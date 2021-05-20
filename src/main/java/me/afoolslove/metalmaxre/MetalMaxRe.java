@@ -2,10 +2,7 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editor.*;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
-import me.afoolslove.metalmaxre.editor.map.MapBuilder;
-import me.afoolslove.metalmaxre.editor.map.MapEditor;
-import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
-import me.afoolslove.metalmaxre.editor.map.MapTile;
+import me.afoolslove.metalmaxre.editor.map.*;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,25 +51,16 @@ public class MetalMaxRe {
         MapEditor mapEditor = new MapEditor();
         EditorManager.register(mapEditor);
 
+        DogSystemEditor dogSystemEditor = new DogSystemEditor();
+        EditorManager.register(dogSystemEditor);
+
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-//        buffer.position(0xBB010);
-
-//        MapBuilder mapBuilder = new MapBuilder();
-//        mapBuilder.add(0x22,0);
-//        mapBuilder.add(0x13,1);
-//        mapBuilder.add(0x14,1);
-//        mapBuilder.add(0x15,1);
-//        System.out.println(Arrays.toString(mapBuilder.build()));
-
-//        MapEditor.parseMap(buffer, 0,0, bytes -> bytes.size() < 8, aByte -> {
-//            for (int i = 0; i < 8; i++) {
-//                System.out.printf("%d", (aByte & (0B1000_0000 >>> i)) == 0 ? 0 : 1);
-//            }
-//
-//            System.out.println(" " + (aByte & 0xFF));
-//            return false;
-//        });
+        int i = 0;
+        for (DogSystemEditor.Destination destination : dogSystemEditor.getDestinations()) {
+            destination.setY(0x10);
+            destination.setX(i++);
+        }
 
 //        computerEditor.removeAll(computerEditor.findMap(0x02));
 

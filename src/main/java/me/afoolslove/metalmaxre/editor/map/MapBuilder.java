@@ -206,6 +206,9 @@ public class MapBuilder extends LinkedList<MapTile> {
         return bytes;
     }
 
+    /**
+     * 记录当前构建器的数据进度
+     */
     private int index, offset;
 
     private void append(byte[] bytes, int tile) {

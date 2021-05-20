@@ -24,8 +24,14 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public class ComputerEditor extends AbstractEditor {
+    /**
+     * 计算机最大数量
+     */
     public static final int COMPUTER_MAX_COUNT = 0x7B;
 
+    /**
+     * 所有计算机
+     */
     private final LinkedHashSet<Computer> computers = new LinkedHashSet<>(COMPUTER_MAX_COUNT);
 
     @Override
@@ -58,7 +64,7 @@ public class ComputerEditor extends AbstractEditor {
             if (iterator.hasNext()) {
                 Computer computer = iterator.next();
                 iterator.remove();
-                System.out.println("移除多余的电脑：" + computer);
+                System.out.printf("计算机编辑器：移除多余的电脑 %s", computer);
             }
         }
 
@@ -86,7 +92,7 @@ public class ComputerEditor extends AbstractEditor {
             Arrays.fill(types, i, COMPUTER_MAX_COUNT, (byte) 0xFF);
             Arrays.fill(xs, i, COMPUTER_MAX_COUNT, (byte) 0xFF);
             Arrays.fill(ys, i, COMPUTER_MAX_COUNT, (byte) 0xFF);
-            System.out.printf("%s个未使用的计算机\n", COMPUTER_MAX_COUNT - i);
+            System.out.printf("计算机编辑器：%d个未使用的计算机\n", COMPUTER_MAX_COUNT - i);
         }
 
         // 写入

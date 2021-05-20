@@ -106,14 +106,17 @@ public class MapPropertiesEditor extends AbstractEditor {
             properties[entry.getKey()] = entry.getValue().toArray();
         }
 
+        // K: properties hashCode
+        // V: propertiesIndex
+        // 通过hash判断地图属性是否重复，根据已重复的地图进行索引到已有的数据
         Map<Integer, Character> mapping = new HashMap<>();
-        char[] mapIndexRoll = new char[0x40 + 0xB0];
+//        char[] mapIndexRoll = new char[0x40 + 0xB0];
 
         buffer.position(0x0BE10);
         // 固定值，无任何作用？
         buffer.put((byte) 0x00);
         buffer.put((byte) 0x00);
-        mapIndexRoll[0x00] = 0x0000;
+//        mapIndexRoll[0x00] = 0x0000;
 
         char mapPropertiesIndex = 0x8500;
         for (int i = 0x01; i < 0x40; i++) {
@@ -121,29 +124,29 @@ public class MapPropertiesEditor extends AbstractEditor {
             Character character = mapping.get(hashCode);
             if (character != null) {
                 // 如果有相同的地图属性索引，则索引到同一个位置
-                mapIndexRoll[i] = character;
+//                mapIndexRoll[i] = character;
                 buffer.putChar(NumberR.parseChar(character));
             } else {
                 // 如果是新的地图属性，就设置地图属性索引和写入地图属性
                 mapping.put(hashCode, mapPropertiesIndex);
-                mapIndexRoll[i] = mapPropertiesIndex;
+//                mapIndexRoll[i] = mapPropertiesIndex;
                 buffer.putChar(NumberR.parseChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
             }
         }
 
         buffer.position(0x1DEB0);
-        for (int i = 0x40; i < mapIndexRoll.length; i++) {
+        for (int i = 0x40; i < (0x40 + 0xB0); i++) {
             int hashCode = Arrays.hashCode(properties[i]);
             Character character = mapping.get(hashCode);
             if (character != null) {
                 // 如果有相同的地图属性索引，则索引到同一个位置
-                mapIndexRoll[i] = character;
+//                mapIndexRoll[i] = character;
                 buffer.putChar(NumberR.parseChar(character));
             } else {
                 // 如果是新的地图属性，就设置地图属性索引和写入地图属性
                 mapping.put(hashCode, mapPropertiesIndex);
-                mapIndexRoll[i] = mapPropertiesIndex;
+//                mapIndexRoll[i] = mapPropertiesIndex;
                 buffer.putChar(NumberR.parseChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
             }
