@@ -63,19 +63,11 @@ public class Computer {
         if (!(o instanceof Computer)) {
             return false;
         }
-
         Computer computer = (Computer) o;
-
-        if (getMap() != computer.getMap()) {
-            return false;
-        }
-        if (getX() != computer.getX()) {
-            return false;
-        }
-        if (getY() != computer.getY()) {
-            return false;
-        }
-        return getType() == computer.getType();
+        return getMap() == computer.getMap()
+                && getType() == computer.getType()
+                && getX() == computer.getX()
+                && getY() == computer.getY();
     }
 
     @Override

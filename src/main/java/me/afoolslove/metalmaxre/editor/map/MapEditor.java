@@ -99,15 +99,6 @@ public class MapEditor extends AbstractEditor {
             // 按序添加地图
             maps.put(maps.size() + 1, mapBuilder);
         }
-        /*
-         * ArrayList<Integer> list = mapPropertiesEditor.getMapProperties().values().stream().mapToInt(value -> value.mapIndex).filter(value -> value >= 0xC000).boxed().distinct().collect(Collectors.toCollection(ArrayList::new));
-         * Collections.sort(list);
-         *
-         * list
-         */
-        var list1 = mapPropertiesEditor.getMapProperties().entrySet().stream().filter(entry -> entry.getValue().mapIndex < 0xC000).sorted(Comparator.comparingInt(o -> o.getValue().mapIndex)).collect(Collectors.toList());
-        var list2 = mapPropertiesEditor.getMapProperties().entrySet().stream().filter(entry -> entry.getValue().mapIndex >= 0xC000).sorted(Comparator.comparingInt(o -> o.getValue().mapIndex)).collect(Collectors.toList());
-
         return true;
     }
 
@@ -175,22 +166,22 @@ public class MapEditor extends AbstractEditor {
             }
         }
 
-        for (Map.Entry<Integer, Map<Integer, Integer>> entry : coincidence.entrySet()) {
-            Integer map = entry.getKey();
-            List<Map.Entry<Integer, Integer>> collect = entry.getValue().entrySet().stream().parallel().sorted((o1, o2) -> {
-                return ((o1.getValue() & 0xFF00) >>> 8 - (o2.getValue() & 0xFF00) >>> 8) + (o1.getValue() & 0xFF) - (o2.getValue() & 0xFF);
-            }).collect(Collectors.toList());
-
-            //Collections.reverse(collect);
-
-            System.out.println("Map:" + map);
-            Map.Entry<Integer, Integer> integerIntegerEntry = collect.get(0);
-            System.out.printf("%02X,%04d,%04d\n", integerIntegerEntry.getKey(), (integerIntegerEntry.getValue() & 0xFF00) >>> 8, integerIntegerEntry.getValue() & 0xFF);
-        }
+//        for (Map.Entry<Integer, Map<Integer, Integer>> entry : coincidence.entrySet()) {
+//            Integer map = entry.getKey();
+//            List<Map.Entry<Integer, Integer>> collect = entry.getValue().entrySet().stream().parallel().sorted((o1, o2) -> {
+//                return ((o1.getValue() & 0xFF00) >>> 8 - (o2.getValue() & 0xFF00) >>> 8) + (o1.getValue() & 0xFF) - (o2.getValue() & 0xFF);
+//            }).collect(Collectors.toList());
+//
+//            //Collections.reverse(collect);
+//
+//            System.out.println("Map:" + map);
+//            Map.Entry<Integer, Integer> integerIntegerEntry = collect.get(0);
+//            System.out.printf("%02X,%04d,%04d\n", integerIntegerEntry.getKey(), (integerIntegerEntry.getValue() & 0xFF00) >>> 8, integerIntegerEntry.getValue() & 0xFF);
+//        }
 //
 //
 
-        int more = 0, c = 0;
+        int more = 0;
         for (Map.Entry<Integer, byte[]> entry : maps.entrySet()) {
             MapProperties mapProperties = mapPropertiesEditor.getMapProperties().get(entry.getKey());
             int mapIndex = mapProperties.mapIndex;
@@ -198,22 +189,22 @@ public class MapEditor extends AbstractEditor {
             if (mapIndex >= 0xC000) {
                 buffer.position(getMetalMaxRe().getVROMOffset() + 0x2F000 + mapIndex);
                 int i = buffer.position() + entry.getValue().length;
-                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
+//                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
                 if (i >= 0xBF010) {
-                    System.out.print(" >= 0xBF010");
+//                    System.out.print(" >= 0xBF010");
                     more += i - 0xBF010;
                 }
             } else {
                 mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
                 buffer.position(getMetalMaxRe().getPROMOffset() + mapIndex);
                 int i = buffer.position() + entry.getValue().length;
-                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
+//                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
                 if (i >= 0x0B6D4) {
-                    System.out.print(" >= 0x0B6D4");
+//                    System.out.print(" >= 0x0B6D4");
                     more += i - 0x0B6D4;
                 }
             }
-            System.out.println();
+//            System.out.println();
             buffer.put(entry.getValue());
 
 //            MapBuilder mapTiles = maps.get(i);
@@ -222,23 +213,6 @@ public class MapEditor extends AbstractEditor {
         System.out.println("more byte:" + more);
         return true;
     }
-    // 0094400564128056212A50080480EA0C
-    // 02B06012040094220400412048041240
-    // 20BAF556AD2244A0120400801A21E290
-    // A410550881A8502B5690025080412000
-    // 8828040255AB008029114840220C9123
-    // 740E12A548AD5A2020802008011074AD
-    // 91A244D92A456AD11314840200601204
-    // 448922500A02A500AC1A244010040090
-    // 22B548952B560138300AC2A244041204
-    // 868D9C64AC03308D802706D802506AD5
-    // A218290A43A78FBC0088224500138350
-    // 0128356D0022068100C1235900441002
-    // 40C0128356D1A22448103300883AC580
-    // 11075601A0300AC200441D62C0088380
-    // 561402227F0080676CB97B83001C404E
-    // 1C3C7EFDE428014202F0
-    //
 
     public HashMap<Integer, MapBuilder> getMaps() {
         return maps;
@@ -249,33 +223,6 @@ public class MapEditor extends AbstractEditor {
     }
 
     /*
-     *
-     *  没错，也失败了
-     * public boolean add(int tile, int count) {
-     *         tile &= 0x7F;
-     *         count &= 0xFF;
-     *         MapTile last = peekLast();
-     *         // 判断是否需要合并
-     *         if (last != null && last.tile == tile && last.count != 0x00 && (last.count & count) != 0x7F) {
-     *             if (last.count + count < 0x80) {
-     *                 // 与末尾图块合并
-     *                 last.count += count;
-     *                 return true;
-     *             } else if (last.count + count < 0xFF) {
-     *                 // 填满末尾图块，并添加一个图块数量为剩余的图块
-     *                 int y = count + last.count - 0x7F;
-     *                 last.count = 0x7F;
-     *                 return y == 0 || add(tile, y);
-     *             } else if (last.count + count > 0xFF){
-     *                 // 填满末尾图块，并添加一个图块数量为剩余的图块
-     *                 int y = count + last.count - 0x100;
-     *                 // 没错就是0xFF
-     *                 last.count = 0x00;
-     *                 return y == 0 || add(tile, y);
-     *             }
-     *         }
-     *         return add(new MapTile(tile, count));
-     *     }
      *
      * 尘封的代码，太麻烦了，只有256 128的数量没有优化好
      *          已移步到MapBuilder中实现

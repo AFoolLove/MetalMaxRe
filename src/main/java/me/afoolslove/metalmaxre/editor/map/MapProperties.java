@@ -10,11 +10,25 @@ public class MapProperties {
      * 暂时不知道叫什么好，可以影响传送带等的运动方式 2byte
      */
     public static final byte FLAG_DY_TILE = 0B0000_0001;
+    /**
+     * 地图是否存在事件图块
+     */
     public static final byte FLAG_EVENT_TILE = 0B0000_0100;
+    /**
+     * 地图是否为地下地图
+     * 使用犬系统显示返回地面
+     */
     public static final byte FLAG_UNDERGROUND = 0B0000_1000;
 
-
+    /**
+     * 单个地图属性的最大长度
+     */
     public static final int PROPERTIES_MAX_LENGTH = 0x1C;
+
+    /**
+     * 单个地图属性的基础长度
+     */
+    public static final int PROPERTIES_BASE_LENGTH = PROPERTIES_MAX_LENGTH - 2 - 2;
 
 
     public byte head;
