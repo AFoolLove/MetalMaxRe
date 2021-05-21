@@ -2,6 +2,9 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editor.*;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
+import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
+import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGood;
+import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGoods;
 import me.afoolslove.metalmaxre.editor.map.*;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
@@ -54,18 +57,16 @@ public class MetalMaxRe {
         DogSystemEditor dogSystemEditor = new DogSystemEditor();
         EditorManager.register(dogSystemEditor);
 
+        VendorEditor vendorEditor = new VendorEditor();
+        EditorManager.register(vendorEditor);
+
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-        int i = 0;
-        for (DogSystemEditor.Destination destination : dogSystemEditor.getDestinations()) {
-            destination.setY(0x10);
-            destination.setX(i++);
-        }
 
 //        computerEditor.removeAll(computerEditor.findMap(0x02));
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
-
+        System.out.println();
     }
 
     public static synchronized MetalMaxRe getInstance() {
