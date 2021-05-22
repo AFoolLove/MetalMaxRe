@@ -62,8 +62,7 @@ public class MetalMaxRe {
 
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-
-//        computerEditor.removeAll(computerEditor.findMap(0x02));
+        dogSystemEditor.getTownSeries().put(0x01, 0x03);
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();

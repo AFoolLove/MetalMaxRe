@@ -178,8 +178,6 @@ public class MapEditor extends AbstractEditor {
 //            Map.Entry<Integer, Integer> integerIntegerEntry = collect.get(0);
 //            System.out.printf("%02X,%04d,%04d\n", integerIntegerEntry.getKey(), (integerIntegerEntry.getValue() & 0xFF00) >>> 8, integerIntegerEntry.getValue() & 0xFF);
 //        }
-//
-//
 
         int more = 0;
         for (Map.Entry<Integer, byte[]> entry : maps.entrySet()) {

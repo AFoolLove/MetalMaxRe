@@ -39,6 +39,11 @@ public class Point<T extends Number> {
         this.y = y;
     }
 
+    public void setPoint(T x, T y) {
+        setX(x);
+        setY(y);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

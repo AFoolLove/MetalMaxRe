@@ -3,10 +3,13 @@ package me.afoolslove.metalmaxre.editor;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.nio.*;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * 基本的编辑器功能
@@ -274,5 +277,15 @@ public abstract class AbstractEditor {
         return Objects.equals(buffer, that.buffer);
     }
 
+
+    public static <T> void limit(@NotNull Iterator<T> iterator, @NotNull Predicate<?> condition, @Nullable Predicate<T> removed) {
+        while (condition.test(null) && iterator.hasNext()){
+            T remove = iterator.next();
+            iterator.remove();
+            if (removed != null) {
+                removed.test(remove);
+            }
+        }
+    }
 
 }
