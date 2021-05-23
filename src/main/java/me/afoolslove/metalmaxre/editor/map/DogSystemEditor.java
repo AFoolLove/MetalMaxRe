@@ -131,9 +131,8 @@ public class DogSystemEditor extends AbstractEditor {
 
         Iterator<Integer> townIterator = towns.values().iterator();
         // 移除多余的城镇
-        limit(townIterator, o -> towns.size() > DESTINATION_MAX_COUNT, removed -> {
+        limit(townIterator, () -> towns.size() > DESTINATION_MAX_COUNT, removed -> {
             System.out.printf("犬系统编辑器：移除多余的城镇 %02X\n", removed);
-            return true;
         });
 
         // 写入城镇
@@ -146,9 +145,8 @@ public class DogSystemEditor extends AbstractEditor {
         // 城镇附属
         Iterator<Map.Entry<Integer, Integer>> townSeriesIterator = townSeries.entrySet().iterator();
         // 移除多余的城镇附属
-        limit(townSeriesIterator, o -> townSeries.size() > 0x02, removed -> {
+        limit(townSeriesIterator, () -> townSeries.size() > 0x02, removed -> {
             System.out.printf("犬系统编辑器：移除多余的城镇 %02X\n", removed.getKey());
-            return true;
         });
 
         // 写入城镇附属

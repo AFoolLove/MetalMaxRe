@@ -72,15 +72,10 @@ public class TreasureEditor extends AbstractEditor {
         // 写入前修正宝藏数量
 
         Iterator<Treasure> iterator = treasures.iterator();
-
         // 移除多余的宝藏
-        while (treasures.size() > TREASURE_MAX_COUNT) {
-            if (iterator.hasNext()) {
-                Treasure treasure = iterator.next();
-                iterator.remove();
-                System.err.println("移除多余的宝藏：" + treasure);
-            }
-        }
+        limit(iterator,() -> treasures.size() > TREASURE_MAX_COUNT, removed -> {
+            System.out.println("移除多余的宝藏：" + removed);
+        });
 
         int i = 0;
         while (iterator.hasNext()) {

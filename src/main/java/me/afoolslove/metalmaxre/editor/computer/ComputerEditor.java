@@ -58,15 +58,10 @@ public class ComputerEditor extends AbstractEditor {
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         Iterator<Computer> iterator = computers.iterator();
-
         // 移除多余的电脑
-        while (computers.size() > COMPUTER_MAX_COUNT) {
-            if (iterator.hasNext()) {
-                Computer computer = iterator.next();
-                iterator.remove();
-                System.out.printf("计算机编辑器：移除多余的电脑 %s", computer);
-            }
-        }
+        limit(iterator, () -> computers.size()>COMPUTER_MAX_COUNT, removed -> {
+            System.out.printf("计算机编辑器：移除多余的电脑 %s", removed);
+        });
 
         byte[] maps = new byte[COMPUTER_MAX_COUNT];
         byte[] types = new byte[COMPUTER_MAX_COUNT];

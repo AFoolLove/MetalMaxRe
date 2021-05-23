@@ -19,8 +19,8 @@ import java.util.List;
  * 0x07 - 0x0C  商品数量
  * 0x0D 中奖物品
  * 数量byte D7的值为1时，商品为无货
- *
- * TODO 商品价格
+ * <p>
+ * TODO 商品价格，毫无头绪
  *
  * @author AFoolLove
  */
@@ -62,13 +62,9 @@ public class VendorEditor extends AbstractEditor {
 
         // 移除多余的商品组合
         Iterator<VendorGoods> iterator = vendorGoods.iterator();
-        while (vendorGoods.size() > VENDOR_MAX_COUNT) {
-            if (iterator.hasNext()) {
-                VendorGoods vendorGood = iterator.next();
-                iterator.remove();
-                System.out.printf("售货机编辑器：移除多余的售货机商品组 %s", vendorGood);
-            }
-        }
+        limit(iterator, () -> vendorGoods.size() > VENDOR_MAX_COUNT, remove -> {
+            System.out.printf("售货机编辑器：移除多余的售货机商品组 %s", remove);
+        });
 
         byte[] items = new byte[0x06];
         byte[] counts = new byte[0x06];

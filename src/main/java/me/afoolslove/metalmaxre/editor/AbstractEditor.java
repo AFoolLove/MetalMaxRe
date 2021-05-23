@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Range;
 import java.nio.*;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -278,12 +280,12 @@ public abstract class AbstractEditor {
     }
 
 
-    public static <T> void limit(@NotNull Iterator<T> iterator, @NotNull Predicate<?> condition, @Nullable Predicate<T> removed) {
-        while (condition.test(null) && iterator.hasNext()){
+    public static <T> void limit(@NotNull Iterator<T> iterator, @NotNull BooleanSupplier condition, @Nullable Consumer<T> removed) {
+        while (condition.getAsBoolean() && iterator.hasNext()){
             T remove = iterator.next();
             iterator.remove();
             if (removed != null) {
-                removed.test(remove);
+                removed.accept(remove);
             }
         }
     }
