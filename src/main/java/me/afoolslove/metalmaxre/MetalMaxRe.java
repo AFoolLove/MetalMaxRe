@@ -6,6 +6,7 @@ import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGood;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGoods;
 import me.afoolslove.metalmaxre.editor.map.*;
+import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,9 +61,10 @@ public class MetalMaxRe {
         VendorEditor vendorEditor = new VendorEditor();
         EditorManager.register(vendorEditor);
 
-        loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
+        EventTilesEditor eventTilesEditor = new EventTilesEditor();
+        EditorManager.register(eventTilesEditor);
 
-        dogSystemEditor.getTownSeries().put(0x01, 0x03);
+        loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();

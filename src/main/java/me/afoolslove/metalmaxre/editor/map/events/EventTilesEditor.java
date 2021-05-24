@@ -1,10 +1,14 @@
 package me.afoolslove.metalmaxre.editor.map.events;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
+import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.map.MapProperties;
+import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 事件图块编辑器
@@ -19,42 +23,104 @@ import java.util.*;
  */
 public class EventTilesEditor extends AbstractEditor {
 
-    private final HashMap<Integer, List<EventTile>> eventTiles = new HashMap<>();
+    /**
+     * K：original EventTilesIndex
+     * V：
+     * ----K：event
+     * ----V：tile
+     */
+    private final HashMap<Character, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 排除事件为 0x00 ！！！！
-        buffer.position(0x1DCCF);
+        // buffer.position(0x1DCCF);
 
-        // TODO read!!!!!
-        int event = buffer.get();
-        do {
-            // 读取该事件的所有图块数量，不会真有人写入了数量为0的事件吧？？？
-            int count = buffer.get() & 0xFF;
-            ArrayList<EventTile> eventTiles = new ArrayList<>();
-            for (int i = 0; i < count; i++) {
-                // 读取 X、Y、Tile
-                eventTiles.add(new EventTile(buffer.get(), buffer.get(), buffer.get()));
-            }
-
-            getEventTiles().put(event, eventTiles);
-        } while ((event = buffer.get()) == 0x00);
+        MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
 
+        var map = new HashMap<>(mapPropertiesEditor.getMapProperties())
+                .entrySet().stream().parallel()
+                .filter(entry -> entry.getValue().hasEventTile()) // 移除没有事件图块属性的地图
+                .collect(
+                        // 移除相同的事件图块数据索引
+                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing((o) -> o.getValue().eventTilesIndex)))
+                );
+
+        for (Map.Entry<Integer, MapProperties> mapPropertiesEntry : map) {
+            char eventTilesIndex = mapPropertiesEntry.getValue().eventTilesIndex;
+            buffer.position(0x10 + 0x1C000 + eventTilesIndex - 0x8000);
+
+            // 一个或多个事件作为一组，一组使用 0x00 作为结尾
+            var events = new HashMap<Integer, List<EventTile>>();
+            // 事件
+            int event = buffer.get();
+            do {
+                // 图块数量
+                int count = buffer.get();
+
+                List<EventTile> eventTiles = new ArrayList<>();
+                // 读取事件图块：X、Y、图块
+                for (int i = count; i > 0; i--) {
+                    eventTiles.add(new EventTile(buffer.get(), buffer.get(), buffer.get()));
+                }
+                events.put(event, eventTiles);
+            } while ((event = buffer.get()) != 0x00);
+
+            // 添加事件图块组
+            getEventTiles().put(eventTilesIndex, events);
+        }
         return true;
     }
 
+    // TODO 错误的写入了数据？
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        // 排除事件为 0x00 ！！！！
+        MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
-        eventTiles.remove(0x00);
-        Iterator<Map.Entry<Integer, List<EventTile>>> iterator = eventTiles.entrySet().iterator();
+        // 排除事件为 0x00 ！！！！
+        getEventTiles().values().forEach(each -> {
+            each.entrySet().removeIf(entry -> entry.getKey() == 0x00);
+        });
+
+        buffer.position(0x1DCCF);
+
+
+        for (Map.Entry<Character, Map<Integer, List<EventTile>>> e : getEventTiles().entrySet()) {
+            // 原始事件图块索引
+            Character original = e.getKey();
+            // 事件组
+            Map<Integer, List<EventTile>> events = e.getValue();
+
+            // 计算新的事件图块索引，太长了！简称：索引
+            char newEventTilesIndex = (char) (buffer.position() - 0x10 - 0x1C000 + 0x8000);
+            // 将旧的索引替换为新的索引
+            for (MapProperties mapProperties : mapPropertiesEditor.getMapProperties().values()) {
+                if (mapProperties.eventTilesIndex == original) {
+                    mapProperties.eventTilesIndex = newEventTilesIndex;
+                }
+            }
+            // 写入数据
+            for (Map.Entry<Integer, List<EventTile>> entry : events.entrySet()) {
+                // 写入事件
+                buffer.put(entry.getKey().byteValue());
+                // 写入事件数量
+                buffer.put(((byte) entry.getValue().size()));
+                // 写入 X、Y、Tile
+                for (EventTile eventTile : entry.getValue()) {
+                    buffer.put(eventTile.x);
+                    buffer.put(eventTile.y);
+                    buffer.put(eventTile.tile);
+                }
+            }
+            // 写入事件组结束符
+            buffer.put((byte) 0x00);
+        }
 
         return true;
     }
 
-    public HashMap<Integer, List<EventTile>> getEventTiles() {
+    public HashMap<Character, Map<Integer, List<EventTile>>> getEventTiles() {
         return eventTiles;
     }
 }
