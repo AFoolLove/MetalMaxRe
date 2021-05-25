@@ -12,12 +12,21 @@ import java.util.stream.Collectors;
 
 /**
  * 事件图块编辑器
+ * 支持世界地图
  * 根据事件状态可以显示不同的图块，覆盖原图块
  * 注意尽量不要同时作用在同一个图块上，因为没测试会发生啥
  * <p>
  * 需要地图属性中的事件图块启用才会生效
  * 图块图像根据玩家当前的图块组合不同而不同
- * 不包含世界地图
+ * <p>
+ * <p>
+ * 世界地图：
+ * 世界地图的总tile大小为0x100*0x100，其中每4*4为一个小块
+ * 当世界地图使用时，单个tile数据控制此4*4的方块
+ * 并且X、Y的计算方式变更为 X*4、Y*4，X、Y < 0x40
+ * <p>
+ * <p>
+ * 2021年5月26日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */
@@ -73,7 +82,6 @@ public class EventTilesEditor extends AbstractEditor {
         return true;
     }
 
-    // TODO 错误的写入了数据？
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
@@ -85,8 +93,8 @@ public class EventTilesEditor extends AbstractEditor {
 
         buffer.position(0x1DCCF);
 
-
-        for (Map.Entry<Character, Map<Integer, List<EventTile>>> e : getEventTiles().entrySet()) {
+        // 需要修改key，所以新起一个map
+        for (Map.Entry<Character, Map<Integer, List<EventTile>>> e : new HashMap<>(getEventTiles()).entrySet()) {
             // 原始事件图块索引
             Character original = e.getKey();
             // 事件组
@@ -95,9 +103,12 @@ public class EventTilesEditor extends AbstractEditor {
             // 计算新的事件图块索引，太长了！简称：索引
             char newEventTilesIndex = (char) (buffer.position() - 0x10 - 0x1C000 + 0x8000);
             // 将旧的索引替换为新的索引
-            for (MapProperties mapProperties : mapPropertiesEditor.getMapProperties().values()) {
-                if (mapProperties.eventTilesIndex == original) {
-                    mapProperties.eventTilesIndex = newEventTilesIndex;
+            for (var entry : mapPropertiesEditor.getMapProperties().entrySet()) {
+                if (entry.getValue().eventTilesIndex == original) {
+                    // 替换Key
+                    // 移除旧的索引数据并添加到新的索引中
+                    getEventTiles().put(newEventTilesIndex, getEventTiles().remove(original));
+                    entry.getValue().eventTilesIndex = newEventTilesIndex;
                 }
             }
             // 写入数据
@@ -122,5 +133,13 @@ public class EventTilesEditor extends AbstractEditor {
 
     public HashMap<Character, Map<Integer, List<EventTile>>> getEventTiles() {
         return eventTiles;
+    }
+
+    /**
+     * @return 获取指定map的事件图块，可能为null，包含世界地图
+     */
+    public Map<Integer, List<EventTile>> getEventTile(int map) {
+        MapPropertiesEditor editor = EditorManager.getEditor(MapPropertiesEditor.class);
+        return eventTiles.get(editor.getMapProperties().get(map).eventTilesIndex);
     }
 }

@@ -31,13 +31,14 @@ import java.util.*;
  * 0x02 byte:事件图块索引
  * <p>
  * <p>
- * 不支持世界地图
+ * 支持世界地图的部分属性 {@link WorldMapProperties}
  * <p>
  * <p>
  * <p>
  * 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
- *
+ * <p>
  * 2021年5月14日：已完成并通过测试基本编辑功能
+ *
  * @author AFoolLove
  */
 public class MapPropertiesEditor extends AbstractEditor {
@@ -91,6 +92,23 @@ public class MapPropertiesEditor extends AbstractEditor {
 
         // 移除世界地图（无效数据
         mapProperties.remove(0x00);
+
+        // 读取世界地图属性
+        Arrays.fill(properties, (byte) 0x00);
+        // 读取宽度、高度，因为在代码中使用同一个数据赋值，所以宽高只能一样
+        properties[0x01] = buffer.get(0x28A87);
+        properties[0x02] = properties[0x01];
+        // 读取可移动区域偏移量，同上
+        properties[0x03] = buffer.get(0x28A8D);
+        properties[0x04] = properties[0x03];
+        // 读取可移动区域，同上
+        properties[0x05] = buffer.get(0x28A95);
+        properties[0x06] = properties[0x05];
+        // 读取事件图块索引
+        properties[0x1A] = buffer.get(0x28AC3);
+        properties[0x1B] = buffer.get(0x28AC7);
+        // 添加世界地图属性
+        mapProperties.put(0x00, new WorldMapProperties(properties));
         return true;
     }
 
@@ -99,11 +117,13 @@ public class MapPropertiesEditor extends AbstractEditor {
         // 写入地图属性索引，上卷 0x40、下卷 0xB0
         // 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
 
-
         // 将地图属性整合为写入的格式，index=0无效
         byte[][] properties = new byte[MapEditor.MAP_MAX_COUNT + 1][];
         for (Map.Entry<Integer, MapProperties> entry : mapProperties.entrySet()) {
-            properties[entry.getKey()] = entry.getValue().toArray();
+            // 排除世界地图
+            if ((!(entry.getValue() instanceof WorldMapProperties))) {
+                properties[entry.getKey()] = entry.getValue().toArray();
+            }
         }
 
         // K: properties hashCode
@@ -157,6 +177,18 @@ public class MapPropertiesEditor extends AbstractEditor {
         for (int i = 0x01; i < properties.length - 1; i++) {
             buffer.put(properties[i]);
         }
+
+        // 写入世界地图属性
+        MapProperties worldMapProperties = this.mapProperties.get(0x00);
+        // 写入宽度、高度
+        buffer.put(0x28A87, worldMapProperties.width);
+        // 写入可移动区域偏移量，同上
+        buffer.put(0x28A8D, worldMapProperties.movableWidthOffset);
+        // 写入可移动区域，同上
+        buffer.put(0x28A95, worldMapProperties.movableWidth);
+        // 写入事件图块索引
+        buffer.put(0x28AC3, (byte) (worldMapProperties.eventTilesIndex & 0x00FF));
+        buffer.put(0x28AC7, (byte) ((worldMapProperties.eventTilesIndex & 0xFF00) >>> 8));
 
         System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", 0x0FBBD - buffer.position());
         return true;

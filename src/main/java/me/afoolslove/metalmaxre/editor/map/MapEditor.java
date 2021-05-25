@@ -55,6 +55,11 @@ public class MapEditor extends AbstractEditor {
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
         for (MapProperties mapProperties : mapPropertiesEditor.getMapProperties().values()) {
+            if (mapProperties instanceof WorldMapProperties) {
+                // 排除世界地图
+                continue;
+            }
+
             int mapIndex = mapProperties.mapIndex;
             if (mapIndex >= 0xC000) {
                 // 0xBB010
@@ -113,6 +118,10 @@ public class MapEditor extends AbstractEditor {
         for (Map.Entry<Integer, MapProperties> entry : mapPropertiesEditor.getMapProperties().entrySet()) {
             // 不存在就put
 //            indexMaps.computeIfAbsent(entry.getValue().mapIndex, k -> entry.getKey());
+            if (entry.getValue() instanceof WorldMapProperties) {
+                // 排除世界地图
+                continue;
+            }
 
             Integer map = indexMaps.get(entry.getValue().mapIndex);
             if (map == null) {
@@ -182,6 +191,10 @@ public class MapEditor extends AbstractEditor {
         int more = 0;
         for (Map.Entry<Integer, byte[]> entry : maps.entrySet()) {
             MapProperties mapProperties = mapPropertiesEditor.getMapProperties().get(entry.getKey());
+            if (mapProperties instanceof WorldMapProperties) {
+                // 排除世界地图
+                continue;
+            }
             int mapIndex = mapProperties.mapIndex;
 
             if (mapIndex >= 0xC000) {

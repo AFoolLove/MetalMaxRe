@@ -11,7 +11,7 @@
     ComputerEditor      计算机编辑器 √
     DogSystem           犬系统 √
     VendorEditor        售货机编辑器 √ 后续考虑添加功能
-    EventTilesEditor    事件图块编辑器 - ...
+    EventTilesEditor    事件图块编辑器 √
 
     TankEditor          坦克编辑器 -
     HumanEditor         人类编辑器 -

@@ -6,6 +6,7 @@ import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGood;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGoods;
 import me.afoolslove.metalmaxre.editor.map.*;
+import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -65,6 +68,13 @@ public class MetalMaxRe {
         EditorManager.register(eventTilesEditor);
 
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
+
+        Map<Integer, List<EventTile>> integerListMap = eventTilesEditor.getEventTiles().get(mapPropertiesEditor.getMapProperties().get(0x00).eventTilesIndex);
+        integerListMap.get(0x19).get(0).tile = 0x12;
+        integerListMap = eventTilesEditor.getEventTiles().get(mapPropertiesEditor.getMapProperties().get(0x01).eventTilesIndex);
+        integerListMap.values().stream().findAny().ifPresent(eventTiles -> {
+            eventTiles.get(0).tile = 0x22;
+        });
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
@@ -167,9 +177,31 @@ public class MetalMaxRe {
     public boolean saveAs(@NotNull String path) {
         try {
             // 保存所有更改
-            for (AbstractEditor editor : EditorManager.getEditors().values()) {
-                editor.onWrite(buffer);
-            }
+//            for (AbstractEditor editor : EditorManager.getEditors().values()) {
+//                editor.onWrite(buffer);
+//            }
+            // 暂时还没想好写什么样的读取跟写入的优先度
+            // 手动添加
+            var treasureEditor = EditorManager.getEditor(TreasureEditor.class);
+            var computerEditor = EditorManager.getEditor(ComputerEditor.class);
+            var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
+            var mapEditor = EditorManager.getEditor(MapEditor.class);
+            var dogSystemEditor = EditorManager.getEditor(DogSystemEditor.class);
+            var vendorEditor = EditorManager.getEditor(VendorEditor.class);
+            var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
+
+            // 无序
+            treasureEditor.onWrite(buffer);
+            computerEditor.onWrite(buffer);
+            dogSystemEditor.onWrite(buffer);
+            vendorEditor.onWrite(buffer);
+
+
+            // 顺序写入
+            mapEditor.onWrite(buffer); // 影响 mapPropertiesEditor
+            eventTilesEditor.onWrite(buffer); // 影响 mapPropertiesEditor
+            mapPropertiesEditor.onWrite(buffer);
+
             Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);
             return true;
         } catch (IOException e) {

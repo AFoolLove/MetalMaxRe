@@ -18,6 +18,8 @@ import java.util.*;
  * <p>
  * 修改意向：修改传送代码，让其支持任意地图
  * ---------程序代码入口：0x3270F
+ * <p>
+ * 2021年5月23日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */
@@ -101,13 +103,9 @@ public class DogSystemEditor extends AbstractEditor {
 
         // 移除多余的目的地坐标
         Iterator<Destination> iterator = destinations.iterator();
-        while (destinations.size() > DESTINATION_MAX_COUNT) {
-            if (iterator.hasNext()) {
-                Destination destination = iterator.next();
-                iterator.remove();
-                System.out.printf("犬系统编辑器：移除多余的目的地 %s\n", destination);
-            }
-        }
+        limit(iterator, () -> destinations.size() > DESTINATION_MAX_COUNT, removed -> {
+            System.out.printf("犬系统编辑器：移除多余的目的地 %s\n", removed);
+        });
 
         int i = 0;
         while (iterator.hasNext()) {

@@ -4,6 +4,8 @@ package me.afoolslove.metalmaxre.editor.map;
  * 地图属性
  * <p>
  * 不支持世界地图
+ *
+ * @author AFoolLove
  */
 public class MapProperties {
     /**
