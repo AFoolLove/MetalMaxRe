@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editor.map.events;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.MapProperties;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
  * <p>
  * <p>
  * 2021年5月26日：已完成并通过测试基本编辑功能
- *
+ * <p>
  * TODO 如何添加？
  *
  * @author AFoolLove
@@ -40,15 +41,26 @@ public class EventTilesEditor extends AbstractEditor {
      * ----K：event
      * ----V：tile
      */
-    private final HashMap<Character, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
+    // private final HashMap<Character, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
+
+    /**
+     * K：Map
+     * V：events
+     */
+    private final HashMap<Integer, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
 
     @Override
+
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 排除事件为 0x00 ！！！！
         // buffer.position(0x1DCCF);
 
-        MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
+        // 填充
+        for (int i = 0; i < MapEditor.MAP_MAX_COUNT; i++) {
+            getEventTiles().put(i, new HashMap<>());
+        }
 
+        MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
         var map = new HashMap<>(mapPropertiesEditor.getMapProperties())
                 .entrySet().stream().parallel()
@@ -79,7 +91,12 @@ public class EventTilesEditor extends AbstractEditor {
             } while ((event = buffer.get()) != 0x00);
 
             // 添加事件图块组
-            getEventTiles().put(eventTilesIndex, events);
+            for (Map.Entry<Integer, MapProperties> propertiesEntry : mapPropertiesEditor.getMapProperties().entrySet()) {
+                if (propertiesEntry.getValue().eventTilesIndex == eventTilesIndex) {
+                    // 添加使用当前事件图块的地图
+                    getEventTiles().put(propertiesEntry.getKey(), events);
+                }
+            }
         }
         return true;
     }
@@ -95,45 +112,51 @@ public class EventTilesEditor extends AbstractEditor {
 
         buffer.position(0x1DCCF);
 
-        // 需要修改key，所以新起一个map
-        for (Map.Entry<Character, Map<Integer, List<EventTile>>> e : new HashMap<>(getEventTiles()).entrySet()) {
-            // 原始事件图块索引
-            Character original = e.getKey();
-            // 事件组
-            Map<Integer, List<EventTile>> events = e.getValue();
+        getEventTiles().entrySet()
+                .stream().parallel()
+                .filter(entry -> !entry.getValue().isEmpty()) // 过滤没有事件图块的地图
+                .distinct()
+                .forEachOrdered(entry -> {
+                    Integer map = entry.getKey();
+                    Map<Integer, List<EventTile>> events = entry.getValue();
 
-            // 计算新的事件图块索引，太长了！简称：索引
-            char newEventTilesIndex = (char) (buffer.position() - 0x10 - 0x1C000 + 0x8000);
-            // 将旧的索引替换为新的索引
-            for (var entry : mapPropertiesEditor.getMapProperties().entrySet()) {
-                if (entry.getValue().eventTilesIndex == original) {
-                    // 替换Key
-                    // 移除旧的索引数据并添加到新的索引中
-                    getEventTiles().put(newEventTilesIndex, getEventTiles().remove(original));
-                    entry.getValue().eventTilesIndex = newEventTilesIndex;
-                }
-            }
-            // 写入数据
-            for (Map.Entry<Integer, List<EventTile>> entry : events.entrySet()) {
-                // 写入事件
-                buffer.put(entry.getKey().byteValue());
-                // 写入事件数量
-                buffer.put(((byte) entry.getValue().size()));
-                // 写入 X、Y、Tile
-                for (EventTile eventTile : entry.getValue()) {
-                    buffer.put(eventTile.x);
-                    buffer.put(eventTile.y);
-                    buffer.put(eventTile.tile);
-                }
-            }
-            // 写入事件组结束符
-            buffer.put((byte) 0x00);
+                    // 计算新的事件图块索引，太长了！简称：索引
+                    char newEventTilesIndex = (char) (buffer.position() - 0x10 - 0x1C000 + 0x8000);
+                    // 将旧的索引替换为新的索引
+                    getEventTiles().entrySet()
+                            .stream().parallel()
+                            .filter(entry1 -> entry1.getValue() == events) // 获取相同事件图块的地图
+                            .forEach(mapEntry -> {
+                                // 通过相同的事件图块组更新索引
+                                mapPropertiesEditor.getMapProperties().get(mapEntry.getKey()).eventTilesIndex = newEventTilesIndex;
+                            });
+
+                    // 写入数据
+                    for (Map.Entry<Integer, List<EventTile>> eventsList : events.entrySet()) {
+                        // 写入事件
+                        buffer.put(eventsList.getKey().byteValue());
+                        // 写入事件数量
+                        buffer.put(((byte) eventsList.getValue().size()));
+                        // 写入 X、Y、Tile
+                        for (EventTile eventTile : eventsList.getValue()) {
+                            buffer.put(eventTile.x);
+                            buffer.put(eventTile.y);
+                            buffer.put(eventTile.tile);
+                        }
+                    }
+                    // 写入事件组结束符
+                    buffer.put((byte) 0x00);
+                });
+
+        if (0x1DEAF >= buffer.position()) {
+            System.out.printf("事件图块编辑器：剩余%d个空闲字节\n", 0x1DEAF - buffer.position());
+        } else {
+            System.out.printf("事件图块编辑器：错误！事件图块超出了数据上限%d字节", buffer.position() - 0x1DEAF);
         }
-
         return true;
     }
 
-    public HashMap<Character, Map<Integer, List<EventTile>>> getEventTiles() {
+    public HashMap<Integer, Map<Integer, List<EventTile>>> getEventTiles() {
         return eventTiles;
     }
 
@@ -141,7 +164,6 @@ public class EventTilesEditor extends AbstractEditor {
      * @return 获取指定map的事件图块，可能为null，包含世界地图
      */
     public Map<Integer, List<EventTile>> getEventTile(int map) {
-        MapPropertiesEditor editor = EditorManager.getEditor(MapPropertiesEditor.class);
-        return eventTiles.get(editor.getMapProperties().get(map).eventTilesIndex);
+        return eventTiles.get(map);
     }
 }

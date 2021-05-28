@@ -17,10 +17,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 程序主体
@@ -69,12 +66,19 @@ public class MetalMaxRe {
 
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-        Map<Integer, List<EventTile>> integerListMap = eventTilesEditor.getEventTiles().get(mapPropertiesEditor.getMapProperties().get(0x00).eventTilesIndex);
-        integerListMap.get(0x19).get(0).tile = 0x12;
-        integerListMap = eventTilesEditor.getEventTiles().get(mapPropertiesEditor.getMapProperties().get(0x01).eventTilesIndex);
-        integerListMap.values().stream().findAny().ifPresent(eventTiles -> {
-            eventTiles.get(0).tile = 0x22;
-        });
+        eventTilesEditor.getEventTile(0x00).get(0x19).get(0).tile = 0x12;
+        Iterator<List<EventTile>> iterator = eventTilesEditor.getEventTile(0x01).values().iterator();
+        iterator.hasNext();
+        List<EventTile> next = iterator.next();
+        next.remove(next.size() - 1);
+        next.remove(next.size() - 1);
+        next.remove(next.size() - 1);
+
+        // 启用事件图块
+        mapPropertiesEditor.getMapProperties().get(0x02).head |= MapProperties.FLAG_EVENT_TILE;
+        // 添加动态图块
+        eventTilesEditor.getEventTile(0x02).put(0x19, new ArrayList<>(Arrays.asList(new EventTile(5, 5, 0x12))));
+
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
@@ -176,6 +180,7 @@ public class MetalMaxRe {
 
     public boolean saveAs(@NotNull String path) {
         try {
+            System.out.printf("保存修改到：%s\n", path);
             // 保存所有更改
 //            for (AbstractEditor editor : EditorManager.getEditors().values()) {
 //                editor.onWrite(buffer);
