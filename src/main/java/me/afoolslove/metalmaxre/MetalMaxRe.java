@@ -8,6 +8,8 @@ import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGoods;
 import me.afoolslove.metalmaxre.editor.map.*;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
+import me.afoolslove.metalmaxre.editor.sprite.Sprite;
+import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,22 +66,16 @@ public class MetalMaxRe {
         EventTilesEditor eventTilesEditor = new EventTilesEditor();
         EditorManager.register(eventTilesEditor);
 
+        SpriteEditor spriteEditor = new SpriteEditor();
+        EditorManager.register(spriteEditor);
+
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-        eventTilesEditor.getEventTile(0x00).get(0x19).get(0).tile = 0x12;
-        Iterator<List<EventTile>> iterator = eventTilesEditor.getEventTile(0x01).values().iterator();
-        iterator.hasNext();
-        List<EventTile> next = iterator.next();
-        next.remove(next.size() - 1);
-        next.remove(next.size() - 1);
-        next.remove(next.size() - 1);
+        spriteEditor.getSprites(0x01).remove(0);
+        spriteEditor.getSprites(0x01).remove(0);
+        spriteEditor.getSprites(0x01).remove(0);
 
-        // 启用事件图块
-        mapPropertiesEditor.getMapProperties().get(0x02).head |= MapProperties.FLAG_EVENT_TILE;
-        // 添加动态图块
-        eventTilesEditor.getEventTile(0x02).put(0x19, new ArrayList<>(Arrays.asList(new EventTile(5, 5, 0x12))));
-
-
+        spriteEditor.getSprites(0x04).add(new Sprite(0x22,0x05,0x05,0x20,0x22,20));
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
     }
@@ -194,12 +190,14 @@ public class MetalMaxRe {
             var dogSystemEditor = EditorManager.getEditor(DogSystemEditor.class);
             var vendorEditor = EditorManager.getEditor(VendorEditor.class);
             var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
+            var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
             computerEditor.onWrite(buffer);
             dogSystemEditor.onWrite(buffer);
             vendorEditor.onWrite(buffer);
+            spriteEditor.onWrite(buffer);
 
 
             // 顺序写入

@@ -190,7 +190,13 @@ public class MapPropertiesEditor extends AbstractEditor {
         buffer.put(0x28AC3, (byte) (worldMapProperties.eventTilesIndex & 0x00FF));
         buffer.put(0x28AC7, (byte) ((worldMapProperties.eventTilesIndex & 0xFF00) >>> 8));
 
-        System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", 0x0FBBD - buffer.position());
+
+        int end = buffer.position() - 1;
+        if (end < 0x0FBBD) {
+            System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", 0x0FBBD - end);
+        } else {
+            System.out.printf("地图属性编辑器：错误！超出了数据上限%d字节\n", end - 0x0FBBD);
+        }
         return true;
     }
 
