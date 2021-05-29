@@ -188,7 +188,6 @@ public class MapEditor extends AbstractEditor {
 //            System.out.printf("%02X,%04d,%04d\n", integerIntegerEntry.getKey(), (integerIntegerEntry.getValue() & 0xFF00) >>> 8, integerIntegerEntry.getValue() & 0xFF);
 //        }
 
-        int more = 0;
         for (Map.Entry<Integer, byte[]> entry : maps.entrySet()) {
             MapProperties mapProperties = mapPropertiesEditor.getMapProperties().get(entry.getKey());
             if (mapProperties instanceof WorldMapProperties) {
@@ -201,19 +200,19 @@ public class MapEditor extends AbstractEditor {
                 buffer.position(getMetalMaxRe().getVROMOffset() + 0x2F000 + mapIndex);
                 int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
-                if (i >= 0xBF010) {
-//                    System.out.print(" >= 0xBF010");
-                    more += i - 0xBF010;
-                }
+//                if (i >= 0xBF010) {
+////                    System.out.print(" >= 0xBF010");
+//                    more += i - 0xBF010;
+//                }
             } else {
                 mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
                 buffer.position(getMetalMaxRe().getPROMOffset() + mapIndex);
                 int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
-                if (i >= 0x0B6D4) {
-//                    System.out.print(" >= 0x0B6D4");
-                    more += i - 0x0B6D4;
-                }
+//                if (i >= 0x0B6D4) {
+////                    System.out.print(" >= 0x0B6D4");
+//                    more += i - 0x0B6D4;
+//                }
             }
 //            System.out.println();
             buffer.put(entry.getValue());
@@ -221,7 +220,7 @@ public class MapEditor extends AbstractEditor {
 //            MapBuilder mapTiles = maps.get(i);
 //            buffer.put(mapTiles.build());
         }
-        System.out.println("more byte:" + more);
+//        System.out.println("more byte:" + more);
         return true;
     }
 

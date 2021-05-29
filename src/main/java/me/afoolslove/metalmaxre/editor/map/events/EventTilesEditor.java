@@ -139,19 +139,18 @@ public class EventTilesEditor extends AbstractEditor {
                         buffer.put(((byte) eventsList.getValue().size()));
                         // 写入 X、Y、Tile
                         for (EventTile eventTile : eventsList.getValue()) {
-                            buffer.put(eventTile.x);
-                            buffer.put(eventTile.y);
-                            buffer.put(eventTile.tile);
+                            buffer.put(eventTile.toArray());
                         }
                     }
                     // 写入事件组结束符
                     buffer.put((byte) 0x00);
                 });
 
-        if (0x1DEAF >= buffer.position()) {
-            System.out.printf("事件图块编辑器：剩余%d个空闲字节\n", 0x1DEAF - buffer.position());
+        int end = buffer.position() - 1;
+        if (end < 0x1DEAF) {
+            System.out.printf("事件图块编辑器：剩余%d个空闲字节\n", 0x1DEAF - end);
         } else {
-            System.out.printf("事件图块编辑器：错误！事件图块超出了数据上限%d字节", buffer.position() - 0x1DEAF);
+            System.out.printf("事件图块编辑器：错误！超出了数据上限%d字节\n", end - 0x1DEAF);
         }
         return true;
     }

@@ -25,6 +25,10 @@ public class EventTile extends Point<Byte> {
         return tile;
     }
 
+    public byte[] toArray() {
+        return new byte[]{x, y, tile};
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
