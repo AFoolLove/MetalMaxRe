@@ -69,13 +69,16 @@ public class MetalMaxRe {
         SpriteEditor spriteEditor = new SpriteEditor();
         EditorManager.register(spriteEditor);
 
+        MapEntranceEditor mapEntranceEditor = new MapEntranceEditor();
+        EditorManager.register(mapEntranceEditor);
+
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
         spriteEditor.getSprites(0x01).remove(0);
         spriteEditor.getSprites(0x01).remove(0);
         spriteEditor.getSprites(0x01).remove(0);
 
-        spriteEditor.getSprites(0x04).add(new Sprite(0x22,0x05,0x05,0x20,0x22,20));
+        spriteEditor.getSprites(0x04).add(new Sprite(0x22, 0x05, 0x05, 0x20, 0x22, 20));
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
     }
@@ -191,6 +194,7 @@ public class MetalMaxRe {
             var vendorEditor = EditorManager.getEditor(VendorEditor.class);
             var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
             var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
+            var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -203,6 +207,7 @@ public class MetalMaxRe {
             // 顺序写入
             mapEditor.onWrite(buffer); // 影响 mapPropertiesEditor
             eventTilesEditor.onWrite(buffer); // 影响 mapPropertiesEditor
+            mapEntranceEditor.onWrite(buffer); // 影响 mapPropertiesEditor
             mapPropertiesEditor.onWrite(buffer);
 
             Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);

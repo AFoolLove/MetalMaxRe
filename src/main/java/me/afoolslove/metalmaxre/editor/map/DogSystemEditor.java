@@ -245,14 +245,14 @@ public class DogSystemEditor extends AbstractEditor {
          * 此坐标会右偏移8格坐标点
          */
         public void setCameraX(int x) {
-            super.setX((byte) x);
+            super.setX((byte) (x & 0xFF));
         }
 
         /**
          * 此坐标会下偏移7格坐标点
          */
         public void setCameraY(int y) {
-            super.setY((byte) y);
+            super.setY((byte) (y & 0xFF));
         }
 
         public void setPoint(int x, int y) {
@@ -260,7 +260,8 @@ public class DogSystemEditor extends AbstractEditor {
         }
 
         public void setCameraPoint(int x, int y) {
-            super.setPoint((byte) x, (byte) y);
+            setCameraX(x);
+            setCameraY(y);
         }
 
         @Override

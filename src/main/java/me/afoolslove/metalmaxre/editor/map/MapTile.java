@@ -16,12 +16,12 @@ public class MapTile {
     public int count;
 
     public MapTile(int tile, int count) {
-        this.tile = (byte) tile;
+        this.tile = (byte) (tile & 0xFF);
         this.count = count;
     }
 
     public MapTile(int tile) {
-        this.tile = (byte) tile;
+        this.tile = (byte) (tile & 0xFF);
         this.count = 1;
     }
 

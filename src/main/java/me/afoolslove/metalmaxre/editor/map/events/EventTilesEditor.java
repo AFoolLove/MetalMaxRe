@@ -112,14 +112,11 @@ public class EventTilesEditor extends AbstractEditor {
 
         buffer.position(0x1DCCF);
 
-        getEventTiles().entrySet()
+        getEventTiles().values()
                 .stream().parallel()
-                .filter(entry -> !entry.getValue().isEmpty()) // 过滤没有事件图块的地图
+                .filter(entry -> !entry.isEmpty()) // 过滤没有事件图块的地图
                 .distinct()
-                .forEachOrdered(entry -> {
-                    Integer map = entry.getKey();
-                    Map<Integer, List<EventTile>> events = entry.getValue();
-
+                .forEachOrdered(events -> {
                     // 计算新的事件图块索引，太长了！简称：索引
                     char newEventTilesIndex = (char) (buffer.position() - 0x10 - 0x1C000 + 0x8000);
                     // 将旧的索引替换为新的索引
@@ -128,7 +125,7 @@ public class EventTilesEditor extends AbstractEditor {
                             .filter(entry1 -> entry1.getValue() == events) // 获取相同事件图块的地图
                             .forEach(mapEntry -> {
                                 // 通过相同的事件图块组更新索引
-                                mapPropertiesEditor.getMapProperties().get(mapEntry.getKey()).eventTilesIndex = newEventTilesIndex;
+                                mapPropertiesEditor.getMapProperties(mapEntry.getKey()).eventTilesIndex = newEventTilesIndex;
                             });
 
                     // 写入数据

@@ -19,7 +19,7 @@ public class NumberR {
      */
     public static byte parseByte(int number) {
         // 沙雕？
-        return (byte) number;
+        return (byte) (number & 0xFF);
     }
 
     /**

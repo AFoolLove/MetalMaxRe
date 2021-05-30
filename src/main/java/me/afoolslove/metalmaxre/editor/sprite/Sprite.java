@@ -45,12 +45,12 @@ public class Sprite {
     }
 
     public Sprite(int type, int x, int y, int talk1, int talk2, int action) {
-        this.type = (byte) type;
-        this.x = (byte) x;
-        this.y = (byte) y;
-        this.talk1 = (byte) talk1;
-        this.talk2 = (byte) talk2;
-        this.action = (byte) action;
+        this.type = (byte) (type & 0xFF);
+        this.x = (byte) (x & 0xFF);
+        this.y = (byte) (y & 0xFF);
+        this.talk1 = (byte) (talk1 & 0xFF);
+        this.talk2 = (byte) (talk2 & 0xFF);
+        this.action = (byte) (action & 0xFF);
     }
 
     /**
@@ -90,8 +90,8 @@ public class Sprite {
     }
 
     public void setTalk(int talk1, int talk2) {
-        this.talk1 = (byte) talk1;
-        this.talk2 = (byte) talk2;
+        this.talk1 = (byte) (talk1 & 0xFF);
+        this.talk2 = (byte) (talk2 & 0xFF);
     }
 
     public void setAction(byte action) {

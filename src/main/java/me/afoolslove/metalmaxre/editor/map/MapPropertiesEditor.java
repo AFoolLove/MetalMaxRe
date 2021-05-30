@@ -104,9 +104,13 @@ public class MapPropertiesEditor extends AbstractEditor {
         // 读取可移动区域，同上
         properties[0x05] = buffer.get(0x28A95);
         properties[0x06] = properties[0x05];
+        // 世界地图的出入口初始地址
+        properties[0x0B] = (byte) 0x80;
+        properties[0x0C] = (byte) 0x89;
         // 读取事件图块索引
         properties[0x1A] = buffer.get(0x28AC3);
         properties[0x1B] = buffer.get(0x28AC7);
+
         // 添加世界地图属性
         mapProperties.put(0x00, new WorldMapProperties(properties));
         return true;
@@ -200,8 +204,18 @@ public class MapPropertiesEditor extends AbstractEditor {
         return true;
     }
 
+    /**
+     * @return 所有地图的地图属性
+     */
     public LinkedHashMap<Integer, MapProperties> getMapProperties() {
         return mapProperties;
+    }
+
+    /**
+     * @return 指定地图的地图属性
+     */
+    public MapProperties getMapProperties(int map) {
+        return mapProperties.get(map);
     }
 
 }

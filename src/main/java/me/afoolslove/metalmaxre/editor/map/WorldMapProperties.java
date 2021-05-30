@@ -8,6 +8,7 @@ package me.afoolslove.metalmaxre.editor.map;
  * 地图的可移动区域偏移量
  * 地图的可移动区域
  * 事件图块索引
+ * 入口
  * <p>
  * 其它属性无效
  *
