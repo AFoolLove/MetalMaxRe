@@ -30,12 +30,28 @@ public class MapPoint extends Point<Byte> {
         return map;
     }
 
+    public void setMap(int map) {
+        this.map = (byte) (map & 0xFF);
+    }
+
     public void setX(int x) {
         super.setX((byte) (x & 0xFF));
     }
 
     public void setY(int y) {
         super.setY((byte) ((byte) y & 0xFF));
+    }
+
+    public void set(int map, int x, int y) {
+        setMap(map);
+        setX(x);
+        setY(y);
+    }
+
+    public void set(MapPoint mapPoint) {
+        setMap(mapPoint.map);
+        setX(mapPoint.x);
+        setY(mapPoint.y);
     }
 
     @Override

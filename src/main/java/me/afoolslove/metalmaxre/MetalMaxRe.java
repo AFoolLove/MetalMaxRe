@@ -74,11 +74,7 @@ public class MetalMaxRe {
 
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-        spriteEditor.getSprites(0x01).remove(0);
-        spriteEditor.getSprites(0x01).remove(0);
-        spriteEditor.getSprites(0x01).remove(0);
-
-        spriteEditor.getSprites(0x04).add(new Sprite(0x22, 0x05, 0x05, 0x20, 0x22, 20));
+        mapEntranceEditor.getMapEntrance(0x01).getBorder().getFirst().set(0xDB, 0x03, 0x05);
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
     }

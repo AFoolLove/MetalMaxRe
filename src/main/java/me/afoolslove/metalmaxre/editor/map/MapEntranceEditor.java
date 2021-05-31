@@ -16,6 +16,8 @@ import java.util.Map;
  * <p>
  * 起始：0x1E990
  * 结束：0x1F999
+ * <p>
+ * 2021年5月31日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */
@@ -97,7 +99,6 @@ public class MapEntranceEditor extends AbstractEditor {
         return true;
     }
 
-    /* TODO 错误的写入数据 */
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
@@ -107,8 +108,7 @@ public class MapEntranceEditor extends AbstractEditor {
                 .distinct()
                 .forEachOrdered(mapEntrance -> {
                     // 计算新的出入口索引
-                    char newEntrance = (char) (buffer.position() - 0x10 + 0x1E000 + 0x8000);
-
+                    char newEntrance = (char) (buffer.position() - (0x10 + 0x1E000 + 0x8000));
                     // 更新所有使用此数据的地图
                     getMapEntrances().entrySet().stream().parallel()
                             .filter(entry -> entry.getValue() == mapEntrance)

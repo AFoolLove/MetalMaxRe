@@ -13,7 +13,7 @@ import java.util.LinkedList;
  *
  * @author AFoolLove
  */
-public class MapBorder extends ArrayList<MapPoint> {
+public class MapBorder extends LinkedList<MapPoint> {
     /**
      * 地图边界类型
      */
@@ -35,7 +35,7 @@ public class MapBorder extends ArrayList<MapPoint> {
                 bytes = new byte[0x01 + 0x03];
                 bytes[0x00] = type.getValue();
 
-                MapPoint first = get(0);
+                MapPoint first = getFirst();
                 bytes[0x01] = first.map;
                 bytes[0x02] = first.x;
                 bytes[0x03] = first.y;
