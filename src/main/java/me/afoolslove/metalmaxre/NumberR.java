@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre;
 
+import java.util.Arrays;
+
 /**
  * 将数字解析为 NES能够正常识别的 byte
  *
@@ -10,7 +12,6 @@ public class NumberR {
      * 两个byte只需要互换
      */
     public static char parseChar(int number) {
-        //
         return (char) (((number & 0xFF00) >>> 8) + ((number & 0xFF) << 8));
     }
 
@@ -50,4 +51,14 @@ public class NumberR {
         return charSub(numberA, numberB, true);
     }
 
+    /**
+     * @return 将int分割为byte，低位的byte在最前面
+     */
+    public static byte[] toBytes(int number, int length, boolean reverse) {
+        byte[] bytes = new byte[length];
+        for (int i = 0, j = 0xFF; i < length; i++, j <<= (i * 8)) {
+            bytes[i] = (byte) ((number & j) >>> (i * 8));
+        }
+        return bytes;
+    }
 }

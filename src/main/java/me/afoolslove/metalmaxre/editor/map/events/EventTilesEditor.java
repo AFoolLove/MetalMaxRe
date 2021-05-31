@@ -36,14 +36,6 @@ import java.util.stream.Collectors;
 public class EventTilesEditor extends AbstractEditor {
 
     /**
-     * K：original EventTilesIndex
-     * V：
-     * ----K：event
-     * ----V：tile
-     */
-    // private final HashMap<Character, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
-
-    /**
      * K：Map
      * V：events
      */

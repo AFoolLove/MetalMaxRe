@@ -14,7 +14,7 @@
     EventTilesEditor    事件图块编辑器 √
     SpriteEditor        精灵编辑器 √
     MapEntranceEditor   地图边界和出入口编辑器 √
+    PlayerEditor        玩家编辑器 ...
 
     TankEditor          坦克编辑器 -
-    HumanEditor         人类编辑器 -
     其它

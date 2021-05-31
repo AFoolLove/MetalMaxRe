@@ -8,6 +8,8 @@ import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGoods;
 import me.afoolslove.metalmaxre.editor.map.*;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
+import me.afoolslove.metalmaxre.editor.player.Player;
+import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
 import me.afoolslove.metalmaxre.editor.sprite.Sprite;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
@@ -72,9 +74,13 @@ public class MetalMaxRe {
         MapEntranceEditor mapEntranceEditor = new MapEntranceEditor();
         EditorManager.register(mapEntranceEditor);
 
+        PlayerEditor playerEditor = new PlayerEditor();
+        EditorManager.register(playerEditor);
+
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-        mapEntranceEditor.getMapEntrance(0x01).getBorder().getFirst().set(0xDB, 0x03, 0x05);
+//        playerEditor.getInitialAttributes().get(Player.HANTA).attack = 5;
+
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
     }
@@ -191,6 +197,7 @@ public class MetalMaxRe {
             var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
             var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
             var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
+            var playerEditor = EditorManager.getEditor(PlayerEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -198,6 +205,7 @@ public class MetalMaxRe {
             dogSystemEditor.onWrite(buffer);
             vendorEditor.onWrite(buffer);
             spriteEditor.onWrite(buffer);
+            playerEditor.onWrite(buffer);
 
 
             // 顺序写入
