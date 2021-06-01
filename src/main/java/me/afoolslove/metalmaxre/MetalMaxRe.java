@@ -9,6 +9,7 @@ import me.afoolslove.metalmaxre.editor.map.*;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.player.Player;
+import me.afoolslove.metalmaxre.editor.player.PlayerDeBuff;
 import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
 import me.afoolslove.metalmaxre.editor.sprite.Sprite;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
@@ -79,7 +80,21 @@ public class MetalMaxRe {
 
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-//        playerEditor.getInitialAttributes().get(Player.HANTA).attack = 5;
+        playerEditor.getInitialAttributes().get(Player.HANTA).setBattleSkill(255);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setRepairSkill(Byte.MAX_VALUE);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setDrivingSkill(Byte.MAX_VALUE);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setAttack(255);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setDefense(255);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setStrength(Byte.MAX_VALUE);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setWisdom(Byte.MAX_VALUE);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setSpeed(Byte.MAX_VALUE);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setVitality(Byte.MAX_VALUE);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setExperience(65536);
+        playerEditor.getInitialAttributes().get(Player.TAMPER).setExperience(123);
+        playerEditor.getInitialAttributes().get(Player.ANNE).setExperience(555654);
+
+        playerEditor.getInitialAttributes().get(Player.HANTA).setHealth(2);
+        playerEditor.getInitialAttributes().get(Player.HANTA).setDeBuff(PlayerDeBuff.ERODING);
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();

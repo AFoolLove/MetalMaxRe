@@ -4,11 +4,16 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 玩家编辑器
- * 包括不限于玩家初始属
+ * 包括不限于玩家初始属性
+ * 目前只能修改初始数据
+ * <p>
+ * 2021年6月1日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */
@@ -52,6 +57,10 @@ public class PlayerEditor extends AbstractEditor {
         // 读取初始攻击力（含已装备的武器
         for (int i = 0; i < 0x03; i++) {
             playerInitialAttributes[i].attack = (char) (buffer.get() + (buffer.get() << 8));
+        }
+        // 读取初始防御力（含已装备的防具
+        for (int i = 0; i < 0x03; i++) {
+            playerInitialAttributes[i].defense = (char) (buffer.get() + (buffer.get() << 8));
         }
         // 读取初始队伍状态
         for (int i = 0; i < 0x03; i++) {
@@ -109,6 +118,10 @@ public class PlayerEditor extends AbstractEditor {
         for (int i = 0; i < 0x03; i++) {
             playerInitialAttributes[i].equipmentState = buffer.get();
         }
+        // 读取初始经验值
+        for (int i = 0; i < 0x03; i++) {
+            playerInitialAttributes[i].experience = buffer.get() + (buffer.get() << 8) + (buffer.get() << 16);
+        }
         return true;
     }
 
@@ -128,75 +141,75 @@ public class PlayerEditor extends AbstractEditor {
         buffer.put((byte) ((money & 0xFF0000) >>> 16));
         // 写入初始最大生命值
         for (int i = 0; i < 0x03; i++) {
-            buffer.put((byte) (playerInitialAttributes[i].maxHealth & 0x00FF));
-            buffer.put((byte) ((playerInitialAttributes[i].maxHealth & 0xFF00) >>> 8));
+            buffer.put(playerInitialAttributes[i].getBytesMaxHealth());
         }
         // 写入初始当前生命值
         for (int i = 0; i < 0x03; i++) {
-            buffer.put((byte) (playerInitialAttributes[i].health & 0x00FF));
-            buffer.put((byte) ((playerInitialAttributes[i].health & 0xFF00) >>> 8));
+            buffer.put(playerInitialAttributes[i].getBytesHealth());
         }
         // 写入初始攻击力（含已装备的武器
         for (int i = 0; i < 0x03; i++) {
-            buffer.put((byte) (playerInitialAttributes[i].attack & 0x00FF));
-            buffer.put((byte) ((playerInitialAttributes[i].attack & 0xFF00) >>> 8));
+            buffer.put(playerInitialAttributes[i].getBytesAttack());
         }
         // 写入初始防御力（含已装备的防具
         for (int i = 0; i < 0x03; i++) {
-            buffer.put((byte) (playerInitialAttributes[i].defense & 0x00FF));
-            buffer.put((byte) ((playerInitialAttributes[i].defense & 0xFF00) >>> 8));
+            buffer.put(playerInitialAttributes[i].getBytesDefense());
         }
         // 写入初始队伍状态
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].teamStatus);
+            buffer.put(playerInitialAttributes[i].getTeamStatus());
         }
         // 写入初始异常状态
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].deBuff);
+            buffer.put(playerInitialAttributes[i].getDeBuff());
         }
         //  写入初始等级
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].level);
+            buffer.put(playerInitialAttributes[i].getLevel());
         }
         // 写入初始力量
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].strength);
+            buffer.put(playerInitialAttributes[i].getStrength());
         }
         // 写入初始智力
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].wisdom);
+            buffer.put(playerInitialAttributes[i].getWisdom());
         }
         // 写入初始速度
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].speed);
+            buffer.put(playerInitialAttributes[i].getSpeed());
         }
         // 写入初始体力
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].vitality);
+            buffer.put(playerInitialAttributes[i].getVitality());
         }
         // 写入初始战斗等级
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].battleSkill);
+            buffer.put(playerInitialAttributes[i].getBattleSkill());
         }
         // 写入初始修理等级
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].repairSkill);
+            buffer.put(playerInitialAttributes[i].getRepairSkill());
         }
         // 写入初始驾驶等级
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].drivingSkill);
+            buffer.put(playerInitialAttributes[i].getDrivingSkill());
         }
         // 写入初始装备
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].equipment);
+            buffer.put(playerInitialAttributes[i].getEquipment());
         }
         // 写入初始道具
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].inventory);
+            buffer.put(playerInitialAttributes[i].getInventory());
         }
         // 写入初始装备的装备状态
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].equipmentState);
+            buffer.put(playerInitialAttributes[i].getEquipmentState());
+        }
+        // 写入初始经验值
+        for (int i = 0; i < 0x03; i++) {
+            buffer.put(playerInitialAttributes[i].getBytesExperience());
         }
         return true;
     }
@@ -213,87 +226,6 @@ public class PlayerEditor extends AbstractEditor {
      */
     public PlayerInitialAttributes getInitialAttributes(Player player) {
         return initialAttributes.get(player);
-    }
-
-    /**
-     * 玩家初始属性
-     */
-    public static class PlayerInitialAttributes {
-        /**
-         * 装备，8byte
-         */
-        public byte[] equipment;
-        /**
-         * 装备状态
-         */
-        public byte equipmentState;
-
-        /**
-         * 道具，8byte
-         */
-        public byte[] inventory;
-
-        /**
-         * 队伍状态
-         */
-        public byte teamStatus;
-        /**
-         * 异常状态
-         */
-        public byte deBuff;
-
-
-        /**
-         * 最大生命值
-         */
-        public char maxHealth;
-        /**
-         * 生命值
-         */
-        public char health;
-
-        /**
-         * 攻击力（包含已装备的武器
-         */
-        public char attack;
-        /**
-         * 防御力（包含已装备的防具
-         */
-        public char defense;
-
-        /**
-         * 等级
-         */
-        public byte level;
-        /**
-         * 力量
-         */
-        public byte strength;
-        /**
-         * 智力
-         */
-        public byte wisdom;
-        /**
-         * 速度
-         */
-        public byte speed;
-        /**
-         * 体力
-         */
-        public byte vitality;
-
-        /**
-         * 战斗等级
-         */
-        public byte battleSkill;
-        /**
-         * 修理等级
-         */
-        public byte repairSkill;
-        /**
-         * 驾驶等级
-         */
-        public byte drivingSkill;
     }
 
 }
