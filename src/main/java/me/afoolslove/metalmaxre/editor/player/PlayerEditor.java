@@ -2,11 +2,10 @@ package me.afoolslove.metalmaxre.editor.player;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 玩家编辑器
@@ -21,7 +20,7 @@ public class PlayerEditor extends AbstractEditor {
     /**
      * 初始属性
      */
-    private final Map<Player, PlayerInitialAttributes> initialAttributes = new HashMap<>(Player.values().length);
+    private final EnumMap<Player, PlayerInitialAttributes> initialAttributes = new EnumMap<>(Player.class);
 
     public int money;
 
@@ -228,4 +227,22 @@ public class PlayerEditor extends AbstractEditor {
         return initialAttributes.get(player);
     }
 
+    public void setMoney(@Range(from = 0x00, to = 0xFFFFFF) int money) {
+        this.money = money;
+    }
+
+    /**
+     * @return 金钱
+     */
+    @Range(from = 0x00, to = 0xFFFFFF)
+    public int getMoney() {
+        return money;
+    }
+
+    /**
+     * @return 数组形式的金钱
+     */
+    public byte[] getBytesMoney() {
+        return new byte[]{(byte) (money & 0x0000FF), (byte) ((money & 0x00FF00) >>> 8), (byte) ((money & 0xFF0000) >>> 16)};
+    }
 }

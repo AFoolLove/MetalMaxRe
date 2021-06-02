@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Range;
 
 /**
  * 玩家初始属性
+ *
+ * @author AFoolLove
  */
 public class PlayerInitialAttributes {
     /**

@@ -13,6 +13,9 @@ import me.afoolslove.metalmaxre.editor.player.PlayerDeBuff;
 import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
 import me.afoolslove.metalmaxre.editor.sprite.Sprite;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
+import me.afoolslove.metalmaxre.editor.tank.Tank;
+import me.afoolslove.metalmaxre.editor.tank.TankEditor;
+import me.afoolslove.metalmaxre.editor.tank.TankInitialAttributes;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,23 +81,18 @@ public class MetalMaxRe {
         PlayerEditor playerEditor = new PlayerEditor();
         EditorManager.register(playerEditor);
 
+        TankEditor tankEditor = new TankEditor();
+        EditorManager.register(tankEditor);
+
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-        playerEditor.getInitialAttributes().get(Player.HANTA).setBattleSkill(255);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setRepairSkill(Byte.MAX_VALUE);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setDrivingSkill(Byte.MAX_VALUE);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setAttack(255);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setDefense(255);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setStrength(Byte.MAX_VALUE);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setWisdom(Byte.MAX_VALUE);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setSpeed(Byte.MAX_VALUE);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setVitality(Byte.MAX_VALUE);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setExperience(65536);
-        playerEditor.getInitialAttributes().get(Player.TAMPER).setExperience(123);
-        playerEditor.getInitialAttributes().get(Player.ANNE).setExperience(555654);
-
-        playerEditor.getInitialAttributes().get(Player.HANTA).setHealth(2);
-        playerEditor.getInitialAttributes().get(Player.HANTA).setDeBuff(PlayerDeBuff.ERODING);
+        tankEditor.getInitialAttributes(Tank.NO_1).setDefense(0xFF0F);
+        tankEditor.getInitialAttributes(Tank.NO_1).setSlot(0);
+//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(55,66,77,78,79);
+        tankEditor.getInitialAttributes(Tank.NO_1).setSp(5523);
+        tankEditor.getInitialAttributes(Tank.NO_1).setWeight(1);
+        tankEditor.getInitialAttributes(Tank.NO_1).setMaxShells(250);
+        tankEditor.getInitialAttributes(Tank.NO_1).setEquipmentState(0xFF);
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
@@ -213,6 +211,7 @@ public class MetalMaxRe {
             var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
             var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
             var playerEditor = EditorManager.getEditor(PlayerEditor.class);
+            var tankInitialAttributes = EditorManager.getEditor(TankEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -221,6 +220,7 @@ public class MetalMaxRe {
             vendorEditor.onWrite(buffer);
             spriteEditor.onWrite(buffer);
             playerEditor.onWrite(buffer);
+            tankInitialAttributes.onWrite(buffer);
 
 
             // 顺序写入

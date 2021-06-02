@@ -15,8 +15,8 @@
     SpriteEditor        精灵编辑器 √
     MapEntranceEditor   地图边界和出入口编辑器 √
     PlayerEditor        玩家编辑器 √ 后续考虑添加功能
+    TankEditor          坦克编辑器 - ...
 
-    TankEditor          坦克编辑器 -
     其它
 
 ### 下载
