@@ -4,13 +4,19 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
 /**
  * 坦克编辑器
  * <p>
- * TODO 无法正确读取和写入数据？
+ * 包含出租坦克
+ * <p>
+ * 包括不限于坦克初始属性
+ * 目前只能修改初始数据
+ * <p>
+ * 2021年6月3日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */
@@ -34,20 +40,18 @@ public class TankEditor extends AbstractEditor {
 
         // 读取坦克初始装备（6byte）
         buffer.position(0x22010);
-        byte[] tempArray;
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            tempArray = new byte[0x06];
-            buffer.get(tempArray);
-            tankInitialAttributes[tank].setEquipment(tempArray);
+            byte[] equipment = new byte[0x06];
+            buffer.get(equipment);
+            tankInitialAttributes[tank].setEquipment(Arrays.copyOf(equipment, equipment.length));
         }
-        buffer.position(0x2207C);
         // 读取初始装备的 装备/卸下 状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
             tankInitialAttributes[tank].setEquipmentState(buffer.get());
         }
-        // 读取出租坦克弹仓大小
-        for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
-            tankInitialAttributes[Tank.NO_COUNT + taxTank].setMaxShells(buffer.get());
+        // 读取坦克弹仓大小
+        for (int tank = 0; tank < Tank.COUNT; tank++) {
+            tankInitialAttributes[tank].setMaxShells(buffer.get());
         }
         // 读取坦克底盘防御力（2byte）
         for (int tank = 0; tank < Tank.COUNT; tank++) {
@@ -63,7 +67,7 @@ public class TankEditor extends AbstractEditor {
         // 读取出租坦克的底盘重量（2byte）
         buffer.position(0x220D4);
         for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
-            tankInitialAttributes[Tank.NO_COUNT + taxTank].setWeight(buffer.get());
+            tankInitialAttributes[Tank.NO_COUNT + taxTank].setWeight(buffer.get() + (buffer.get() << 8));
         }
         // 读取坦克开洞状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
@@ -97,9 +101,9 @@ public class TankEditor extends AbstractEditor {
         for (int tank = 0; tank < Tank.COUNT; tank++) {
             buffer.put(tankInitialAttributes[tank].getEquipmentState());
         }
-        // 写入出租坦克弹仓大小
-        for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
-            buffer.put(tankInitialAttributes[Tank.NO_COUNT + taxTank].getMaxShells());
+        // 写入坦克弹仓大小
+        for (int tank = 0; tank < Tank.COUNT; tank++) {
+            buffer.put(tankInitialAttributes[tank].getMaxShells());
         }
         // 写入坦克底盘防御力（2byte）
         for (int tank = 0; tank < Tank.COUNT; tank++) {
@@ -109,13 +113,13 @@ public class TankEditor extends AbstractEditor {
         // 写入坦克的底盘重量
         buffer.position(0x28142);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            buffer.put(tankInitialAttributes[noTank].getWeight());
+            buffer.put(tankInitialAttributes[noTank].getBytesWeight());
         }
 
         // 写入出租坦克的底盘重量（2byte）
         buffer.position(0x220D4);
         for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
-            buffer.put(tankInitialAttributes[Tank.NO_COUNT + taxTank].getWeight());
+            buffer.put(tankInitialAttributes[Tank.NO_COUNT + taxTank].getBytesWeight());
         }
         // 写入坦克开洞状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
@@ -123,7 +127,7 @@ public class TankEditor extends AbstractEditor {
         }
 
         // 写入坦克的初始SP
-        buffer.position(0x28157);
+        buffer.position(0x28158);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
             buffer.put(tankInitialAttributes[noTank].getBytesSp());
         }

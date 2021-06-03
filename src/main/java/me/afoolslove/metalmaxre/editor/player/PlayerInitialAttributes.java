@@ -326,7 +326,7 @@ public class PlayerInitialAttributes {
      * @return 数组形式的最大生命值
      */
     public byte[] getBytesMaxHealth() {
-        return new byte[]{(byte) (maxHealth & 0xFF), (byte) ((maxHealth & 0xFF00) >>> 8)};
+        return new byte[]{(byte) (maxHealth & 0x00FF), (byte) ((maxHealth & 0xFF00) >>> 8)};
     }
 
     /**
@@ -341,7 +341,7 @@ public class PlayerInitialAttributes {
      * @return 数组形式的当前生命值
      */
     public byte[] getBytesHealth() {
-        return new byte[]{(byte) (health & 0xFF), (byte) ((health & 0xFF00) >>> 8)};
+        return new byte[]{(byte) (health & 0x00FF), (byte) ((health & 0xFF00) >>> 8)};
     }
 
     /**
@@ -356,7 +356,7 @@ public class PlayerInitialAttributes {
      * @return 数组形式的攻击力
      */
     public byte[] getBytesAttack() {
-        return new byte[]{(byte) (attack & 0xFF), (byte) ((attack & 0xFF00) >>> 8)};
+        return new byte[]{(byte) (attack & 0x00FF), (byte) ((attack & 0xFF00) >>> 8)};
     }
 
     /**
@@ -371,7 +371,7 @@ public class PlayerInitialAttributes {
      * @return 数组形式的防御力
      */
     public byte[] getBytesDefense() {
-        return new byte[]{(byte) (defense & 0xFF), (byte) ((defense & 0xFF00) >>> 8)};
+        return new byte[]{(byte) (defense & 0x00FF), (byte) ((defense & 0xFF00) >>> 8)};
     }
 
     /**

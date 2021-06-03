@@ -12,9 +12,6 @@ import org.jetbrains.annotations.Range;
 public class TankInitialAttributes {
     /**
      * 开洞状态
-     * 0B1000_0000  主炮开洞
-     * 0B0100_0000  副炮开洞
-     * 0B0010_0000  S-E开洞
      */
     public byte slot;
     /**
@@ -32,7 +29,7 @@ public class TankInitialAttributes {
     /**
      * 底盘重量
      */
-    public byte weight;
+    public char weight;
     /**
      * 弹仓，每扩充一次增加5
      */
@@ -46,6 +43,9 @@ public class TankInitialAttributes {
 
     /**
      * 设置开洞状态
+     * 0B1000_0000  主炮开洞
+     * 0B0100_0000  副炮开洞
+     * 0B0010_0000  S-E开洞
      */
     public void setSlot(@Range(from = 0x00, to = 0xFF) int slot) {
         this.slot = (byte) (slot & 0xFF);
@@ -100,14 +100,17 @@ public class TankInitialAttributes {
     /**
      * 设置装备的 装备/卸下 状态
      * <p>
-     * 0x80 0x40
-     * 0x20 0x10
-     * 0x08 0x04
-     * 0x02 0x01
+     * 0B1000_0000  装备主炮
+     * 0B0100_0000  装备副炮
+     * 0B0010_0000  装备S-E
+     * 0B0001_0000  装备C装置
+     * 0B0000_1000  装备发动机
+     * 0B0000_0100  装备底盘
+     * 其它为无效属性
      * 相加即可装备
      */
     public void setEquipmentState(@Range(from = 0x00, to = 0xFF) int equipmentState) {
-        this.equipmentState = (byte) (equipmentState & 0xFF);
+        this.equipmentState = (byte) (equipmentState & 0B1111_1100);
     }
 
     /**
@@ -120,12 +123,13 @@ public class TankInitialAttributes {
     /**
      * 设置底盘重量
      */
-    public void setWeight(@Range(from = 0x00, to = 0xFF) int weight) {
-        this.weight = (byte) (weight & 0xFF);
+    public void setWeight(@Range(from = 0x00, to = 0xFFFF) int weight) {
+        this.weight = (char) (weight & 0xFFFF);
     }
 
     /**
      * 设置装甲片
+     * 注：当装甲片大于承载时，会显示当前的sp，而不是承载值（e.g：0/50 to 55/55
      */
     public void setSp(@Range(from = 0x00, to = 0xFFFF) int sp) {
         this.sp = (char) (sp & 0xFFFF);
@@ -157,7 +161,7 @@ public class TankInitialAttributes {
     /**
      * @return 指定位置的装备
      */
-    public byte getEquipment(@Range(from = 0x00, to = 0x07) int index) {
+    public byte getEquipment(@Range(from = 0x00, to = 0x05) int index) {
         return equipment[index];
     }
 
@@ -180,14 +184,21 @@ public class TankInitialAttributes {
      * @return 数组形式的防御力
      */
     public byte[] getBytesDefense() {
-        return new byte[]{(byte) (defense & 0xFF), (byte) ((defense & 0xFF00) >>> 8)};
+        return new byte[]{(byte) (defense & 0x00FF), (byte) ((defense & 0xFF00) >>> 8)};
     }
 
     /**
      * @return 底盘重量
      */
-    public byte getWeight() {
+    public char getWeight() {
         return weight;
+    }
+
+    /**
+     * @return 数组形式的底盘重量
+     */
+    public byte[] getBytesWeight() {
+        return new byte[]{(byte) (weight & 0x00FF), (byte) ((weight & 0xFF00) >>> 8)};
     }
 
     /**

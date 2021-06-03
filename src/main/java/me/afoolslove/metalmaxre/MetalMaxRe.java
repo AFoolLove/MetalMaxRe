@@ -87,8 +87,12 @@ public class MetalMaxRe {
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
         tankEditor.getInitialAttributes(Tank.NO_1).setDefense(0xFF0F);
-        tankEditor.getInitialAttributes(Tank.NO_1).setSlot(0);
-//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(55,66,77,78,79);
+        tankEditor.getInitialAttributes(Tank.NO_1).setSlot(1);
+//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(0,5);
+//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(1,5);
+//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(2,5);
+//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(3,5);
+//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(4,5);
         tankEditor.getInitialAttributes(Tank.NO_1).setSp(5523);
         tankEditor.getInitialAttributes(Tank.NO_1).setWeight(1);
         tankEditor.getInitialAttributes(Tank.NO_1).setMaxShells(250);
