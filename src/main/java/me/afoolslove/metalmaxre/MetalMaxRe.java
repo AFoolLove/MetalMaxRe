@@ -10,6 +10,7 @@ import me.afoolslove.metalmaxre.editor.map.MapEntranceEditor;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
+import me.afoolslove.metalmaxre.editor.player.PlayerExperienceEditor;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
 import me.afoolslove.metalmaxre.editor.tank.Tank;
 import me.afoolslove.metalmaxre.editor.tank.TankEditor;
@@ -83,17 +84,16 @@ public class MetalMaxRe {
         TankEditor tankEditor = new TankEditor();
         EditorManager.register(tankEditor);
 
+        PlayerExperienceEditor playerExperienceEditor = new PlayerExperienceEditor();
+        EditorManager.register(playerExperienceEditor);
+
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-        TankInitialAttributes no1 = tankEditor.getInitialAttributes(Tank.NO_1);
-        TankInitialAttributes no2 = tankEditor.getInitialAttributes(Tank.NO_2);
-        no1.setDefense(0xFF0F);
-        no1.setSlot(1);
-        no1.setEquipment(TankEquipment.CHASSIS, no2.getEquipment(TankEquipment.CHASSIS));
-        no1.setSp(5523);
-        no1.setWeight(1);
-        no1.setMaxShells(250);
-        no1.setEquipmentState(0xFF);
+        playerExperienceEditor.setExperience(2, 1);
+        playerExperienceEditor.setExperience(3, 3);
+        playerExperienceEditor.setExperience(4, 5);
+        playerExperienceEditor.setExperience(5, 7);
+        playerExperienceEditor.setExperience(6, 9);
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
@@ -213,6 +213,7 @@ public class MetalMaxRe {
             var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
             var playerEditor = EditorManager.getEditor(PlayerEditor.class);
             var tankInitialAttributes = EditorManager.getEditor(TankEditor.class);
+            var playerExperienceEditor = EditorManager.getEditor(PlayerExperienceEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -222,6 +223,7 @@ public class MetalMaxRe {
             spriteEditor.onWrite(buffer);
             playerEditor.onWrite(buffer);
             tankInitialAttributes.onWrite(buffer);
+            playerExperienceEditor.onWrite(buffer);
 
 
             // 顺序写入
