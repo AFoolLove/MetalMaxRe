@@ -1,20 +1,19 @@
 package me.afoolslove.metalmaxre;
 
-import me.afoolslove.metalmaxre.editor.*;
+import me.afoolslove.metalmaxre.editor.AbstractEditor;
+import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
-import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGood;
-import me.afoolslove.metalmaxre.editor.computer.vendor.VendorGoods;
-import me.afoolslove.metalmaxre.editor.map.*;
-import me.afoolslove.metalmaxre.editor.map.events.EventTile;
+import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
+import me.afoolslove.metalmaxre.editor.map.MapEditor;
+import me.afoolslove.metalmaxre.editor.map.MapEntranceEditor;
+import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
-import me.afoolslove.metalmaxre.editor.player.Player;
-import me.afoolslove.metalmaxre.editor.player.PlayerDeBuff;
 import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
-import me.afoolslove.metalmaxre.editor.sprite.Sprite;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
 import me.afoolslove.metalmaxre.editor.tank.Tank;
 import me.afoolslove.metalmaxre.editor.tank.TankEditor;
+import me.afoolslove.metalmaxre.editor.tank.TankEquipment;
 import me.afoolslove.metalmaxre.editor.tank.TankInitialAttributes;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.Properties;
 
 /**
  * 程序主体
@@ -86,17 +85,15 @@ public class MetalMaxRe {
 
         loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
 
-        tankEditor.getInitialAttributes(Tank.NO_1).setDefense(0xFF0F);
-        tankEditor.getInitialAttributes(Tank.NO_1).setSlot(1);
-//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(0,5);
-//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(1,5);
-//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(2,5);
-//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(3,5);
-//        tankEditor.getInitialAttributes(Tank.NO_1).setEquipment(4,5);
-        tankEditor.getInitialAttributes(Tank.NO_1).setSp(5523);
-        tankEditor.getInitialAttributes(Tank.NO_1).setWeight(1);
-        tankEditor.getInitialAttributes(Tank.NO_1).setMaxShells(250);
-        tankEditor.getInitialAttributes(Tank.NO_1).setEquipmentState(0xFF);
+        TankInitialAttributes no1 = tankEditor.getInitialAttributes(Tank.NO_1);
+        TankInitialAttributes no2 = tankEditor.getInitialAttributes(Tank.NO_2);
+        no1.setDefense(0xFF0F);
+        no1.setSlot(1);
+        no1.setEquipment(TankEquipment.CHASSIS, no2.getEquipment(TankEquipment.CHASSIS));
+        no1.setSp(5523);
+        no1.setWeight(1);
+        no1.setMaxShells(250);
+        no1.setEquipmentState(0xFF);
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();

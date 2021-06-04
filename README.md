@@ -9,7 +9,7 @@
     MapEditor           地图编辑器 × 半成品
     MapPropertiesEditor 地图属性编辑器 √
     ComputerEditor      计算机编辑器 √
-    DogSystem           犬系统 √
+    DogSystemEditor     犬系统 √
     VendorEditor        售货机编辑器 √ 后续考虑添加功能
     EventTilesEditor    事件图块编辑器 √
     SpriteEditor        精灵编辑器 √
