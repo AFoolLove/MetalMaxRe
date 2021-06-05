@@ -20,7 +20,7 @@ import java.util.List;
  * 0x0D 中奖物品
  * 数量byte D7的值为1时，商品为无货
  * <p>
- * TODO 商品价格，毫无头绪
+ * TODO 商品价格，毫无头绪，有了，但是没有测试（刚看见还有这个todo
  *
  * @author AFoolLove
  */
@@ -30,7 +30,7 @@ public class VendorEditor extends AbstractEditor {
      */
     public static final int VENDOR_MAX_COUNT = 0x12;
 
-    private final List<VendorGoods> vendorGoods = new ArrayList<>();
+    private final List<VendorItemList> vendorItemLists = new ArrayList<>();
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
@@ -44,14 +44,14 @@ public class VendorEditor extends AbstractEditor {
             // 读取商品数量和是否有货
             buffer.get(counts);
 
-            VendorGoods goods = new VendorGoods();
+            VendorItemList itemList = new VendorItemList();
             // 添加商品
             for (int i = 0; i < 0x06; i++) {
-                goods.add(new VendorGood(items[i], counts[i]));
+                itemList.add(new VendorItem(items[i], counts[i]));
             }
             // 获取中奖物品
-            goods.setAward(buffer.get());
-            vendorGoods.add(goods);
+            itemList.setAward(buffer.get());
+            vendorItemLists.add(itemList);
         }
         return true;
     }
@@ -61,37 +61,37 @@ public class VendorEditor extends AbstractEditor {
         buffer.position(0x23EC8);
 
         // 移除多余的商品组合
-        Iterator<VendorGoods> iterator = vendorGoods.iterator();
-        limit(iterator, () -> vendorGoods.size() > VENDOR_MAX_COUNT, remove -> {
+        Iterator<VendorItemList> iterator = vendorItemLists.iterator();
+        limit(iterator, () -> vendorItemLists.size() > VENDOR_MAX_COUNT, remove -> {
             System.out.printf("售货机编辑器：移除多余的售货机商品组 %s", remove);
         });
 
         byte[] items = new byte[0x06];
         byte[] counts = new byte[0x06];
         while (iterator.hasNext()) {
-            VendorGoods vendorGood = iterator.next();
+            VendorItemList vendorItemList = iterator.next();
 
             // 写入固定头
             buffer.put((byte) 0x0D);
             // 写入商品和数量
             for (int i = 0; i < 0x06; i++) {
-                VendorGood good = vendorGood.get(i);
-                items[i] = good.item;
-                counts[i] = good.count;
+                VendorItem item = vendorItemList.get(i);
+                items[i] = item.item;
+                counts[i] = item.count;
             }
             buffer.put(items);
             buffer.put(counts);
             // 写入奖品
-            buffer.put(vendorGood.award);
+            buffer.put(vendorItemList.award);
         }
         return true;
     }
 
-    public List<VendorGoods> getVendorGoods() {
-        return vendorGoods;
+    public List<VendorItemList> getVendorItemLists() {
+        return vendorItemLists;
     }
 
-    public VendorGoods getVendorGood(int vendor) {
-        return vendorGoods.get(vendor % 6);
+    public VendorItemList getVendorItem(int vendor) {
+        return vendorItemLists.get(vendor % 6);
     }
 }

@@ -7,11 +7,11 @@ import java.util.Objects;
  *
  * @author AFoolLove
  */
-public class VendorGood {
+public class VendorItem {
     public byte item;
     public byte count;
 
-    public VendorGood(byte item, byte count) {
+    public VendorItem(byte item, byte count) {
         this.item = item;
         this.count = count;
     }
@@ -47,8 +47,8 @@ public class VendorGood {
     /**
      * 设置商品是否有货
      */
-    public void setNoGoods(boolean goods) {
-        if (goods) {
+    public void setHasItems(boolean hasItems) {
+        if (hasItems) {
             count |= 0B1000_0000;
         } else {
             count &= 0B0111_1111;
@@ -56,14 +56,19 @@ public class VendorGood {
     }
 
     @Override
+    public String toString() {
+        return String.format("VendorItem{item=%s, count=%s}", item, count);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof VendorGood)) {
+        if (!(o instanceof VendorItem)) {
             return false;
         }
-        VendorGood that = (VendorGood) o;
+        VendorItem that = (VendorItem) o;
         return getItem() == that.getItem() && getCount() == that.getCount();
     }
 

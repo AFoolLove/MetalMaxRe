@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editor.map;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import java.util.Map;
  * <p>
  * 起始：0x1E990
  * 结束：0x1F999
- *
+ * <p>
  * 修改地图的边界类型和地图的出入口
  * <p>
  * 2021年5月31日：已完成并通过测试基本编辑功能
@@ -145,7 +146,7 @@ public class MapEntranceEditor extends AbstractEditor {
 
 
         int end = buffer.position() - 1;
-        if (end < 0x1F999) {
+        if (end <= 0x1F999) {
             System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", 0x1F999 - end);
         } else {
             System.out.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", end - 0x1F999);
@@ -163,7 +164,7 @@ public class MapEntranceEditor extends AbstractEditor {
     /**
      * @return 指定地图的边界和出入口
      */
-    public MapEntrance getMapEntrance(int map) {
+    public MapEntrance getMapEntrance(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map) {
         return mapEntrances.get(map);
     }
 }

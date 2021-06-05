@@ -6,9 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * 地图编辑器
@@ -137,6 +138,9 @@ public class MapEditor extends AbstractEditor {
             maps.put(map, getMap(map).build());
         }
 
+/*
+        // --------- TEST
+
         // 重合度
         // K：MapId
         // V：与其它地图的重合度
@@ -187,6 +191,7 @@ public class MapEditor extends AbstractEditor {
 //            Map.Entry<Integer, Integer> integerIntegerEntry = collect.get(0);
 //            System.out.printf("%02X,%04d,%04d\n", integerIntegerEntry.getKey(), (integerIntegerEntry.getValue() & 0xFF00) >>> 8, integerIntegerEntry.getValue() & 0xFF);
 //        }
+*/
 
         for (Map.Entry<Integer, byte[]> entry : maps.entrySet()) {
             MapProperties mapProperties = mapPropertiesEditor.getMapProperties().get(entry.getKey());
@@ -196,9 +201,10 @@ public class MapEditor extends AbstractEditor {
             }
             int mapIndex = mapProperties.mapIndex;
 
+            // 定位到地图数据的起始地址
             if (mapIndex >= 0xC000) {
                 buffer.position(getMetalMaxRe().getVROMOffset() + 0x2F000 + mapIndex);
-                int i = buffer.position() + entry.getValue().length;
+//                int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
 //                if (i >= 0xBF010) {
 ////                    System.out.print(" >= 0xBF010");
@@ -207,7 +213,7 @@ public class MapEditor extends AbstractEditor {
             } else {
                 mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
                 buffer.position(getMetalMaxRe().getPROMOffset() + mapIndex);
-                int i = buffer.position() + entry.getValue().length;
+//                int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
 //                if (i >= 0x0B6D4) {
 ////                    System.out.print(" >= 0x0B6D4");
@@ -215,6 +221,7 @@ public class MapEditor extends AbstractEditor {
 //                }
             }
 //            System.out.println();
+            // 写入地图数据
             buffer.put(entry.getValue());
 
 //            MapBuilder mapTiles = maps.get(i);
@@ -231,93 +238,4 @@ public class MapEditor extends AbstractEditor {
     public MapBuilder getMap(@Range(from = 0x01, to = 0xEF) int map) {
         return maps.get(map);
     }
-
-    /*
-     *
-     * 尘封的代码，太麻烦了，只有256 128的数量没有优化好
-     *          已移步到MapBuilder中实现
-     *         System.out.println("地图编辑器：开始优化地图");
-     *         for (Map.Entry<Integer, MapBuilder> entry : maps.entrySet()) {
-     *             MapTile[] mapTiles = entry.getValue().toArray(new MapTile[0]);
-     *             // 合计省下的bit数量，1=7bit
-     *             int bits = 0;
-     *
-     *             for (int i = 0; i < mapTiles.length; i++) {
-     *                 MapTile mapTile = mapTiles[i];
-     *                 if (mapTile.count == 0) {
-     *                     // 数量为 0 的图块实际数量为 256
-     *                     // 不可以与任何图块合并
-     *                     continue;
-     *                 }
-     *
-     *                 // 判断接下来的数据是否一致，是否需要合并
-     *                 // 条件满足任意一条即可
-     *                 // 合并条件一：数量合计大于或等于3
-     *                 // 合并条件二：三个图块相同
-     *                 int j = i + 1;
-     *                 for (; j < mapTiles.length; j++) {
-     *                     if (mapTiles[j].count == 0) {
-     *                         // 数量为 0 的图块实际数量为 256
-     *                         // 不可以与任何图块合并
-     *                         break;
-     *                     }
-     *                     if (mapTiles[j].tile != mapTile.tile) {
-     *                         // 计算相同的图块
-     *                         break;
-     *                     }
-     *                 }
-     *                 // 计算结束
-     *
-     *                 // 计算一共多少个图块
-     *                 int count = 0;
-     *                 for (int k = j - 1; k >= i; k--) {
-     *                     count += mapTiles[k].count;
-     *                 }
-     *
-     *                 // 如果图块数量或相同的图块不超过3个
-     *                 // 就跳过这些相同的图块
-     *                 if (count < 3 || j - i < 3) {
-     *                     i = j;
-     *                     continue;
-     *                 }
-     *
-     *                 // 合并前计算总数量在128以下或128以上256以下
-     *                 // 128以下时，直接加入
-     *                 // 128以上256以下时，分成两个图块存放
-     *                 // 256不合并
-     *                 int finalCount = mapTile.count + count;
-     *                 if (finalCount <= 0x7F) {
-     *                     for (int k = j - 1; k > i; k--) {
-     *                         mapTile.count += mapTiles[k].count;
-     *                         bits += mapTiles[k].count;
-     *                         // 置空表示已合并
-     *                         mapTiles[k] = null;
-     *                     }
-     *                 } else if (finalCount >= 0xFF) {
-     *                     // 分成多个图块存放
-     *
-     *                     // 多个图块的数量
-     *                     int tileCount = finalCount / 0x100;
-     *                     for (int k = 0; k < tileCount; k++) {
-     *                         mapTile.count = 0xFF;
-     *                         i++;
-     *                         mapTile = mapTiles[i];
-     *                     }
-     *                     if (finalCount % 0x80 == 0) {
-     *
-     *                     }
-     *
-     *                 }
-     *                 i = j;
-     *             }
-     *
-     *             if (bits != 0) {
-     *                 System.out.format("地图编辑器：%#02X 优化了%d...%d个byte\n", entry.getKey(), (bits * 7) / 8, (bits * 7) % 8);
-     *             }
-     *             entry.getValue().clear();
-     *             entry.getValue().addAll(Arrays.stream(mapTiles).filter(Objects::nonNull).collect(Collectors.toList()));
-     *         }
-     *
-     *         System.out.println("地图编辑器：优化地图结束");
-     */
 }

@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
  * <p>
  * <p>
  * 2021年5月26日：已完成并通过测试基本编辑功能
- * <p>
- * TODO 如何添加？
  *
  * @author AFoolLove
  */
@@ -136,7 +134,7 @@ public class EventTilesEditor extends AbstractEditor {
                 });
 
         int end = buffer.position() - 1;
-        if (end < 0x1DEAF) {
+        if (end <= 0x1DEAF) {
             System.out.printf("事件图块编辑器：剩余%d个空闲字节\n", 0x1DEAF - end);
         } else {
             System.out.printf("事件图块编辑器：错误！超出了数据上限%d字节\n", end - 0x1DEAF);

@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 /**
  * 基本的编辑器功能
- * 所有操作不计算NES头0x10数据
+ * 所有操作不计算NES头0x10数据（并没有
  *
  * @author AFoolLove
  */

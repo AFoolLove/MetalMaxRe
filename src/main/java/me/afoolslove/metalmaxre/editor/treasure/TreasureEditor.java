@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 /**
  * 宝藏编辑器
- *
+ * <p>
  * 宝藏没有前后顺序
  * <p>
  * 包含世界地图，世界地图宝藏图像会固定自动隐藏
@@ -55,8 +55,8 @@ public class TreasureEditor extends AbstractEditor {
             boolean add = treasures.add(treasure);
             if (!add) {
                 // 重复的宝藏
-                System.err.println("读取到重复的宝藏 " + treasure);
-                System.err.format("位置：Map:%05X, X:%05X, Y:%05X,Item:%05X\n", treasure.getMap(), treasure.getX(), treasure.getY(), treasure.getItem());
+                System.out.println("读取到重复的宝藏 " + treasure);
+                System.out.format("位置：Map:%05X, X:%05X, Y:%05X,Item:%05X\n", treasure.getMap(), treasure.getX(), treasure.getY(), treasure.getItem());
             }
         }
         return true;
@@ -73,7 +73,7 @@ public class TreasureEditor extends AbstractEditor {
 
         Iterator<Treasure> iterator = treasures.iterator();
         // 移除多余的宝藏
-        limit(iterator,() -> treasures.size() > TREASURE_MAX_COUNT, removed -> {
+        limit(iterator, () -> treasures.size() > TREASURE_MAX_COUNT, removed -> {
             System.out.println("移除多余的宝藏：" + removed);
         });
 

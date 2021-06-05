@@ -7,7 +7,7 @@ import java.util.LinkedList;
  *
  * @author AFoolLove
  */
-public class VendorGoods extends LinkedList<VendorGood> {
+public class VendorItemList extends LinkedList<VendorItem> {
     public byte award;
 
     /**
@@ -26,7 +26,7 @@ public class VendorGoods extends LinkedList<VendorGood> {
 
     @Override
     public String toString() {
-//        return String.format("VendorGoods{goods={{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X}},award=%02X}", award);
-        return String.format("VendorGoods{award=%02X}", award);
+//        return String.format("VendorItemList{items={{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X}},award=%02X}", award);
+        return String.format("VendorItemList{award=%02X}", award);
     }
 }

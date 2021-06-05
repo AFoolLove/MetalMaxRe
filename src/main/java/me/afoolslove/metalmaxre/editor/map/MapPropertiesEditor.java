@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editor.map;
 import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -196,7 +197,7 @@ public class MapPropertiesEditor extends AbstractEditor {
 
 
         int end = buffer.position() - 1;
-        if (end < 0x0FBBD) {
+        if (end <= 0x0FBBD) {
             System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", 0x0FBBD - end);
         } else {
             System.out.printf("地图属性编辑器：错误！超出了数据上限%d字节\n", end - 0x0FBBD);
@@ -214,7 +215,7 @@ public class MapPropertiesEditor extends AbstractEditor {
     /**
      * @return 指定地图的地图属性
      */
-    public MapProperties getMapProperties(int map) {
+    public MapProperties getMapProperties(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map) {
         return mapProperties.get(map);
     }
 

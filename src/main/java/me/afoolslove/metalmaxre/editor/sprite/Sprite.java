@@ -98,6 +98,81 @@ public class Sprite {
         this.action = action;
     }
 
+    /**
+     * 设置是否可以被推动
+     */
+    public void canPushed(boolean enable) {
+        if (enable) {
+            y |= FLAG_CAN_PUSHED;
+        } else {
+            y &= (0B1100_0000 ^ FLAG_CAN_PUSHED);
+        }
+    }
+
+    /**
+     * 设置是否可以忽略地形移动
+     */
+    public void ignoreTerrain(boolean enable) {
+        if (enable) {
+            y |= FLAG_IGNORE_TERRAIN;
+        } else {
+            y &= (0B1100_0000 ^ FLAG_IGNORE_TERRAIN);
+        }
+    }
+
+    /**
+     * 设置是否始终朝向初始的方向
+     */
+    public void lockDirection(boolean enable) {
+        if (enable) {
+            y |= FLAG_LOCK_DIRECTION;
+        } else {
+            y &= (0B1100_0000 ^ FLAG_LOCK_DIRECTION);
+        }
+    }
+
+    /**
+     * 设置移动时是否禁用移动动画
+     */
+    public void disableMovingAnim(boolean enable) {
+        if (enable) {
+            y |= FLAG_DISABLE_MOVING_ANIM;
+        } else {
+            y &= (0B1100_0000 ^ FLAG_DISABLE_MOVING_ANIM);
+        }
+    }
+
+    /**
+     * @return 是否可以被玩家推动
+     */
+    public boolean hasCanPushed() {
+        return (y & FLAG_CAN_PUSHED) == FLAG_CAN_PUSHED;
+    }
+
+    /**
+     * @return 是否可以忽略地形移动（可以往墙里走
+     */
+    public boolean hasIgnoreTerrain() {
+        return (y & FLAG_IGNORE_TERRAIN) == FLAG_IGNORE_TERRAIN;
+    }
+
+    /**
+     * @return 是否始终朝向初始的方向
+     */
+    public boolean hasLockDirection() {
+        return (x & FLAG_LOCK_DIRECTION) == FLAG_LOCK_DIRECTION;
+    }
+
+    /**
+     * @return 是否禁用移动时的动画（人偶或假人等使用
+     */
+    public boolean hasDisableMovingAnim() {
+        return (x & FLAG_DISABLE_MOVING_ANIM) == FLAG_DISABLE_MOVING_ANIM;
+    }
+
+    /**
+     * @return 转换为数组
+     */
     public byte[] toArray() {
         return new byte[]{type, x, y, talk1, talk2, action};
     }

@@ -9,13 +9,11 @@ import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEntranceEditor;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
+import me.afoolslove.metalmaxre.editor.palette.PaletteEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerExperienceEditor;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
-import me.afoolslove.metalmaxre.editor.tank.Tank;
 import me.afoolslove.metalmaxre.editor.tank.TankEditor;
-import me.afoolslove.metalmaxre.editor.tank.TankEquipment;
-import me.afoolslove.metalmaxre.editor.tank.TankInitialAttributes;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,13 +85,13 @@ public class MetalMaxRe {
         PlayerExperienceEditor playerExperienceEditor = new PlayerExperienceEditor();
         EditorManager.register(playerExperienceEditor);
 
-        loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
+        PaletteEditor paletteEditor = new PaletteEditor();
+        EditorManager.register(paletteEditor);
 
-        playerExperienceEditor.setExperience(2, 1);
-        playerExperienceEditor.setExperience(3, 3);
-        playerExperienceEditor.setExperience(4, 5);
-        playerExperienceEditor.setExperience(5, 7);
-        playerExperienceEditor.setExperience(6, 9);
+        loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
+        var p = paletteEditor.getPalettes(mapPropertiesEditor.getMapProperties(0x01).palette);
+        p.get(0x00).setColors(0x0f, 0x30, 0x11);
+        p.get(0x01).setColors(0x0f, 0x30, 0x11);
 
         saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         System.out.println();
@@ -133,7 +131,7 @@ public class MetalMaxRe {
         }
         getProperties().clear();
         if (config == null) {
-            System.err.println("没有可用的配置文件加载！");
+            System.out.println("没有可用的配置文件加载！");
             return;
         }
 
@@ -142,7 +140,7 @@ public class MetalMaxRe {
             getProperties().load(Files.newBufferedReader(Paths.get(config)));
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("加载配置文件失败：" + config);
+            System.out.println("加载配置文件失败：" + config);
         }
     }
 
@@ -214,6 +212,7 @@ public class MetalMaxRe {
             var playerEditor = EditorManager.getEditor(PlayerEditor.class);
             var tankInitialAttributes = EditorManager.getEditor(TankEditor.class);
             var playerExperienceEditor = EditorManager.getEditor(PlayerExperienceEditor.class);
+            var paletteEditor = EditorManager.getEditor(PaletteEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -230,6 +229,7 @@ public class MetalMaxRe {
             mapEditor.onWrite(buffer); // 影响 mapPropertiesEditor
             eventTilesEditor.onWrite(buffer); // 影响 mapPropertiesEditor
             mapEntranceEditor.onWrite(buffer); // 影响 mapPropertiesEditor
+            paletteEditor.onWrite(buffer); // 影响 mapPropertiesEditor // 暂时没有
             mapPropertiesEditor.onWrite(buffer);
 
             Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);

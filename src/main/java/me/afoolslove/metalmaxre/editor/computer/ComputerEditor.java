@@ -59,7 +59,7 @@ public class ComputerEditor extends AbstractEditor {
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         Iterator<Computer> iterator = computers.iterator();
         // 移除多余的电脑
-        limit(iterator, () -> computers.size()>COMPUTER_MAX_COUNT, removed -> {
+        limit(iterator, () -> computers.size() > COMPUTER_MAX_COUNT, removed -> {
             System.out.printf("计算机编辑器：移除多余的电脑 %s", removed);
         });
 

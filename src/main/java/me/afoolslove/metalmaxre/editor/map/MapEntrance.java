@@ -7,6 +7,8 @@ import java.util.Map;
 
 /**
  * 地图出入口
+ * <p>
+ * 地图边界和地图出入口储存在同一段数据中，就做一起了
  *
  * @author AFoolLove
  */
@@ -23,7 +25,7 @@ public class MapEntrance {
     /**
      * 地图内的出入口
      */
-    public Map<MapPoint, MapPoint> entrance = new HashMap<>();
+    private final Map<MapPoint, MapPoint> entrance = new HashMap<>();
 
     public MapEntrance(@NotNull MapBorder border) {
         this.border = border;

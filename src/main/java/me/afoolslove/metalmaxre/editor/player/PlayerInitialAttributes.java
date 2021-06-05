@@ -210,16 +210,6 @@ public class PlayerInitialAttributes {
     }
 
     /**
-     * 设置装备，数量小于8时使用0x00填充
-     */
-    public void setEquipment(int... equipment) {
-        for (int i = 0; i < 0x08; i++) {
-            // 不足使用0x00填充
-            this.equipment[i] = equipment.length > i ? ((byte) (equipment[i] & 0xFF)) : 0x00;
-        }
-    }
-
-    /**
      * 设置某个位置的装备
      */
     public void setEquipment(@Range(from = 0x00, to = 0x07) int index, @Range(from = 0x00, to = 0xFF) int equipment) {
@@ -252,16 +242,6 @@ public class PlayerInitialAttributes {
      */
     public void setInventory(byte[] inventory) {
         this.inventory = inventory;
-    }
-
-    /**
-     * 设置道具，数量小于8时使用0x00填充
-     */
-    public void setInventory(int... inventory) {
-        for (int i = 0; i < 0x08; i++) {
-            // 不足使用0x00填充
-            this.inventory[i] = inventory.length > i ? ((byte) (inventory[i] & 0xFF)) : 0x00;
-        }
     }
 
     /**

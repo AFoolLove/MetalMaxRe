@@ -36,12 +36,12 @@ public class MapBuilder extends LinkedList<MapTile> {
      * 通过条件读取数据并转换为7bit的地图数据格式
      *
      * @param buffer    被读取的缓存数据
-     * @param offset    bit的偏移
+     * @param bitOffset    bit的偏移
      * @param condition 循环条件
      * @param listener  每完成一个7bit就会调用一次
      * @return 7bit的地图数据格式
      */
-    public static byte[] parseMap(ByteBuffer buffer, int offset, @NotNull Predicate<List<Byte>> condition, @Nullable Predicate<Byte> listener) {
+    public static byte[] parseMap(ByteBuffer buffer, int bitOffset, @NotNull Predicate<List<Byte>> condition, @Nullable Predicate<Byte> listener) {
         List<Byte> list = new ArrayList<>();
         int index = 0;
         while (condition.test(list)) {
@@ -54,8 +54,8 @@ public class MapBuilder extends LinkedList<MapTile> {
             int hBit, lBit;
             // 前bit和后bit的数量，总和不超过 7
 
-            // 前bit数量：通过最大的7位减去当前位(offset)得到
-            hBit = 7 - offset;
+            // 前bit数量：通过最大的7位减去当前位(bitOffset)得到
+            hBit = 7 - bitOffset;
             // 后bit数量：通过最大的8位减去前bit数量
             lBit = 8 - hBit;
 
@@ -90,14 +90,15 @@ public class MapBuilder extends LinkedList<MapTile> {
             }
 
             // 后bit数量作为下一个offset
-            offset = lBit % 7;
+            bitOffset = lBit % 7;
         }
 
-        if (offset != 0 && listener != null) {
+        if (bitOffset != 0 && listener != null) {
             // 最后的数据
             listener.test(list.get(index));
         }
 
+        // 转换为byte数组
         byte[] bytes = new byte[list.size()];
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = list.get(i);

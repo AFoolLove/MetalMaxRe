@@ -19,7 +19,7 @@ public class ReLauncher {
                     if (value != null && Files.exists(Paths.get(value))) {
                         config = value;
                     } else {
-                        System.err.println("无效的配置文件：" + value);
+                        System.out.println("无效的配置文件：" + value);
                     }
                     break;
                 default:
