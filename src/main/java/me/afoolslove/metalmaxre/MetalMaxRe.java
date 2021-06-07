@@ -87,14 +87,6 @@ public class MetalMaxRe {
 
         PaletteEditor paletteEditor = new PaletteEditor();
         EditorManager.register(paletteEditor);
-
-        loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
-        var p = paletteEditor.getPalettes(mapPropertiesEditor.getMapProperties(0x01).palette);
-        p.get(0x00).setColors(0x0f, 0x30, 0x11);
-        p.get(0x01).setColors(0x0f, 0x30, 0x11);
-
-        saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
-        System.out.println();
     }
 
     public static synchronized MetalMaxRe getInstance() {

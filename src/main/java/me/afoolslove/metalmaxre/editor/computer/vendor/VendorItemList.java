@@ -26,7 +26,7 @@ public class VendorItemList extends LinkedList<VendorItem> {
 
     @Override
     public String toString() {
-//        return String.format("VendorItemList{items={{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X}},award=%02X}", award);
+//        return String.format("VendorItemList{items.txt={{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X},{%02X:%02X}},award=%02X}", award);
         return String.format("VendorItemList{award=%02X}", award);
     }
 }

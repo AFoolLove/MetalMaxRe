@@ -57,7 +57,7 @@ public class VendorItem {
 
     @Override
     public String toString() {
-        return String.format("VendorItem{item=%s, count=%s}", item, count);
+        return String.format("VendorItem{item=%02X, count=%02X}", item, count);
     }
 
     @Override

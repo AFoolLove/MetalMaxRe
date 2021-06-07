@@ -91,7 +91,7 @@ public class VendorEditor extends AbstractEditor {
         return vendorItemLists;
     }
 
-    public VendorItemList getVendorItem(int vendor) {
-        return vendorItemLists.get(vendor % 6);
+    public VendorItemList getVendorItemList(int vendor) {
+        return vendorItemLists.get(vendor);
     }
 }

@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre;
 
+import me.afoolslove.metalmaxre.gui.MainWindow;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -10,6 +12,7 @@ public class ReLauncher {
     public static void main(String[] args) {
         String config = null;
 
+        boolean showGui = true;
         for (String[] strings : Arrays.stream(args).map(s -> s.split("=", 2)).collect(Collectors.toList())) {
             String key = strings[0].toUpperCase(Locale.ROOT);
             String value = strings.length == 1 ? null : strings[1];
@@ -22,10 +25,19 @@ public class ReLauncher {
                         System.out.println("无效的配置文件：" + value);
                     }
                     break;
+                case "GUI":
+                    showGui = Boolean.parseBoolean(value);
+                    break;
                 default:
                     break;
             }
         }
-        new MetalMaxRe(config);
+        MetalMaxRe metalMaxRe = new MetalMaxRe(config);
+        if (showGui) {
+            new MainWindow();
+        } else {
+            metalMaxRe.loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
+        }
+        metalMaxRe.saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
     }
 }
