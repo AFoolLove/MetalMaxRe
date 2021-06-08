@@ -2,9 +2,13 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.gui.MainWindow;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ReLauncher {
@@ -36,8 +40,16 @@ public class ReLauncher {
         if (showGui) {
             new MainWindow();
         } else {
-            metalMaxRe.loadGame("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes");
+            metalMaxRe.loadGame(new File("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes"), new EditorWorker() {
+                @Override
+                protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
+                    for (Map.Entry<ProcessState, Object> chunk : chunks) {
+                        System.out.println(chunk.getValue());
+                    }
+                }
+            });
+
+            metalMaxRe.saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
         }
-        metalMaxRe.saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
     }
 }

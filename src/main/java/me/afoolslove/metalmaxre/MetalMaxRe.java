@@ -1,6 +1,5 @@
 package me.afoolslove.metalmaxre;
 
-import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
@@ -18,6 +17,7 @@ import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -32,6 +32,10 @@ import java.util.Properties;
  */
 public class MetalMaxRe {
     private static MetalMaxRe INSTANCE;
+    /**
+     * 当前加载的游戏文件
+     */
+    private static File target;
 
     private final String defaultConfig;
     private String config;
@@ -89,12 +93,31 @@ public class MetalMaxRe {
         EditorManager.register(paletteEditor);
     }
 
+    public void setBuffer(ByteBuffer buffer) {
+        this.buffer = buffer;
+    }
+
+    /**
+     * @return 主程序实例
+     */
+    @NotNull
     public static synchronized MetalMaxRe getInstance() {
         if (INSTANCE == null) {
             // 在？为什么会是 null
             INSTANCE = new MetalMaxRe(null);
         }
         return INSTANCE;
+    }
+
+    /**
+     * @return 当前打开的游戏文件，可能为null
+     */
+    public static File getTarget() {
+        return target;
+    }
+
+    public static void setTarget(File target) {
+        MetalMaxRe.target = target;
     }
 
     /**
@@ -139,48 +162,9 @@ public class MetalMaxRe {
     /**
      * 加载游戏文件
      */
-    public boolean loadGame(@NotNull String path) {
-        try {
-            byte[] bytes = Files.readAllBytes(Paths.get(path));
-            if (buffer != null) {
-                buffer.clear(); // 怎么释放呢？
-            }
-
-            buffer = ByteBuffer.allocate(bytes.length);
-            buffer.put(bytes);
-
-            // 编辑器重新读取数据
-
-            long start = 0, count = 0;
-            int successful = 0, failed = 0;
-            if (!EditorManager.getEditors().isEmpty()) {
-                System.out.println("开始加载编辑器");
-                for (AbstractEditor editor : EditorManager.getEditors().values()) {
-                    start = System.currentTimeMillis();
-                    System.out.print("加载编辑器：" + editor.getClass().getSimpleName());
-                    if (editor.onRead(buffer)) {
-                        successful++;
-                        long time = System.currentTimeMillis() - start;
-                        count += time;
-                        System.out.printf(" 加载成功！耗时：%dms\n", time);
-                    } else {
-                        failed++;
-                        long time = System.currentTimeMillis() - start;
-                        count += time;
-                        System.out.printf(" 加载失败！耗时：%dms\n", time);
-                    }
-                }
-                System.out.format("加载编辑器结束，共%d个编辑器，成功%d个，失败%d个\n", successful + failed, successful, failed);
-                System.out.format("加载编辑器共计耗时：%dms\n", count);
-            } else {
-                System.out.println("没有可用的编辑器！");
-            }
-
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+    public void loadGame(@NotNull File game, @NotNull EditorWorker editorWorker) {
+        setTarget(game);
+        editorWorker.execute();
     }
 
     public boolean saveAs(@NotNull String path) {
