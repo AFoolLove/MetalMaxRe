@@ -42,6 +42,9 @@ public class EventTilesEditor extends AbstractEditor {
     @Override
 
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        // 读取前清空数据
+        eventTiles.clear();
+
         // 排除事件为 0x00 ！！！！
         // buffer.position(0x1DCCF);
 

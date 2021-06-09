@@ -31,18 +31,14 @@ public class PlayerEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
-        // 初始化数据
-        getInitialAttributes().clear();
+        // 读取前清空数据
+        initialAttributes.clear();
 
         // 读取初始属性
-
-        PlayerInitialAttributes[] playerInitialAttributes = new PlayerInitialAttributes[0x03];
-        playerInitialAttributes[0x00] = new PlayerInitialAttributes();
-        initialAttributes.put(Player.HANTA, playerInitialAttributes[0x00]);
-        playerInitialAttributes[0x01] = new PlayerInitialAttributes();
-        initialAttributes.put(Player.TAMPER, playerInitialAttributes[0x01]);
-        playerInitialAttributes[0x02] = new PlayerInitialAttributes();
-        initialAttributes.put(Player.ANNE, playerInitialAttributes[0x02]);
+        PlayerInitialAttributes[] playerInitialAttributes = new PlayerInitialAttributes[Player.values().length];
+        for (Player player : Player.values()) {
+            playerInitialAttributes[player.getId()] = new PlayerInitialAttributes();
+        }
 
         // 从初始金钱开始读取
         buffer.position(0x280CD);

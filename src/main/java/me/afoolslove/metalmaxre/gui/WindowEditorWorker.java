@@ -16,7 +16,7 @@ public class WindowEditorWorker extends EditorWorker {
     protected void process(List<Map.Entry<EditorWorker.ProcessState, Object>> chunks) {
         for (Map.Entry<ProcessState, Object> chunk : chunks) {
             if (chunk.getKey() == ProcessState.MESSAGE) {
-                System.out.println(chunk);
+                System.out.println(chunk.getValue());
             }
         }
     }

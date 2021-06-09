@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.gui.MainWindow;
 
+import javax.swing.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,9 +39,14 @@ public class ReLauncher {
         }
         MetalMaxRe metalMaxRe = new MetalMaxRe(config);
         if (showGui) {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+                e.printStackTrace();
+            }
             new MainWindow();
         } else {
-            metalMaxRe.loadGame(new File("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes"), new EditorWorker() {
+            metalMaxRe.loadGame(false, new File("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes"), new EditorWorker() {
                 @Override
                 protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
                     for (Map.Entry<ProcessState, Object> chunk : chunks) {

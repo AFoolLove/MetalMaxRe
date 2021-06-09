@@ -57,6 +57,9 @@ public class MapPropertiesEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        // 读取前清空数据
+        mapProperties.clear();
+
         // 读取地图属性索引，上卷 0x40、下卷 0xB0
         // 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
         char[] mapIndexRoll = new char[0x40 + 0xB0];

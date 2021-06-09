@@ -27,13 +27,14 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
     protected Boolean doInBackground() throws Exception {
         // 暂时不进行同时加载
         try {
-            byte[] bytes = Files.readAllBytes(MetalMaxRe.getTarget().toPath());
-            if (MetalMaxRe.getInstance().getBuffer() != null) {
-                MetalMaxRe.getInstance().getBuffer().clear(); // 怎么释放呢？
+            MetalMaxRe instance = MetalMaxRe.getInstance();
+            byte[] bytes = Files.readAllBytes(instance.getTarget().toPath());
+            if (instance.getBuffer() != null) {
+                instance.getBuffer().clear(); // 怎么释放呢？
             }
 
             ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-            MetalMaxRe.getInstance().setBuffer(buffer);
+            instance.setBuffer(buffer);
             // 写入到 ByteBuffer
             buffer.put(bytes);
 
@@ -58,18 +59,18 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
                         successful++;
                         long time = System.currentTimeMillis() - start;
                         count += time;
-                        publish(Map.entry(ProcessState.MESSAGE, String.format(" 加载成功！耗时：%dms\n", time)));
+                        publish(Map.entry(ProcessState.MESSAGE, String.format(" 加载成功！耗时：%dms", time)));
                         publish(Map.entry(ProcessState.RESULT, true));
                     } else {
                         failed++;
                         long time = System.currentTimeMillis() - start;
                         count += time;
-                        publish(Map.entry(ProcessState.MESSAGE, String.format(" 加载失败！耗时：%dms\n", time)));
+                        publish(Map.entry(ProcessState.MESSAGE, String.format(" 加载失败！耗时：%dms", time)));
                         publish(Map.entry(ProcessState.RESULT, false));
                     }
                 }
-                publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器结束，共%d个编辑器，成功%d个，失败%d个\n", successful + failed, successful, failed)));
-                publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器共计耗时：%dms\n", count)));
+                publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器结束，共%d个编辑器，成功%d个，失败%d个", successful + failed, successful, failed)));
+                publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器共计耗时：%dms", count)));
                 // 全部加载失败，那还得了？
                 return successful != 0;
             } else {

@@ -28,8 +28,8 @@ public class TankEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
-        // 初始化数据
-        getInitialAttributes().clear();
+        // 读取前清空数据
+        initialAttributes.clear();
 
         // 创建新的初始坦克属性
         TankInitialAttributes[] tankInitialAttributes = new TankInitialAttributes[Tank.values().length];

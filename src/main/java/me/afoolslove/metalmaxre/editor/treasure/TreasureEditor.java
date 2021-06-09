@@ -37,6 +37,9 @@ public class TreasureEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        // 读取前清空数据
+        treasures.clear();
+
         byte[] maps = new byte[TREASURE_MAX_COUNT];
         byte[] xs = new byte[TREASURE_MAX_COUNT];
         byte[] ys = new byte[TREASURE_MAX_COUNT];

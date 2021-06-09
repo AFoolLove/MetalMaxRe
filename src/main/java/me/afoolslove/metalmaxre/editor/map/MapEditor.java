@@ -47,12 +47,13 @@ public class MapEditor extends AbstractEditor {
         for (byte b : mapBuilder.build()) {
             System.out.printf("%02X ", b);
         }
-
-
     }
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        // 读取前清空数据
+        maps.clear();
+
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
         for (MapProperties mapProperties : mapPropertiesEditor.getMapProperties().values()) {

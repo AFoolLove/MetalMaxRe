@@ -35,7 +35,11 @@ public class MetalMaxRe {
     /**
      * 当前加载的游戏文件
      */
-    private static File target;
+    private File target;
+    /**
+     * 是否为初始文件
+     */
+    private boolean isInitTarget;
 
     private final String defaultConfig;
     private String config;
@@ -112,12 +116,16 @@ public class MetalMaxRe {
     /**
      * @return 当前打开的游戏文件，可能为null
      */
-    public static File getTarget() {
+    public File getTarget() {
         return target;
     }
 
-    public static void setTarget(File target) {
-        MetalMaxRe.target = target;
+    public void setTarget(File target) {
+        this.target = target;
+    }
+
+    public boolean isIsInitTarget() {
+        return isInitTarget;
     }
 
     /**
@@ -162,8 +170,9 @@ public class MetalMaxRe {
     /**
      * 加载游戏文件
      */
-    public void loadGame(@NotNull File game, @NotNull EditorWorker editorWorker) {
+    public void loadGame(boolean isInitTarget, @NotNull File game, @NotNull EditorWorker editorWorker) {
         setTarget(game);
+        this.isInitTarget = isInitTarget;
         editorWorker.execute();
     }
 

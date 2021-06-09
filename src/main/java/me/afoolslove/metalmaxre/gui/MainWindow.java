@@ -5,10 +5,13 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
-import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -19,16 +22,9 @@ import java.util.concurrent.ExecutionException;
 public class MainWindow extends JFrame {
 
     private JPanel contentPane;
+    private JTabbedPane tabbedPane1;
 
     public MainWindow() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
-
-        // 窗口默认大小
-        setSize(640, 800);
         URL resource = getClass().getClassLoader().getResource("MetalMax.nes");
         if (resource == null) {
             // 不会真的会读取失败吧？
@@ -42,7 +38,9 @@ public class MainWindow extends JFrame {
 
         setContentPane(contentPane);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        pack();
+        // 窗口默认大小
+        setSize(854, 480);
+//        pack();
         setVisible(true);
 
     }
@@ -56,14 +54,14 @@ public class MainWindow extends JFrame {
         JMenu fileMenu = new JMenu("File");
         fileMenu.setMnemonic(KeyEvent.VK_F);
 
-        JMenuItem fileMenuOpen = new JMenuItem("Open ...");
+        JMenuItem fileMenuOpen = new JMenuItem("Open...");
         // 快捷键：Ctrl + O
         fileMenuOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
         fileMenuOpen.addActionListener(e -> {
             // 文件选择器
             JFileChooser fileChooser = new JFileChooser();
             // 添加一个nes后缀的文件过滤器
-            fileChooser.setFileFilter(new FileNameExtensionFilter("NES FILE", "NES"));
+            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("NES FILE(*.nes)", "NES"));
             // 开始选择文件
             int state = fileChooser.showOpenDialog(this);
             if (state == JFileChooser.APPROVE_OPTION) {
@@ -72,10 +70,90 @@ public class MainWindow extends JFrame {
             } // 其它皆为不打开文件
         });
 
+        JMenuItem fileMenuReload = new JMenuItem("Reload");
+        fileMenuReload.addActionListener(e -> {
+            // 重新加载前提示放弃已修改的数据
+            int result = JOptionPane.showConfirmDialog(this,
+                    "重新加载将会丢失已修改的数据！"
+                    , "重新加载"
+                    , JOptionPane.OK_CANCEL_OPTION
+                    , JOptionPane.WARNING_MESSAGE);
+
+            if (result == JOptionPane.OK_OPTION) {
+                // 已确认重新加载
+                loadGame(MetalMaxRe.getInstance().getTarget(), MetalMaxRe.getInstance().isIsInitTarget());
+            }
+        });
+
+        JMenuItem fileMenuSave = new JMenuItem("Save");
+        // 快捷键：Ctrl + S
+        fileMenuSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+        fileMenuSave.addActionListener(e -> {
+            // 目标文件有效才能保存
+            if (!MetalMaxRe.getInstance().isIsInitTarget()) {
+                // 保存修改
+                MetalMaxRe.getInstance().saveAs(MetalMaxRe.getInstance().getTarget().getPath());
+            }
+        });
+
+        JMenuItem fileMenuSaveAs = new JMenuItem("Save As...");
+        // 快捷键：Ctrl + Shift + S
+        fileMenuSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
+        fileMenuSaveAs.addActionListener(e -> {
+            // 文件选择器
+            JFileChooser fileChooser = new JFileChooser();
+            // 选择保存的路径或替换的文件
+            int state = fileChooser.showSaveDialog(this);
+            // 只关心是否选中了导出的目标文件
+            if (state == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                // 如果存在则提示是否覆盖
+                int result = 0;
+                if (selectedFile.exists()) {
+                    result = JOptionPane.showConfirmDialog(this,
+                            String.format("目标文件已存在：%s！\n替换目标文件吗？", selectedFile.getName()),
+                            "目标文件已存在",
+                            JOptionPane.OK_CANCEL_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                if (result == JOptionPane.OK_OPTION) {
+                    // 保存
+                    MetalMaxRe.getInstance().saveAs(selectedFile.getPath());
+                }
+            } // 其它皆为不不保存
+        });
+
 
         fileMenu.add(fileMenuOpen);
+        fileMenu.addSeparator();
+        fileMenu.add(fileMenuReload);
+        fileMenu.addSeparator();
+        fileMenu.add(fileMenuSave);
+        fileMenu.add(fileMenuSaveAs);
+
+
+        JMenu helpMenu = new JMenu("Help");
+
+        JMenuItem helpMenuGithub = new JMenuItem("Github");
+        helpMenuGithub.addActionListener(e -> {
+            try {
+                Desktop.getDesktop().browse(URI.create("https://github.com/AFoolLove/MetalMaxRe"));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
+
+        JMenuItem helpMenuAbout = new JMenuItem("About");
+        helpMenuAbout.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "这是一个FC游戏 MetalMax 的编辑器");
+        });
+
+        helpMenu.add(helpMenuGithub);
+        helpMenu.add(helpMenuAbout);
+
 
         menuBar.add(fileMenu);
+        menuBar.add(helpMenu);
         // 设置菜单栏
         setJMenuBar(menuBar);
     }
@@ -88,7 +166,7 @@ public class MainWindow extends JFrame {
     }
 
     private synchronized void loadGame(@NotNull File game, boolean init) {
-        MetalMaxRe.getInstance().loadGame(game, new WindowEditorWorker() {
+        MetalMaxRe.getInstance().loadGame(init, game, new WindowEditorWorker() {
             @Override
             protected void done() {
                 try {
@@ -100,6 +178,17 @@ public class MainWindow extends JFrame {
                             setTitle(String.format("MetalMaxRe [%s] - %s", game.getName(), game.getPath()));
                         } else {
                             setTitle(String.format("MetalMaxRe [%s]", game.getName()));
+                        }
+
+                        JPopupMenu fileMenu = getJMenuBar().getMenu(0x00).getPopupMenu();
+                        for (Component component : fileMenu.getComponents()) {
+                            if (component instanceof JMenuItem) {
+                                if (Objects.equals(((JMenuItem) component).getText(), "Save")) {
+                                    // 对菜单 File->Save 按钮启用或禁用
+                                    component.setEnabled(!init);
+                                    break;
+                                }
+                            }
                         }
                     } else {
                         if (!init) {

@@ -47,6 +47,11 @@ public class DogSystemEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        // 读取前清空数据
+        destinations.clear();
+        towns.clear();
+        townSeries.clear();
+
         byte[] xs = new byte[DESTINATION_MAX_COUNT];
         byte[] ys = new byte[DESTINATION_MAX_COUNT];
 

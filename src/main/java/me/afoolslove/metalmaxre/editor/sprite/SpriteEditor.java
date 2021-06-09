@@ -41,6 +41,8 @@ public class SpriteEditor extends AbstractEditor {
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 不提供精灵数据索引的修改！！
 
+        // 读取前清空数据
+        sprites.clear();
 
         // 读取精灵数据索引
         buffer.position(0x24010);

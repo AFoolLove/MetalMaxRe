@@ -30,7 +30,7 @@ public class MapEntranceEditor extends AbstractEditor {
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 读取前清空数据
-        getMapEntrances().clear();
+        mapEntrances.clear();
 
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
         for (Map.Entry<Integer, MapProperties> mapPropertiesEntry : mapPropertiesEditor.getMapProperties().entrySet()) {

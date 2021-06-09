@@ -30,6 +30,9 @@ public class PlayerExperienceEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        // 读取前清空数据
+        experiences.clear();
+
         buffer.position(0x27C52);
 
         // 读取升级到2-99级的所需经验

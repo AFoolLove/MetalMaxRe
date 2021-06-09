@@ -31,7 +31,7 @@ public class PaletteEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
-        // 初始化数据
+        // 读取前清空数据
         paletteLists.clear();
 
         buffer.position(0x1DAE0);

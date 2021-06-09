@@ -36,6 +36,9 @@ public class ComputerEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        // 读取前清空数据
+        computers.clear();
+
         byte[] maps = new byte[COMPUTER_MAX_COUNT];
         byte[] types = new byte[COMPUTER_MAX_COUNT];
         byte[] xs = new byte[COMPUTER_MAX_COUNT];
