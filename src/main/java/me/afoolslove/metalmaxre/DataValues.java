@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public class DataValues {
-    public static final Map<Integer, Integer> VALUES = new HashMap<>();
+    public static final Map<Number, Integer> VALUES = new HashMap<>();
 
     static {
         VALUES.put(0x00, 0x000005);
@@ -256,7 +256,7 @@ public class DataValues {
     /**
      * @return 该值的所有key
      */
-    public static List<Integer> getKeys(@Range(from = 0x00, to = 0xFFFFFF) int value) {
+    public static List<Number> getKeys(@Range(from = 0x00, to = 0xFFFFFF) int value) {
         return VALUES.entrySet().stream().parallel()
                 .filter(entry -> entry.getValue() == value)
                 .map(Map.Entry::getKey)
@@ -266,25 +266,25 @@ public class DataValues {
     /**
      * @return 1Byte的数据
      */
-    public static Map<Integer, Integer> get1ByteValue() {
+    public static Map<Number, Integer> get1ByteValue() {
         return getFormByteLength(1);
     }
 
     /**
      * @return 2Byte的数据
      */
-    public static Map<Integer, Integer> get2ByteValue() {
+    public static Map<Number, Integer> get2ByteValue() {
         return getFormByteLength(2);
     }
 
     /**
      * @return 3Byte的数据
      */
-    public static Map<Integer, Integer> get3ByteValue() {
+    public static Map<Number, Integer> get3ByteValue() {
         return getFormByteLength(3);
     }
 
-    private static Map<Integer, Integer> getFormByteLength(@Range(from = 0x01, to = 0x03) int length) {
+    private static Map<Number, Integer> getFormByteLength(@Range(from = 0x01, to = 0x03) int length) {
         if (length != 0x01 && length != 0x02) {
             return new HashMap<>(VALUES);
         }
@@ -308,7 +308,7 @@ public class DataValues {
         var a = get1ByteValue();
         var b = get2ByteValue();
         var c = get3ByteValue();
-        for (Integer value : getKeys(0x00)) {
+        for (Number value : getKeys(0x00)) {
             System.out.println(value);
         }
         System.out.println();

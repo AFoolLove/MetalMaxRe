@@ -38,6 +38,7 @@ public class PlayerEditor extends AbstractEditor {
         PlayerInitialAttributes[] playerInitialAttributes = new PlayerInitialAttributes[Player.values().length];
         for (Player player : Player.values()) {
             playerInitialAttributes[player.getId()] = new PlayerInitialAttributes();
+            initialAttributes.put(player, playerInitialAttributes[player.getId()]);
         }
 
         // 从初始金钱开始读取

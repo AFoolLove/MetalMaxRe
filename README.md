@@ -18,6 +18,7 @@
     TankEditor              坦克编辑器 √ 后续考虑添加功能
     PlayerExperienceEditor  玩家升级所需经验值编辑器 √
     PaletteEditor           调色板编辑器 √
+    ItemsEditor             物品编辑器 ...
 
     其它
 

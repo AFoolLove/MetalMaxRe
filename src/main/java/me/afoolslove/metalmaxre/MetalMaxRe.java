@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
+import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEntranceEditor;
@@ -95,6 +96,9 @@ public class MetalMaxRe {
 
         PaletteEditor paletteEditor = new PaletteEditor();
         EditorManager.register(paletteEditor);
+
+        ItemsEditor itemsEditor = new ItemsEditor();
+        EditorManager.register(itemsEditor);
     }
 
     public void setBuffer(ByteBuffer buffer) {
@@ -198,6 +202,7 @@ public class MetalMaxRe {
             var tankInitialAttributes = EditorManager.getEditor(TankEditor.class);
             var playerExperienceEditor = EditorManager.getEditor(PlayerExperienceEditor.class);
             var paletteEditor = EditorManager.getEditor(PaletteEditor.class);
+            var itemsEditor = EditorManager.getEditor(ItemsEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -208,6 +213,7 @@ public class MetalMaxRe {
             playerEditor.onWrite(buffer);
             tankInitialAttributes.onWrite(buffer);
             playerExperienceEditor.onWrite(buffer);
+            itemsEditor.onWrite(buffer);
 
 
             // 顺序写入

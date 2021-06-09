@@ -1,6 +1,10 @@
 package me.afoolslove.metalmaxre.gui;
 
+import me.afoolslove.metalmaxre.AttackRange;
+import me.afoolslove.metalmaxre.DataValues;
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -148,8 +152,26 @@ public class MainWindow extends JFrame {
             JOptionPane.showMessageDialog(this, "这是一个FC游戏 MetalMax 的编辑器");
         });
 
+
+        // 测试功能的选项
+        JMenuItem helpMenuTest = new JMenuItem("Test");
+        // 快捷键：Ctrl + Shift + T
+        helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
+        helpMenuTest.addActionListener(e -> {
+            ItemsEditor editor = EditorManager.getEditor(ItemsEditor.class);
+            editor.getPlayerItems().getWeapons().get(6).setAttackRange(AttackRange.ALL);
+            editor.getPlayerItems().getWeapons().get(6).setAttack(0x2C);
+            editor.getPlayerItems().getWeapons().get(6).setPrice(DataValues.getKeys(0).get(0).byteValue());
+
+
+            editor.getPlayerItems().getArmors().get(8).setDefense(0x2C);
+            editor.getPlayerItems().getArmors().get(8).setPrice(DataValues.VALUES.get(0));
+            System.out.println("test.");
+        });
+
         helpMenu.add(helpMenuGithub);
         helpMenu.add(helpMenuAbout);
+        helpMenu.add(helpMenuTest);
 
 
         menuBar.add(fileMenu);
