@@ -5,7 +5,7 @@ package me.afoolslove.metalmaxre.editor.tank;
  *
  * @author AFoolLove
  */
-public enum TankSlot {
+public enum TankWeaponSlot {
     /**
      * 主炮开洞
      */
@@ -21,7 +21,7 @@ public enum TankSlot {
 
     private final byte slot;
 
-    TankSlot(int slot) {
+    TankWeaponSlot(int slot) {
         this.slot = (byte) (slot & 0xFF);
     }
 

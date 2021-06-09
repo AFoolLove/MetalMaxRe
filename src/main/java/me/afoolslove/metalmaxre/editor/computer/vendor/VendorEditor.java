@@ -34,6 +34,9 @@ public class VendorEditor extends AbstractEditor {
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        // 读取前清空数据
+        vendorItemLists.clear();
+
         buffer.position(0x23EC8);
 
         byte[] items = new byte[0x06];

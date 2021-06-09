@@ -18,10 +18,11 @@
     TankEditor              坦克编辑器 √ 后续考虑添加功能
     PlayerExperienceEditor  玩家升级所需经验值编辑器 √
     PaletteEditor           调色板编辑器 √
-    ItemsEditor             物品编辑器 ...
+    ItemsEditor             物品编辑器 √ 
 
     其它
 
 ### 下载
 
 无法给出可以用的版本，所以暂不提构建的jar
+

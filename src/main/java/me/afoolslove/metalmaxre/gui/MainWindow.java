@@ -5,6 +5,8 @@ import me.afoolslove.metalmaxre.DataValues;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
+import me.afoolslove.metalmaxre.editor.tank.TankShellCapacity;
+import me.afoolslove.metalmaxre.editor.tank.TankWeaponSlot;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -166,6 +168,18 @@ public class MainWindow extends JFrame {
 
             editor.getPlayerItems().getArmors().get(8).setDefense(0x2C);
             editor.getPlayerItems().getArmors().get(8).setPrice(DataValues.VALUES.get(0));
+
+
+            editor.getTankItems().getEngines().get(0).setCapacity(55);
+            editor.getTankItems().getEngines().get(0).setDefense(1);
+            editor.getTankItems().getEngines().get(0).setWeight(55);
+            editor.getTankItems().getEngines().get(0).setPrice(0);
+            editor.getTankItems().getWeapons().get(0).setAttack(0x2c);
+            editor.getTankItems().getWeapons().get(0).setCanEquipped(TankWeaponSlot.SECONDARY_GUN);
+            editor.getTankItems().getWeapons().get(0).setShellCapacity(TankShellCapacity.INFINITE);
+            editor.getTankItems().getWeapons().get(0).setAttackAnim(26);
+
+
             System.out.println("test.");
         });
 

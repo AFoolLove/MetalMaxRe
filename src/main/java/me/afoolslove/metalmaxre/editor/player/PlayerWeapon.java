@@ -12,6 +12,18 @@ import org.jetbrains.annotations.Range;
  */
 public class PlayerWeapon extends PlayerEquipmentItem {
     /**
+     * 攻击动画
+     */
+    public byte attackAnim;
+
+    /**
+     * 设置攻击动画
+     */
+    public void setAttackAnim(@Range(from = 0x00, to = 0xFF) int attackAnim) {
+        this.attackAnim = (byte) (attackAnim & 0xFF);
+    }
+
+    /**
      * 设置攻击力
      *
      * @see DataValues#get2ByteValue()
@@ -28,6 +40,13 @@ public class PlayerWeapon extends PlayerEquipmentItem {
         canEquipped &= 0B1110_0111;
         // 设置攻击范围
         canEquipped |= range.getValue();
+    }
+
+    /**
+     * @return 攻击动画
+     */
+    public byte getAttackAnim() {
+        return attackAnim;
     }
 
     /**

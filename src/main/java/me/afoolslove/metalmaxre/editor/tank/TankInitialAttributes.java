@@ -63,12 +63,12 @@ public class TankInitialAttributes {
      * 设置装备
      */
     public void setEquipment(int mainGun, int secondaryGun, int specialEquipment, int cUnit, int engine, int chassis, boolean allEquipped) {
-        setEquipment(TankEquipment.MAIN_GUN, mainGun, allEquipped);
-        setEquipment(TankEquipment.SECONDARY_GUN, secondaryGun, allEquipped);
-        setEquipment(TankEquipment.SPECIAL_EQUIPMENT, specialEquipment, allEquipped);
-        setEquipment(TankEquipment.C_UNIT, cUnit, allEquipped);
-        setEquipment(TankEquipment.ENGINE, engine, allEquipped);
-        setEquipment(TankEquipment.CHASSIS, chassis, allEquipped);
+        setEquipment(TankEquipmentSlot.MAIN_GUN, mainGun, allEquipped);
+        setEquipment(TankEquipmentSlot.SECONDARY_GUN, secondaryGun, allEquipped);
+        setEquipment(TankEquipmentSlot.SPECIAL_EQUIPMENT, specialEquipment, allEquipped);
+        setEquipment(TankEquipmentSlot.C_UNIT, cUnit, allEquipped);
+        setEquipment(TankEquipmentSlot.ENGINE, engine, allEquipped);
+        setEquipment(TankEquipmentSlot.CHASSIS, chassis, allEquipped);
     }
 
     /**
@@ -102,14 +102,14 @@ public class TankInitialAttributes {
     /**
      * 移除一个装备
      */
-    public void removeEquipment(@NotNull TankEquipment equipment) {
+    public void removeEquipment(@NotNull TankEquipmentSlot equipment) {
         this.equipment[equipment.getSlot()] = 0x00;
     }
 
     /**
      * 设置某个部位的装备
      */
-    public void setEquipment(@NotNull TankEquipment slot, @Range(from = 0x00, to = 0xFF) int equipment, boolean equipped) {
+    public void setEquipment(@NotNull TankEquipmentSlot slot, @Range(from = 0x00, to = 0xFF) int equipment, boolean equipped) {
         // 设置装备
         this.equipment[slot.getSlot()] = (byte) (equipment & 0xFF);
         // 装备或卸下
@@ -122,7 +122,7 @@ public class TankInitialAttributes {
         }
     }
 
-    public void setEquipment(@NotNull TankEquipment slot, @Range(from = 0x00, to = 0xFF) int equipment) {
+    public void setEquipment(@NotNull TankEquipmentSlot slot, @Range(from = 0x00, to = 0xFF) int equipment) {
         setEquipment(slot, equipment, true);
     }
 
@@ -198,7 +198,7 @@ public class TankInitialAttributes {
     /**
      * @return 某个部位的装备
      */
-    public byte getEquipment(@NotNull TankEquipment equipment) {
+    public byte getEquipment(@NotNull TankEquipmentSlot equipment) {
         return this.equipment[equipment.getSlot()];
     }
 

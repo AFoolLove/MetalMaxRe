@@ -4,6 +4,9 @@ import me.afoolslove.metalmaxre.Item;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerArmor;
 import me.afoolslove.metalmaxre.editor.player.PlayerWeapon;
+import me.afoolslove.metalmaxre.editor.tank.TankEngine;
+import me.afoolslove.metalmaxre.editor.tank.TankEquipmentItem;
+import me.afoolslove.metalmaxre.editor.tank.TankWeapon;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -20,18 +23,23 @@ import java.util.List;
  */
 public class ItemsEditor extends AbstractEditor {
     private final PlayerItems playerItems = new PlayerItems();
-    private final List<Item> items = new ArrayList<>(PlayerItems.PLAYER_ITEMS_MAX_COUNT + 0x13);
+    private final TankItems tankItems = new TankItems();
+    private final List<Item> items = new ArrayList<>(PlayerItems.PLAYER_ITEMS_MAX_COUNT + TankItems.TANK_ITEMS_MAX_COUNT);
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 读取前清空数据
         playerItems.armors.clear();
         playerItems.weapons.clear();
+        tankItems.weapons.clear();
+        tankItems.cUnits.clear();
+        tankItems.engines.clear();
+        tankItems.chassis.clear();
         items.clear();
 
         // 初始化数据
         // 初始化道具，战车还没写所以直接写道具数量 0x13
-        for (int i = 0; i < PlayerItems.PLAYER_ITEMS_MAX_COUNT + 0x13; i++) {
+        for (int i = 0; i < PlayerItems.PLAYER_ITEMS_MAX_COUNT + TankItems.TANK_ITEMS_MAX_COUNT; i++) {
             items.add(i, new Item());
         }
         // 初始化玩家的防具
@@ -41,6 +49,28 @@ public class ItemsEditor extends AbstractEditor {
         // 初始化玩家的武器
         for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
             playerItems.weapons.add(i, new PlayerWeapon());
+        }
+        // 初始化坦克装备
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            tankItems.weapons.add(i, new TankWeapon());
+        }
+        // 初始化坦克C装置
+        for (int i = 0; i < TankItems.TANK_C_UNIT_MAX_COUNT; i++) {
+            tankItems.cUnits.add(i, new TankEquipmentItem());
+        }
+        // 初始化坦克引擎
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            tankItems.engines.add(i, new TankEngine());
+        }
+        // 初始化坦克底盘
+        for (int i = 0; i < TankItems.TANK_CHASSIS_MAX_COUNT; i++) {
+            tankItems.chassis.add(i, new Item());
+        }
+
+        buffer.position(0x21804);
+        // 读取战车引擎的最大载重
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            tankItems.engines.get(i).setCapacity(buffer.get());
         }
 
         buffer.position(0x22285);
@@ -52,8 +82,33 @@ public class ItemsEditor extends AbstractEditor {
         for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
             playerItems.weapons.get(i).setCanEquipped(buffer.get());
         }
+        // 读取战车可装备穴、攻击范围和弹药量
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            tankItems.weapons.get(i).setCanEquipped(buffer.get());
+        }
+        buffer.get(); // 0x222F9 不知道干嘛的
+        // 读取人类武器攻击动画
+        for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
+            playerItems.weapons.get(i).setAttackAnim(buffer.get());
+        }
+        // 读取战车武器攻击动画
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            tankItems.weapons.get(i).setAttackAnim(buffer.get());
+        }
+        // 读取战车的武器重量
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            tankItems.weapons.get(i).setWeight(buffer.get());
+        }
+        // 读取战车的C装置重量
+        for (int i = 0; i < TankItems.TANK_C_UNIT_MAX_COUNT; i++) {
+            tankItems.cUnits.get(i).setWeight(buffer.get());
+        }
+        // 读取战车的引擎自重量
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            tankItems.engines.get(i).setWeight(buffer.get());
+        }
 
-        buffer.position(0x2239D);
+        buffer.get(); // 0x2239C 未知
         // 读取人类防具防御力
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             playerItems.armors.get(i).setDefense(buffer.get());
@@ -62,8 +117,23 @@ public class ItemsEditor extends AbstractEditor {
         for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
             playerItems.weapons.get(i).setAttack(buffer.get());
         }
-
-        buffer.position(0x22462);
+        // 读取战车武器攻击力
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            tankItems.weapons.get(i).setAttack(buffer.get());
+        }
+        // 读取战车武器防御力
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            tankItems.weapons.get(i).setDefense(buffer.get());
+        }
+        // 读取战车C装置防御力
+        for (int i = 0; i < TankItems.TANK_C_UNIT_MAX_COUNT; i++) {
+            tankItems.cUnits.get(i).setDefense(buffer.get());
+        }
+        // 读取战车引擎防御力
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            tankItems.engines.get(i).setDefense(buffer.get());
+        }
+        buffer.get(); // 0x22461 未知
         // 读取人类防具的价格
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             playerItems.armors.get(i).setPrice(buffer.get());
@@ -72,10 +142,24 @@ public class ItemsEditor extends AbstractEditor {
         for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
             playerItems.weapons.get(i).setPrice(buffer.get());
         }
-
-        buffer.position(0x224FA);
+        // 读取战车装备的价格
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            tankItems.weapons.get(i).setPrice(buffer.get());
+        }
+        // 读取战车C装置的价格
+        for (int i = 0; i < TankItems.TANK_C_UNIT_MAX_COUNT; i++) {
+            tankItems.cUnits.get(i).setPrice(buffer.get());
+        }
+        // 读取战车引擎的价格
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            tankItems.engines.get(i).setPrice(buffer.get());
+        }
+        // 读取战车底盘的价格
+        for (int i = 0; i < TankItems.TANK_CHASSIS_MAX_COUNT; i++) {
+            tankItems.chassis.get(i).setPrice(buffer.get());
+        }
         // 读取道具的价格，战车还没写所以直接写道具数量 0x13
-        for (int i = 0; i < PlayerItems.PLAYER_ITEMS_MAX_COUNT + 0x13; i++) {
+        for (int i = 0; i < PlayerItems.PLAYER_ITEMS_MAX_COUNT + TankItems.TANK_ITEMS_MAX_COUNT; i++) {
             items.get(i).setPrice(buffer.get());
         }
         return true;
@@ -83,6 +167,12 @@ public class ItemsEditor extends AbstractEditor {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
+        buffer.position(0x21804);
+        // 写入战车引擎的最大载重
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            buffer.put(tankItems.engines.get(i).getCapacity());
+        }
+
         buffer.position(0x22285);
         // 写入人类防具的可装备角色的数据
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
@@ -92,8 +182,32 @@ public class ItemsEditor extends AbstractEditor {
         for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
             buffer.put(playerItems.weapons.get(i).canEquipped);
         }
-
-        buffer.position(0x2239D);
+        // 写入战车可装备穴、攻击范围和弹药量
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            buffer.put(tankItems.weapons.get(i).getCanEquipped());
+        }
+        buffer.position(buffer.position() + 1); // 0x222F9 不知道干嘛的
+        // 写入人类武器攻击动画
+        for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
+            buffer.put(playerItems.weapons.get(i).getAttackAnim());
+        }
+        // 写入战车武器攻击动画
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            buffer.put(tankItems.weapons.get(i).getAttackAnim());
+        }
+        // 写入战车的武器重量
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            buffer.put(tankItems.weapons.get(i).getWeight());
+        }
+        // 写入战车的C装置重量
+        for (int i = 0; i < TankItems.TANK_C_UNIT_MAX_COUNT; i++) {
+            buffer.put(tankItems.cUnits.get(i).getWeight());
+        }
+        // 写入战车的引擎自重量
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            buffer.put(tankItems.engines.get(i).getWeight());
+        }
+        buffer.position(buffer.position() + 1); // 0x2239C 未知
         // 写入人类防具防御力
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             buffer.put(playerItems.armors.get(i).getDefense());
@@ -102,8 +216,23 @@ public class ItemsEditor extends AbstractEditor {
         for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
             buffer.put(playerItems.weapons.get(i).getAttack());
         }
-
-        buffer.position(0x22462);
+        // 写入战车武器攻击力
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            buffer.put(tankItems.weapons.get(i).getAttack());
+        }
+        // 写入战车武器防御力
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            buffer.put(tankItems.weapons.get(i).getDefense());
+        }
+        // 写入战车C装置防御力
+        for (int i = 0; i < TankItems.TANK_C_UNIT_MAX_COUNT; i++) {
+            buffer.put(tankItems.cUnits.get(i).getDefense());
+        }
+        // 写入战车引擎防御力
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            buffer.put(tankItems.engines.get(i).getDefense());
+        }
+        buffer.position(buffer.position() + 1); // 0x22461 未知
         // 写入人类防具的价格
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             buffer.put(playerItems.armors.get(i).getPrice());
@@ -112,10 +241,24 @@ public class ItemsEditor extends AbstractEditor {
         for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
             buffer.put(playerItems.weapons.get(i).getPrice());
         }
-
-        buffer.position(0x224FA);
+        // 写入战车装备的价格
+        for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
+            buffer.put(tankItems.weapons.get(i).getPrice());
+        }
+        // 写入战车C装置的价格
+        for (int i = 0; i < TankItems.TANK_C_UNIT_MAX_COUNT; i++) {
+            buffer.put(tankItems.cUnits.get(i).getPrice());
+        }
+        // 写入战车引擎的价格
+        for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
+            buffer.put(tankItems.engines.get(i).getPrice());
+        }
+        // 写入战车底盘的价格
+        for (int i = 0; i < TankItems.TANK_CHASSIS_MAX_COUNT; i++) {
+            buffer.put(tankItems.chassis.get(i).getPrice());
+        }
         // 写入道具的价格，战车还没写所以直接写道具数量 0x13
-        for (int i = 0; i < PlayerItems.PLAYER_ITEMS_MAX_COUNT + 0x13; i++) {
+        for (int i = 0; i < PlayerItems.PLAYER_ITEMS_MAX_COUNT + TankItems.TANK_ITEMS_MAX_COUNT; i++) {
             buffer.put(items.get(i).getPrice());
         }
         return true;
@@ -127,6 +270,13 @@ public class ItemsEditor extends AbstractEditor {
      */
     public PlayerItems getPlayerItems() {
         return playerItems;
+    }
+
+    /**
+     * @return 坦克的武器、C装置、引擎和底盘
+     */
+    public TankItems getTankItems() {
+        return tankItems;
     }
 
     /**
