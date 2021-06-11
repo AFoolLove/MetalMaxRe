@@ -1,12 +1,7 @@
 package me.afoolslove.metalmaxre.editor.text;
 
-import javax.swing.*;
 import java.io.*;
-import java.net.URL;
-import java.nio.Buffer;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 字库
@@ -50,8 +45,8 @@ public class WordBank {
         for (byte i = 0; i <= 9; i++) {
             FONTS_SINGLE.put((char) ('0' + i), i);
         }
-        for (char i = 'A'; i <= 'Z'; i++) {
-            FONTS_SINGLE.put(i, (byte) (i - '0'));
+        for (char i = 'A', j = 0x0A; i <= 'Z'; i++) {
+            FONTS_SINGLE.put(i, (byte) (j + (i - 'A')));
         }
         FONTS_SINGLE.put('-', (byte) (0x62));
         FONTS_SINGLE.put('▼', (byte) (0x63));  // 下标
@@ -83,6 +78,18 @@ public class WordBank {
 
         // 使用小写英文字母对应另外一组相同字符
         // 数据不一样，但显示一样
+        FONTS_SINGLE_REPEATED.put('a', (byte) 0x0A);
+        FONTS_SINGLE_REPEATED.put('b', (byte) 0x0B);
+        FONTS_SINGLE_REPEATED.put('c', (byte) 0x0C);
+        FONTS_SINGLE_REPEATED.put('d', (byte) 0x0D);
+        FONTS_SINGLE_REPEATED.put('e', (byte) 0x0E);
+        FONTS_SINGLE_REPEATED.put('f', (byte) 0x0F);
+        FONTS_SINGLE_REPEATED.put('g', (byte) 0x10);
+        FONTS_SINGLE_REPEATED.put('h', (byte) 0x11);
+        FONTS_SINGLE_REPEATED.put('i', (byte) 0x12);
+        FONTS_SINGLE_REPEATED.put('j', (byte) 0x13);
+        FONTS_SINGLE_REPEATED.put('k', (byte) 0x14);
+        FONTS_SINGLE_REPEATED.put('l', (byte) 0x15);
         FONTS_SINGLE_REPEATED.put('m', (byte) 0x80);
         FONTS_SINGLE_REPEATED.put('n', (byte) 0x81);
         FONTS_SINGLE_REPEATED.put('o', (byte) 0x82);
@@ -213,11 +220,223 @@ public class WordBank {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         char[] chars = text.toCharArray(); // 转换为字符集
 
+        // 通过字符获取游戏文本字节
+        charsLoop:
+        for (int i = 0; i < chars.length; ) {
+            char ch = chars[i];
 
+            // 被 [] 所包围的文本属于十六进制 1byte，使用十六进制解析
+            if (ch == '[') {
+                // 梦的开始.jpg
+                while (true) {
+                    // 获取源字节
+                    ch = chars[++i];
+
+                    if (ch == ' ') {
+                        // 为空就获取下一个字符
+                        continue;
+                    }
+
+                    if (ch == ']') {
+                        // 源字节读取结束
+                        i++;
+                        continue charsLoop;
+                    }
+
+                    if (++i >= chars.length) {
+                        // 所有字节读取完毕
+                        // 写入单个源字节
+                        outputStream.write(Integer.parseInt(String.valueOf(ch), 16));
+                        return outputStream.toByteArray();
+                    }
+
+                    char next = chars[i];
+                    if (next == ' ') {
+                        // 写入单个源字节
+                        outputStream.write(Integer.parseInt(String.valueOf(ch), 16));
+                        continue;
+                    }
+
+                    if (next == ']') {
+                        // 读取到结束符
+                        i++;
+
+                        // ']' : FF F] <-this
+                        // 写入单个源字节
+                        outputStream.write(Integer.parseInt(String.valueOf(ch), 16));
+                        continue charsLoop;
+                    } else {
+                        // 写入两个字符组成的十六进制
+                        outputStream.write(Integer.parseInt(String.valueOf(new char[]{ch, next}), 16));
+                    }
+                }
+            }
+
+            // 从重复单byte中获取
+            Object temp = FONTS_SINGLE_REPEATED.get(ch);
+            if (temp == null) {
+                // 从单byte中获取
+                temp = FONTS_SINGLE.get(ch);
+            }
+            if (temp == null) {
+                // 从多byte中获取
+                temp = FONTS.get(ch);
+            }
+            if (temp == null) {
+                // 从重复多byte中获取
+                temp = FONTS_REPEATED.get(ch);
+            }
+            if (temp != null) {
+                if (temp instanceof byte[]) {
+                    // 写入多字节
+                    for (byte b : (byte[]) temp) {
+                        outputStream.write(b);
+                    }
+                } else {
+                    // 写入单字节
+                    outputStream.write((byte) temp);
+                }
+            } else {
+                // 没有这个字符
+                System.out.println("未知字符：" + ch);
+            }
+            i++;
+        }
         return outputStream.toByteArray();
     }
 
+    public static String toString(byte[] bytes, int offset, int length) {
+        StringBuilder text = new StringBuilder();
+        byte[] copy = Arrays.copyOfRange(bytes, offset, offset + length);
+
+        IdentityHashMap<Character, Object> maps = new IdentityHashMap<>();
+        maps.putAll(FONTS_SINGLE);
+        maps.putAll(FONTS_SINGLE_REPEATED);
+        maps.putAll(FONTS);
+        maps.putAll(FONTS_REPEATED);
+        // OPCODES 单独配置
+
+        maps:
+        for (int i = 0; i < length; i++) {
+            byte[] copyOfRange = Arrays.copyOfRange(copy, i, Math.min(i + 2, copy.length));
+            for (Map.Entry<Character, Object> entry : maps.entrySet()) {
+                if (entry.getValue() instanceof byte[]) {
+                    if (Objects.equals(entry.getValue(), copyOfRange)) {
+                        text.append(entry.getKey());
+                        i++;
+                        continue maps;
+                    }
+                } else {
+                    if (Objects.equals(entry.getValue(), copy[i])) {
+                        text.append(entry.getKey());
+                        i++;
+                        continue maps;
+                    }
+                }
+            }
+
+            Integer opcodeValue = OPCODES.get(copy[i]);
+            if (opcodeValue != null) {
+                text.append('[');
+                text.append(String.format("%02X", copy[i]));
+                switch (copy[i]) {
+                    case (byte) 0xF6: // 读取到 0x9F 或 0x63 后结束
+                        // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
+                        // 0x63             (结束)
+                        // 0x8C + 2byte     (填充数量，填充字符)
+                        // 0x43 ???
+                        whileF6:
+                        while (true) {
+                            if (++i >= copy.length) {
+                                // 读取数据完毕
+                                text.append(']');
+                                return text.toString();
+                            }
+                            // 添加控制码或者纯字符（不会转换为中文等）
+                            text.append(String.format("%02X", copy[i]));
+                            switch (copy[i]) {
+                                case (byte) 0x9E:
+                                    // 空格填充
+                                    if (++i >= copy.length) {
+                                        // 读取完毕
+                                        // 没有数量，直接结束
+                                        text.append(']');
+                                        return text.toString();
+                                    }
+                                    // 填充数量
+                                    text.append(String.format(" %02X", copy[i]));
+                                    break;
+                                case (byte) 0x63:
+                                    // 0xF6 的结束符
+                                    text.append(']');
+                                    break whileF6;
+                                case (byte) 0x8C:
+                                    // 使用指定字符填充指定数量
+                                    if (++i >= copy.length) {
+                                        // 读取完毕
+                                        // 没有字符，也没有数量，直接结束
+                                        text.append(']');
+                                        return text.toString();
+                                    }
+                                    // 填充数量
+                                    text.append(String.format(" %02X", copy[i]));
+                                    if (++i >= copy.length) {
+                                        // 读取完毕
+                                        // 没有字符，直接结束
+                                        text.append(']');
+                                        return text.toString();
+                                    }
+                                    // 填充字符
+                                    text.append(String.format(" %02X", copy[i]));
+                                    break;
+                                case (byte) 0x9F:
+                                    // 文本段结束
+                                    text.append('\n');
+                                    // emm？要不要结束？
+//                                    break whileF6;
+                                    break;
+                                default:
+                                    // 写入不认识的字节
+                                    text.append(String.format(" %02X", copy[i]));
+                                    break;
+                            }
+                        }
+                        break;
+                    default:
+                        // 其余的直接读取相应的字节数量
+                        for (int j = 0, len = Math.min(copy.length - i - 1, opcodeValue); j < len; j++) {
+                            text.append(' ');
+                            text.append(String.format("%02X", copy[i + j + 1]));
+                        }
+                        break;
+                }
+            } else {
+                // 能到这里的只有纯字节，使用 [] 包起来
+
+                // 如果上一个是源字符结尾 ']' 就合并
+                if (text.length() > 0 && text.charAt(text.length() - 1) == ']') {
+                    // 合并
+                    text.setCharAt(text.length() - 1, ' ');
+                } else {
+                    // 无法合并
+                    text.append('[');
+                }
+                text.append(String.format("%02X", copy[i]));
+                text.append(']');
+            }
+        }
+        return text.toString();
+    }
+
     public static void main(String[] args) {
+        byte[] bytes = toBytes("就是 ！[EF 42 F7 01 02] 吗？");
+        for (byte b : bytes) {
+            System.out.format("%02X", b);
+        }
+        System.out.println();
+
+        System.out.println(toString(bytes, 0, bytes.length));
+
         System.out.println();
     }
 }
