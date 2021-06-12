@@ -69,7 +69,7 @@ public class WordBank {
 //        FONTS_SINGLE.put('t', (byte) (0x9C));
 //        FONTS_SINGLE.put('@', (byte) (0x9D));
 //        FONTS_SINGLE.put('', (byte) (0x9E)); // 可自定义图块
-        FONTS_SINGLE.put(' ', (byte) (0xFF));
+        FONTS_SINGLE.put(' ', (byte) (0xFF)); // 空格，占一个英文字符，全角空格占两个英文字符'　'
         FONTS_SINGLE.put('\t', (byte) (0xE5)); // 换行
         FONTS_SINGLE.put('\r', (byte) (0xFE)); // 带名称换行
         FONTS_SINGLE.put('\n', (byte) (0x9F)); // 文本结束
@@ -188,15 +188,15 @@ public class WordBank {
 
                         // 添加文字
                         char key = line.charAt(column);
-                        if (FONTS.containsKey(key)) {
-                            // 如果已经添加过，添加进重复Map中
-                            if (key != ' ') {
-                                // 空格就算了吧
+                        if (key != ' ') {
+                            // 空格就算了吧
+                            if (FONTS.containsKey(key)) {
+                                // 如果已经添加过，添加进重复Map中
                                 FONTS_REPEATED.put(key, value);
+                            } else {
+                                // 直接添加
+                                FONTS.putIfAbsent(key, value);
                             }
-                        } else {
-                            // 直接添加
-                            FONTS.putIfAbsent(key, value);
                         }
                     }
                 }
@@ -321,7 +321,7 @@ public class WordBank {
             byte[] copyOfRange = Arrays.copyOfRange(copy, i, Math.min(i + 2, copy.length));
             for (Map.Entry<Character, Object> entry : maps.entrySet()) {
                 if (entry.getValue() instanceof byte[]) {
-                    if (Objects.equals(entry.getValue(), copyOfRange)) {
+                    if (Arrays.equals((byte[]) entry.getValue(), copyOfRange)) {
                         text.append(entry.getKey());
                         i++;
                         continue maps;
@@ -329,15 +329,21 @@ public class WordBank {
                 } else {
                     if (Objects.equals(entry.getValue(), copy[i])) {
                         text.append(entry.getKey());
-                        i++;
                         continue maps;
                     }
                 }
             }
 
             Integer opcodeValue = OPCODES.get(copy[i]);
-            if (opcodeValue != null) {
+            // 如果上一个是源字符结尾 ']' 就合并
+            if (text.length() > 0 && text.charAt(text.length() - 1) == ']') {
+                // 合并
+                text.setCharAt(text.length() - 1, ' ');
+            } else {
+                // 无法合并
                 text.append('[');
+            }
+            if (opcodeValue != null) {
                 text.append(String.format("%02X", copy[i]));
                 switch (copy[i]) {
                     case (byte) 0xF6: // 读取到 0x9F 或 0x63 后结束
@@ -404,23 +410,18 @@ public class WordBank {
                         break;
                     default:
                         // 其余的直接读取相应的字节数量
-                        for (int j = 0, len = Math.min(copy.length - i - 1, opcodeValue); j < len; j++) {
+                        int len = Math.min(copy.length - i - 1, opcodeValue);
+                        for (int j = 0; j < len; j++) {
                             text.append(' ');
                             text.append(String.format("%02X", copy[i + j + 1]));
                         }
+                        i += len;
+                        // 读取结束
+                        text.append(']');
                         break;
                 }
             } else {
-                // 能到这里的只有纯字节，使用 [] 包起来
-
-                // 如果上一个是源字符结尾 ']' 就合并
-                if (text.length() > 0 && text.charAt(text.length() - 1) == ']') {
-                    // 合并
-                    text.setCharAt(text.length() - 1, ' ');
-                } else {
-                    // 无法合并
-                    text.append('[');
-                }
+                // 能到这里的只有纯字节
                 text.append(String.format("%02X", copy[i]));
                 text.append(']');
             }
@@ -429,14 +430,8 @@ public class WordBank {
     }
 
     public static void main(String[] args) {
-        byte[] bytes = toBytes("就是 ！[EF 42 F7 01 02] 吗？");
-        for (byte b : bytes) {
-            System.out.format("%02X", b);
-        }
-        System.out.println();
-
-        System.out.println(toString(bytes, 0, bytes.length));
-
-        System.out.println();
+        byte[] bytes = toBytes("就是 ！[32]　[23][0][EEE][EF 42 F7 01 02] 吗？");
+        String x = toString(bytes, 0, bytes.length);
+        System.out.println(x);
     }
 }
