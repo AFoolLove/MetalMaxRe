@@ -14,6 +14,7 @@ import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerExperienceEditor;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
 import me.afoolslove.metalmaxre.editor.tank.TankEditor;
+import me.afoolslove.metalmaxre.editor.text.TextEditor;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -99,6 +100,9 @@ public class MetalMaxRe {
 
         ItemsEditor itemsEditor = new ItemsEditor();
         EditorManager.register(itemsEditor);
+
+        TextEditor textEditor = new TextEditor();
+        EditorManager.register(textEditor);
     }
 
     public void setBuffer(ByteBuffer buffer) {
@@ -203,6 +207,7 @@ public class MetalMaxRe {
             var playerExperienceEditor = EditorManager.getEditor(PlayerExperienceEditor.class);
             var paletteEditor = EditorManager.getEditor(PaletteEditor.class);
             var itemsEditor = EditorManager.getEditor(ItemsEditor.class);
+            var textEditor = EditorManager.getEditor(TextEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -214,6 +219,7 @@ public class MetalMaxRe {
             tankInitialAttributes.onWrite(buffer);
             playerExperienceEditor.onWrite(buffer);
             itemsEditor.onWrite(buffer);
+            textEditor.onWrite(buffer);
 
 
             // 顺序写入

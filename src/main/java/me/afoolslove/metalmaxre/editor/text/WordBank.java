@@ -305,6 +305,16 @@ public class WordBank {
         return outputStream.toByteArray();
     }
 
+    /**
+     * @return 将字节数组通过词库转换为能读懂的文本
+     */
+    public static String toString(byte[] bytes) {
+        return toString(bytes, 0, bytes.length);
+    }
+
+    /**
+     * @return 将字节数组通过词库转换为能读懂的文本
+     */
     public static String toString(byte[] bytes, int offset, int length) {
         StringBuilder text = new StringBuilder();
         byte[] copy = Arrays.copyOfRange(bytes, offset, offset + length);
@@ -343,8 +353,8 @@ public class WordBank {
                 // 无法合并
                 text.append('[');
             }
+            text.append(String.format("%02X", copy[i]));
             if (opcodeValue != null) {
-                text.append(String.format("%02X", copy[i]));
                 switch (copy[i]) {
                     case (byte) 0xF6: // 读取到 0x9F 或 0x63 后结束
                         // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
@@ -358,10 +368,11 @@ public class WordBank {
                                 text.append(']');
                                 return text.toString();
                             }
-                            // 添加控制码或者纯字符（不会转换为中文等）
-                            text.append(String.format("%02X", copy[i]));
+
                             switch (copy[i]) {
-                                case (byte) 0x9E:
+                                case (byte) 0x9E: // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
+                                    // 写入 9E
+                                    text.append(" 9E");
                                     // 空格填充
                                     if (++i >= copy.length) {
                                         // 读取完毕
@@ -370,13 +381,14 @@ public class WordBank {
                                         return text.toString();
                                     }
                                     // 填充数量
-                                    text.append(String.format(" %02X", copy[i]));
+                                    text.append(String.format("%02X ", copy[i]));
                                     break;
-                                case (byte) 0x63:
+                                case (byte) 0x63: // 0x63             (结束)
                                     // 0xF6 的结束符
-                                    text.append(']');
-                                    break whileF6;
-                                case (byte) 0x8C:
+                                    text.append(" 63]");
+                                    continue maps;
+                                case (byte) 0x8C: // 0x8C + 2byte     (填充数量，填充字符)
+                                    text.append(" 8C");
                                     // 使用指定字符填充指定数量
                                     if (++i >= copy.length) {
                                         // 读取完毕
@@ -385,7 +397,7 @@ public class WordBank {
                                         return text.toString();
                                     }
                                     // 填充数量
-                                    text.append(String.format(" %02X", copy[i]));
+                                    text.append(String.format("%02X", copy[i]));
                                     if (++i >= copy.length) {
                                         // 读取完毕
                                         // 没有字符，直接结束
@@ -393,17 +405,16 @@ public class WordBank {
                                         return text.toString();
                                     }
                                     // 填充字符
-                                    text.append(String.format(" %02X", copy[i]));
+                                    text.append(String.format("%02X ", copy[i]));
                                     break;
                                 case (byte) 0x9F:
-                                    // 文本段结束
-                                    text.append('\n');
+                                    // 文本段结束，另一个的开始
+                                    text.append("]\n");
                                     // emm？要不要结束？
-//                                    break whileF6;
-                                    break;
+                                    break whileF6;
                                 default:
                                     // 写入不认识的字节
-                                    text.append(String.format(" %02X", copy[i]));
+                                    text.append(String.format("%02X", copy[i]));
                                     break;
                             }
                         }
@@ -412,7 +423,6 @@ public class WordBank {
                         // 其余的直接读取相应的字节数量
                         int len = Math.min(copy.length - i - 1, opcodeValue);
                         for (int j = 0; j < len; j++) {
-                            text.append(' ');
                             text.append(String.format("%02X", copy[i + j + 1]));
                         }
                         i += len;
@@ -422,7 +432,6 @@ public class WordBank {
                 }
             } else {
                 // 能到这里的只有纯字节
-                text.append(String.format("%02X", copy[i]));
                 text.append(']');
             }
         }
@@ -430,8 +439,10 @@ public class WordBank {
     }
 
     public static void main(String[] args) {
-        byte[] bytes = toBytes("就是 ！[32]　[23][0][EEE][EF 42 F7 01 02] 吗？");
-        String x = toString(bytes, 0, bytes.length);
-        System.out.println(x);
+        byte[] bytes = toBytes("就是 ！[01 02 9f 9f 05 06 07 08] 吗？");
+        String[] x = toString(bytes, 0, bytes.length).split("\n");
+        for (String s : x) {
+            System.out.println(s);
+        }
     }
 }
