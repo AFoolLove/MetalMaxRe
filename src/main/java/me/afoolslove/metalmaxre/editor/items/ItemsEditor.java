@@ -8,6 +8,7 @@ import me.afoolslove.metalmaxre.editor.tank.TankEngine;
 import me.afoolslove.metalmaxre.editor.tank.TankEquipmentItem;
 import me.afoolslove.metalmaxre.editor.tank.TankWeapon;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -22,6 +23,20 @@ import java.util.List;
  * @author AFoolLove
  */
 public class ItemsEditor extends AbstractEditor {
+    /**
+     * 道具类型
+     */
+    public static final List<Integer> ITEM_TYPES = List.of(
+            PlayerItems.PLAYER_ARMOR_MAX_COUNT,
+            PlayerItems.PLAYER_WEAPON_MAX_COUNT,
+            TankItems.TANK_WEAPON_MAX_COUNT,
+            TankItems.TANK_C_UNIT_MAX_COUNT,
+            TankItems.TANK_ENGINE_MAX_COUNT,
+            TankItems.TANK_CHASSIS_MAX_COUNT,
+            PlayerItems.PLAYER_ITEMS_MAX_COUNT,
+            TankItems.TANK_ITEMS_MAX_COUNT
+    );
+
     private final PlayerItems playerItems = new PlayerItems();
     private final TankItems tankItems = new TankItems();
     private final List<Item> items = new ArrayList<>(PlayerItems.PLAYER_ITEMS_MAX_COUNT + TankItems.TANK_ITEMS_MAX_COUNT);
@@ -284,5 +299,42 @@ public class ItemsEditor extends AbstractEditor {
      */
     public List<Item> getItems() {
         return items;
+    }
+
+    public Item getItem(@Range(from = 0x00, to = 0xFF) int item) {
+        int temp = 0; // 计数
+        for (Integer itemType : ITEM_TYPES) {
+            temp += itemType;
+            if (temp > item) {
+                switch (itemType) {
+                    case PlayerItems.PLAYER_ARMOR_MAX_COUNT:
+                        // 玩家防具
+                        return getPlayerItems().getArmors().get(item - (temp - itemType));
+                    case PlayerItems.PLAYER_WEAPON_MAX_COUNT:
+                        // 玩家武器
+                        return getPlayerItems().getWeapons().get(item - (temp - itemType));
+                    case TankItems.TANK_WEAPON_MAX_COUNT:
+                        // 武器
+                        return getTankItems().getWeapons().get(item - (temp - itemType));
+                    case TankItems.TANK_C_UNIT_MAX_COUNT:
+                        // C装置
+                        return getTankItems().getCUnits().get(item - (temp - itemType));
+                    case TankItems.TANK_ENGINE_MAX_COUNT:
+                        // 引擎
+                        return getTankItems().getEngines().get(item - (temp - itemType));
+                    case TankItems.TANK_CHASSIS_MAX_COUNT:
+                        // 底盘
+                        return getTankItems().getChassis().get(item - (temp - itemType));
+
+                    case PlayerItems.PLAYER_ITEMS_MAX_COUNT:
+                    case TankItems.TANK_ITEMS_MAX_COUNT:
+                        // 玩家和坦克的道具
+                        return getItems().get(item - (temp - itemType));
+                    default:
+                        break;
+                }
+            }
+        }
+        return null;
     }
 }

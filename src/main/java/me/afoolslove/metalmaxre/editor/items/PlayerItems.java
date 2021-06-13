@@ -1,7 +1,10 @@
 package me.afoolslove.metalmaxre.editor.items;
 
+import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.player.PlayerArmor;
 import me.afoolslove.metalmaxre.editor.player.PlayerWeapon;
+import me.afoolslove.metalmaxre.editor.text.TextEditor;
+import org.jetbrains.annotations.Range;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +40,28 @@ public class PlayerItems {
     }
 
     /**
+     * @return 防具名称
+     * @see TextEditor#getItemName(int)
+     */
+    public String getArmorName(@Range(from = 0x00, to = 0xFF) int armor) {
+        TextEditor textEditor = EditorManager.getEditor(TextEditor.class);
+        return textEditor.getItemName(armor);
+    }
+
+    /**
      * @return 玩家所有武器
      */
     public List<PlayerWeapon> getWeapons() {
         return weapons;
+    }
+
+    /**
+     * @return 底盘名称
+     * @see TextEditor#getItemName(int)
+     */
+    public String getWeaponName(@Range(from = 0x00, to = 0xFF) int weapon) {
+        TextEditor textEditor = EditorManager.getEditor(TextEditor.class);
+        return textEditor.getItemName(PlayerItems.PLAYER_ARMOR_MAX_COUNT
+                + weapon);
     }
 }

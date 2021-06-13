@@ -7,6 +7,7 @@ import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
 import me.afoolslove.metalmaxre.editor.tank.TankShellCapacity;
 import me.afoolslove.metalmaxre.editor.tank.TankWeaponSlot;
+import me.afoolslove.metalmaxre.editor.text.TextEditor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -179,6 +180,7 @@ public class MainWindow extends JFrame {
             editor.getTankItems().getWeapons().get(0).setShellCapacity(TankShellCapacity.INFINITE);
             editor.getTankItems().getWeapons().get(0).setAttackAnim(26);
 
+            System.out.println(editor.getTankItems().getWeaponName(0));
 
             System.out.println("test.");
         });

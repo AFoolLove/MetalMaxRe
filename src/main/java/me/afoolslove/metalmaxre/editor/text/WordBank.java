@@ -1,7 +1,11 @@
 package me.afoolslove.metalmaxre.editor.text;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 字库
@@ -31,6 +35,9 @@ public class WordBank {
      * @see WordBank#FONTS_SINGLE
      */
     public static final Map<Character, Byte> FONTS_SINGLE_REPEATED = new HashMap<>();
+
+
+    public static final IdentityHashMap<Character, Object> ALL_FONTS = new IdentityHashMap<>();
 
 
     /**
@@ -208,6 +215,12 @@ public class WordBank {
             // 不会真的会读取失败吧？
             System.out.println("读取字库失败！");
         }
+
+
+        ALL_FONTS.putAll(FONTS_SINGLE);
+        ALL_FONTS.putAll(FONTS_SINGLE_REPEATED);
+        ALL_FONTS.putAll(FONTS);
+        ALL_FONTS.putAll(FONTS_REPEATED);
     }
 
     private WordBank() {
@@ -216,7 +229,11 @@ public class WordBank {
     /**
      * @return 字符串转换为游戏中的文本
      */
-    public static byte[] toBytes(String text) {
+    public static byte[] toBytes(@Nullable String text) {
+        if (text == null || text.isEmpty()) {
+            // 空字符直接返回
+            return new byte[0];
+        }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         char[] chars = text.toCharArray(); // 转换为字符集
 
@@ -312,32 +329,39 @@ public class WordBank {
         return toString(bytes, 0, bytes.length);
     }
 
+
     /**
      * @return 将字节数组通过词库转换为能读懂的文本
      */
     public static String toString(byte[] bytes, int offset, int length) {
+        return toString(ALL_FONTS, bytes, offset, length);
+    }
+
+    /**
+     * @return 将字节数组通过词库转换为能读懂的文本
+     */
+    public static String toString(IdentityHashMap<Character, Object> allFonts, byte[] bytes, int offset, int length) {
         StringBuilder text = new StringBuilder();
         byte[] copy = Arrays.copyOfRange(bytes, offset, offset + length);
 
-        IdentityHashMap<Character, Object> maps = new IdentityHashMap<>();
-        maps.putAll(FONTS_SINGLE);
-        maps.putAll(FONTS_SINGLE_REPEATED);
-        maps.putAll(FONTS);
-        maps.putAll(FONTS_REPEATED);
-        // OPCODES 单独配置
+        // OPCODES 单独配置，不属于 allFonts
 
         maps:
         for (int i = 0; i < length; i++) {
             byte[] copyOfRange = Arrays.copyOfRange(copy, i, Math.min(i + 2, copy.length));
-            for (Map.Entry<Character, Object> entry : maps.entrySet()) {
+
+            // 在字库中查找对应的字符文本
+            for (Map.Entry<Character, Object> entry : allFonts.entrySet()) {
                 if (entry.getValue() instanceof byte[]) {
                     if (Arrays.equals((byte[]) entry.getValue(), copyOfRange)) {
+                        // 多byte对应的字符
                         text.append(entry.getKey());
                         i++;
                         continue maps;
                     }
                 } else {
                     if (Objects.equals(entry.getValue(), copy[i])) {
+                        // 单byte对应的字符
                         text.append(entry.getKey());
                         continue maps;
                     }
