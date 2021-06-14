@@ -37,7 +37,7 @@ public class WordBank {
     public static final Map<Character, Byte> FONTS_SINGLE_REPEATED = new HashMap<>();
 
 
-    public static final IdentityHashMap<Character, Object> ALL_FONTS = new IdentityHashMap<>();
+    public static final List<Map.Entry<Character, ?>> ALL_FONTS = new ArrayList<>();
 
 
     /**
@@ -217,10 +217,10 @@ public class WordBank {
         }
 
 
-        ALL_FONTS.putAll(FONTS_SINGLE);
-        ALL_FONTS.putAll(FONTS_SINGLE_REPEATED);
-        ALL_FONTS.putAll(FONTS);
-        ALL_FONTS.putAll(FONTS_REPEATED);
+        ALL_FONTS.addAll(FONTS_SINGLE.entrySet());
+        ALL_FONTS.addAll(FONTS_SINGLE_REPEATED.entrySet());
+        ALL_FONTS.addAll(FONTS.entrySet());
+        ALL_FONTS.addAll(FONTS_REPEATED.entrySet());
     }
 
     private WordBank() {
@@ -340,7 +340,7 @@ public class WordBank {
     /**
      * @return 将字节数组通过词库转换为能读懂的文本
      */
-    public static String toString(IdentityHashMap<Character, Object> allFonts, byte[] bytes, int offset, int length) {
+    public static String toString(List<Map.Entry<Character, ?>> allFonts, byte[] bytes, int offset, int length) {
         StringBuilder text = new StringBuilder();
         byte[] copy = Arrays.copyOfRange(bytes, offset, offset + length);
 
@@ -351,7 +351,7 @@ public class WordBank {
             byte[] copyOfRange = Arrays.copyOfRange(copy, i, Math.min(i + 2, copy.length));
 
             // 在字库中查找对应的字符文本
-            for (Map.Entry<Character, Object> entry : allFonts.entrySet()) {
+            for (Map.Entry<Character, ?> entry : allFonts) {
                 if (entry.getValue() instanceof byte[]) {
                     if (Arrays.equals((byte[]) entry.getValue(), copyOfRange)) {
                         // 多byte对应的字符

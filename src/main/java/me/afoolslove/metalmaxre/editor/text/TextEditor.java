@@ -49,8 +49,10 @@ public class TextEditor extends AbstractEditor {
             textParagraphs.addAll(Arrays.asList(split));
             paragraphsMap.put(point, textParagraphs);
         }
-        String strings = paragraphsMap.get(POINTS.get(0x01)).get(12);
-        String formatted = paragraphsMap.get(POINTS.get(0x01)).getFormatted(12);
+        TextParagraphs textParagraphs = paragraphsMap.get(POINTS.get(0x01));
+        textParagraphs.set(0, "[F7 01 09] 恩");
+        textParagraphs.set(1, "？");
+        String formatted = textParagraphs.getFormatted(0);
         return true;
     }
 

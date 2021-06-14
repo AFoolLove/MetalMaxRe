@@ -4,9 +4,11 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.invoke.StringConcatFactory;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * 文本段，使用 0x9F 结尾
@@ -100,7 +102,7 @@ public class TextParagraphs extends ArrayList<String> {
             // 写入源字节格式： [byte]{string}
             for (int i = 0; i < bytes.length; i++) {
                 if (bytes[i] == (byte) 0xF7) {
-                    // F7 + 1 + 1       文本集索引，第一字节为下标，第二字节
+                    // F7 + 1 + 1   文本集索引，第一字节为下标，第二字节
                     if (i + 2 >= bytes.length) {
                         // 剩余字节不足以作为变量
                         // 写入并结束当前源字节
@@ -157,7 +159,7 @@ public class TextParagraphs extends ArrayList<String> {
                                 break;
                             }
                         }
-                        // 下一个
+                        // 继续解析下一个字节
                         continue;
                     }
 
@@ -233,20 +235,45 @@ public class TextParagraphs extends ArrayList<String> {
                     // 未知的索引（为探索到的索引
                     text.append(String.format("[F7%02X%02X]", inx, pointStart));
                     continue;
+                } else if (bytes[i] == (byte) 0xEA
+                        || bytes[i] == (byte) 0xEC
+                        || bytes[i] == (byte) 0xF2
+//                        || bytes[i] == (byte) 0xF3
+                ) {
+                    // 1 + 1   type + 下标
+                    // 0xEA 索引 0x11933-0x11A1F 的文本
+                    // 0xEC 索引 0x0BE90-0x0C00F 的文本
+                    // 0xF2 索引 0x10010-0x10DB2 的文本
+
+                    if (++i >= bytes.length) {
+                        // 读取完毕
+                        text.append(String.format("[%02X]", bytes[i - 1]));
+                        break;
+                    }
+                    Map.Entry<Integer, Integer> point = null;
+                    if (bytes[i] == (byte) 0xEA) {
+                        point = TextEditor.POINTS.get(0x04);
+                    } else if (bytes[i] == (byte) 0xEC) {
+                        point = TextEditor.POINTS.get(0x00);
+                    } else if (bytes[i] == (byte) 0xF2) {
+                        point = TextEditor.POINTS.get(0x01);
+                    } // else 就不用了吧
+
+                    // 下标
+                    int inx = bytes[i];
+                    // 写入解析后的文本
+                    text.append(String.format("[%02X %02X]{%s}", bytes[i - 1], inx, textEditor.getParagraphsMap().get(point).getFormatted(inx)));
+
+                    // 继续解析下一个字节
+                    continue;
                 }
 
                 // 未知的源字节
 
                 // 如果上一个是源字符结尾 ']' 就合并
-                if (text.length() > 0) {
-                    if (text.charAt(text.length() - 1) == ']') {
-                        // 合并
-                        text.setCharAt(text.length() - 1, ' ');
-                    }
-                    if (text.charAt(text.length() - 1) != ' '){
-                        // 需要添加一个空格
-                        text.append(' ');
-                    }
+                if (text.length() > 0 && text.charAt(text.length() - 1) == ']') {
+                    // 合并
+                    text.setCharAt(text.length() - 1, ' ');
                 }
                 text.append(String.format("%02X]", bytes[i]));
             }
