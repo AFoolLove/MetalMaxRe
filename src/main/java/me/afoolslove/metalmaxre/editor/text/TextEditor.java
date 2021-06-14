@@ -49,6 +49,8 @@ public class TextEditor extends AbstractEditor {
             textParagraphs.addAll(Arrays.asList(split));
             paragraphsMap.put(point, textParagraphs);
         }
+        String strings = paragraphsMap.get(POINTS.get(0x01)).get(12);
+        String formatted = paragraphsMap.get(POINTS.get(0x01)).getFormatted(12);
         return true;
     }
 
