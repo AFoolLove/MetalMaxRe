@@ -49,10 +49,6 @@ public class TextEditor extends AbstractEditor {
             textParagraphs.addAll(Arrays.asList(split));
             paragraphsMap.put(point, textParagraphs);
         }
-        TextParagraphs textParagraphs = paragraphsMap.get(POINTS.get(0x01));
-        textParagraphs.set(0, "[F7 01 09] 恩");
-        textParagraphs.set(1, "？");
-        String formatted = textParagraphs.getFormatted(0);
         return true;
     }
 
@@ -96,10 +92,10 @@ public class TextEditor extends AbstractEditor {
                 }
             }
 
-//            // test
-//            if (length < 0) {
-//                System.out.println();
-//            }
+            // test
+            if (length < 0) {
+                System.out.print("");
+            }
 
             if (length > 0) {
                 // 多余的空间使用 0x9F 填充

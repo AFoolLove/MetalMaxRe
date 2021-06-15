@@ -257,7 +257,7 @@ public class DataValues {
      * @return 该值的所有key
      */
     public static List<Number> getKeys(@Range(from = 0x00, to = 0xFFFFFF) int value) {
-        return VALUES.entrySet().stream().parallel()
+        return VALUES.entrySet().parallelStream()
                 .filter(entry -> entry.getValue() == value)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
@@ -288,7 +288,7 @@ public class DataValues {
         if (length != 0x01 && length != 0x02) {
             return new HashMap<>(VALUES);
         }
-        return VALUES.entrySet().stream().parallel()
+        return VALUES.entrySet().parallelStream()
                 .filter(entry -> {
                     switch (length) {
                         case 1:

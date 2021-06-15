@@ -25,6 +25,7 @@ import java.util.List;
  * @author AFoolLove
  */
 public class PaletteEditor extends AbstractEditor {
+    public static final int PALETTE_START_OFFSET = 0x1DAE0 - 0x10;
     public static final int PALETTE_LIST_COUNT = 0xA5;
 
     private final List<PaletteList> paletteLists = new ArrayList<>();
@@ -34,7 +35,7 @@ public class PaletteEditor extends AbstractEditor {
         // 读取前清空数据
         paletteLists.clear();
 
-        buffer.position(0x1DAE0);
+        setPrgRomPosition(buffer, PALETTE_START_OFFSET);
         // 读取所有调色板集（9byte）
         for (int i = 0; i < (PALETTE_LIST_COUNT / 0x03); i++) {
             PaletteList palettes = new PaletteList();
@@ -50,7 +51,7 @@ public class PaletteEditor extends AbstractEditor {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        buffer.position(0x1DAE0);
+        setPrgRomPosition(buffer, PALETTE_START_OFFSET);
         // 写入所有调色板集
         // 限制数据
         Iterator<PaletteList> iterator = paletteLists.iterator();

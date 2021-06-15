@@ -23,6 +23,9 @@ import java.util.*;
  * @author AFoolLove
  */
 public class SpriteEditor extends AbstractEditor {
+    public static final int SPRITE_INDEX_START_OFFSET = 0x24010 - 0x10;
+
+    public static final int SPRITE_START_OFFSET = 0x24204 - 0x10;
 
     /**
      * 地图的精灵数据索引
@@ -45,7 +48,7 @@ public class SpriteEditor extends AbstractEditor {
         sprites.clear();
 
         // 读取精灵数据索引
-        buffer.position(0x24010);
+        setPrgRomPosition(buffer, SPRITE_INDEX_START_OFFSET);
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
 
         for (int i = 0; i < 0xF0 + 0x0A; i++) {
@@ -66,7 +69,7 @@ public class SpriteEditor extends AbstractEditor {
             }
 
             // 读取精灵
-            buffer.position(0x10 + 0x24000 + spritesIndex - 0x8000);
+            setPrgRomPosition(buffer, 0x24000 + spritesIndex - 0x8000);
             // 获取奖励数量
             int count = buffer.get();
 
@@ -93,8 +96,7 @@ public class SpriteEditor extends AbstractEditor {
         // 不提供精灵数据索引的修改！！
 
         // 指向精灵数据
-        buffer.position(0x24204);
-
+        setPrgRomPosition(buffer, SPRITE_START_OFFSET);
 
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
 
@@ -135,7 +137,7 @@ public class SpriteEditor extends AbstractEditor {
         }
 
         // 写入精灵数据索引
-        buffer.position(0x24010);
+        setPrgRomPosition(buffer, SPRITE_INDEX_START_OFFSET);
         for (Character spritesIndex : spritesIndexes) {
             buffer.put((byte) (spritesIndex & 0x00FF));
             buffer.put((byte) ((spritesIndex & 0xFF00) >> 0x08));

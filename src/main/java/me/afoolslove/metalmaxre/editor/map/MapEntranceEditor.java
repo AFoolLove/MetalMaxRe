@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.map;
 
+import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,9 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class MapEntranceEditor extends AbstractEditor {
+    public static final int MAP_ENTRANCE_START_OFFSET = 0x1E990 - 0x10;
+    public static final int MAP_ENTRANCE_END_OFFSET = 0x1F990 - 0x10;
+
     private final Map<Integer, MapEntrance> mapEntrances = new HashMap<>();
 
     @Override
@@ -45,7 +49,7 @@ public class MapEntranceEditor extends AbstractEditor {
             MapBorder mapBorder;
 
             // 索引到数据
-            buffer.position(0x10 + 0x1E000 + mapProperties.entrance - 0x8000);
+            setPrgRomPosition(buffer, 0x1E000 + mapProperties.entrance - 0x8000);
             int temp = buffer.get() & 0xFF;
 
             switch (MapBorderType.getType(temp)) {
@@ -91,7 +95,7 @@ public class MapEntranceEditor extends AbstractEditor {
             }
 
             // 设置所有使用此属性的地图
-            mapPropertiesEditor.getMapProperties().entrySet().stream().parallel()
+            mapPropertiesEditor.getMapProperties().entrySet().parallelStream()
                     .filter(entry -> entry.getValue().entrance == mapProperties.entrance)
                     .forEach(entry -> {
                         // 添加该地图的边界和出入口数据
@@ -106,14 +110,14 @@ public class MapEntranceEditor extends AbstractEditor {
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
-        buffer.position(0x1E990);
-        getMapEntrances().values().stream().parallel()
+        setPrgRomPosition(buffer, MAP_ENTRANCE_START_OFFSET);
+        getMapEntrances().values().parallelStream()
                 .distinct()
                 .forEachOrdered(mapEntrance -> {
                     // 计算新的出入口索引
                     char newEntrance = (char) (buffer.position() - (0x10 + 0x1E000 + 0x8000));
                     // 更新所有使用此数据的地图
-                    getMapEntrances().entrySet().stream().parallel()
+                    getMapEntrances().entrySet().parallelStream()
                             .filter(entry -> entry.getValue() == mapEntrance)
                             .forEach(entry -> {
                                 mapPropertiesEditor.getMapProperties(entry.getKey()).entrance = newEntrance;

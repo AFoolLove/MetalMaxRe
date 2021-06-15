@@ -56,7 +56,7 @@ public class EventTilesEditor extends AbstractEditor {
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
         var map = new HashMap<>(mapPropertiesEditor.getMapProperties())
-                .entrySet().stream().parallel()
+                .entrySet().parallelStream()
                 .filter(entry -> entry.getValue().hasEventTile()) // 移除没有事件图块属性的地图
                 .collect(
                         // 移除相同的事件图块数据索引
@@ -65,7 +65,7 @@ public class EventTilesEditor extends AbstractEditor {
 
         for (Map.Entry<Integer, MapProperties> mapPropertiesEntry : map) {
             char eventTilesIndex = mapPropertiesEntry.getValue().eventTilesIndex;
-            buffer.position(0x10 + 0x1C000 + eventTilesIndex - 0x8000);
+            setPrgRomPosition(buffer, 0x1C000 + eventTilesIndex - 0x8000);
 
             // 一个或多个事件作为一组，一组使用 0x00 作为结尾
             var events = new HashMap<Integer, List<EventTile>>();
@@ -106,7 +106,7 @@ public class EventTilesEditor extends AbstractEditor {
         buffer.position(0x1DCCF);
 
         getEventTiles().values()
-                .stream().parallel()
+                .parallelStream()
                 .filter(entry -> !entry.isEmpty()) // 过滤没有事件图块的地图
                 .distinct()
                 .forEachOrdered(events -> {
@@ -114,7 +114,7 @@ public class EventTilesEditor extends AbstractEditor {
                     char newEventTilesIndex = (char) (buffer.position() - 0x10 - 0x1C000 + 0x8000);
                     // 将旧的索引替换为新的索引
                     getEventTiles().entrySet()
-                            .stream().parallel()
+                            .parallelStream()
                             .filter(entry1 -> entry1.getValue() == events) // 获取相同事件图块的地图
                             .forEach(mapEntry -> {
                                 // 通过相同的事件图块组更新索引

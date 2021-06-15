@@ -19,10 +19,16 @@ import java.util.List;
  * 玩家的武器、防具等
  * 战车的主炮、副炮、S-E
  * 玩家的道具和战车道具
+ * <p>
+ * 2021年6月9日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */
 public class ItemsEditor extends AbstractEditor {
+
+    public static final int TANK_ENGINE_MAX_CAPACITY_OFFSET = 0x21804 - 0x10;
+    public static final int PLAYER_EQUIPMENT_CAN_EQUIPPED_OFFSET = 0x22285 - 0x10;
+
     /**
      * 道具类型
      */
@@ -82,13 +88,13 @@ public class ItemsEditor extends AbstractEditor {
             tankItems.chassis.add(i, new Item());
         }
 
-        buffer.position(0x21804);
+        setPrgRomPosition(buffer, TANK_ENGINE_MAX_CAPACITY_OFFSET);
         // 读取战车引擎的最大载重
         for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
             tankItems.engines.get(i).setCapacity(buffer.get());
         }
 
-        buffer.position(0x22285);
+        setPrgRomPosition(buffer, PLAYER_EQUIPMENT_CAN_EQUIPPED_OFFSET);
         // 读取人类防具的可装备角色的数据
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             playerItems.armors.get(i).setCanEquipped(buffer.get());
@@ -182,13 +188,13 @@ public class ItemsEditor extends AbstractEditor {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        buffer.position(0x21804);
+        setPrgRomPosition(buffer, TANK_ENGINE_MAX_CAPACITY_OFFSET);
         // 写入战车引擎的最大载重
         for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
             buffer.put(tankItems.engines.get(i).getCapacity());
         }
 
-        buffer.position(0x22285);
+        setPrgRomPosition(buffer, PLAYER_EQUIPMENT_CAN_EQUIPPED_OFFSET);
         // 写入人类防具的可装备角色的数据
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             buffer.put(playerItems.armors.get(i).canEquipped);

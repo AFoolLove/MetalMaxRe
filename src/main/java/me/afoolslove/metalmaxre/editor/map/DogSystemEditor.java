@@ -29,6 +29,11 @@ public class DogSystemEditor extends AbstractEditor {
      */
     public static final int DESTINATION_MAX_COUNT = 0x0C;
 
+    public static final int DESTINATION_POINT_START_OFFSET = 0x3272D - 0x10;
+    public static final int DESTINATION_POINT_END_OFFSET = 0x32738 - 0x10;
+    public static final int DESTINATION_START_OFFSET = 0x34707 - 0x10;
+    public static final int DESTINATION_END_OFFSET = 0x34712 - 0x10;
+
     /**
      * 犬系统一共就 3*4 个目的地，写死算求
      */
@@ -58,7 +63,7 @@ public class DogSystemEditor extends AbstractEditor {
         // (0x30 & 0B1111_1000) >>> 3 // 0x0441的偏移量
         // (0x30 & 0x0000_0111) // 指向的bit位
         // 读取目的地坐标
-        buffer.position(0x3272D);
+        setPrgRomPosition(buffer, DESTINATION_POINT_START_OFFSET);
         buffer.get(xs);
         buffer.get(ys);
 
@@ -71,7 +76,7 @@ public class DogSystemEditor extends AbstractEditor {
         byte[] townValues = new byte[DESTINATION_MAX_COUNT];
 
         // 读取城镇
-        buffer.position(0x34707);
+        setPrgRomPosition(buffer, DESTINATION_START_OFFSET);
         buffer.get(towns);
         // 读取城镇数据
         // 这个数据就厉害了
@@ -125,7 +130,7 @@ public class DogSystemEditor extends AbstractEditor {
         }
 
         // 写入目的地
-        buffer.position(0x3272D);
+        setPrgRomPosition(buffer, DESTINATION_POINT_START_OFFSET);
         buffer.put(xs);
         buffer.put(ys);
 
@@ -139,7 +144,7 @@ public class DogSystemEditor extends AbstractEditor {
         });
 
         // 写入城镇
-        buffer.position(0x34707);
+        setPrgRomPosition(buffer, DESTINATION_START_OFFSET);
         while (townIterator.hasNext()) {
             Integer next = townIterator.next();
             buffer.put(next.byteValue());

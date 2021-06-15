@@ -38,6 +38,9 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
             // 写入到 ByteBuffer
             buffer.put(bytes);
 
+            // 读取头属性
+            instance.setHeader(new GameHeader(buffer));
+
             // 编辑器重新读取数据
 
             long start = 0, count = 0;

@@ -21,6 +21,13 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class TankEditor extends AbstractEditor {
+    public static final int TANK_INIT_EQUIPMENT_START_OFFSET = 0x22010 - 0x10;
+
+    public static final int TANK_INIT_CHASSIS_WEIGHT_START_OFFSET = 0x28142 - 0x10;
+    public static final int TAX_TANK_INIT_CHASSIS_WEIGHT_START_OFFSET = 0x220D4 - 0x10;
+
+    public static final int TANK_INIT_SP_START_OFFSET = 0x28158 - 0x10;
+
     /**
      * NO.1 - NO.8 - TAX1 - TAXA 的初始属性
      */
@@ -39,7 +46,7 @@ public class TankEditor extends AbstractEditor {
         }
 
         // 读取坦克初始装备（6byte）
-        buffer.position(0x22010);
+        setPrgRomPosition(buffer, TANK_INIT_EQUIPMENT_START_OFFSET);
         for (int tank = 0; tank < Tank.COUNT; tank++) {
             byte[] equipment = new byte[0x06];
             buffer.get(equipment);
@@ -59,13 +66,13 @@ public class TankEditor extends AbstractEditor {
         }
 
         // 读取坦克的底盘重量
-        buffer.position(0x28142);
+        setPrgRomPosition(buffer, TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
             tankInitialAttributes[noTank].setWeight(buffer.get() + (buffer.get() << 8));
         }
 
         // 读取出租坦克的底盘重量（2byte）
-        buffer.position(0x220D4);
+        setPrgRomPosition(buffer, TAX_TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
             tankInitialAttributes[Tank.NO_COUNT + taxTank].setWeight(buffer.get() + (buffer.get() << 8));
         }
@@ -75,7 +82,7 @@ public class TankEditor extends AbstractEditor {
         }
 
         // 读取坦克的初始SP
-        buffer.position(0x28157);
+        setPrgRomPosition(buffer, TANK_INIT_SP_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
             tankInitialAttributes[noTank].setSp(buffer.get() + (buffer.get() << 8));
         }
@@ -86,14 +93,14 @@ public class TankEditor extends AbstractEditor {
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         // 写入初始属性
 
-
         TankInitialAttributes[] tankInitialAttributes = new TankInitialAttributes[Tank.values().length];
         for (Map.Entry<Tank, TankInitialAttributes> entry : getInitialAttributes().entrySet()) {
             tankInitialAttributes[entry.getKey().getId() & 0xFF] = entry.getValue();
         }
 
         // 写入坦克初始装备（6byte）
-        buffer.position(0x22010);
+
+        setPrgRomPosition(buffer, TANK_INIT_EQUIPMENT_START_OFFSET);
         for (int tank = 0; tank < Tank.COUNT; tank++) {
             buffer.put(tankInitialAttributes[tank].getEquipment());
         }
@@ -111,13 +118,13 @@ public class TankEditor extends AbstractEditor {
         }
 
         // 写入坦克的底盘重量
-        buffer.position(0x28142);
+        setPrgRomPosition(buffer, TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
             buffer.put(tankInitialAttributes[noTank].getBytesWeight());
         }
 
         // 写入出租坦克的底盘重量（2byte）
-        buffer.position(0x220D4);
+        setPrgRomPosition(buffer, TAX_TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
             buffer.put(tankInitialAttributes[Tank.NO_COUNT + taxTank].getBytesWeight());
         }
@@ -127,7 +134,7 @@ public class TankEditor extends AbstractEditor {
         }
 
         // 写入坦克的初始SP
-        buffer.position(0x28158);
+        setPrgRomPosition(buffer, TANK_INIT_SP_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
             buffer.put(tankInitialAttributes[noTank].getBytesSp());
         }

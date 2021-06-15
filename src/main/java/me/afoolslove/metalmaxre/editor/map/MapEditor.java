@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.map;
 
+import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import org.jetbrains.annotations.NotNull;
@@ -65,11 +66,11 @@ public class MapEditor extends AbstractEditor {
             int mapIndex = mapProperties.mapIndex;
             if (mapIndex >= 0xC000) {
                 // 0xBB010
-                buffer.position(getMetalMaxRe().getVROMOffset() + 0x2F000 + mapIndex);
+                setChrRomPosition(buffer, 0x2F000 + mapIndex);
             } else {
                 // 0x00000(610)
                 mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
-                buffer.position(getMetalMaxRe().getPROMOffset() + mapIndex);
+                setPrgRomPosition(buffer, mapIndex);
             }
 
             MapBuilder mapBuilder = new MapBuilder();
@@ -182,7 +183,7 @@ public class MapEditor extends AbstractEditor {
 
 //        for (Map.Entry<Integer, Map<Integer, Integer>> entry : coincidence.entrySet()) {
 //            Integer map = entry.getKey();
-//            List<Map.Entry<Integer, Integer>> collect = entry.getValue().entrySet().stream().parallel().sorted((o1, o2) -> {
+//            List<Map.Entry<Integer, Integer>> collect = entry.getValue().entrySet().parallelStream().sorted((o1, o2) -> {
 //                return ((o1.getValue() & 0xFF00) >>> 8 - (o2.getValue() & 0xFF00) >>> 8) + (o1.getValue() & 0xFF) - (o2.getValue() & 0xFF);
 //            }).collect(Collectors.toList());
 //
@@ -204,7 +205,7 @@ public class MapEditor extends AbstractEditor {
 
             // 定位到地图数据的起始地址
             if (mapIndex >= 0xC000) {
-                buffer.position(getMetalMaxRe().getVROMOffset() + 0x2F000 + mapIndex);
+                setChrRomPosition(buffer, 0x2F000 + mapIndex);
 //                int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
 //                if (i >= 0xBF010) {
@@ -213,7 +214,7 @@ public class MapEditor extends AbstractEditor {
 //                }
             } else {
                 mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
-                buffer.position(getMetalMaxRe().getPROMOffset() + mapIndex);
+                setPrgRomPosition(buffer, mapIndex);
 //                int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
 //                if (i >= 0x0B6D4) {
@@ -232,10 +233,16 @@ public class MapEditor extends AbstractEditor {
         return true;
     }
 
+    /**
+     * @return 所有地图的构建器
+     */
     public HashMap<Integer, MapBuilder> getMaps() {
         return maps;
     }
 
+    /**
+     * @return 指定地图的构建器
+     */
     public MapBuilder getMap(@Range(from = 0x01, to = 0xEF) int map) {
         return maps.get(map);
     }

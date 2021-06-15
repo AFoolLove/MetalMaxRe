@@ -43,6 +43,13 @@ import java.util.*;
  * @author AFoolLove
  */
 public class MapPropertiesEditor extends AbstractEditor {
+    public static final int MAP_PROPERTIES_UP_ROLL_OFFSET = 0x0BE10 - 0x10;
+    public static final int MAP_PROPERTIES_DOWN_ROLL_OFFSET = 0x1DEB0 - 0x10;
+
+    public static final int MAP_PROPERTIES_OFFSET = 0x0E510 - 0x10;
+
+    public static final int MAP_PROPERTIES_START_OFFSET = MAP_PROPERTIES_OFFSET - 0x08500;
+    public static final int MAP_PROPERTIES_END_OFFSET = 0x0FBBD - 0x08500 - 0x10;
 
     private final LinkedHashMap<Integer, MapProperties> mapProperties = new LinkedHashMap<>(MapEditor.MAP_MAX_COUNT);
 
@@ -63,17 +70,17 @@ public class MapPropertiesEditor extends AbstractEditor {
         // 读取地图属性索引，上卷 0x40、下卷 0xB0
         // 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
         char[] mapIndexRoll = new char[0x40 + 0xB0];
-        buffer.position(0x0BE10);
+        setPrgRomPosition(buffer, MAP_PROPERTIES_UP_ROLL_OFFSET);
         for (int i = 0; i < 0x40; i++) {
             mapIndexRoll[i] = (char) ((buffer.get() & 0xFF) + ((buffer.get() & 0xFF) << 8));
         }
-        buffer.position(0x1DEB0);
+        setPrgRomPosition(buffer, MAP_PROPERTIES_DOWN_ROLL_OFFSET);
         for (int i = 0x40; i < mapIndexRoll.length; i++) {
             mapIndexRoll[i] = (char) ((buffer.get() & 0xFF) + ((buffer.get() & 0xFF) << 8));
         }
 
         // 通过地图属性索引读取地图属性
-        buffer.position(0x06010);
+        setPrgRomPosition(buffer, MAP_PROPERTIES_START_OFFSET);
         buffer.mark();
         byte[] properties = new byte[MapProperties.PROPERTIES_MAX_LENGTH];
         for (char index : mapIndexRoll) {
@@ -140,7 +147,7 @@ public class MapPropertiesEditor extends AbstractEditor {
         Map<Integer, Character> mapping = new HashMap<>();
 //        char[] mapIndexRoll = new char[0x40 + 0xB0];
 
-        buffer.position(0x0BE10);
+        setPrgRomPosition(buffer, MAP_PROPERTIES_UP_ROLL_OFFSET);
         // 固定值，无任何作用？
         buffer.put((byte) 0x00);
         buffer.put((byte) 0x00);
@@ -163,7 +170,7 @@ public class MapPropertiesEditor extends AbstractEditor {
             }
         }
 
-        buffer.position(0x1DEB0);
+        setPrgRomPosition(buffer, MAP_PROPERTIES_DOWN_ROLL_OFFSET);
         for (int i = 0x40; i < (0x40 + 0xB0); i++) {
             int hashCode = Arrays.hashCode(properties[i]);
             Character character = mapping.get(hashCode);
@@ -181,7 +188,7 @@ public class MapPropertiesEditor extends AbstractEditor {
         }
 
         // 写入地图属性
-        buffer.position(0x0E510);
+        setPrgRomPosition(buffer, MAP_PROPERTIES_OFFSET);
         for (int i = 0x01; i < properties.length - 1; i++) {
             buffer.put(properties[i]);
         }

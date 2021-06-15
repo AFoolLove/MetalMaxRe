@@ -173,14 +173,14 @@ public class MapBuilder extends LinkedList<MapTile> {
         index = 0;
         offset = 0;
         // 获取单个图块的数量
-        int oneCount = stream().parallel()
+        int oneCount = parallelStream()
                 .filter(mapTile -> mapTile.count > 0 && mapTile.count < 3)
                 .mapToInt(MapTile::getCount)
                 .sum();
         // 单个图块占7bit
         int length = oneCount * 7;
         // 自定义数量的图块占3*7bit
-        int multipleCount = (int) stream().parallel()
+        int multipleCount = (int) parallelStream()
                 .filter(mapTile -> mapTile.count == 0 || mapTile.count >= 3)
                 .count();
         length += multipleCount * 3 * 7;

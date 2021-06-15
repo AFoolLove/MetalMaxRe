@@ -19,6 +19,8 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class PlayerEditor extends AbstractEditor {
+
+    public static final int PLAYER_START_OFFSET = 0x280CD - 0x10;
     /**
      * 初始属性
      */
@@ -42,7 +44,7 @@ public class PlayerEditor extends AbstractEditor {
         }
 
         // 从初始金钱开始读取
-        buffer.position(0x280CD);
+        setPrgRomPosition(buffer, PLAYER_START_OFFSET);
         money = buffer.get();
         money |= buffer.get() << 8;
         money |= buffer.get() << 16;
@@ -137,7 +139,7 @@ public class PlayerEditor extends AbstractEditor {
         }
 
         // 从初始金钱开始写入
-        buffer.position(0x280CD);
+        setPrgRomPosition(buffer, PLAYER_START_OFFSET);
         buffer.put((byte) (money & 0x0000FF));
         buffer.put((byte) ((money & 0x00FF00) >>> 8));
         buffer.put((byte) ((money & 0xFF0000) >>> 16));

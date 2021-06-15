@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor;
 
+import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -20,12 +21,6 @@ import java.util.function.Predicate;
  * @author AFoolLove
  */
 public abstract class AbstractEditor {
-    /**
-     * NES 头数据的长度
-     */
-    public static final int NES_HEADER_LENGTH = 0x10;
-
-
     protected ByteBuffer buffer;
 
 
@@ -45,6 +40,21 @@ public abstract class AbstractEditor {
      * 使用 Buffer 前请先定位数据
      */
     public abstract boolean onWrite(@NotNull ByteBuffer buffer);
+
+
+    /**
+     * 设置为 PRG COM 的偏移量
+     */
+    public void setPrgRomPosition(@NotNull ByteBuffer buffer, int offset) {
+        buffer.position(getHeader().getPrgRomStart(offset));
+    }
+
+    /**
+     * 设置为 CHR COM 的偏移量
+     */
+    public void setChrRomPosition(@NotNull ByteBuffer buffer, int offset) {
+        buffer.position(getHeader().getChrRomStart(offset));
+    }
 
 
     public ByteBuffer slice() {
@@ -267,6 +277,14 @@ public abstract class AbstractEditor {
         return MetalMaxRe.getInstance();
     }
 
+    /**
+     * @return 获取头属性
+     */
+    @NotNull
+    public static GameHeader getHeader() {
+        return MetalMaxRe.getInstance().getHeader();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -281,7 +299,7 @@ public abstract class AbstractEditor {
 
 
     public static <T> void limit(@NotNull Iterator<T> iterator, @NotNull BooleanSupplier condition, @Nullable Consumer<T> removed) {
-        while (condition.getAsBoolean() && iterator.hasNext()){
+        while (condition.getAsBoolean() && iterator.hasNext()) {
             T remove = iterator.next();
             iterator.remove();
             if (removed != null) {

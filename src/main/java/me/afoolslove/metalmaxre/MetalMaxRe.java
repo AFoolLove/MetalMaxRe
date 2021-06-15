@@ -34,6 +34,9 @@ import java.util.Properties;
  */
 public class MetalMaxRe {
     private static MetalMaxRe INSTANCE;
+
+    private GameHeader header;
+
     /**
      * 当前加载的游戏文件
      */
@@ -122,10 +125,24 @@ public class MetalMaxRe {
     }
 
     /**
+     * @return 头属性
+     */
+    public GameHeader getHeader() {
+        return header;
+    }
+
+    /**
      * @return 当前打开的游戏文件，可能为null
      */
     public File getTarget() {
         return target;
+    }
+
+    /**
+     * 设置头属性
+     */
+    public void setHeader(GameHeader header) {
+        this.header = header;
     }
 
     public void setTarget(File target) {
@@ -187,6 +204,10 @@ public class MetalMaxRe {
     public boolean saveAs(@NotNull String path) {
         try {
             System.out.printf("保存修改到：%s\n", path);
+            // 写入头属性
+            buffer.position(0x00);
+            buffer.put(header.header);
+
             // 保存所有更改
 //            for (AbstractEditor editor : EditorManager.getEditors().values()) {
 //                editor.onWrite(buffer);

@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
 public class TreasureEditor extends AbstractEditor {
     public static final int TREASURE_MAX_COUNT = 0x5B;
 
+    public static final int TREASURE_START_OFFSET = 0x39C50 - 0x10;
+    public static final int TREASURE_END_OFFSET = 0x39DBB - 0x10;
+
     private final LinkedHashSet<Treasure> treasures = new LinkedHashSet<>(TREASURE_MAX_COUNT);
 
     @Override
@@ -46,7 +49,7 @@ public class TreasureEditor extends AbstractEditor {
         byte[] items = new byte[TREASURE_MAX_COUNT];
 
         // 宝藏的数据按顺序存放（地图、X、Y、物品
-        buffer.position(0x39C50);
+        setPrgRomPosition(buffer, TREASURE_START_OFFSET);
         buffer.get(maps);
         buffer.get(xs);
         buffer.get(ys);
@@ -94,7 +97,7 @@ public class TreasureEditor extends AbstractEditor {
             i++;
         }
 
-        buffer.position(0x39C50);
+        setPrgRomPosition(buffer, TREASURE_START_OFFSET);
         buffer.put(maps);
         buffer.put(xs);
         buffer.put(ys);
@@ -102,6 +105,9 @@ public class TreasureEditor extends AbstractEditor {
         return true;
     }
 
+    /**
+     * @return 所有宝藏
+     */
     public HashSet<Treasure> getTreasures() {
         return treasures;
     }

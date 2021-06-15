@@ -29,6 +29,10 @@ public class ComputerEditor extends AbstractEditor {
      */
     public static final int COMPUTER_MAX_COUNT = 0x7B;
 
+
+    public static final int COMPUTER_START_OFFSET = 0x39DD2 - 0x10;
+    public static final int COMPUTER_END_OFFSET = 0x39FBD - 0x10;
+
     /**
      * 所有计算机
      */
@@ -44,7 +48,7 @@ public class ComputerEditor extends AbstractEditor {
         byte[] xs = new byte[COMPUTER_MAX_COUNT];
         byte[] ys = new byte[COMPUTER_MAX_COUNT];
 
-        buffer.position(0x39DD2);
+        setPrgRomPosition(buffer, COMPUTER_START_OFFSET);
         buffer.get(maps);
         buffer.get(types);
         buffer.get(xs);
@@ -94,7 +98,7 @@ public class ComputerEditor extends AbstractEditor {
         }
 
         // 写入
-        buffer.position(0x39DD2);
+        setPrgRomPosition(buffer, COMPUTER_START_OFFSET);
         buffer.put(maps);
         buffer.put(types);
         buffer.put(xs);

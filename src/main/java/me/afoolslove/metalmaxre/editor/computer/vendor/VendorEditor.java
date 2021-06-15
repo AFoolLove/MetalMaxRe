@@ -30,6 +30,11 @@ public class VendorEditor extends AbstractEditor {
      */
     public static final int VENDOR_MAX_COUNT = 0x12;
 
+
+    public static final int VENDOR_START_OFFSET = 0x23EC8 - 0x10;
+    public static final int VENDOR_END_OFFSET = 0x23FC4 - 0x10;
+
+
     private final List<VendorItemList> vendorItemLists = new ArrayList<>();
 
     @Override
@@ -37,7 +42,7 @@ public class VendorEditor extends AbstractEditor {
         // 读取前清空数据
         vendorItemLists.clear();
 
-        buffer.position(0x23EC8);
+        setPrgRomPosition(buffer, VENDOR_START_OFFSET);
 
         byte[] items = new byte[0x06];
         byte[] counts = new byte[0x06];
@@ -61,7 +66,7 @@ public class VendorEditor extends AbstractEditor {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        buffer.position(0x23EC8);
+        setPrgRomPosition(buffer, VENDOR_START_OFFSET);
 
         // 移除多余的商品组合
         Iterator<VendorItemList> iterator = vendorItemLists.iterator();
@@ -90,10 +95,16 @@ public class VendorEditor extends AbstractEditor {
         return true;
     }
 
+    /**
+     * @return 所有售货机的商品
+     */
     public List<VendorItemList> getVendorItemLists() {
         return vendorItemLists;
     }
 
+    /**
+     * @return 某一个售货机的商品
+     */
     public VendorItemList getVendorItemList(int vendor) {
         return vendorItemLists.get(vendor);
     }
