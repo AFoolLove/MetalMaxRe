@@ -4,7 +4,9 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 
 import javax.swing.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.List;
@@ -28,7 +30,21 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
         // 暂时不进行同时加载
         try {
             MetalMaxRe instance = MetalMaxRe.getInstance();
-            byte[] bytes = Files.readAllBytes(instance.getTarget().toPath());
+            byte[] bytes;
+            if (instance.isIsInitTarget()) {
+                // 直接获取流
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("MetalMax.nes");
+                if (resourceAsStream == null) {
+                    // 读取失败可还行
+                    return false;
+                }
+                resourceAsStream.transferTo(byteArrayOutputStream);
+                bytes = byteArrayOutputStream.toByteArray();
+            } else {
+                // 外部路径
+                bytes = Files.readAllBytes(instance.getTarget().toPath());
+            }
             if (instance.getBuffer() != null) {
                 instance.getBuffer().clear(); // 怎么释放呢？
             }

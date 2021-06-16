@@ -32,6 +32,8 @@ public class MainWindow extends JFrame {
     private JTabbedPane tabbedPane1;
 
     public MainWindow() {
+        setTitle("MetalMaxRe");
+
         URL resource = getClass().getClassLoader().getResource("MetalMax.nes");
         if (resource == null) {
             // 不会真的会读取失败吧？
@@ -99,7 +101,14 @@ public class MainWindow extends JFrame {
             // 目标文件有效才能保存
             if (!MetalMaxRe.getInstance().isIsInitTarget()) {
                 // 保存修改
-                MetalMaxRe.getInstance().saveAs(MetalMaxRe.getInstance().getTarget().getPath());
+                String path = MetalMaxRe.getInstance().getTarget().getPath();
+                boolean saveAs = MetalMaxRe.getInstance().saveAs(path);
+                if (!saveAs) {
+                    // 保存失败
+                    JOptionPane.showMessageDialog(this,
+                            String.format("保存到：%s\n失败！", path), "保存失败",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -204,42 +213,6 @@ public class MainWindow extends JFrame {
     }
 
     private synchronized void loadGame(@NotNull File game, boolean init) {
-        MetalMaxRe.getInstance().loadGame(init, game, new WindowEditorWorker() {
-            @Override
-            protected void done() {
-                try {
-                    // 加载NES文件
-                    if (get()) {
-                        // 加载成功
-                        // 设置标题为打开的文件路径
-                        if (!init) {
-                            setTitle(String.format("MetalMaxRe [%s] - %s", game.getName(), game.getPath()));
-                        } else {
-                            setTitle(String.format("MetalMaxRe [%s]", game.getName()));
-                        }
-
-                        JPopupMenu fileMenu = getJMenuBar().getMenu(0x00).getPopupMenu();
-                        for (Component component : fileMenu.getComponents()) {
-                            if (component instanceof JMenuItem) {
-                                if (Objects.equals(((JMenuItem) component).getText(), "Save")) {
-                                    // 对菜单 File->Save 按钮启用或禁用
-                                    component.setEnabled(!init);
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        if (!init) {
-                            String text = String.format("打开%s文件失败\n路径：%s", game.getName(), game.getPath());
-                            JOptionPane.showMessageDialog(MainWindow.this, text, "游戏文件加载失败，请重试", JOptionPane.ERROR_MESSAGE);
-                        } else {
-                            JOptionPane.showMessageDialog(MainWindow.this, "打开初始文件失败", "初始游戏文件加载失败，请重新打开一个文件再使用", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        MetalMaxRe.getInstance().loadGame(init, game, new WindowEditorWorker(this, game, init));
     }
 }

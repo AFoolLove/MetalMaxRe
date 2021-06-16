@@ -17,7 +17,7 @@ public class ReLauncher {
     public static void main(String[] args) {
         String config = null;
 
-        boolean showGui = true;
+        boolean showGui = false;
         for (String[] strings : Arrays.stream(args).map(s -> s.split("=", 2)).collect(Collectors.toList())) {
             String key = strings[0].toUpperCase(Locale.ROOT);
             String value = strings.length == 1 ? null : strings[1];
@@ -46,16 +46,21 @@ public class ReLauncher {
             }
             new MainWindow();
         } else {
-            metalMaxRe.loadGame(false, new File("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes"), new EditorWorker() {
-                @Override
-                protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
-                    for (Map.Entry<ProcessState, Object> chunk : chunks) {
-                        System.out.println(chunk.getValue());
-                    }
-                }
-            });
+            metalMaxRe.loadGame(false, new File("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes"),
+                    new EditorWorker() {
+                        @Override
+                        protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
+                            for (Map.Entry<ProcessState, Object> chunk : chunks) {
+                                System.out.println(chunk.getValue());
+                            }
+                        }
 
-            metalMaxRe.saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
+                        @Override
+                        protected void done() {
+
+                            metalMaxRe.saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
+                        }
+                    });
         }
     }
 }
