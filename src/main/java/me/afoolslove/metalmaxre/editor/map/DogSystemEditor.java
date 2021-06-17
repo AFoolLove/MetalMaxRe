@@ -1,8 +1,9 @@
 package me.afoolslove.metalmaxre.editor.map;
 
-import me.afoolslove.metalmaxre.Point;
+import me.afoolslove.metalmaxre.Point2B;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -222,56 +223,71 @@ public class DogSystemEditor extends AbstractEditor {
 
     /**
      * 目的地
+     * 坐标以屏幕的左上角Tile作为起点，所以需要玩家在 0,0 坐标时，需要 x-8,y-7
      */
-    public static class Destination extends Point<Byte> {
+    public static class Destination extends Point2B {
 
-        public Destination(Byte x, Byte y) {
+        public Destination(byte x, byte y) {
             super(x, y);
         }
 
-        public Destination(@NotNull Point<Byte> point) {
+        public Destination(int x, int y) {
+            super(x, y);
+        }
+
+        public Destination(@NotNull Point2B point) {
             super(point);
         }
 
         @Override
-        public void setX(Byte x) {
-            super.setX((byte) (x - 0x08));
+        public void setX(byte x) {
+            this.x = (byte) (x - 0x08);
         }
 
         @Override
-        public void setY(Byte y) {
-            super.setY((byte) (y - 0x07));
+        public void setY(byte y) {
+            this.y = (byte) (y - 0x07);
         }
 
-        public void setX(int x) {
-            super.setX((byte) (x - 0x08));
+        @Override
+        public void set(byte x, byte y) {
+            super.set(x, y);
         }
 
-        public void setY(int y) {
-            super.setY((byte) (y - 0x07));
+        @Override
+        public void set(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y) {
+            super.set(x, y);
         }
 
         /**
          * 此坐标会右偏移8格坐标点
          */
-        public void setCameraX(int x) {
-            super.setX((byte) (x & 0xFF));
+        public void setCameraX(@Range(from = 0x00, to = 0xFF) int x) {
+            this.x = (byte) (x & 0xFF);
         }
 
         /**
          * 此坐标会下偏移7格坐标点
          */
-        public void setCameraY(int y) {
-            super.setY((byte) (y & 0xFF));
+        public void setCameraY(@Range(from = 0x00, to = 0xFF) int y) {
+            this.y = (byte) (y & 0xFF);
         }
 
-        public void setPoint(int x, int y) {
-            super.setPoint((byte) x, (byte) y);
+        public void setCamera(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y) {
+            setCamera((byte) x, (byte) y);
         }
 
-        public void setCameraPoint(int x, int y) {
-            setCameraX(x);
-            setCameraY(y);
+        public void setCamera(byte x, byte y) {
+            this.x = x;
+            this.x = y;
+        }
+
+        public byte getCameraX() {
+            return x;
+        }
+
+        public byte getCameraY() {
+            return y;
         }
 
         @Override

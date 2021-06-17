@@ -35,13 +35,10 @@ public enum MapBorderType {
      * @return 转换为枚举类型
      */
     public static MapBorderType getType(int type) {
-        switch (type) {
-            case 0xFF:
-                return LAST;
-            case 0xFE:
-                return FIXED;
-            default:
-                return DIRECTION;
-        }
+        return switch (type) {
+            case 0xFF -> LAST;
+            case 0xFE -> FIXED;
+            default -> DIRECTION;
+        };
     }
 }

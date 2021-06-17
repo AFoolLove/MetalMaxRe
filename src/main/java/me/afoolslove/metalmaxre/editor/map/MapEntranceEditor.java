@@ -1,6 +1,5 @@
 package me.afoolslove.metalmaxre.editor.map;
 
-import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import org.jetbrains.annotations.NotNull;
@@ -46,23 +45,22 @@ public class MapEntranceEditor extends AbstractEditor {
                 continue;
             }
 
-            MapBorder mapBorder;
 
             // 索引到数据
             setPrgRomPosition(buffer, 0x1E000 + mapProperties.entrance - 0x8000);
             int temp = buffer.get() & 0xFF;
 
+            MapBorder mapBorder;
             switch (MapBorderType.getType(temp)) {
-                case LAST:
-                    mapBorder = new MapBorder(MapBorderType.LAST);
-                    // 上一个位置，不需要读取额外数据
-                    break;
-                case FIXED:
+                case LAST -> mapBorder = new MapBorder(MapBorderType.LAST);
+
+                // 上一个位置，不需要读取额外数据
+                case FIXED -> {
                     mapBorder = new MapBorder(MapBorderType.FIXED);
                     // 固定位置，读取1个目标地图位置
                     mapBorder.add(new MapPoint(buffer.get(), buffer.get(), buffer.get()));
-                    break;
-                default:
+                }
+                default -> {
                     mapBorder = new MapBorder(MapBorderType.DIRECTION);
                     // 不同的目标地图位置，读取4个目标地图位置
 
@@ -72,7 +70,7 @@ public class MapEntranceEditor extends AbstractEditor {
                     for (int i = 0; i < 0x04; i++) {
                         mapBorder.add(new MapPoint(buffer.get(), buffer.get(), buffer.get()));
                     }
-                    break;
+                }
             }
 
             MapEntrance mapEntrance = new MapEntrance(mapBorder);

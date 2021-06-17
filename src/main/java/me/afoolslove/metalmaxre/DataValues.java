@@ -289,17 +289,12 @@ public class DataValues {
             return new HashMap<>(VALUES);
         }
         return VALUES.entrySet().parallelStream()
-                .filter(entry -> {
-                    switch (length) {
-                        case 1:
-                            return entry.getValue() <= 0x0000FF;
-                        case 2:
-                            return entry.getValue() <= 0x00FFFF;
+                .filter(entry -> switch (length) {
+                    case 1 -> entry.getValue() <= 0x0000FF;
+                    case 2 -> entry.getValue() <= 0x00FFFF;
 //                        case 3:
 //                            return entry.getValue() <= 0xFFFFFF;
-                        default:
-                            return true;
-                    }
+                    default -> true;
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

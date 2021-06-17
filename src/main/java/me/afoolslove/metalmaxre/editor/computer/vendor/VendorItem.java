@@ -65,10 +65,9 @@ public class VendorItem {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof VendorItem)) {
+        if (!(o instanceof VendorItem that)) {
             return false;
         }
-        VendorItem that = (VendorItem) o;
         return getItem() == that.getItem() && getCount() == that.getCount();
     }
 

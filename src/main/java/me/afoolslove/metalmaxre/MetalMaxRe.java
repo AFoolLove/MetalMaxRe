@@ -167,6 +167,7 @@ public class MetalMaxRe {
      */
     public void setConfig(@NotNull String config) {
         this.config = config;
+        loadConfig(config);
         //TODO 更新配置
     }
 

@@ -137,7 +137,7 @@ public class MapPropertiesEditor extends AbstractEditor {
         for (Map.Entry<Integer, MapProperties> entry : mapProperties.entrySet()) {
             // 排除世界地图
             if ((!(entry.getValue() instanceof WorldMapProperties))) {
-                properties[entry.getKey()] = entry.getValue().toArray();
+                properties[entry.getKey()] = entry.getValue().toByteArray();
             }
         }
 

@@ -14,9 +14,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
-    compile 'org.jetbrains:annotations:20.1.0'
-    compile 'org.mapeditor:libtiled:1.4.2'
-    compile 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.jetbrains:annotations:20.1.0'
+    implementation 'org.mapeditor:libtiled:1.4.2'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
 }
 
 test {

@@ -173,7 +173,7 @@ public class Sprite {
     /**
      * @return 转换为数组
      */
-    public byte[] toArray() {
+    public byte[] toByteArray() {
         return new byte[]{type, x, y, talk1, talk2, action};
     }
 

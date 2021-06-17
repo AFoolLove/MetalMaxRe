@@ -124,7 +124,7 @@ public class SpriteEditor extends AbstractEditor {
                 buffer.put((byte) spriteList.size());
                 // 写入精灵
                 for (Sprite sprite : spriteList) {
-                    buffer.put(sprite.toArray());
+                    buffer.put(sprite.toByteArray());
                 }
             }
         }

@@ -113,7 +113,7 @@ public class MapProperties {
     }
 
 
-    public byte[] toArray() {
+    public byte[] toByteArray() {
         int length = PROPERTIES_MAX_LENGTH;
         if (!hasDyTile()) {
             length -= 2;

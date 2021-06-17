@@ -50,23 +50,15 @@ public enum PlayerDeBuff {
     }
 
     public static PlayerDeBuff getDeBuff(int deBuff) {
-        switch (deBuff & 0xFF) {
-            case 0B0000_0010:
-                return SURROUND_FROZEN;
-            case 0B0000_0100:
-                return SURROUND_FLAMES;
-            case 0B0000_1000:
-                return ERODING;
-            case 0B0001_0000:
-                return PANIC;
-            case 0B0010_0000:
-                return STUCK;
-            case 0B0100_0000:
-                return SLEEPING;
-            case 0B1000_0000:
-                return PARALYSIS;
-            default:
-                return NORMAL;
-        }
+        return switch (deBuff & 0xFF) {
+            case 0B0000_0010 -> SURROUND_FROZEN;
+            case 0B0000_0100 -> SURROUND_FLAMES;
+            case 0B0000_1000 -> ERODING;
+            case 0B0001_0000 -> PANIC;
+            case 0B0010_0000 -> STUCK;
+            case 0B0100_0000 -> SLEEPING;
+            case 0B1000_0000 -> PARALYSIS;
+            default -> NORMAL;
+        };
     }
 }

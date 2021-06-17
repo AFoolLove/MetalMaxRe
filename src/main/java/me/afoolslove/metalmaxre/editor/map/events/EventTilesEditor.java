@@ -129,7 +129,7 @@ public class EventTilesEditor extends AbstractEditor {
                         buffer.put(((byte) eventsList.getValue().size()));
                         // 写入 X、Y、Tile
                         for (EventTile eventTile : eventsList.getValue()) {
-                            buffer.put(eventTile.toArray());
+                            buffer.put(eventTile.toByteArray());
                         }
                     }
                     // 写入事件组结束符
