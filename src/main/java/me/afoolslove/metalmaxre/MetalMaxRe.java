@@ -9,6 +9,7 @@ import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEntranceEditor;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
+import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.editor.palette.PaletteEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerExperienceEditor;
@@ -106,6 +107,9 @@ public class MetalMaxRe {
 
         TextEditor textEditor = new TextEditor();
         EditorManager.register(textEditor);
+
+        TileSetEditor tileSetEditor = new TileSetEditor();
+        EditorManager.register(tileSetEditor);
     }
 
     public void setBuffer(ByteBuffer buffer) {
@@ -230,6 +234,7 @@ public class MetalMaxRe {
             var paletteEditor = EditorManager.getEditor(PaletteEditor.class);
             var itemsEditor = EditorManager.getEditor(ItemsEditor.class);
             var textEditor = EditorManager.getEditor(TextEditor.class);
+            var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -242,6 +247,7 @@ public class MetalMaxRe {
             playerExperienceEditor.onWrite(buffer);
             itemsEditor.onWrite(buffer);
             textEditor.onWrite(buffer);
+            tileSetEditor.onWrite(buffer);
 
 
             // 顺序写入

@@ -1,16 +1,20 @@
 package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.AttackRange;
+import me.afoolslove.metalmaxre.ColorTool;
 import me.afoolslove.metalmaxre.DataValues;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
+import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.editor.tank.TankShellCapacity;
 import me.afoolslove.metalmaxre.editor.tank.TankWeaponSlot;
 import me.afoolslove.metalmaxre.editor.text.TextEditor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.colorchooser.AbstractColorChooserPanel;
+import javax.swing.colorchooser.DefaultColorSelectionModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -147,6 +151,16 @@ public class MainWindow extends JFrame {
         fileMenu.add(fileMenuSave);
         fileMenu.add(fileMenuSaveAs);
 
+        JMenu toolsMenu = new JMenu("Tools");
+
+        JMenuItem toolsMenuPalette = new JMenuItem("Palette");
+        toolsMenuPalette.addActionListener(e -> {
+
+        });
+
+
+        toolsMenu.add(toolsMenuPalette);
+
 
         JMenu helpMenu = new JMenu("Help");
 
@@ -170,26 +184,17 @@ public class MainWindow extends JFrame {
         // 快捷键：Ctrl + Shift + T
         helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         helpMenuTest.addActionListener(e -> {
-            ItemsEditor editor = EditorManager.getEditor(ItemsEditor.class);
-            editor.getPlayerItems().getWeapons().get(6).setAttackRange(AttackRange.ALL);
-            editor.getPlayerItems().getWeapons().get(6).setAttack(0x2C);
-            editor.getPlayerItems().getWeapons().get(6).setPrice(DataValues.getKeys(0).get(0).byteValue());
+            var editor = EditorManager.getEditor(TileSetEditor.class);
+            byte[] bytes = editor.tiles[0x00][0x00];
+            bytes[0x00] = (byte) 0B0001_1000;
+            bytes[0x01] = (byte) 0B0001_1000;
+            bytes[0x02] = (byte) 0B0010_0100;
+            bytes[0x03] = (byte) 0B0100_0010;
+            bytes[0x04] = (byte) 0B0001_1000;
+            bytes[0x05] = (byte) 0B1000_0001;
+            bytes[0x06] = (byte) 0B0000_0000;
+            bytes[0x07] = (byte) 0B1111_1111;
 
-
-            editor.getPlayerItems().getArmors().get(8).setDefense(0x2C);
-            editor.getPlayerItems().getArmors().get(8).setPrice(DataValues.VALUES.get(0));
-
-
-            editor.getTankItems().getEngines().get(0).setCapacity(55);
-            editor.getTankItems().getEngines().get(0).setDefense(1);
-            editor.getTankItems().getEngines().get(0).setWeight(55);
-            editor.getTankItems().getEngines().get(0).setPrice(0);
-            editor.getTankItems().getWeapons().get(0).setAttack(0x2c);
-            editor.getTankItems().getWeapons().get(0).setCanEquipped(TankWeaponSlot.SECONDARY_GUN);
-            editor.getTankItems().getWeapons().get(0).setShellCapacity(TankShellCapacity.INFINITE);
-            editor.getTankItems().getWeapons().get(0).setAttackAnim(26);
-
-            System.out.println(editor.getTankItems().getWeaponName(0));
 
             System.out.println("test.");
         });
@@ -200,6 +205,7 @@ public class MainWindow extends JFrame {
 
 
         menuBar.add(fileMenu);
+        menuBar.add(toolsMenu);
         menuBar.add(helpMenu);
         // 设置菜单栏
         setJMenuBar(menuBar);
