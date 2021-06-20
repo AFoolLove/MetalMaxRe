@@ -1,29 +1,21 @@
 package me.afoolslove.metalmaxre.gui;
 
-import me.afoolslove.metalmaxre.AttackRange;
-import me.afoolslove.metalmaxre.ColorTool;
-import me.afoolslove.metalmaxre.DataValues;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editor.EditorManager;
-import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
+import me.afoolslove.metalmaxre.editor.map.MapProperties;
+import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
-import me.afoolslove.metalmaxre.editor.tank.TankShellCapacity;
-import me.afoolslove.metalmaxre.editor.tank.TankWeaponSlot;
-import me.afoolslove.metalmaxre.editor.text.TextEditor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.colorchooser.AbstractColorChooserPanel;
-import javax.swing.colorchooser.DefaultColorSelectionModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 /**
  * 主窗口
@@ -155,7 +147,9 @@ public class MainWindow extends JFrame {
 
         JMenuItem toolsMenuPalette = new JMenuItem("Palette");
         toolsMenuPalette.addActionListener(e -> {
-
+            PaletteDialog paletteDialog = new PaletteDialog();
+            paletteDialog.pack();
+            paletteDialog.setVisible(true);
         });
 
 
@@ -185,17 +179,19 @@ public class MainWindow extends JFrame {
         helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         helpMenuTest.addActionListener(e -> {
             var editor = EditorManager.getEditor(TileSetEditor.class);
-            byte[] bytes = editor.tiles[0x00][0x00];
-            bytes[0x00] = (byte) 0B0001_1000;
-            bytes[0x01] = (byte) 0B0001_1000;
-            bytes[0x02] = (byte) 0B0010_0100;
-            bytes[0x03] = (byte) 0B0100_0010;
-            bytes[0x04] = (byte) 0B0001_1000;
-            bytes[0x05] = (byte) 0B1000_0001;
-            bytes[0x06] = (byte) 0B0000_0000;
-            bytes[0x07] = (byte) 0B1111_1111;
-
-
+            MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
+            MapProperties mapProperties = mapPropertiesEditor.getMapProperties(0x01);
+            final Color[][] colors = {
+                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
+                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
+                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
+                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)}
+            };
+            BufferedImage bufferedImage = editor.generateTileSet(mapProperties.tilesIndexA,
+                    mapProperties.tilesIndexB & 0xFF,
+                    mapProperties.tilesIndexC & 0xFF,
+                    mapProperties.tilesIndexD & 0xFF
+            );
             System.out.println("test.");
         });
 

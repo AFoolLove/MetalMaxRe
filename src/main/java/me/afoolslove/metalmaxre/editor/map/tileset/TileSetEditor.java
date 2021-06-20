@@ -1,8 +1,12 @@
 package me.afoolslove.metalmaxre.editor.map.tileset;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
+import me.afoolslove.metalmaxre.editor.map.MapProperties;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -81,7 +85,7 @@ public class TileSetEditor extends AbstractEditor {
             compositions[count] = tileCompositions;
             for (int i = 0; i < 0x40; i++) {
                 // tile composition
-                byte[] tileComposition = tileCompositions[i] != null ? tileCompositions[i] : new byte[0x40];
+                byte[] tileComposition = tileCompositions[i] != null ? tileCompositions[i] : new byte[0x04];
                 tileCompositions[i] = tileComposition;
                 buffer.get(tileComposition);
             }
@@ -92,7 +96,7 @@ public class TileSetEditor extends AbstractEditor {
         // 0x40tile = 0x40（0x00、0x80、0xC0）
         setChrRomPosition(buffer, TILE_SET_COLOR_INDEX_START_OFFSET);
         for (int count = 0; count < 0x37; count++) {
-            byte[] color = colorIndex[count] == null ? colorIndex[count] : new byte[0x40];
+            byte[] color = colorIndex[count] != null ? colorIndex[count] : new byte[0x40];
             colorIndex[count] = color;
             // 读取 x40 tile特性和调色板
             buffer.get(color);
@@ -124,5 +128,157 @@ public class TileSetEditor extends AbstractEditor {
             buffer.put(bytes);
         }
         return true;
+    }
+
+    /**
+     * @return 通过地图属性生成一张 TileSet 图片
+     * @see #generateTileSet(int, int, int, int, int, int, Color[][])
+     */
+    public BufferedImage generateTileSet(@NotNull MapProperties mapProperties, @Nullable Color[][] colors) {
+        return generateTileSet(
+                mapProperties.tilesIndexA & 0xFF,
+                mapProperties.tilesIndexB & 0xFF,
+                mapProperties.tilesIndexC & 0xFF,
+                mapProperties.tilesIndexD & 0xFF,
+                mapProperties.combinationA & 0xFF,
+                mapProperties.combinationB & 0xFF,
+                colors
+        );
+    }
+
+    /**
+     * 生成一张 TileSet 图片
+     * 用于到地图中
+     * 导出的图片不适用于世界地图
+     * <p>
+     * 图片的大小为 256*128
+     */
+    public BufferedImage generateTileSet(int x00, int x40, int x80, int xC0, int compositionA, int compositionB, @Nullable Color[][] colors) {
+        if (colors == null) {
+            // 如果没有提供颜色，就适用灰白
+            // TODO 暂时这么写。。记得改
+            colors = new Color[][]{
+                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
+                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
+                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
+                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)}
+            };
+        }
+
+        // 获取图块集
+        byte[][][] tiles = new byte[4][0x40][0x10];
+        tiles[0] = this.tiles[x00]; // $00-$3F
+        tiles[1] = this.tiles[x40]; // $40-$7F
+        tiles[2] = this.tiles[x80]; // $80-$BF
+        tiles[3] = this.tiles[xC0]; // $C0-$FF
+
+        // 获取图块集组合
+        byte[][][] compositions = new byte[2][0x40][0x04];
+        compositions[0] = this.compositions[compositionA]; // $00-$7F
+        compositions[1] = this.compositions[compositionB]; // $80-$FF
+
+        // 获取图块的颜色
+        byte[][] colorIndex = new byte[2][0x40];
+        colorIndex[0] = this.colorIndex[compositionA];
+        colorIndex[1] = this.colorIndex[compositionB];
+
+
+        BufferedImage bufferedImage = new BufferedImage(0x100, 0x80, BufferedImage.TYPE_INT_RGB);
+        // 绘制
+        Graphics graphics = bufferedImage.getGraphics();
+
+        // 分为上下两部分绘制，每部分0x40个tile
+        // 上半部分为 $00-$7F
+        // 下半部分为 $80-$FF
+        // 怎么写出来的？别问，问就是不知道
+        for (int part = 0; part < 0x02; part++) {
+            // 获取该部分的组合集
+            byte[][] composition = compositions[part];
+            // 获取该部分的颜色
+            byte[] color = colorIndex[part];
+
+            // pixel y
+            // 该部分的所有y值
+            for (int y = 0; y < 0x40; y++) {
+                // pixel (x * 16) tile width
+                for (int tileX = 0; tileX < 0x10; tileX++) {
+                    // tile由4个小tile组成
+                    for (int smallTile = 0; smallTile < 0x04; smallTile++) {
+                        // 得到tile图像
+                        int b1 = composition[(y % 0x04 * 0x10) + tileX][smallTile] & 0xFF;
+                        byte[] bytes = tiles[b1 / 0x40][b1 % 0x40];
+                        // 得到调色板
+                        int b2 = color[(y % 0x04 * 0x10) + tileX] & 0xFF;
+                        Color[] colors1 = colors[b2 & 0B0000_0011]; // 获取调色盘
+
+                        // 绘制小tile
+                        // 小tile的大小为8*8
+                        for (int b = 0; b < 0x08; b++) {
+                            // 将0x10byte合成为一行8*1的图像
+                            for (int m = 0, d = 0x80; m < 0x08; m++, d >>>= 1) {
+                                // 得到该像素点的调色板
+                                int l = (bytes[b] & d) >>> (7 - m);
+                                l += ((bytes[b + 0x08] & d) >>> (7 - m)) << 1;
+                                graphics.setColor(colors1[l]);
+
+                                // 获取像素点坐标y
+                                int y2 = (part * 0x40) + (y * 0x08 * 0x02) + ((smallTile / 0x02) * 0x08) + b;
+                                // 获取像素点坐标x
+                                int x2 = (tileX * 0x08 * 0x02) + ((smallTile % 0x02) * 0x08) + m;
+                                // 绘制像素点
+                                graphics.drawLine(x2, y2, x2, y2);
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        graphics.dispose();
+        return bufferedImage;
+    }
+
+
+    /**
+     * 生成一张没有组合过的 TileSet 图片
+     * 4个32*128直接拼接的图片
+     * <p>
+     * 图片的大小为 128*128
+     */
+    public BufferedImage generateTileSet(int x00, int x40, int x80, int xC0) {
+        // 只能是灰白色了
+        Color[] colors = new Color[]{
+                Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)
+        };
+        byte[][][] tiles = new byte[4][0x40][0x10];
+        tiles[0] = this.tiles[x00]; // $00-$3F
+        tiles[1] = this.tiles[x40]; // $40-$7F
+        tiles[2] = this.tiles[x80]; // $80-$BF
+        tiles[3] = this.tiles[xC0]; // $C0-$FF
+
+        BufferedImage bufferedImage = new BufferedImage(0x80, 0x80, BufferedImage.TYPE_INT_RGB);
+
+        // 绘制
+        Graphics graphics = bufferedImage.getGraphics();
+
+        // 4个32*128直接拼接的图片
+        for (int part = 0; part < 0x04; part++) {
+            for (int tileX = 0; tileX < 0x40; tileX++) {
+                byte[] bytes = tiles[part][tileX];
+                for (int b = 0; b < 0x08; b++) { // byte
+                    for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
+                        int l = (bytes[b] & d) >>> (7 - k);
+                        l += ((bytes[b + 0x08] & d) >>> (7 - k)) << 1;
+                        // 设置颜色
+                        graphics.setColor(colors[l]);
+                        int y = (part * 0x20) + ((tileX / 0x10) * 0x08) + b;
+                        int x = ((tileX % 0x10) * 0x08) + k;
+                        // 绘制像素点
+                        graphics.drawLine(x, y, x, y);
+                    }
+                }
+            }
+        }
+        return bufferedImage;
     }
 }

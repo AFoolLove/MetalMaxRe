@@ -21,8 +21,9 @@ public class PaletteDialog extends JDialog {
     private JList<ImageIcon> palettes;
 
     public PaletteDialog() {
+        setTitle("调色板");
         setContentPane(contentPane);
-        setModal(true);
+//        setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
         DefaultListModel<ImageIcon> model = new DefaultListModel<>();
