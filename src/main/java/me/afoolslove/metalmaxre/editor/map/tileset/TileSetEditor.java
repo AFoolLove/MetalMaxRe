@@ -165,77 +165,11 @@ public class TileSetEditor extends AbstractEditor {
             };
         }
 
-        // 获取图块集
-        byte[][][] tiles = new byte[4][0x40][0x10];
-        tiles[0] = this.tiles[x00]; // $00-$3F
-        tiles[1] = this.tiles[x40]; // $40-$7F
-        tiles[2] = this.tiles[x80]; // $80-$BF
-        tiles[3] = this.tiles[xC0]; // $C0-$FF
-
-        // 获取图块集组合
-        byte[][][] compositions = new byte[2][0x40][0x04];
-        compositions[0] = this.compositions[compositionA]; // $00-$7F
-        compositions[1] = this.compositions[compositionB]; // $80-$FF
-
-        // 获取图块的颜色
-        byte[][] colorIndex = new byte[2][0x40];
-        colorIndex[0] = this.colorIndex[compositionA];
-        colorIndex[1] = this.colorIndex[compositionB];
-
-
-        BufferedImage bufferedImage = new BufferedImage(0x100, 0x80, BufferedImage.TYPE_INT_RGB);
-        // 绘制
-        Graphics graphics = bufferedImage.getGraphics();
-
-        // 分为上下两部分绘制，每部分0x40个tile
-        // 上半部分为 $00-$7F
-        // 下半部分为 $80-$FF
-        // 怎么写出来的？别问，问就是不知道
-        for (int part = 0; part < 0x02; part++) {
-            // 获取该部分的组合集
-            byte[][] composition = compositions[part];
-            // 获取该部分的颜色
-            byte[] color = colorIndex[part];
-
-            // pixel y
-            // 该部分的所有y值
-            for (int y = 0; y < 0x40; y++) {
-                // pixel (x * 16) tile width
-                for (int tileX = 0; tileX < 0x10; tileX++) {
-                    // tile由4个小tile组成
-                    for (int smallTile = 0; smallTile < 0x04; smallTile++) {
-                        // 得到tile图像
-                        int b1 = composition[(y % 0x04 * 0x10) + tileX][smallTile] & 0xFF;
-                        byte[] bytes = tiles[b1 / 0x40][b1 % 0x40];
-                        // 得到调色板
-                        int b2 = color[(y % 0x04 * 0x10) + tileX] & 0xFF;
-                        Color[] colors1 = colors[b2 & 0B0000_0011]; // 获取调色盘
-
-                        // 绘制小tile
-                        // 小tile的大小为8*8
-                        for (int b = 0; b < 0x08; b++) {
-                            // 将0x10byte合成为一行8*1的图像
-                            for (int m = 0, d = 0x80; m < 0x08; m++, d >>>= 1) {
-                                // 得到该像素点的调色板
-                                int l = (bytes[b] & d) >>> (7 - m);
-                                l += ((bytes[b + 0x08] & d) >>> (7 - m)) << 1;
-                                graphics.setColor(colors1[l]);
-
-                                // 获取像素点坐标y
-                                int y2 = (part * 0x40) + (y * 0x08 * 0x02) + ((smallTile / 0x02) * 0x08) + b;
-                                // 获取像素点坐标x
-                                int x2 = (tileX * 0x08 * 0x02) + ((smallTile % 0x02) * 0x08) + m;
-                                // 绘制像素点
-                                graphics.drawLine(x2, y2, x2, y2);
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-        graphics.dispose();
-        return bufferedImage;
+        return generate(0x100, 0x80,
+                x00, x40, x80, xC0,
+                new byte[][][]{this.compositions[compositionA], this.compositions[compositionB]},
+                new byte[][]{this.colorIndex[compositionA], this.colorIndex[compositionB]},
+                colors);
     }
 
 
@@ -279,6 +213,82 @@ public class TileSetEditor extends AbstractEditor {
                 }
             }
         }
+        return bufferedImage;
+    }
+
+
+    /**
+     * 生成一个世界地图的 TileSet 图片
+     * 使用了3个0x40组合和颜色
+     * 图片的大小为 256*192
+     */
+    public BufferedImage generateWorldTileSet(int x00, int x40, int x80, int xC0,
+                                              byte[][][] compositions, byte[][] colorIndexes,
+                                              Color[][] colors) {
+        return generate(0x100, 0xC0, x00, x40, x80, xC0, compositions, colorIndexes, colors);
+    }
+
+    private BufferedImage generate(int width, int height,
+                                   int x00, int x40, int x80, int xC0,
+                                   byte[][][] compositions, byte[][] colorIndexes,
+                                   Color[][] colors) {
+        byte[][][] tiles = new byte[4][0x40][0x10];
+        tiles[0] = this.tiles[x00]; // $00-$3F
+        tiles[1] = this.tiles[x40]; // $40-$7F
+        tiles[2] = this.tiles[x80]; // $80-$BF
+        tiles[3] = this.tiles[xC0]; // $C0-$FF
+
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        // 绘制
+        Graphics graphics = bufferedImage.getGraphics();
+
+        // 每0x40个tile作为一个部分
+        // 怎么写出来的？别问，问就是不知道
+        for (int part = 0; part < compositions.length; part++) {
+            // 获取该部分的组合集
+            byte[][] composition = compositions[part];
+            // 获取该部分的颜色
+            byte[] color = colorIndexes[part];
+
+            // pixel y
+            // 该部分的所有y值
+            for (int y = 0; y < 0x40; y++) {
+                // pixel (x * 16) tile width
+                for (int tileX = 0; tileX < 0x10; tileX++) {
+                    // tile由4个小tile组成
+                    for (int smallTile = 0; smallTile < 0x04; smallTile++) {
+                        // 得到tile图像
+                        int b1 = composition[(y % 0x04 * 0x10) + tileX][smallTile] & 0xFF;
+                        byte[] bytes = tiles[b1 / 0x40][b1 % 0x40];
+                        // 得到调色板
+                        int b2 = color[(y % 0x04 * 0x10) + tileX] & 0xFF;
+                        Color[] colors1 = colors[b2 & 0B0000_0011]; // 获取调色盘
+
+                        // 绘制小tile
+                        // 小tile的大小为8*8
+                        for (int b = 0; b < 0x08; b++) {
+                            // 将0x10byte合成为一行8*1的图像
+                            for (int m = 0, d = 0x80; m < 0x08; m++, d >>>= 1) {
+                                // 得到该像素点的调色板
+                                int l = (bytes[b] & d) >>> (7 - m);
+                                l += ((bytes[b + 0x08] & d) >>> (7 - m)) << 1;
+                                graphics.setColor(colors1[l]);
+
+                                // 获取像素点坐标y
+                                int y2 = (part * 0x40) + (y * 0x08 * 0x02) + ((smallTile / 0x02) * 0x08) + b;
+                                // 获取像素点坐标x
+                                int x2 = (tileX * 0x08 * 0x02) + ((smallTile % 0x02) * 0x08) + m;
+                                // 绘制像素点
+                                graphics.drawLine(x2, y2, x2, y2);
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        graphics.dispose();
         return bufferedImage;
     }
 }

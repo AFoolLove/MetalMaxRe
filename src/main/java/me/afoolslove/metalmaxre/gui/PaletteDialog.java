@@ -19,6 +19,7 @@ public class PaletteDialog extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private JList<ImageIcon> palettes;
+    private JPanel changeColor;
 
     public PaletteDialog() {
         setTitle("调色板");
@@ -37,5 +38,9 @@ public class PaletteDialog extends JDialog {
             graphics.fillRect(0x00, 0x00, 0x40, 0x40);
             model.add(i, new ImageIcon(bufferedImage));
         }
+
+        JColorChooser colorChooser = new JColorChooser(Color.BLACK);
+        colorChooser.setVisible(true);
+        colorChooser.add(changeColor);
     }
 }

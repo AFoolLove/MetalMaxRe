@@ -307,6 +307,10 @@ public class ItemsEditor extends AbstractEditor {
         return items;
     }
 
+    public Item getItem(byte item) {
+        return getItem(item & 0xFF);
+    }
+
     public Item getItem(@Range(from = 0x00, to = 0xFF) int item) {
         int temp = 0; // 计数
         for (Integer itemType : ITEM_TYPES) {

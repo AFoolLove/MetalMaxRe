@@ -5,8 +5,15 @@ import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.MapProperties;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
+import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
+import org.mapeditor.core.Map;
+import org.mapeditor.core.Tile;
+import org.mapeditor.core.TileSet;
+import org.mapeditor.io.TMXMapWriter;
+import org.mapeditor.util.BasicTileCutter;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -187,11 +194,26 @@ public class MainWindow extends JFrame {
                     {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
                     {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)}
             };
-            BufferedImage bufferedImage = editor.generateTileSet(mapProperties.tilesIndexA,
-                    mapProperties.tilesIndexB & 0xFF,
-                    mapProperties.tilesIndexC & 0xFF,
-                    mapProperties.tilesIndexD & 0xFF
-            );
+            BufferedImage bufferedImage = editor.generateTileSet(mapProperties, colors);
+
+            try {
+                ImageIO.write(bufferedImage, "png", new File("C:\\Users\\AFoolLove\\Desktop\\t.png"));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+            TileSet tiles = new TileSet();
+            try {
+                String name = "1C0E1E1F-0001-9AD9";
+                tiles.importTileBitmap(String.format("C:\\Users\\AFoolLove\\Desktop\\Map\\tsx\\png\\%s.png", name), new BasicTileCutter(16, 16, 0, 0));
+                tiles.setName(name);
+                Map mapLayers = TiledMap.create(0x01, tiles);
+
+                TMXMapWriter tmxMapWriter = new TMXMapWriter();
+                tmxMapWriter.writeMap(mapLayers, "C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+
             System.out.println("test.");
         });
 
