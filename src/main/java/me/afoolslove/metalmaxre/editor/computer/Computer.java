@@ -1,6 +1,10 @@
 package me.afoolslove.metalmaxre.editor.computer;
 
 
+import me.afoolslove.metalmaxre.Point2B;
+import me.afoolslove.metalmaxre.editor.map.MapEditor;
+import org.jetbrains.annotations.Range;
+
 /**
  * 计算机
  * 售货机、游戏机、计算机等
@@ -10,60 +14,87 @@ package me.afoolslove.metalmaxre.editor.computer;
  *
  * @author AFoolLove
  */
-public class Computer {
+public class Computer extends Point2B {
     public byte map;
     public byte type;
-    public byte x, y;
 
     public Computer(byte map, byte type, byte x, byte y) {
+        super(x, y);
         this.map = map;
         this.type = type;
-        this.x = x;
-        this.y = y;
     }
 
-    public byte getMap() {
-        return map;
+    public Computer(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map,
+                    @Range(from = 0x00, to = 0xFF) int type,
+                    @Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
+        super(x, y);
+        this.map = (byte) (map & 0xFF);
+        this.type = (byte) (type & 0xFF);
     }
 
     public void setMap(byte map) {
         this.map = map;
     }
 
-    public byte getX() {
-        return x;
-    }
-
-    public void setX(byte x) {
-        this.x = x;
-    }
-
-    public byte getY() {
-        return y;
-    }
-
-    public void setY(byte y) {
-        this.y = y;
-    }
-
-    public byte getType() {
-        return type;
+    public void setMap(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map) {
+        this.map = (byte) (map & 0xFF);
     }
 
     public void setType(byte type) {
         this.type = type;
     }
 
+    public void setType(@Range(from = 0x00, to = 0xFF) int type) {
+        this.type = (byte) (type & 0xFF);
+    }
+
+    @Override
+    public void set(@Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
+        super.set(x, y);
+    }
+
+    @Override
+    public void set(byte x, byte y) {
+        super.set(x, y);
+    }
+
+    public void set(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map,
+                    @Range(from = 0x00, to = 0xFF) int type,
+                    @Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
+        super.set(x, y);
+        setMap(map);
+        setType(type);
+    }
+
+    public byte getMap() {
+        return map;
+    }
+
+    @Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1)
+    public int intMap() {
+        return map;
+    }
+
+    public byte getType() {
+        return type;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intType() {
+        return type;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Computer)) {
+        if (!(o instanceof Computer computer)) {
             return false;
         }
-        Computer computer = (Computer) o;
         return getMap() == computer.getMap()
                 && getType() == computer.getType()
                 && getX() == computer.getX()

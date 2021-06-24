@@ -22,7 +22,22 @@ public class MapPoint extends Point2B {
         this.map = map;
     }
 
+    public MapPoint(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map,
+                    @Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
+        super(x, y);
+        this.map = (byte) (map & 0xFF);
+    }
+
+
     public MapPoint(byte x, byte y) {
+        super(x, y);
+        this.map = 0x00;
+    }
+
+
+    public MapPoint(@Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
         super(x, y);
         this.map = 0x00;
     }

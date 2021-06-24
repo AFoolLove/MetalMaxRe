@@ -10,12 +10,14 @@ import org.jetbrains.annotations.NotNull;
 import org.mapeditor.core.Map;
 import org.mapeditor.core.Tile;
 import org.mapeditor.core.TileSet;
+import org.mapeditor.io.TMXMapReader;
 import org.mapeditor.io.TMXMapWriter;
 import org.mapeditor.util.BasicTileCutter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.bind.JAXBException;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -213,6 +215,14 @@ public class MainWindow extends JFrame {
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
+            // 导入tmx到编辑器中
+//            try {
+//                Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
+//                TiledMap.importMap(0x01, mapLayers);
+//            } catch (Exception jaxbException) {
+//                jaxbException.printStackTrace();
+//            }
+
 
             System.out.println("test.");
         });
