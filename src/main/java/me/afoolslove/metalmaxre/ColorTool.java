@@ -42,7 +42,14 @@ public class ColorTool {
      * @return 指定颜色
      */
     public static Color getColor(@Range(from = 0x00, to = 0x3F) int color) {
-        return COLORS[color % 0x40];
+        return COLORS[color & 0B0011_11111];
+    }
+
+    /**
+     * @return 指定颜色
+     */
+    public static Color getColor(byte color) {
+        return COLORS[color & 0B0011_11111];
     }
 
     private ColorTool() {

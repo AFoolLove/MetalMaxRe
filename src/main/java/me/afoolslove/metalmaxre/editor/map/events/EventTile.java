@@ -3,7 +3,6 @@ package me.afoolslove.metalmaxre.editor.map.events;
 import me.afoolslove.metalmaxre.Point2B;
 import org.jetbrains.annotations.Range;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 
 /**
@@ -21,6 +20,11 @@ public class EventTile extends Point2B {
     public EventTile(int x, int y, int tile) {
         super(x, y);
         this.tile = (byte) (tile & 0xFF);
+    }
+
+    public EventTile(byte x, byte y, byte tile) {
+        super(x, y);
+        this.tile = tile;
     }
 
     public void setTile(int tile) {

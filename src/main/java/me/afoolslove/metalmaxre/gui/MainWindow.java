@@ -1,26 +1,15 @@
 package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
-import me.afoolslove.metalmaxre.editor.EditorManager;
-import me.afoolslove.metalmaxre.editor.map.MapProperties;
-import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
-import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
 import org.mapeditor.core.Map;
-import org.mapeditor.core.Tile;
-import org.mapeditor.core.TileSet;
 import org.mapeditor.io.TMXMapReader;
-import org.mapeditor.io.TMXMapWriter;
-import org.mapeditor.util.BasicTileCutter;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.bind.JAXBException;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -145,8 +134,8 @@ public class MainWindow extends JFrame {
         });
 
 
-        fileMenu.add(fileMenuOpen);
-        fileMenu.addSeparator();
+//        fileMenu.add(fileMenuOpen);
+//        fileMenu.addSeparator();
         fileMenu.add(fileMenuReload);
         fileMenu.addSeparator();
         fileMenu.add(fileMenuSave);
@@ -187,41 +176,42 @@ public class MainWindow extends JFrame {
         // 快捷键：Ctrl + Shift + T
         helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         helpMenuTest.addActionListener(e -> {
-            var editor = EditorManager.getEditor(TileSetEditor.class);
-            MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
-            MapProperties mapProperties = mapPropertiesEditor.getMapProperties(0x01);
-            final Color[][] colors = {
-                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
-                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
-                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
-                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)}
-            };
-            BufferedImage bufferedImage = editor.generateTileSet(mapProperties, colors);
-
-            try {
-                ImageIO.write(bufferedImage, "png", new File("C:\\Users\\AFoolLove\\Desktop\\t.png"));
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-            TileSet tiles = new TileSet();
-            try {
-                String name = "1C0E1E1F-0001-9AD9";
-                tiles.importTileBitmap(String.format("C:\\Users\\AFoolLove\\Desktop\\Map\\tsx\\png\\%s.png", name), new BasicTileCutter(16, 16, 0, 0));
-                tiles.setName(name);
-                Map mapLayers = TiledMap.create(0x01, tiles);
-
-                TMXMapWriter tmxMapWriter = new TMXMapWriter();
-                tmxMapWriter.writeMap(mapLayers, "C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-            // 导入tmx到编辑器中
+//            var editor = EditorManager.getEditor(TileSetEditor.class);
+//            var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
+//            var paletteEditor = EditorManager.getEditor(PaletteEditor.class);
+//
 //            try {
-//                Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
-//                TiledMap.importMap(0x01, mapLayers);
-//            } catch (Exception jaxbException) {
-//                jaxbException.printStackTrace();
+//                File tilePng = new File("C:/Users/AFoolLove/Desktop/Map/tsx/png/1C0E1E1F-0001-9AD9.png");
+//                File spritePng = new File("C:\\Users\\AFoolLove\\Desktop\\t.png");
+//                File tmx = new File("C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
+//                MapProperties mapProperties = mapPropertiesEditor.getMapProperties(0x01);
+//                BufferedImage bufferedImage = editor.generateSpriteTileSet(mapProperties.spriteIndex, null);
+//
+//                ImageIO.write(bufferedImage, "png", spritePng);
+//
+//
+//                TileSet tiles = new TileSet();
+//                tiles.importTileBitmap(tilePng.getPath(), new BasicTileCutter(16, 16, 0, 0));
+//                tiles.setName(tilePng.getName());
+//
+//                TileSet spriteTiles = new TileSet();
+//                spriteTiles.importTileBitmap(spritePng.getPath(), new BasicTileCutter(16, 16, 0, 0));
+//                spriteTiles.setName(spritePng.getName());
+//
+//                Map mapLayers = TiledMap.create(0x01, tiles, spriteTiles);
+//
+//                TMXMapWriter tmxMapWriter = new TMXMapWriter();
+//                tmxMapWriter.writeMap(mapLayers, tmx.getPath());
+//            } catch (Exception ioException) {
+//                ioException.printStackTrace();
 //            }
+            // 导入tmx到编辑器中
+            try {
+                Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
+                TiledMap.importMap(0x01, mapLayers);
+            } catch (Exception jaxbException) {
+                jaxbException.printStackTrace();
+            }
 
 
             System.out.println("test.");

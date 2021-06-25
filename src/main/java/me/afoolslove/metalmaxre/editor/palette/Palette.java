@@ -11,13 +11,13 @@ import java.util.Arrays;
 /**
  * 调色板
  * <p>
- * 只能设置三种颜色，最后一个颜色固定为黑色
+ * 只能设置三种颜色，第一个颜色固定为黑色
  *
  * @author AFoolLove
  */
 public class Palette {
     /**
-     * 只能设置前三种颜色，最后一种颜色固定为黑色，4byte
+     * 只能设置后三种颜色，第一种颜色固定为黑色，4byte
      */
     byte[] colors;
 
@@ -89,6 +89,13 @@ public class Palette {
      */
     public byte getColor(@Range(from = 0x00, to = 0x03) int colorIndex) {
         return colors[colorIndex];
+    }
+
+    /**
+     * @return Color对象的指定位置的颜色
+     */
+    public Color getToColor(@Range(from = 0x00, to = 0x03) int colorIndex) {
+        return ColorTool.getColor(colors[colorIndex]);
     }
 
     /**

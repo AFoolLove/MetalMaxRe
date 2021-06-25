@@ -3,7 +3,7 @@ package me.afoolslove.metalmaxre.editor.palette;
 import me.afoolslove.metalmaxre.ColorTool;
 
 import java.awt.*;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  * 调色板集
@@ -12,7 +12,16 @@ import java.util.LinkedList;
  *
  * @author AFoolLove
  */
-public class PaletteList extends LinkedList<Palette> {
+public class PaletteList extends ArrayList<Palette> {
+    /**
+     * 黑白的调色板
+     */
+    public static final Color[][] BLACK_WHITE = new Color[][]{
+            {ColorTool.BLACK, ColorTool.WHITE, ColorTool.getColor(0x10), ColorTool.getColor(0x00)},
+            {ColorTool.BLACK, ColorTool.WHITE, ColorTool.getColor(0x10), ColorTool.getColor(0x00)},
+            {ColorTool.BLACK, ColorTool.WHITE, ColorTool.getColor(0x10), ColorTool.getColor(0x00)},
+            {ColorTool.BLACK, ColorTool.WHITE, ColorTool.getColor(0x10), ColorTool.getColor(0x00)}
+    };
 
     /**
      * @return 转换为数组

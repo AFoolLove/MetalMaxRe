@@ -2,13 +2,17 @@ package me.afoolslove.metalmaxre.editor.map.tileset;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.map.MapProperties;
+import me.afoolslove.metalmaxre.editor.palette.Palette;
+import me.afoolslove.metalmaxre.editor.palette.PaletteList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * 图块集
@@ -24,6 +28,18 @@ public class TileSetEditor extends AbstractEditor {
     public byte[][][] tiles = new byte[0x100][0x40][0x10]; // 0x04 = CHR表的四分之一
     public byte[][][] compositions = new byte[0x37][0x40][0x04]; // 每4byte一组，0x37个组合，0x40个4byte组
     public byte[][] colorIndex = new byte[0x37][0x40]; // 每0x40byte一组，0x37个组合，每byte对应一个图块的特性和调色板索引
+
+
+    public byte[] xA597 = new byte[0x04]; // 精灵的朝向帧，全局属性（移动和未移动的图像
+    public byte[] xA59B = new byte[0x04]; // 精灵的姿态，全局属性（翻转、调色板等
+    public byte[] xA59E = new byte[0x40]; // 精灵图像值 value + spriteId = $0150，该数据大小待验证
+    public byte[] xA5DD = new byte[0x40]; // 精灵的姿态和调色板的值，(value + spriteId) | xA59B = $0160，该数据大小待验证
+
+    public byte[] x83F2 = new byte[0x08]; // 精灵上半部分两个图像块的差值
+    public byte[] x83FA = new byte[0x08]; // 精灵下半部分两个图像块的差值
+    public byte[] x847B = new byte[0x100]; // 精灵图像块差值索引等，该数据大小待验证
+    public byte[] x8552 = new byte[0x100]; // 精灵图像上半部分的图像索引，该数据大小待验证
+    public byte[] x8629 = new byte[0x100]; // 精灵图像下半部分的图像索引，该数据大小待验证
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
@@ -56,6 +72,17 @@ public class TileSetEditor extends AbstractEditor {
                 Arrays.fill(index, (byte) 0x00);
             }
         }
+        // 精灵相关数据
+        Arrays.fill(xA597, (byte) 0x00);
+        Arrays.fill(xA59B, (byte) 0x00);
+        Arrays.fill(xA59E, (byte) 0x00);
+        Arrays.fill(xA5DD, (byte) 0x00);
+        Arrays.fill(x83F2, (byte) 0x00);
+        Arrays.fill(x83FA, (byte) 0x00);
+        Arrays.fill(x847B, (byte) 0x00);
+        Arrays.fill(x8552, (byte) 0x00);
+        Arrays.fill(x8629, (byte) 0x00);
+
 
         // 读取所有 tile：0x00-0xFF
         // 0x10byte = 1tile
@@ -101,6 +128,47 @@ public class TileSetEditor extends AbstractEditor {
             // 读取 x40 tile特性和调色板
             buffer.get(color);
         }
+
+        // 读取精灵相关数据，太杂乱了，未命名
+
+        // 精灵朝向帧
+        setPrgRomPosition(buffer, 0x34597);
+        buffer.get(xA597);
+        // 精灵的姿态
+        buffer.get(xA59B);
+
+        // 精灵图像值
+        // 起始值最小为1，所以需要减1
+        // 但避免使用 索引0 这个无效数据
+        setPrgRomPosition(buffer, 0x3459F - 0x01);
+        buffer.get(xA59E);
+
+        // 精灵的姿态和调色板值
+        // 起始值最小为1，所以需要减1
+        // 但避免使用 索引0 这个无效数据
+        setPrgRomPosition(buffer, 0x345DE - 0x01);
+        buffer.get(xA5DD);
+
+        // 精灵的上半部分图像块差值
+        setPrgRomPosition(buffer, 0x263F2);
+        buffer.get(x83F2);
+        // 精灵的下半部分图像块差值
+        buffer.get(x83FA);
+
+        // 精灵图像块差值索引等
+        setPrgRomPosition(buffer, 0x2647B);
+        buffer.get(x847B);
+
+        // 精灵的图像上半部分索引
+        // 起始值最小为1，所以需要减1
+        // 但避免使用 索引0 这个无效数据
+        setPrgRomPosition(buffer, 0x26553 - 0x01);
+        buffer.get(x8552);
+        // 精灵的图像下半部分索引
+        // 起始值最小为1，所以需要减1
+        // 但避免使用 索引0 这个无效数据
+        setPrgRomPosition(buffer, 0x2662A - 0x01);
+        buffer.get(x8629);
         return true;
     }
 
@@ -127,6 +195,43 @@ public class TileSetEditor extends AbstractEditor {
         for (byte[] bytes : colorIndex) {
             buffer.put(bytes);
         }
+        // 写入精灵相关数据
+
+        // 写入精灵朝向帧
+        setPrgRomPosition(buffer, 0x34597);
+        buffer.put(xA597);
+        // 写入精灵的姿态
+        buffer.put(xA59B);
+        buffer.put(xA59E);
+        buffer.put(xA5DD);
+
+        // 写入精灵图像值
+        setPrgRomPosition(buffer, 0x3459F);
+        buffer.put(xA59E, 1, xA59E.length - 1);
+        // 写入精灵的姿态和调色板值
+        setPrgRomPosition(buffer, 0x345DE);
+        buffer.put(xA5DD, 1, xA5DD.length - 1);
+
+        // 写入精灵的上半部分图像块差值
+        setPrgRomPosition(buffer, 0x263F2);
+        buffer.put(x83F2);
+        // 写入精灵的下半部分图像块差值
+        buffer.put(x83FA);
+
+        // 写入精灵图像块差值索引等
+        setPrgRomPosition(buffer, 0x2647B);
+        buffer.put(x847B);
+
+        // 精灵的图像上半部分索引
+        // 起始值最小为1
+        // 第一个数据为无效数据
+        setPrgRomPosition(buffer, 0x26553);
+        buffer.put(x8552, 1, x8552.length - 1);
+        // 精灵的图像下半部分索引
+        // 起始值最小为1
+        // 第一个数据为无效数据
+        setPrgRomPosition(buffer, 0x2662A);
+        buffer.put(x8629, 1, x8629.length - 1);
         return true;
     }
 
@@ -156,13 +261,7 @@ public class TileSetEditor extends AbstractEditor {
     public BufferedImage generateTileSet(int x00, int x40, int x80, int xC0, int compositionA, int compositionB, @Nullable Color[][] colors) {
         if (colors == null) {
             // 如果没有提供颜色，就适用灰白
-            // TODO 暂时这么写。。记得改
-            colors = new Color[][]{
-                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
-                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
-                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)},
-                    {Color.BLACK, Color.WHITE, new Color(0xa1a1a1), new Color(0x585858)}
-            };
+            colors = PaletteList.BLACK_WHITE;
         }
 
         return generate(0x100, 0x80,
@@ -226,6 +325,217 @@ public class TileSetEditor extends AbstractEditor {
                                               byte[][][] compositions, byte[][] colorIndexes,
                                               Color[][] colors) {
         return generate(0x100, 0xC0, x00, x40, x80, xC0, compositions, colorIndexes, colors);
+    }
+
+
+    /**
+     * 生成一张精灵的 TileSet 图片
+     * 该算法不完整，所以有部分错误的图像
+     * 图片的大小为
+     * <p>
+     * 暂时未知精灵的调色板获取方式，使用的大部分相同的配色
+     */
+    public BufferedImage generateSpriteTileSet(int sprite, PaletteList palette) {
+        // 获取精灵使用的图块表
+        byte[][][] spriteTiles = new byte[4][0x40][0x10];
+        spriteTiles[0] = this.tiles[0x04]; // $00-$3F
+        spriteTiles[1] = this.tiles[0x05]; // $40-$7F
+        // 上面两个为固定的精灵表
+        spriteTiles[2] = this.tiles[sprite]; // $80-$BF
+        spriteTiles[3] = this.tiles[sprite + 1]; // $C0-$FF
+
+        palette = new PaletteList();
+        palette.add(new Palette(0x36, 0x0F, 0x16));
+        palette.add(new Palette(0x36, 0x0F, 0x21));
+        palette.add(new Palette(0x37, 0x0F, 0x18));
+        palette.add(new Palette(0x36, 0x0F, 0x12));
+
+        BufferedImage bufferedImage = new BufferedImage(0x100, 0x100, BufferedImage.TYPE_INT_ARGB);
+        Graphics graphics = bufferedImage.getGraphics();
+
+        // 精灵的的图像一共有 0x100 / 0x04 = 0x40 种
+        // 0x04 为精灵的四个朝向
+        // 精灵的id为0时，不显示精灵，所以直接跳过
+        for (int spriteId = 1; spriteId < 0x40; spriteId++) {
+            // 顺序为：上、下、左、右
+            for (int direction = 0; direction < 0x04; direction++) {
+                // 模拟内存地址$0150-$015F的数据
+                byte bA597 = xA597[direction];
+                byte bA59E = xA59E[spriteId];
+                int x0150 = (bA59E & 0xFF) + (bA597 & 0xFF);
+                // 模拟内存地址$0160-$016F的数据
+                byte bA59B = xA59B[direction];
+                byte bA5DD = xA5DD[spriteId];
+                int x0160 = (bA5DD & 0xFF) | (bA59B & 0xFF);
+
+                // 得到精灵图像差值索引
+                byte b847B = (byte) (x847B[x0150] & 0B0000_0111);
+
+                // 精灵图像上半部分的图像索引
+                byte b8552 = x8552[x0150];
+                // 精灵图像下半部分的图像索引
+                byte b8629 = x8629[x0150];
+                // 精灵上半部分两个图像块的差值
+                byte b83F2 = x83F2[b847B];
+                // 精灵下半部分两个图像块的差值
+                byte b83FA = x83FA[b847B];
+
+                // 获取上半部分图像索引
+                int up1 = b8552 & 0xFF;
+                int up2 = (b8552 + b83F2) & 0xFF;
+                // 获取下半部分图像索引
+                int down1 = b8629 & 0xFF;
+                int down2 = ((byte) (b8629 + b83FA)) & 0xFF;
+
+                // 0x10为精灵大小，0x04为精灵四个朝向
+                // 0x100为画布大小
+                // id + direction = 这个精灵的朝向
+
+                // 精灵的起始X坐标
+                int x = ((spriteId * 0x10 * 0x04) + (direction * 0x10)) % 0x100;
+                // 精灵的起始Y坐标
+                int y = (((spriteId * 0x10 * 0x04) + (direction * 0x10)) / 0x100) * 0x10;
+
+                // 读取精灵材质
+                byte[][] texture = new byte[0x04][0x10];
+                texture[0x00] = Arrays.copyOf(spriteTiles[up1 / 0x40][up1 % 0x40], 0x10);
+                texture[0x01] = Arrays.copyOf(spriteTiles[up2 / 0x40][up2 % 0x40], 0x10);
+                texture[0x02] = Arrays.copyOf(spriteTiles[down1 / 0x40][down1 % 0x40], 0x10);
+                texture[0x03] = Arrays.copyOf(spriteTiles[down2 / 0x40][down2 % 0x40], 0x10);
+
+                // 精灵姿态
+
+
+                // 精灵图块单独的左右翻转
+                if ((x847B[x0150] & 0B0111_1000) != 0x00) {
+                    for (int i = 0, t = (x847B[x0150] & 0B0111_1000) >>> 3; i < 0x04; i++, t >>>= 1) {
+                        // 翻转循序为：左上、右上、左下、右下
+                        if ((t & 0B0000_0001) != 0x00) {
+                            byte[] temp = texture[i];
+                            byte temp1;
+                            for (int j = 0; j < temp.length; j++) {
+                                temp1 = 0;
+                                for (int k = 7, h = 0x80; k >= 0; h >>>= 1, k--) {
+                                    temp1 |= ((temp[j] & h) >>> k) << (7 - k);
+                                }
+                                temp[j] = temp1;
+                            }
+                        }
+                    }
+                }
+
+                // 上下翻转
+                if ((x0160 & 0B1000_0000) == 0B1000_0000) {
+                    // 上下图块互换
+                    // 0x00 -> 0x02
+                    // 0x01 -> 0x03
+                    byte[] temp = texture[0x00];
+                    texture[0x00] = texture[0x02];
+                    texture[0x02] = temp;
+
+                    temp = texture[0x01];
+                    texture[0x01] = texture[0x03];
+                    texture[0x03] = temp;
+
+                    // 图块上下翻转 TODO 临时
+                    for (int i = 0; i < texture.length; i++) {
+                        ArrayList<Byte> tempList = new ArrayList<>();
+                        for (int j = 0; j < 0x08; j++) {
+                            tempList.add(texture[i][j]);
+                        }
+                        Collections.reverse(tempList);
+                        for (int j = 0; j < tempList.size(); j++) {
+                            texture[i][j] = tempList.get(j);
+                        }
+
+                        tempList.clear();
+
+                        for (int j = 0x08; j < 0x10; j++) {
+                            tempList.add(texture[i][j]);
+                        }
+                        Collections.reverse(tempList);
+                        for (int j = 0; j < tempList.size(); j++) {
+                            texture[i][j + 8] = tempList.get(j);
+                        }
+
+                    }
+                }
+
+                // 左右翻转
+                if ((x0160 & 0B0100_0000) == 0B0100_0000) {
+                    // 左右图块互换
+                    // 0x00 -> 0x01
+                    // 0x02 -> 0x03
+                    byte[] temp = texture[0x00];
+                    texture[0x00] = texture[0x01];
+                    texture[0x01] = temp;
+
+                    temp = texture[0x02];
+                    texture[0x02] = texture[0x03];
+                    texture[0x03] = temp;
+
+                    byte temp1;
+                    for (byte[] bytes : texture) {
+                        for (int j = 0; j < bytes.length; j++) {
+                            temp1 = 0;
+                            for (int k = 7, h = 0x80; k >= 0; h >>>= 1, k--) {
+                                temp1 |= ((bytes[j] & h) >>> k) << (7 - k);
+                            }
+                            bytes[j] = temp1;
+                        }
+                    }
+                }
+
+                for (int j = 0; j < texture.length; j++) {
+                    int x2 = j % 0x02; // 精灵图像的小块(2*2)X值绘制位置
+                    int y2 = j / 0x02; // 精灵图像的小块(2*2)Y值绘制位置
+
+                    byte[] bytes = texture[j];
+                    if (bytes == null) {
+                        continue;
+                    }
+                    for (int b = 0; b < 0x08; b++) { // byte
+                        for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
+                            int l = (bytes[b] & d) >>> (7 - k);
+                            l += ((bytes[b + 0x08] & d) >>> (7 - k)) << 1;
+
+                            if (l == 0) {
+                                continue; //  精灵的第0颜色为透明
+                            }
+
+                            // 翻转保持调色板
+                            if ((x0160 & 0B1000_0000) == 0B1000_0000) {
+                                // 上下翻转替换调色板
+                                if (y2 != 0) {
+                                    // 上半部分使用下半部分的调色板
+                                    graphics.setColor(palette.get((x0160 & 0B0000_1100) >>> 2).getToColor(l));
+                                } else {
+                                    // 下半部分使用上半部分的调色板
+                                    graphics.setColor(palette.get(x0160 & 0B0000_0011).getToColor(l));
+                                }
+                            } else {
+                                if (y2 != 0) {
+                                    // 上半部分调色板
+                                    graphics.setColor(palette.get(x0160 & 0B0000_0011).getToColor(l));
+                                } else {
+                                    // 下半部分调色板
+                                    graphics.setColor(palette.get((x0160 & 0B0000_1100) >>> 2).getToColor(l));
+                                }
+                            }
+
+
+                            int x3 = x + (x2 * 0x08) + k; // 精灵图像X值绘制位置
+                            int y3 = y + (y2 * 0x08) + b; // 精灵图像Y值绘制位置
+                            graphics.drawLine(x3, y3, x3, y3);
+                        }
+                    }
+
+                }
+            }
+        }
+
+
+        return bufferedImage;
     }
 
     private BufferedImage generate(int width, int height,

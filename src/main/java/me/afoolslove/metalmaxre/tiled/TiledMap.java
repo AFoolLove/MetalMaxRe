@@ -13,13 +13,13 @@ import me.afoolslove.metalmaxre.editor.treasure.Treasure;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
+import org.mapeditor.core.Map;
+import org.mapeditor.core.Properties;
 import org.mapeditor.core.*;
 
 import java.awt.*;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Tiled地图
@@ -32,9 +32,9 @@ import java.util.Set;
 public class TiledMap {
 
     /**
-     * 生成
+     * 生成Tiled地图
      */
-    public static Map create(@Range(from = 0x01, to = MapEditor.MAP_MAX_COUNT - 1) int map, @NotNull TileSet tileSet) {
+    public static Map create(@Range(from = 0x01, to = MapEditor.MAP_MAX_COUNT - 1) int map, @NotNull TileSet tileSet, @NotNull TileSet spriteTileSet) {
         var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
         var mapEditor = EditorManager.getEditor(MapEditor.class);
         var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
@@ -61,9 +61,13 @@ public class TiledMap {
         tiledMap.setTileWidth(16);
         tiledMap.setTileHeight(16);
 
-        // 添加这个图块集
+        // 添加图块集
         if (!tiledMap.getTileSets().contains(tileSet)) {
             tiledMap.getTileSets().add(tileSet);
+        }
+        // 添加精灵图块集
+        if (!tiledMap.getTileSets().contains(spriteTileSet)) {
+            tiledMap.getTileSets().add(spriteTileSet);
         }
 
         // ----------------
@@ -99,7 +103,7 @@ public class TiledMap {
         // 隐藏tile层，（门打开后的图块等
         TileLayer hideTileLayer = new TileLayer(width, height);
         hideTileLayer.setId(nextLayerId++);
-        hideTileLayer.setName("hideTileLayer");
+        hideTileLayer.setName("hideTile");
 
         // 获取隐藏的Tile，并将该图层全部设置为该Tile
         Tile hideTile = tileSet.getTile(mapProperties.hideTile & 0x7F);
@@ -225,7 +229,43 @@ public class TiledMap {
         spriteGroup.setId(nextObjectId++);
         spriteGroup.setName("sprites");
 
-        // TODO 需要完成精灵图层，暂不添加
+        // 获取当前地图的所有精灵，添加到精灵组中
+        for (Sprite sprite : spriteEditor.getSprites(map)) {
+            MapObject mapObject = new MapObject();
+            mapObject.setId(nextObjectId++);
+            // 将精灵动作和对话类型作为名称
+            mapObject.setName(String.format("%02X:%02X:%02X", sprite.action, sprite.talk1, sprite.talk2));
+            // 添加标志，Tiled程序可以识别
+            mapObject.setType("sprites");
+            // 0x80 为fistID，tileSet的结尾
+            // 0x01为软件地址偏移
+            mapObject.setGid(0x80 + (sprite.type & 0xFF) + 0x01);
+            // 精灵最大X、Y为0x3F
+            mapObject.setX((sprite.x & 0x3F) * 0x10);
+            // Y值需要额外增加1格，软件才能正确的显示位置
+            mapObject.setY(((sprite.y & 0x3F) + 1) * 0x10);
+
+            // 固定大小为 0x10*0x10
+            mapObject.setWidth((double) 0x10);
+            mapObject.setHeight((double) 0x10);
+
+            // 添加其它属性
+            Properties properties = mapObject.getProperties();
+            if ((sprite.x & Sprite.FLAG_LOCK_DIRECTION) == Sprite.FLAG_LOCK_DIRECTION) {
+                properties.setProperty("XD7|锁定朝向", "true");
+            }
+            if ((sprite.x & Sprite.FLAG_DISABLE_MOVING_ANIM) == Sprite.FLAG_DISABLE_MOVING_ANIM) {
+                properties.setProperty("XD6|禁用移动动画", "true");
+            }
+            if ((sprite.y & Sprite.FLAG_CAN_PUSHED) == Sprite.FLAG_CAN_PUSHED) {
+                properties.setProperty("YD7|可被推动", "true");
+            }
+            if ((sprite.y & Sprite.FLAG_IGNORE_TERRAIN) == Sprite.FLAG_IGNORE_TERRAIN) {
+                properties.setProperty("YD6|无视地形", "true");
+            }
+            // 添加精灵到精灵组
+            spriteGroup.addObject(mapObject);
+        }
 
         // ----------------
 
@@ -276,6 +316,11 @@ public class TiledMap {
                 tile.setType("");
             }
         }
+        for (Tile tile : spriteTileSet) {
+            if (tile.getType() == null) {
+                tile.setType("");
+            }
+        }
         // --- END 可以看出来，新的bug增加了
         return tiledMap;
     }
@@ -284,13 +329,15 @@ public class TiledMap {
     /**
      * 将已有的Tiled地图作为某个地图的数据
      * 部分不存在的数据保持不变
+     * <p>
+     * tileMap的TileSet名称会影响地图图块
+     * tileMap的精灵TileSet名称会影响精灵图块
      */
     public static void importMap(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map, @NotNull Map tiledMap) {
         var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
         var mapEditor = EditorManager.getEditor(MapEditor.class);
         var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
         var treasureEditor = EditorManager.getEditor(TreasureEditor.class);
-        var itemsEditor = EditorManager.getEditor(ItemsEditor.class);
         var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
         var computerEditor = EditorManager.getEditor(ComputerEditor.class);
         var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
@@ -302,7 +349,7 @@ public class TiledMap {
         for (Property property : tiledMap.getProperties().getProperties()) {
             String name = property.getName();
             // 名称必须有效且长度大于3
-            if (property.getType() == PropertyType.BOOL && name != null && name.length() >= 3 && Boolean.parseBoolean(property.getValue())) {
+            if (name != null && name.length() >= 3 && Boolean.parseBoolean(property.getValue())) {
                 name = name.substring(0, 3).toUpperCase();
 
                 switch (name) {
@@ -353,10 +400,8 @@ public class TiledMap {
                             byte y = (byte) ((((int) sprite.getY() / 0x10) & 0xFF) - 1);
 
                             // 通过图块ID获取精灵的朝向和图像
-                            // 朝向
-                            byte type = (byte) ((sprite.getTile().getId() / 0x40) & 0xFF);
-                            // 图像
-                            type += ((sprite.getTile().getId() % 0x40) << 2);
+                            // 精灵图像和朝向
+                            byte type = (byte) (sprite.getTile().getId() & 0xFF);
 
                             // 通过对象名称设置行动方式和对话模式
                             // FF:FF:FF
@@ -368,7 +413,7 @@ public class TiledMap {
                             for (Property property : sprite.getProperties().getProperties()) {
                                 String name = property.getName();
                                 // 名称必须有效且长度大于4
-                                if (property.getType() == PropertyType.BOOL && name != null && name.length() >= 4 && Boolean.parseBoolean(property.getValue())) {
+                                if (name != null && name.length() >= 4 && Boolean.parseBoolean(property.getValue())) {
                                     name = name.substring(0, 4).toUpperCase();
 
                                     switch (name) {
@@ -425,9 +470,80 @@ public class TiledMap {
                             entrances.put(new MapPoint(map, inX, inY), new MapPoint(outMap, outX, outY));
                         }
                         break;
+                    case "treasure":
+                        // 获取当前地图的所有宝藏
+                        Set<Treasure> treasures = treasureEditor.findMap(map);
+                        // 移除当前地图的所有宝藏
+                        treasureEditor.removeAll(treasures);
+
+                        for (MapObject treasure : objectGroup.getObjects()) {
+                            // 通过名称获取宝藏
+                            int item = Integer.parseInt(treasure.getName().substring(0, 2), 16);
+                            int x = (int) (treasure.getX() / 0x10);
+                            int y = (int) treasure.getY() / 0x10;
+                            // 添加宝藏
+                            treasureEditor.add(new Treasure(map, x, y, item));
+                        }
+                        break;
                 }
             } else if (layer instanceof TileLayer tileLayer) {
                 // Tile层
+                switch (tileLayer.getName()) {
+                    case "map" -> {
+                        // 构建地图
+                        MapBuilder mapBuilder = new MapBuilder();
+                        Rectangle mapBounds = tiledMap.getBounds();
+                        for (int y = 0; y < mapBounds.height; y++) {
+                            for (int x = 0; x < mapBounds.width; x++) {
+                                mapBuilder.add(tileLayer.getTileAt(x, y).getId());
+                            }
+                        }
+                        mapEditor.getMaps().put(map, mapBuilder);
+                    }
+                    case "hideTile" ->
+                            // 通过hideTile层的 (0,0) 图块作为隐藏图块
+                            mapProperties.hideTile = (byte) (((TileLayer) layer).getTileAt(0, 0).getId() & 0x7F);
+                    case "fillTile" ->
+                            // 通过fillTile层的 (0,0) 图块作为填充图块（地图外填充的图块
+                            mapProperties.fillTile = (byte) (((TileLayer) layer).getTileAt(0, 0).getId() & 0x7F);
+                }
+
+            } else if (layer instanceof Group group) {
+                // 组
+                // 目前只储存 events
+                if (Objects.equals("events", group.getName())) {
+                    var eventTile = eventTilesEditor.getEventTile(map);
+                    // 移除当前地图所有的事件图块
+                    eventTile.clear();
+
+                    for (MapLayer mapLayer : group.getLayers()) {
+                        if (mapLayer instanceof TileLayer eventLayer) {
+                            // 通过名称获取事件数据
+                            // 0x0441为实际内存地址起始
+                            int event = Integer.parseInt(eventLayer.getName().substring(0, 4), 16) - 0x0441;
+                            // 左移3bit，空出末尾的bit位
+                            event <<= 0x03;
+                            // 末尾为bit位
+                            event += Byte.parseByte(eventLayer.getName().substring(5));
+
+                            // 通过地图内容获取事件影响的图块
+                            List<EventTile> events = new ArrayList<>();
+
+                            Rectangle bounds = eventLayer.getBounds();
+                            for (byte y = 0; y < bounds.height; y++) {
+                                for (byte x = 0; x < bounds.width; x++) {
+                                    Tile tileAt = eventLayer.getTileAt(x, y);
+                                    // 将所有有效的图块作为事件图块
+                                    if (tileAt != null && tileAt.getId() != 0x00) {
+                                        events.add(new EventTile(x, y, tileAt.getId().byteValue()));
+                                    }
+                                }
+                            }
+                            eventTile.put(event, events);
+                        }
+                    }
+
+                }
 
             }
 
