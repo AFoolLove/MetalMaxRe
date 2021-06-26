@@ -29,12 +29,10 @@ public class MapPoint extends Point2B {
         this.map = (byte) (map & 0xFF);
     }
 
-
     public MapPoint(byte x, byte y) {
         super(x, y);
         this.map = 0x00;
     }
-
 
     public MapPoint(@Range(from = 0x00, to = 0xFF) int x,
                     @Range(from = 0x00, to = 0xFF) int y) {
@@ -56,11 +54,14 @@ public class MapPoint extends Point2B {
     }
 
     @Override
-    public void set(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y) {
+    public void set(@Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
         super.set(x, y);
     }
 
-    public void set(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y, @Range(from = 0x00, to = 0xFF) int map) {
+    public void set(@Range(from = 0x00, to = 0xFF) int map,
+                    @Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
         super.set(x, y);
         setMap(map);
     }
@@ -70,7 +71,7 @@ public class MapPoint extends Point2B {
         super.set(x, y);
     }
 
-    public void set(byte x, byte y, byte map) {
+    public void set(byte map, byte x, byte y) {
         super.set(x, y);
         setMap(map);
     }
@@ -81,14 +82,13 @@ public class MapPoint extends Point2B {
         setY(mapPoint.y);
     }
 
-
     public byte getMap() {
         return map;
     }
 
     @Range(from = 0x00, to = 0xFF)
     public int intMap() {
-        return getMap();
+        return getMap() & 0xFF;
     }
 
     @Override

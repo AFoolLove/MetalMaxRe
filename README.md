@@ -24,10 +24,26 @@
 
     其它
 
+## 注意
+
+> 未经允许，请勿将已修改的游戏内容散布到任何地方  
+> Please do not distribute the modified game content to any place without permission (*translate)
+
+### 使用
+
+请确保已经安装了`java 16`或以上的版本
+
+如果需要可视化界面（未完成），可以添加 `gui` 参数，如下：
+
+~~~bash
+java -jar metalmaxre.jar gui
+~~~
+
 ### 下载
 
 无法给出可以用的版本，所以暂不提构建的jar
 
 ### 构建环境
+
 ```java 16```
 

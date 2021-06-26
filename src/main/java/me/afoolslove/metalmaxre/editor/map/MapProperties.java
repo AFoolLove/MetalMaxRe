@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editor.map;
 
+import java.util.Objects;
+
 /**
  * 地图属性
  * <p>
@@ -175,62 +177,14 @@ public class MapProperties {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof MapProperties)) {
+        if (!(o instanceof MapProperties that)) {
             return false;
         }
-        MapProperties that = (MapProperties) o;
-        return head == that.head
-                && width == that.width
-                && height == that.height
-                && movableWidthOffset == that.movableWidthOffset
-                && movableHeightOffset == that.movableHeightOffset
-                && movableWidth == that.movableWidth
-                && movableHeight == that.movableHeight
-                && mapIndex == that.mapIndex
-                && combinationA == that.combinationA
-                && combinationB == that.combinationB
-                && entrance == that.entrance
-                && palette == that.palette
-                && spriteIndex == that.spriteIndex
-                && tilesIndexA == that.tilesIndexA
-                && tilesIndexB == that.tilesIndexB
-                && tilesIndexC == that.tilesIndexC
-                && tilesIndexD == that.tilesIndexD
-                && hideTile == that.hideTile
-                && unknown == that.unknown
-                && fillTile == that.fillTile
-                && music == that.music
-                && dyTileSpeed == that.dyTileSpeed
-                && dyTile == that.dyTile
-                && eventTilesIndex == that.eventTilesIndex;
+        return head == that.head && width == that.width && height == that.height && movableWidthOffset == that.movableWidthOffset && movableHeightOffset == that.movableHeightOffset && movableWidth == that.movableWidth && movableHeight == that.movableHeight && mapIndex == that.mapIndex && combinationA == that.combinationA && combinationB == that.combinationB && entrance == that.entrance && palette == that.palette && spriteIndex == that.spriteIndex && tilesIndexA == that.tilesIndexA && tilesIndexB == that.tilesIndexB && tilesIndexC == that.tilesIndexC && tilesIndexD == that.tilesIndexD && hideTile == that.hideTile && unknown == that.unknown && fillTile == that.fillTile && music == that.music && dyTileSpeed == that.dyTileSpeed && dyTile == that.dyTile && eventTilesIndex == that.eventTilesIndex;
     }
 
     @Override
     public int hashCode() {
-        int result = head;
-        result = 31 * result + (int) width;
-        result = 31 * result + (int) height;
-        result = 31 * result + (int) movableWidthOffset;
-        result = 31 * result + (int) movableHeightOffset;
-        result = 31 * result + (int) movableWidth;
-        result = 31 * result + (int) movableHeight;
-        result = 31 * result + (int) mapIndex;
-        result = 31 * result + (int) combinationA;
-        result = 31 * result + (int) combinationB;
-        result = 31 * result + (int) entrance;
-        result = 31 * result + (int) palette;
-        result = 31 * result + (int) spriteIndex;
-        result = 31 * result + (int) tilesIndexA;
-        result = 31 * result + (int) tilesIndexB;
-        result = 31 * result + (int) tilesIndexC;
-        result = 31 * result + (int) tilesIndexD;
-        result = 31 * result + (int) hideTile;
-        result = 31 * result + (int) unknown;
-        result = 31 * result + (int) fillTile;
-        result = 31 * result + (int) music;
-        result = 31 * result + (int) dyTileSpeed;
-        result = 31 * result + (int) dyTile;
-        result = 31 * result + (int) eventTilesIndex;
-        return result;
+        return Objects.hash(head, width, height, movableWidthOffset, movableHeightOffset, movableWidth, movableHeight, mapIndex, combinationA, combinationB, entrance, palette, spriteIndex, tilesIndexA, tilesIndexB, tilesIndexC, tilesIndexD, hideTile, unknown, fillTile, music, dyTileSpeed, dyTile, eventTilesIndex);
     }
 }

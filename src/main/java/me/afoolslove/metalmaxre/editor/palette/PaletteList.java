@@ -31,8 +31,7 @@ public class PaletteList extends ArrayList<Palette> {
         colors[0x00] = get(0x00).toColors();
         colors[0x01] = get(0x01).toColors();
         colors[0x02] = get(0x02).toColors();
-        // 固定颜色
-        colors[0x03] = new Color[]{Color.BLACK, Color.WHITE, ColorTool.getColor(0x10), ColorTool.getColor(0x00)};
+        colors[0x03] = get(0x03).toColors();
         return colors;
     }
 }

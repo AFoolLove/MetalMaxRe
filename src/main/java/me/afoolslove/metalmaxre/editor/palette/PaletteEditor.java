@@ -27,13 +27,16 @@ import java.util.List;
 public class PaletteEditor extends AbstractEditor {
     public static final int PALETTE_START_OFFSET = 0x1DAE0 - 0x10;
     public static final int PALETTE_LIST_COUNT = 0xA5;
+    public static final int PALETTE_LIST_SPRITE = 0x7D737 - 0x10;
 
     private final List<PaletteList> paletteLists = new ArrayList<>();
+    private final PaletteList spritePalette = new PaletteList();
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 读取前清空数据
         paletteLists.clear();
+        spritePalette.clear();
 
         setPrgRomPosition(buffer, PALETTE_START_OFFSET);
         // 读取所有调色板集（9byte）
@@ -46,6 +49,17 @@ public class PaletteEditor extends AbstractEditor {
             palettes.add(0x03, new Palette(0x30, 0x10, 0x00));
             paletteLists.add(palettes);
         }
+
+        // 读取精灵调色板，固定数值
+        setPrgRomPosition(buffer, PALETTE_LIST_SPRITE);
+        buffer.get(); // 跳过 0x0F
+        spritePalette.add(new Palette(buffer));
+        buffer.get(); // 跳过 0x0F
+        spritePalette.add(new Palette(buffer));
+        buffer.get(); // 跳过 0x0F
+        spritePalette.add(new Palette(buffer));
+        buffer.get(); // 跳过 0x0F
+        spritePalette.add(new Palette(buffer));
         return true;
     }
 
@@ -75,6 +89,12 @@ public class PaletteEditor extends AbstractEditor {
             System.out.printf("调色板编辑器：错误！超出了数据上限%d字节\n", end - 0x1DCCE);
         }
 
+        // 写入精灵调色板
+        setPrgRomPosition(buffer, PALETTE_LIST_SPRITE);
+        buffer.put(spritePalette.get(0x00).colors);
+        buffer.put(spritePalette.get(0x01).colors);
+        buffer.put(spritePalette.get(0x02).colors);
+        buffer.put(spritePalette.get(0x03).colors);
         return true;
     }
 
@@ -83,6 +103,13 @@ public class PaletteEditor extends AbstractEditor {
      */
     public List<PaletteList> getPaletteLists() {
         return new ArrayList<>(paletteLists);
+    }
+
+    /**
+     * @return 精灵的调色板
+     */
+    public PaletteList getSpritePalette() {
+        return spritePalette;
     }
 
     /**

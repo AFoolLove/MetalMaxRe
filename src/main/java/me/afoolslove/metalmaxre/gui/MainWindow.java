@@ -176,16 +176,16 @@ public class MainWindow extends JFrame {
         // 快捷键：Ctrl + Shift + T
         helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         helpMenuTest.addActionListener(e -> {
-//            var editor = EditorManager.getEditor(TileSetEditor.class);
-//            var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
-//            var paletteEditor = EditorManager.getEditor(PaletteEditor.class);
+//            var editor = getEditor(TileSetEditor.class);
+//            var mapPropertiesEditor = getEditor(MapPropertiesEditor.class);
+//            var paletteEditor = getEditor(PaletteEditor.class);
 //
 //            try {
-//                File tilePng = new File("C:/Users/AFoolLove/Desktop/Map/tsx/png/1C0E1E1F-0001-9AD9.png");
+//                File tilePng = new File("C:/Users/AFoolLove/Desktop/Map/tsx/png/40414203-0308-9B4E.png");
 //                File spritePng = new File("C:\\Users\\AFoolLove\\Desktop\\t.png");
 //                File tmx = new File("C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
-//                MapProperties mapProperties = mapPropertiesEditor.getMapProperties(0x01);
-//                BufferedImage bufferedImage = editor.generateSpriteTileSet(mapProperties.spriteIndex, null);
+//                MapProperties mapProperties = mapPropertiesEditor.getMapProperties(0x0A);
+//                BufferedImage bufferedImage = editor.generateSpriteTileSet(mapProperties.spriteIndex & 0xFF);
 //
 //                ImageIO.write(bufferedImage, "png", spritePng);
 //
@@ -198,7 +198,7 @@ public class MainWindow extends JFrame {
 //                spriteTiles.importTileBitmap(spritePng.getPath(), new BasicTileCutter(16, 16, 0, 0));
 //                spriteTiles.setName(spritePng.getName());
 //
-//                Map mapLayers = TiledMap.create(0x01, tiles, spriteTiles);
+//                Map mapLayers = TiledMap.create(0x0A, tiles, spriteTiles);
 //
 //                TMXMapWriter tmxMapWriter = new TMXMapWriter();
 //                tmxMapWriter.writeMap(mapLayers, tmx.getPath());
@@ -208,7 +208,7 @@ public class MainWindow extends JFrame {
             // 导入tmx到编辑器中
             try {
                 Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
-                TiledMap.importMap(0x01, mapLayers);
+                TiledMap.importMap(0x0A, mapLayers);
             } catch (Exception jaxbException) {
                 jaxbException.printStackTrace();
             }

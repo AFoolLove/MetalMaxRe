@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editor.map;
 
+import org.jetbrains.annotations.Range;
+
 /**
  * 地图块和数量
  * <p>
@@ -13,15 +15,26 @@ package me.afoolslove.metalmaxre.editor.map;
  */
 public class MapTile {
     public byte tile;
-    public int count;
+    public byte count;
 
-    public MapTile(int tile, int count) {
+    public MapTile(@Range(from = 0x00, to = 0xFF) int tile,
+                   @Range(from = 0x00, to = 0x7F) int count) {
         this.tile = (byte) (tile & 0xFF);
+        this.count = (byte) (count & 0x7F);
+    }
+
+    public MapTile(byte tile, @Range(from = 0x00, to = 0x7F) byte count) {
+        this.tile = tile;
         this.count = count;
     }
 
-    public MapTile(int tile) {
+    public MapTile(@Range(from = 0x00, to = 0xFF) int tile) {
         this.tile = (byte) (tile & 0xFF);
+        this.count = 1;
+    }
+
+    public MapTile(byte tile) {
+        this.tile = tile;
         this.count = 1;
     }
 
@@ -29,18 +42,36 @@ public class MapTile {
         return tile;
     }
 
+    @Range(from = 0x00, to = 0xFF)
+    public int intTile() {
+        return getTile() & 0xFF;
+    }
+
     public void setTile(byte tile) {
         this.tile = tile;
+    }
+
+    public void setTile(@Range(from = 0x00, to = 0xFF) int tile) {
+        this.tile = (byte) (tile & 0xFF);
     }
 
     /**
      * @return tile的数量
      */
-    public int getCount() {
+    public byte getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    @Range(from = 0x00, to = 0x7F)
+    public int intCount() {
+        return getCount() & 0x7F;
+    }
+
+    public void setCount(@Range(from = 0x00, to = 0x7F) int count) {
+        this.count = (byte) (count & 0x7F);
+    }
+
+    public void setCount(@Range(from = 0x00, to = 0x7F) byte count) {
         this.count = count;
     }
 

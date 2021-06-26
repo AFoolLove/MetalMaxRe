@@ -1,27 +1,38 @@
 package me.afoolslove.metalmaxre.editor.treasure;
 
+import me.afoolslove.metalmaxre.Point2B;
+import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
+
+import java.util.Objects;
 
 /**
  * 宝藏
  *
  * @author AFoolLove
  */
-public class Treasure implements Cloneable {
+public class Treasure extends Point2B {
     /**
-     * 这个宝藏所在的地图
+     * 宝藏所在的地图
      */
     public byte map;
     /**
-     * 这个宝藏所在的地图坐标
-     */
-    public byte x, y;
-    /**
-     * 这个宝藏的内容
+     * 宝藏的内容
      */
     public byte item;
 
-    public Treasure(int map, int x, int y, int item) {
+    public Treasure(byte map, byte x, byte y, byte item) {
+        super(x, y);
+        this.map = map;
+        this.item = item;
+    }
+
+    public Treasure(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map,
+                    @Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y,
+                    @Range(from = 0x00, to = 0xFF) int item) {
+        super(x, y);
         set(map, x, y, item);
     }
 
@@ -41,40 +52,11 @@ public class Treasure implements Cloneable {
     }
 
     /**
-     * 设置宝藏的坐标
-     *
-     * @param x X 坐标
-     * @param y Y 坐标
-     */
-    public void setPosition(int x, int y) {
-        this.x = (byte) (x & 0xFF);
-        this.y = (byte) (y & 0xFF);
-    }
-
-    /**
-     * 设置宝藏所在的 X 坐标
-     *
-     * @param x X 坐标
-     */
-    public void setX(byte x) {
-        this.x = x;
-    }
-
-    /**
-     * 设置宝藏所在的 Y 坐标
-     *
-     * @param y Y 坐标
-     */
-    public void setY(int y) {
-        this.y = (byte) (y & 0xFF);
-    }
-
-    /**
      * 设置宝藏所在的地图
      *
      * @param map 地图
      */
-    public void setMap(int map) {
+    public void setMap(@Range(from = 0x00, to = 0xFF) int map) {
         this.map = (byte) (map & 0xFF);
     }
 
@@ -83,10 +65,9 @@ public class Treasure implements Cloneable {
      *
      * @param item 宝藏
      */
-    public void setItem(int item) {
+    public void setItem(@Range(from = 0x00, to = 0xFF) int item) {
         this.item = (byte) (item & 0xFF);
     }
-
 
     /**
      * @return 这个宝藏所在的地图
@@ -95,18 +76,8 @@ public class Treasure implements Cloneable {
         return map;
     }
 
-    /**
-     * @return 这个宝藏所在的地图 X 坐标
-     */
-    public byte getX() {
-        return x;
-    }
-
-    /**
-     * @return 这个宝藏所在的地图 Y 坐标
-     */
-    public byte getY() {
-        return y;
+    public int intMap() {
+        return getMap() & 0xFF;
     }
 
     /**
@@ -116,6 +87,9 @@ public class Treasure implements Cloneable {
         return item;
     }
 
+    public int intItem() {
+        return getItem() & 0xFF;
+    }
 
     /**
      * @return 是否为空宝藏
@@ -150,30 +124,18 @@ public class Treasure implements Cloneable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Treasure)) {
+        if (!(o instanceof Treasure treasure)) {
             return false;
         }
-
-        Treasure treasure = (Treasure) o;
-
-        if (getMap() != treasure.getMap()) {
+        if (!super.equals(o)) {
             return false;
         }
-        if (getX() != treasure.getX()) {
-            return false;
-        }
-        if (getY() != treasure.getY()) {
-            return false;
-        }
-        return getItem() == treasure.getItem();
+        return getMap() == treasure.getMap()
+                && getItem() == treasure.getItem();
     }
 
     @Override
     public int hashCode() {
-        int result = getMap();
-        result = 31 * result + (int) getX();
-        result = 31 * result + (int) getY();
-        result = 31 * result + (int) getItem();
-        return result;
+        return Objects.hash(super.hashCode(), getMap(), getItem());
     }
 }

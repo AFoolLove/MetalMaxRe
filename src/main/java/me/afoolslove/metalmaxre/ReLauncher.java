@@ -31,7 +31,7 @@ public class ReLauncher {
                     }
                     break;
                 case "GUI":
-                    showGui = Boolean.parseBoolean(value);
+                    showGui = value == null || Boolean.parseBoolean(value);
                     break;
                 default:
                     break;

@@ -1,5 +1,8 @@
 package me.afoolslove.metalmaxre.editor.sprite;
 
+import me.afoolslove.metalmaxre.Point2B;
+import org.jetbrains.annotations.Range;
+
 import java.util.Objects;
 
 /**
@@ -9,7 +12,7 @@ import java.util.Objects;
  *
  * @author AFoolLove
  */
-public class Sprite {
+public class Sprite extends Point2B {
     /**
      * Y:可以被玩家推动
      */
@@ -28,26 +31,29 @@ public class Sprite {
     public static final int FLAG_DISABLE_MOVING_ANIM = 0B0100_0000;
 
     public byte type;
-    public byte x, y;
     public byte talk1, talk2;
     public byte action;
 
     public Sprite() {
+        this(0, 0, 0, 0, 0, 0);
     }
 
     public Sprite(byte type, byte x, byte y, byte talk1, byte talk2, byte action) {
+        super(x, y);
         this.type = type;
-        this.x = x;
-        this.y = y;
         this.talk1 = talk1;
         this.talk2 = talk2;
         this.action = action;
     }
 
-    public Sprite(int type, int x, int y, int talk1, int talk2, int action) {
+    public Sprite(@Range(from = 0x00, to = 0xFF) int type,
+                  @Range(from = 0x00, to = 0xFF) int x,
+                  @Range(from = 0x00, to = 0xFF) int y,
+                  @Range(from = 0x00, to = 0xFF) int talk1,
+                  @Range(from = 0x00, to = 0xFF) int talk2,
+                  @Range(from = 0x00, to = 0xFF) int action) {
+        super(x, y);
         this.type = (byte) (type & 0xFF);
-        this.x = (byte) (x & 0xFF);
-        this.y = (byte) (y & 0xFF);
         this.talk1 = (byte) (talk1 & 0xFF);
         this.talk2 = (byte) (talk2 & 0xFF);
         this.action = (byte) (action & 0xFF);
@@ -62,13 +68,26 @@ public class Sprite {
         return x;
     }
 
+    @Range(from = 0x00, to = 0xFF)
+    public int intRawX() {
+        return x & 0xFF;
+    }
+
     /**
      * 获取精灵的X坐标
      *
      * @return 精灵的X坐标，其中不包含任何属性
      */
+    @Range(from = 0x00, to = 0x3F)
+    @Override
     public byte getX() {
         return (byte) (x & 0x3F);
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    @Override
+    public int intX() {
+        return x & 0x3F;
     }
 
     /**
@@ -80,22 +99,45 @@ public class Sprite {
         return y;
     }
 
+    @Range(from = 0x00, to = 0xFF)
+    public int intRawY() {
+        return y & 0xFF;
+    }
+
     /**
      * 获取精灵的Y坐标
      *
      * @return 精灵的Y坐标，其中不包含任何属性
      */
+    @Range(from = 0x00, to = 0x3F)
+    @Override
     public byte getY() {
         return (byte) (y & 0x3F);
     }
 
-    public void setTalk(int talk1, int talk2) {
+    @Range(from = 0x00, to = 0xFF)
+    @Override
+    public int intY() {
+        return y & 0xFF;
+    }
+
+    public void setTalk(byte talk1, byte talk2) {
+        this.talk1 = talk1;
+        this.talk2 = talk2;
+    }
+
+    public void setTalk(@Range(from = 0x00, to = 0xFF) int talk1,
+                        @Range(from = 0x00, to = 0xFF) int talk2) {
         this.talk1 = (byte) (talk1 & 0xFF);
         this.talk2 = (byte) (talk2 & 0xFF);
     }
 
     public void setAction(byte action) {
         this.action = action;
+    }
+
+    public void setAction(@Range(from = 0x00, to = 0xFF) int action) {
+        this.action = (byte) (action & 0xFF);
     }
 
     /**
@@ -182,13 +224,13 @@ public class Sprite {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Sprite)) {
+        if (!(o instanceof Sprite sprite)) {
             return false;
         }
-        Sprite sprite = (Sprite) o;
+        if (!super.equals(o)) {
+            return false;
+        }
         return type == sprite.type
-                && getX() == sprite.getX()
-                && getY() == sprite.getY()
                 && talk1 == sprite.talk1
                 && talk2 == sprite.talk2
                 && action == sprite.action;

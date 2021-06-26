@@ -31,21 +31,28 @@ public class EventTile extends Point2B {
         this.tile = (byte) (tile & 0xFF);
     }
 
+    public void setTile(byte tile) {
+        this.tile = tile;
+    }
+
     public byte getTile() {
         return tile;
     }
 
     @Range(from = 0x00, to = 0xFF)
     public int intTile() {
-        return getTile();
+        return getTile() & 0xFF;
     }
 
     @Override
-    public void set(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y) {
+    public void set(@Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
         super.set(x, y);
     }
 
-    public void set(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y, @Range(from = 0x00, to = 0xFF) int tile) {
+    public void set(@Range(from = 0x00, to = 0xFF) int tile,
+                    @Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
         super.set(x, y);
         setTile(tile);
     }
@@ -55,7 +62,7 @@ public class EventTile extends Point2B {
         super.set(x, y);
     }
 
-    public void set(byte x, byte y, byte tile) {
+    public void set(byte tile, byte x, byte y) {
         super.set(x, y);
         setTile(tile);
     }

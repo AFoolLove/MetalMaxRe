@@ -1,8 +1,9 @@
 package me.afoolslove.metalmaxre.editor.map.tileset;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
+import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.MapProperties;
-import me.afoolslove.metalmaxre.editor.palette.Palette;
+import me.afoolslove.metalmaxre.editor.palette.PaletteEditor;
 import me.afoolslove.metalmaxre.editor.palette.PaletteList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,9 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * 图块集
@@ -332,10 +331,8 @@ public class TileSetEditor extends AbstractEditor {
      * 生成一张精灵的 TileSet 图片
      * 该算法不完整，所以有部分错误的图像
      * 图片的大小为
-     * <p>
-     * 暂时未知精灵的调色板获取方式，使用的大部分相同的配色
      */
-    public BufferedImage generateSpriteTileSet(int sprite, PaletteList palette) {
+    public BufferedImage generateSpriteTileSet(int sprite) {
         // 获取精灵使用的图块表
         byte[][][] spriteTiles = new byte[4][0x40][0x10];
         spriteTiles[0] = this.tiles[0x04]; // $00-$3F
@@ -344,11 +341,8 @@ public class TileSetEditor extends AbstractEditor {
         spriteTiles[2] = this.tiles[sprite]; // $80-$BF
         spriteTiles[3] = this.tiles[sprite + 1]; // $C0-$FF
 
-        palette = new PaletteList();
-        palette.add(new Palette(0x36, 0x0F, 0x16));
-        palette.add(new Palette(0x36, 0x0F, 0x21));
-        palette.add(new Palette(0x37, 0x0F, 0x18));
-        palette.add(new Palette(0x36, 0x0F, 0x12));
+        // 获取精灵调色板
+        PaletteList palette = EditorManager.getEditor(PaletteEditor.class).getSpritePalette();
 
         BufferedImage bufferedImage = new BufferedImage(0x100, 0x100, BufferedImage.TYPE_INT_ARGB);
         Graphics graphics = bufferedImage.getGraphics();
@@ -405,21 +399,12 @@ public class TileSetEditor extends AbstractEditor {
 
                 // 精灵姿态
 
-
                 // 精灵图块单独的左右翻转
                 if ((x847B[x0150] & 0B0111_1000) != 0x00) {
                     for (int i = 0, t = (x847B[x0150] & 0B0111_1000) >>> 3; i < 0x04; i++, t >>>= 1) {
                         // 翻转循序为：左上、右上、左下、右下
                         if ((t & 0B0000_0001) != 0x00) {
-                            byte[] temp = texture[i];
-                            byte temp1;
-                            for (int j = 0; j < temp.length; j++) {
-                                temp1 = 0;
-                                for (int k = 7, h = 0x80; k >= 0; h >>>= 1, k--) {
-                                    temp1 |= ((temp[j] & h) >>> k) << (7 - k);
-                                }
-                                temp[j] = temp1;
-                            }
+                            TileSetHelper.flip(texture[i]);
                         }
                     }
                 }
@@ -437,27 +422,9 @@ public class TileSetEditor extends AbstractEditor {
                     texture[0x01] = texture[0x03];
                     texture[0x03] = temp;
 
-                    // 图块上下翻转 TODO 临时
-                    for (int i = 0; i < texture.length; i++) {
-                        ArrayList<Byte> tempList = new ArrayList<>();
-                        for (int j = 0; j < 0x08; j++) {
-                            tempList.add(texture[i][j]);
-                        }
-                        Collections.reverse(tempList);
-                        for (int j = 0; j < tempList.size(); j++) {
-                            texture[i][j] = tempList.get(j);
-                        }
-
-                        tempList.clear();
-
-                        for (int j = 0x08; j < 0x10; j++) {
-                            tempList.add(texture[i][j]);
-                        }
-                        Collections.reverse(tempList);
-                        for (int j = 0; j < tempList.size(); j++) {
-                            texture[i][j + 8] = tempList.get(j);
-                        }
-
+                    // 图块上下翻转
+                    for (byte[] bytes : texture) {
+                        TileSetHelper.reverse(bytes);
                     }
                 }
 
@@ -474,15 +441,8 @@ public class TileSetEditor extends AbstractEditor {
                     texture[0x02] = texture[0x03];
                     texture[0x03] = temp;
 
-                    byte temp1;
                     for (byte[] bytes : texture) {
-                        for (int j = 0; j < bytes.length; j++) {
-                            temp1 = 0;
-                            for (int k = 7, h = 0x80; k >= 0; h >>>= 1, k--) {
-                                temp1 |= ((bytes[j] & h) >>> k) << (7 - k);
-                            }
-                            bytes[j] = temp1;
-                        }
+                        TileSetHelper.flip(bytes);
                     }
                 }
 
