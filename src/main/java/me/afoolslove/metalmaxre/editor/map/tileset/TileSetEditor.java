@@ -15,6 +15,8 @@ import java.util.Arrays;
 
 /**
  * 图块集
+ * <p>
+ * 2021年6月26日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */

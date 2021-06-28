@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
 import org.mapeditor.core.Map;
@@ -24,8 +25,21 @@ public class MainWindow extends JFrame {
 
     private JPanel contentPane;
     private JTabbedPane tabbedPane1;
+    private JComboBox<String> mapIds;
 
     public MainWindow() {
+        URL url = getClass().getResource("");
+        if (url != null && "jar".equalsIgnoreCase(url.getProtocol())) {
+            int result = JOptionPane.showConfirmDialog(this,
+                    "没有经过修改版的作者同意，禁止使用本程序将修改内容发布到任何地方",
+                    "MetalMaxRe",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+            if (result != JOptionPane.OK_OPTION) {
+                System.exit(0);
+            }
+        }
+
         setTitle("MetalMaxRe");
 
         URL resource = getClass().getClassLoader().getResource("MetalMax.nes");
@@ -38,6 +52,7 @@ public class MainWindow extends JFrame {
         loadGame(new File(resource.getFile()), true);
 
         createMenuBar();
+        createLayout();
 
         setContentPane(contentPane);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -227,6 +242,24 @@ public class MainWindow extends JFrame {
         menuBar.add(helpMenu);
         // 设置菜单栏
         setJMenuBar(menuBar);
+    }
+
+    /**
+     * 创建布局
+     */
+    private void createLayout() {
+        mapIds.setModel(new DefaultComboBoxModel<>() {
+            {
+                for (int i = 0; i < MapEditor.MAP_MAX_COUNT; i++) {
+                    addElement(String.format("%02X", i));
+                }
+            }
+
+            @Override
+            public int getSize() {
+                return MapEditor.MAP_MAX_COUNT;
+            }
+        });
     }
 
     /**

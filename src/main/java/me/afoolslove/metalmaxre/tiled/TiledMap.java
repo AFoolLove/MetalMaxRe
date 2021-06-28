@@ -26,6 +26,8 @@ import java.util.*;
  * <p>
  * 可以生成 Tiled 能够读取的地图数据
  * 不包含世界地图
+ * <p>
+ * 2021年6月24日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */

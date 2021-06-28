@@ -21,13 +21,13 @@
     ItemsEditor             物品编辑器 √ 后续考虑添加功能
     TextEditor              文本编辑器 √ 文本源后续继续添加测试
     TileSetEditor           图块编辑器 √ 后续考虑添加功能
+    MonsterEditor           怪物编辑器 ... 卡关了。。。
 
     其它
 
 ## 注意
 
-> 未经允许，请勿将已修改的游戏内容散布到任何地方  
-> Please do not distribute the modified game content to any place without permission (*translate)
+> 没有经过修改版的作者同意，禁止使用本程序将修改内容发布到任何地方  
 
 ### 使用
 
