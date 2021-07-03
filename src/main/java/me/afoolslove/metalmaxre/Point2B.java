@@ -19,7 +19,7 @@ public class Point2B {
         this.y = y;
     }
 
-    public Point2B(int x, int y) {
+    public Point2B(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y) {
         this.x = (byte) (x & 0xFF);
         this.y = (byte) (y & 0xFF);
     }

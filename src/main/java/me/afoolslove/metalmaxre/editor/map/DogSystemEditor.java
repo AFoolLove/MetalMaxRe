@@ -231,7 +231,8 @@ public class DogSystemEditor extends AbstractEditor {
             super(x, y);
         }
 
-        public Destination(int x, int y) {
+        public Destination(@Range(from = 0x00, to = 0xFF) int x,
+                           @Range(from = 0x00, to = 0xFF) int y) {
             super(x, y);
         }
 
@@ -255,7 +256,8 @@ public class DogSystemEditor extends AbstractEditor {
         }
 
         @Override
-        public void set(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y) {
+        public void set(@Range(from = 0x00, to = 0xFF) int x,
+                        @Range(from = 0x00, to = 0xFF) int y) {
             super.set(x, y);
         }
 
@@ -273,21 +275,32 @@ public class DogSystemEditor extends AbstractEditor {
             this.y = (byte) (y & 0xFF);
         }
 
-        public void setCamera(@Range(from = 0x00, to = 0xFF) int x, @Range(from = 0x00, to = 0xFF) int y) {
+        public void setCamera(@Range(from = 0x00, to = 0xFF) int x,
+                              @Range(from = 0x00, to = 0xFF) int y) {
             setCamera((byte) x, (byte) y);
         }
 
         public void setCamera(byte x, byte y) {
             this.x = x;
-            this.x = y;
+            this.y = y;
         }
 
         public byte getCameraX() {
             return x;
         }
 
+        @Range(from = 0x00, to = 0xFF)
+        public int intCameraX() {
+            return x & 0xFF;
+        }
+
         public byte getCameraY() {
             return y;
+        }
+
+        @Range(from = 0x00, to = 0xFF)
+        public int intCameraY() {
+            return y & 0xFF;
         }
 
         @Override

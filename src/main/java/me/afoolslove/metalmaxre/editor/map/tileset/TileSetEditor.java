@@ -25,10 +25,22 @@ public class TileSetEditor extends AbstractEditor {
     public static final int TILE_SET_COMPOSITIONS_START_OFFSET = 0x35000; // CHR
     public static final int TILE_SET_COLOR_INDEX_START_OFFSET = 0x38700; // CHR
 
+    public static final int TILE_SET_WORLD_COMPOSITIONS_START_OFFSET = 0x0FBBE - 0x10;
+    public static final int TILE_SET_WORLD_COLOR_INDEX_START_OFFSET = 0x0FEAA - 0x10;
+
 
     public byte[][][] tiles = new byte[0x100][0x40][0x10]; // 0x04 = CHR表的四分之一
     public byte[][][] compositions = new byte[0x37][0x40][0x04]; // 每4byte一组，0x37个组合，0x40个4byte组
     public byte[][] colorIndex = new byte[0x37][0x40]; // 每0x40byte一组，0x37个组合，每byte对应一个图块的特性和调色板索引
+
+    /**
+     * 世界地图的组合数据，全局固定
+     */
+    public byte[][][] worldCompositions = new byte[0x03][0x40][0x04];
+    /**
+     * 世界地图的调色板
+     */
+    public byte[][] worldColorIndexes = new byte[0x03][0x40];
 
 
     public byte[] xA597 = new byte[0x04]; // 精灵的朝向帧，全局属性（移动和未移动的图像
@@ -73,6 +85,17 @@ public class TileSetEditor extends AbstractEditor {
                 Arrays.fill(index, (byte) 0x00);
             }
         }
+        // 世界地图的tile组合
+        for (byte[][] worldComposition : worldCompositions) {
+            for (byte[] bytes : worldComposition) {
+                Arrays.fill(bytes, (byte) 0x00);
+            }
+        }
+        // 世界地图的特性和调色板
+        for (byte[] worldColorIndex : worldColorIndexes) {
+            Arrays.fill(worldColorIndex, (byte) 0x00);
+        }
+
         // 精灵相关数据
         Arrays.fill(xA597, (byte) 0x00);
         Arrays.fill(xA59B, (byte) 0x00);
@@ -126,6 +149,29 @@ public class TileSetEditor extends AbstractEditor {
         for (int count = 0; count < 0x37; count++) {
             byte[] color = colorIndex[count] != null ? colorIndex[count] : new byte[0x40];
             colorIndex[count] = color;
+            // 读取 x40 tile特性和调色板
+            buffer.get(color);
+        }
+
+        // 读取世界地图的tile组合
+        setPrgRomPosition(buffer, TILE_SET_WORLD_COMPOSITIONS_START_OFFSET);
+        for (int count = 0; count < 0x03; count++) {
+            // 0x40 tile composition
+            byte[][] tileCompositions = worldCompositions[count] != null ? worldCompositions[count] : new byte[0x40][0x04];
+            worldCompositions[count] = tileCompositions;
+            for (int i = 0; i < 0x40; i++) {
+                // tile composition
+                byte[] tileComposition = tileCompositions[i] != null ? tileCompositions[i] : new byte[0x04];
+                tileCompositions[i] = tileComposition;
+                buffer.get(tileComposition);
+            }
+        }
+
+        // 读取世界地图的特性和调色板
+        setPrgRomPosition(buffer, TILE_SET_WORLD_COLOR_INDEX_START_OFFSET);
+        for (int count = 0; count < 0x03; count++) {
+            byte[] color = worldColorIndexes[count] != null ? worldColorIndexes[count] : new byte[0x40];
+            worldColorIndexes[count] = color;
             // 读取 x40 tile特性和调色板
             buffer.get(color);
         }
@@ -196,6 +242,21 @@ public class TileSetEditor extends AbstractEditor {
         for (byte[] bytes : colorIndex) {
             buffer.put(bytes);
         }
+
+        // 写入世界地图tile组合
+        setChrRomPosition(buffer, TILE_SET_WORLD_COMPOSITIONS_START_OFFSET);
+        for (byte[][] composition : worldCompositions) {
+            for (byte[] bytes : composition) {
+                buffer.put(bytes);
+            }
+        }
+
+        // 写入世界地图tile的特性和调色板
+        setChrRomPosition(buffer, TILE_SET_WORLD_COLOR_INDEX_START_OFFSET);
+        for (byte[] bytes : worldColorIndexes) {
+            buffer.put(bytes);
+        }
+
         // 写入精灵相关数据
 
         // 写入精灵朝向帧
@@ -326,6 +387,39 @@ public class TileSetEditor extends AbstractEditor {
                                               byte[][][] compositions, byte[][] colorIndexes,
                                               Color[][] colors) {
         return generate(0x100, 0xC0, x00, x40, x80, xC0, compositions, colorIndexes, colors);
+    }
+
+    /**
+     * 生成一个世界地图的 TileSet 图片
+     * 使用了3个0x40组合和颜色
+     * 图片的大小为 256*192
+     *
+     * @param xXX 分割为4个，高位到低位分别为 x00、x40、x80、xC0
+     */
+    public BufferedImage generateWorldTileSet(int xXX,
+                                              byte[][][] compositions, byte[][] colorIndexes,
+                                              Color[][] colors) {
+        int x00 = (xXX >>> 24) & 0xFF;
+        int x40 = (xXX >>> 16) & 0xFF;
+        int x80 = (xXX >>> 8) & 0xFF;
+        int xC0 = xXX & 0xFF;
+        return generate(0x100, 0xC0, x00, x40, x80, xC0, compositions, colorIndexes, colors);
+    }
+
+    /**
+     * 生成一个世界地图的 TileSet 图片
+     * 使用了3个0x40组合和颜色
+     * 图片的大小为 256*192
+     *
+     * @param xXX 分割为4个，高位到低位分别为 x00、x40、x80、xC0
+     */
+    public BufferedImage generateWorldTileSet(int xXX) {
+        int x00 = (xXX >>> 24) & 0xFF;
+        int x40 = (xXX >>> 16) & 0xFF;
+        int x80 = (xXX >>> 8) & 0xFF;
+        int xC0 = xXX & 0xFF;
+        PaletteList palettes = EditorManager.getEditor(PaletteEditor.class).getPalettes(0x9AD0);
+        return generate(0x100, 0xC0, x00, x40, x80, xC0, worldCompositions, worldColorIndexes, palettes.toColors());
     }
 
 
@@ -500,6 +594,9 @@ public class TileSetEditor extends AbstractEditor {
         return bufferedImage;
     }
 
+    /**
+     * 生成指定大小的图片，图块集、图块组合、颜色组合
+     */
     private BufferedImage generate(int width, int height,
                                    int x00, int x40, int x80, int xC0,
                                    byte[][][] compositions, byte[][] colorIndexes,

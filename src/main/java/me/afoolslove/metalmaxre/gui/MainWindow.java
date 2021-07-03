@@ -1,20 +1,29 @@
 package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
+import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
+import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
-import org.mapeditor.core.Map;
-import org.mapeditor.io.TMXMapReader;
+import org.mapeditor.core.TileSet;
+import org.mapeditor.io.TMXMapWriter;
+import org.mapeditor.util.BasicTileCutter;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 主窗口
@@ -25,7 +34,16 @@ public class MainWindow extends JFrame {
 
     private JPanel contentPane;
     private JTabbedPane tabbedPane1;
-    private JComboBox<String> mapIds;
+    private JComboBox<String> comboBox2;
+    private JComboBox<String> comboBox1;
+    private JComboBox<String> comboBox3;
+    private JComboBox<String> comboBox4;
+    private JComboBox<String> comboBox5;
+    private JComboBox<String> comboBox6;
+    private JComboBox<String> comboBox7;
+    private JComboBox<String> comboBox8;
+    private JComboBox<String> comboBox9;
+    private JComboBox<String> maps;
 
     public MainWindow() {
         URL url = getClass().getResource("");
@@ -191,43 +209,41 @@ public class MainWindow extends JFrame {
         // 快捷键：Ctrl + Shift + T
         helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         helpMenuTest.addActionListener(e -> {
-//            var editor = getEditor(TileSetEditor.class);
-//            var mapPropertiesEditor = getEditor(MapPropertiesEditor.class);
-//            var paletteEditor = getEditor(PaletteEditor.class);
-//
-//            try {
-//                File tilePng = new File("C:/Users/AFoolLove/Desktop/Map/tsx/png/40414203-0308-9B4E.png");
-//                File spritePng = new File("C:\\Users\\AFoolLove\\Desktop\\t.png");
-//                File tmx = new File("C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
-//                MapProperties mapProperties = mapPropertiesEditor.getMapProperties(0x0A);
-//                BufferedImage bufferedImage = editor.generateSpriteTileSet(mapProperties.spriteIndex & 0xFF);
-//
-//                ImageIO.write(bufferedImage, "png", spritePng);
-//
-//
-//                TileSet tiles = new TileSet();
-//                tiles.importTileBitmap(tilePng.getPath(), new BasicTileCutter(16, 16, 0, 0));
-//                tiles.setName(tilePng.getName());
-//
-//                TileSet spriteTiles = new TileSet();
-//                spriteTiles.importTileBitmap(spritePng.getPath(), new BasicTileCutter(16, 16, 0, 0));
-//                spriteTiles.setName(spritePng.getName());
-//
-//                Map mapLayers = TiledMap.create(0x0A, tiles, spriteTiles);
-//
-//                TMXMapWriter tmxMapWriter = new TMXMapWriter();
-//                tmxMapWriter.writeMap(mapLayers, tmx.getPath());
-//            } catch (Exception ioException) {
-//                ioException.printStackTrace();
-//            }
-            // 导入tmx到编辑器中
+            var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
+            var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
+
             try {
-                Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\Desktop\\ts.tmx");
-                TiledMap.importMap(0x0A, mapLayers);
-            } catch (Exception jaxbException) {
-                jaxbException.printStackTrace();
+                for (Map.Entry<Rectangle, Integer> entry : WorldMapEditor.DEFAULT_PIECES.entrySet()) {
+                    String name = String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", entry.getValue());
+                    BufferedImage bufferedImage = tileSetEditor.generateWorldTileSet(entry.getValue());
+                    File output = new File(name);
+                    output.createNewFile();
+                    ImageIO.write(bufferedImage, "png", output);
+                }
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
             }
 
+            Map<Integer, TileSet> collect = new HashMap<>();
+
+            for (Integer integer : WorldMapEditor.DEFAULT_PIECES.values().parallelStream().distinct().collect(Collectors.toList())) {
+                try {
+                    TileSet tiles = new TileSet();
+                    tiles.importTileBitmap(
+                            String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", integer),
+                            new BasicTileCutter(0x10, 0x10, 0, 0));
+                    collect.put(integer, tiles);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+
+            org.mapeditor.core.Map world = TiledMap.createWorld(WorldMapEditor.DEFAULT_PIECES, collect);
+            try {
+                new TMXMapWriter().writeMap(world, "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
 
             System.out.println("test.");
         });
@@ -248,7 +264,7 @@ public class MainWindow extends JFrame {
      * 创建布局
      */
     private void createLayout() {
-        mapIds.setModel(new DefaultComboBoxModel<>() {
+        maps.setModel(new DefaultComboBoxModel<>() {
             {
                 for (int i = 0; i < MapEditor.MAP_MAX_COUNT; i++) {
                     addElement(String.format("%02X", i));

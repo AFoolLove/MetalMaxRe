@@ -29,8 +29,13 @@ public class ComputerEditor extends AbstractEditor {
      */
     public static final int COMPUTER_MAX_COUNT = 0x7B;
 
-
+    /**
+     * 计算机数据地址起始
+     */
     public static final int COMPUTER_START_OFFSET = 0x39DD2 - 0x10;
+    /**
+     * 计算机数据地址结束
+     */
     public static final int COMPUTER_END_OFFSET = 0x39FBD - 0x10;
 
     /**

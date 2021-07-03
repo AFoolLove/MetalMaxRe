@@ -20,18 +20,21 @@ import java.util.stream.Collectors;
  * 需要地图属性中的事件图块启用才会生效
  * 图块图像根据玩家当前的图块组合不同而不同
  * <p>
- * <p>
  * 世界地图：
  * 世界地图的总tile大小为0x100*0x100，其中每4*4为一个小块
  * 当世界地图使用时，单个tile数据控制此4*4的方块
  * 并且X、Y的计算方式变更为 X*4、Y*4，X、Y < 0x40
- * <p>
+ *
+ * 起始：0x1DCCF
+ * 结束：0x1DEAF
  * <p>
  * 2021年5月26日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */
 public class EventTilesEditor extends AbstractEditor {
+    public static final int EVENT_TILES_START_OFFSET = 0x1DCCF - 0x10;
+    public static final int EVENT_TILES_END_OFFSET = 0x1DEAF - 0x10;
 
     /**
      * K：Map
@@ -46,7 +49,7 @@ public class EventTilesEditor extends AbstractEditor {
         eventTiles.clear();
 
         // 排除事件为 0x00 ！！！！
-        // buffer.position(0x1DCCF);
+        // setPrgRomPosition(buffer, EVENT_TILES_START_OFFSET);
 
         // 填充
         for (int i = 0; i < MapEditor.MAP_MAX_COUNT; i++) {
@@ -103,8 +106,7 @@ public class EventTilesEditor extends AbstractEditor {
             each.entrySet().removeIf(entry -> entry.getKey() == 0x00);
         });
 
-        buffer.position(0x1DCCF);
-
+        setPrgRomPosition(buffer, EVENT_TILES_START_OFFSET);
         getEventTiles().values()
                 .parallelStream()
                 .filter(entry -> !entry.isEmpty()) // 过滤没有事件图块的地图

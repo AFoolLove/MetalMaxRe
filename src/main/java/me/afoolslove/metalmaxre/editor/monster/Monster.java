@@ -65,6 +65,21 @@ public class Monster {
     }
 
     /**
+     * 设置怪物的命中率
+     * 0B0111_1111  命中率（0x00-0x7F）
+     * 0B1000_0000 怪物的高位攻击力左移1bit（高位攻击力*2）
+     * 如果高位攻击力超过0xFF，怪物的低位防御力左移1bit（低位防御力*2）
+     * 如果存在0B0100_0000，上面的内容再来一次，不影响命中率
+     */
+    public void setHitRate(byte hitRate) {
+        this.hitRate = hitRate;
+    }
+
+    public void setHitRate(@Range(from = 0x00, to = 0xFF) int hitRate) {
+        this.hitRate = (byte) (hitRate & 0xFF);
+    }
+
+    /**
      * 设置掉落物
      * 注：只有怪物ID范围在0x18-0x82内才能设置为有效的战利品
      */
@@ -87,7 +102,19 @@ public class Monster {
 
     @Range(from = 0x00, to = 0xFF)
     public int intSpeed() {
-        return speed & 0xFF;
+        return getSpeed() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的命中率
+     */
+    public byte getHitRate() {
+        return hitRate;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intHitRate() {
+        return getHitRate() & 0xFF;
     }
 
     /**
@@ -99,7 +126,7 @@ public class Monster {
 
     @Range(from = 0x00, to = 0xFF)
     public int intDropsItem() {
-        return dropsItem & 0xFF;
+        return getDropsItem() & 0xFF;
     }
 
 }

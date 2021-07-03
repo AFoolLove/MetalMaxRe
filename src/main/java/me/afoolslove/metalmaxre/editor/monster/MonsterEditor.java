@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 怪物编辑器
@@ -22,6 +23,10 @@ public class MonsterEditor extends AbstractEditor {
      * 怪物出手攻击的速度
      */
     public static final int MONSTER_SPEEDS_OFFSET = 0x38BA0 - 0x10;
+    /**
+     * 怪物命中率
+     */
+    public static final int MONSTER_HIT_RATES_OFFSET = 0x38C23 - 0x10;
 
     /**
      * 怪物的掉落物
@@ -37,11 +42,16 @@ public class MonsterEditor extends AbstractEditor {
         monsters.clear();
 
         byte[] speeds = new byte[MONSTER_COUNT];
+        byte[] hitRates = new byte[MONSTER_COUNT];
         byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
 
         // 读取怪物出手攻击速度
         setPrgRomPosition(buffer, MONSTER_SPEEDS_OFFSET);
         buffer.get(speeds);
+
+        // 读取怪物命中率
+//        setPrgRomPosition(buffer, MONSTER_HIT_RATES_OFFSET);
+        buffer.get(hitRates);
 
         // 读取怪物掉落物
         setPrgRomPosition(buffer, MONSTER_DROPS_ITEMS_OFFSET);
@@ -54,6 +64,7 @@ public class MonsterEditor extends AbstractEditor {
                 monster.setDropsItem(dropsItems[monsterId]);
             }
             monster.setSpeed(speeds[monsterId]);
+            monster.setHitRate(hitRates[monsterId]);
             monsters.put(monsterId, monster);
         }
         return true;
@@ -61,7 +72,29 @@ public class MonsterEditor extends AbstractEditor {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
+        byte[] speeds = new byte[MONSTER_COUNT];
+        byte[] hitRates = new byte[MONSTER_COUNT];
+        byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
 
+        for (Map.Entry<Integer, Monster> entry : monsters.entrySet()) {
+            Monster monster = entry.getValue();
+            int monsterId = entry.getKey();
+            speeds[monsterId] = monster.speed;
+            hitRates[monsterId] = monster.hitRate;
+            if (monsterId >= 0x18) {
+                dropsItems[monsterId] = monster.dropsItem;
+            }
+        }
+
+        // 写入怪物出手攻击的速度
+        setPrgRomPosition(buffer, MONSTER_SPEEDS_OFFSET);
+        buffer.put(speeds);
+        // 写入怪物的命中率
+//        setPrgRomPosition(buffer, MONSTER_HIT_RATES_OFFSET);
+        buffer.put(hitRates);
+        // 写入怪物的掉落物
+        setPrgRomPosition(buffer, MONSTER_DROPS_ITEMS_OFFSET);
+        buffer.put(dropsItems);
         return true;
     }
 }

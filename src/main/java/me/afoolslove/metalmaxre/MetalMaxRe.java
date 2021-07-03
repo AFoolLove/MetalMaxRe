@@ -10,6 +10,7 @@ import me.afoolslove.metalmaxre.editor.map.MapEntranceEditor;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
+import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.editor.palette.PaletteEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerExperienceEditor;
@@ -110,6 +111,9 @@ public class MetalMaxRe {
 
         TileSetEditor tileSetEditor = new TileSetEditor();
         EditorManager.register(tileSetEditor);
+
+        WorldMapEditor worldMapEditor = new WorldMapEditor();
+        EditorManager.register(worldMapEditor);
     }
 
     public void setBuffer(ByteBuffer buffer) {

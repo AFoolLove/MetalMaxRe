@@ -7,6 +7,7 @@ import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
 import me.afoolslove.metalmaxre.editor.map.*;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
+import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.editor.sprite.Sprite;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
 import me.afoolslove.metalmaxre.editor.treasure.Treasure;
@@ -325,6 +326,58 @@ public class TiledMap {
         }
         // --- END 可以看出来，新的bug增加了
         return tiledMap;
+    }
+
+    /**
+     * 生成Tiled的世界地图
+     * TODO 生成的实际图块ID未经过
+     */
+    public static Map createWorld(@NotNull java.util.Map<Rectangle, Integer> pieces, java.util.Map<Integer, TileSet> tileSetMap) {
+        WorldMapEditor worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
+
+        Map world = new Map(0x100, 0x100);
+        world.setInfinite(0);
+        world.setTiledversion("");
+        int nextLayerId = 0;
+        int nextObjectId = 0;
+
+        // 添加所有图块组合到该世界地图
+        for (TileSet tileSet : tileSetMap.values()) {
+            world.addTileset(tileSet);
+            for (Tile tile : tileSet) {
+                if (tile.getType() == null) {
+                    tile.setType("");
+                }
+            }
+        }
+
+        byte[][] map = worldMapEditor.map;
+
+
+        TileLayer worldLayer = new TileLayer(0x100, 0x100);
+        worldLayer.setId(nextLayerId++);
+        worldLayer.setName("world");
+
+        for (java.util.Map.Entry<Rectangle, Integer> entry : pieces.entrySet()) {
+            Rectangle rectangle = entry.getKey();
+            TileSet tiles = tileSetMap.get(entry.getValue());
+            int x = (int) rectangle.getX();
+            int y = (int) rectangle.getY();
+            int width = (int) rectangle.getWidth();
+            int height = (int) rectangle.getHeight();
+            for (int offsetY = 0; offsetY < height; offsetY++) {
+                for (int offsetX = 0; offsetX < width; offsetX++) {
+                    // 世界地图的图块集一共有192块图块
+                    Tile tile = tiles.getTile(map[y + offsetY][x + offsetX] & 0xFF);
+                    worldLayer.setTileAt(x + offsetX, y + offsetY, tile);
+                }
+            }
+        }
+
+        world.addLayer(worldLayer);
+        world.setNextobjectid(nextObjectId);
+        world.setNextlayerid(nextLayerId);
+        return world;
     }
 
 
