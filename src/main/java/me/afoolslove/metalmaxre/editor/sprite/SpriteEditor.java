@@ -1,7 +1,9 @@
 package me.afoolslove.metalmaxre.editor.sprite;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
+import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -155,8 +157,15 @@ public class SpriteEditor extends AbstractEditor {
     /**
      * @return 指定地图的所有精灵
      */
-    public List<Sprite> getSprites(int map) {
+    public List<Sprite> getSprites(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map) {
         return sprites.get(map);
+    }
+
+    /**
+     * @return 世界地图的所有精灵
+     */
+    public List<Sprite> getWorldSprites() {
+        return sprites.get(0x00);
     }
 
 

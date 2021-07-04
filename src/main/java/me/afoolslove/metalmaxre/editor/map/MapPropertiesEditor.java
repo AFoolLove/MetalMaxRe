@@ -229,4 +229,11 @@ public class MapPropertiesEditor extends AbstractEditor {
         return mapProperties.get(map);
     }
 
+    /**
+     * @return 世界地图的地图属性
+     */
+    public WorldMapProperties getWorldMapProperties() {
+        return ((WorldMapProperties) mapProperties.get(0x00));
+    }
+
 }

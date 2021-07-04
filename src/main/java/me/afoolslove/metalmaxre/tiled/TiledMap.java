@@ -10,6 +10,7 @@ import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.editor.sprite.Sprite;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
+import me.afoolslove.metalmaxre.editor.text.TextEditor;
 import me.afoolslove.metalmaxre.editor.treasure.Treasure;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +39,7 @@ public class TiledMap {
      * 生成Tiled地图
      */
     public static Map create(@Range(from = 0x01, to = MapEditor.MAP_MAX_COUNT - 1) int map, @NotNull TileSet tileSet, @NotNull TileSet spriteTileSet) {
+        var textEditor = EditorManager.getEditor(TextEditor.class);
         var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
         var mapEditor = EditorManager.getEditor(MapEditor.class);
         var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
@@ -157,7 +159,7 @@ public class TiledMap {
 
                 // 设置该事件影响的图块
                 for (EventTile eventTile : entry.getValue()) {
-                    eventLayer.setTileAt(eventTile.x & 0xFF, eventTile.y & 0xFF, tileSet.getTile(eventTile.tile & 0xfF));
+                    eventLayer.setTileAt(eventTile.x & 0xFF, eventTile.y & 0xFF, tileSet.getTile(eventTile.tile & 0xFF));
                 }
                 // 添加到事件图块组中
                 eventGroup.getLayers().add(eventLayer);
@@ -178,7 +180,7 @@ public class TiledMap {
             // 添加标志，Tiled程序可以识别
             mapObject.setType("treasure");
             // 设置物品ID和物品当前的名称
-            mapObject.setName(String.format("%02X|%s", treasure.item, itemsEditor.getItem(treasure.item)));
+            mapObject.setName(String.format("%02X|%s", treasure.item, textEditor.getItemName(treasure.item)));
 
             // 添加宝藏
             treasureGroup.addObject(mapObject);
@@ -330,10 +332,18 @@ public class TiledMap {
 
     /**
      * 生成Tiled的世界地图
-     * TODO 生成的实际图块ID未经过
      */
-    public static Map createWorld(@NotNull java.util.Map<Rectangle, Integer> pieces, java.util.Map<Integer, TileSet> tileSetMap) {
-        WorldMapEditor worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
+    public static Map createWorld(@NotNull java.util.Map<Rectangle, Integer> pieces, java.util.Map<Integer, TileSet> tileSetMap, TileSet spriteTileSet) {
+        var textEditor = EditorManager.getEditor(TextEditor.class);
+        var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
+        var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
+        var treasureEditor = EditorManager.getEditor(TreasureEditor.class);
+        var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
+        var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
+        var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
+
+        WorldMapProperties worldMapProperties = mapPropertiesEditor.getWorldMapProperties();
+
 
         Map world = new Map(0x100, 0x100);
         world.setInfinite(0);
@@ -348,6 +358,13 @@ public class TiledMap {
                 if (tile.getType() == null) {
                     tile.setType("");
                 }
+            }
+        }
+
+        world.addTileset(spriteTileSet);
+        for (Tile tile : spriteTileSet) {
+            if (tile.getType() == null) {
+                tile.setType("");
             }
         }
 
@@ -374,7 +391,192 @@ public class TiledMap {
             }
         }
 
+        // ----------------
+
+        // 事件图块，显示时会覆盖对应的图块，相当于事件条件达成
+        Group eventGroup = new Group();
+        eventGroup.setId(nextLayerId++);
+        eventGroup.setName("events");
+        // 默认隐藏
+        eventGroup.setVisible(false);
+        byte[][] indexA = worldMapEditor.indexA[0x02];
+        // 获取该地图的所有事件图块
+        for (var entry : eventTilesEditor.getWorldEventTile().entrySet()) {
+            TileLayer eventLayer = new TileLayer(0x100, 0x100);
+            eventLayer.setId(nextLayerId++);
+            // event:index
+            // 事件内存地址和地址的bit位
+            eventLayer.setName(String.format("%04X:%01X", 0x0441 + ((entry.getKey() & 0xF8) >>> 3), (entry.getKey() & 0x07)));
+
+            // 设置该事件影响的图块
+            for (EventTile eventTile : entry.getValue()) {
+                // 为不同地方的图块集使用不同的图块源
+                for (java.util.Map.Entry<Rectangle, Integer> rectangleIntegerEntry : pieces.entrySet()) {
+                    int x = eventTile.intX() * 4;
+                    int y = eventTile.intY() * 4;
+                    // 找到该坐标的图块集
+                    if (rectangleIntegerEntry.getKey().contains(x, y)) {
+                        TileSet tileSet = tileSetMap.get(rectangleIntegerEntry.getValue());
+                        byte[] tiles = indexA[eventTile.tile & 0xFF];
+
+                        // 世界地图的事件图块为 4*4 个tile
+                        for (int offsetY = 0; offsetY < 0x04; offsetY++) {
+                            for (int offsetX = 0; offsetX < 0x04; offsetX++) {
+                                Tile tile = tileSet.getTile(tiles[(offsetY * 4) + offsetX] & 0xFF);
+                                eventLayer.setTileAt(x + offsetX, y + offsetY, tile);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            // 添加到事件图块组中
+            eventGroup.getLayers().add(eventLayer);
+        }
+
+        // ----------------
+
+        // 宝藏层
+        ObjectGroup treasureGroup = new ObjectGroup();
+        treasureGroup.setId(nextObjectId++);
+        treasureGroup.setName("treasure");
+
+        // 查找该地图的宝藏，并使用 16*16 的矩形对象标出
+        for (Treasure treasure : treasureEditor.findMap(0x00)) {
+            MapObject mapObject = new MapObject((treasure.x & 0xFF) * 0x10, (treasure.y & 0xFF) * 0x10, 0x10, 0x10, 0);
+            mapObject.setId(nextObjectId++);
+            // 添加标志，Tiled程序可以识别
+            mapObject.setType("treasure");
+            // 设置物品ID和物品当前的名称
+            mapObject.setName(String.format("%02X|%s", treasure.item, textEditor.getItemName(treasure.item)));
+
+            // 添加宝藏
+            treasureGroup.addObject(mapObject);
+        }
+
+        // ----------------
+
+        // 当前地图的边界和出入口
+        ObjectGroup entrances = new ObjectGroup();
+        entrances.setId(nextObjectId++);
+        entrances.setName("entrances");
+
+        // 获取当前地图的边界和出入口
+        MapEntrance mapEntrance = mapEntranceEditor.getWorldMapEntrance();
+        for (var entry : mapEntrance.getEntrances().entrySet()) {
+            MapPoint inPoint = entry.getKey();
+            MapPoint outPoint = entry.getValue();
+            // 设置入口坐标
+            MapObject mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
+            mapObject.setId(nextObjectId++);
+            // 设置出口坐标为名称 Map:X:Y
+            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
+
+            // 添加到入口的对象层
+            entrances.addObject(mapObject);
+        }
+
+        // ----------------
+
+        // 精灵层
+        ObjectGroup spriteGroup = new ObjectGroup();
+        spriteGroup.setId(nextObjectId++);
+        spriteGroup.setName("sprites");
+
+        // 获取当前地图的所有精灵，添加到精灵组中
+        for (Sprite sprite : spriteEditor.getWorldSprites()) {
+            MapObject mapObject = new MapObject();
+            mapObject.setId(nextObjectId++);
+            // 将精灵动作和对话类型作为名称
+            mapObject.setName(String.format("%02X:%02X:%02X", sprite.action, sprite.talk1, sprite.talk2));
+            // 添加标志，Tiled程序可以识别
+            mapObject.setType("sprites");
+            // 0x80 为fistID，tileSet的结尾
+            // 0x01为软件地址偏移
+//            mapObject.setGid(0x80 + (sprite.type & 0xFF) + 0x01);
+            mapObject.setGid((tileSetMap.size() * 0xC0) + (sprite.type & 0xFF) + 0x01);
+            // 精灵最大X、Y为0x3F
+            mapObject.setX((sprite.x & 0x3F) * 0x10);
+            // Y值需要额外增加1格，软件才能正确的显示位置
+            mapObject.setY(((sprite.y & 0x3F) + 1) * 0x10);
+
+            // 固定大小为 0x10*0x10
+            mapObject.setWidth((double) 0x10);
+            mapObject.setHeight((double) 0x10);
+
+            // 添加其它属性
+            Properties properties = mapObject.getProperties();
+            if ((sprite.x & Sprite.FLAG_LOCK_DIRECTION) == Sprite.FLAG_LOCK_DIRECTION) {
+                properties.setProperty("XD7|锁定朝向", "true");
+            }
+            if ((sprite.x & Sprite.FLAG_DISABLE_MOVING_ANIM) == Sprite.FLAG_DISABLE_MOVING_ANIM) {
+                properties.setProperty("XD6|禁用移动动画", "true");
+            }
+            if ((sprite.y & Sprite.FLAG_CAN_PUSHED) == Sprite.FLAG_CAN_PUSHED) {
+                properties.setProperty("YD7|可被推动", "true");
+            }
+            if ((sprite.y & Sprite.FLAG_IGNORE_TERRAIN) == Sprite.FLAG_IGNORE_TERRAIN) {
+                properties.setProperty("YD6|无视地形", "true");
+            }
+            // 添加精灵到精灵组
+            spriteGroup.addObject(mapObject);
+        }
+
+        // ----------------
+
+        // 可移动区域，超出后按走出边界处理
+        ObjectGroup movable = new ObjectGroup();
+        movable.setId(nextObjectId++);
+        movable.setName("movable");
+        // 默认隐藏
+        movable.setVisible(false);
+        // 可移动区域偏移量
+        int movableWidthOffset = (worldMapProperties.movableWidthOffset & 0xFF) * 0x10;
+        int movableHeightOffset = (worldMapProperties.movableHeightOffset & 0xFF) * 0x10;
+        // 可移动区域实际宽度
+        int movableWidth = (worldMapProperties.movableWidth & 0xFF) * 0x10;
+        movableWidth -= movableWidthOffset;
+        // 可移动区域实际高度
+        int movableHeight = (worldMapProperties.movableHeight & 0xFF) * 0x10;
+        movableHeight -= movableHeightOffset;
+        // 只有这一个对象
+        MapObject movableObject = new MapObject(movableWidthOffset, movableHeightOffset, movableWidth, movableHeight, 0);
+        movableObject.setId(nextObjectId++);
+        movableObject.setName("movable");
+        // 添加
+        movable.addObject(movableObject);
+
+        // ----------------
+
+        // 图块集分割
+        ObjectGroup piecesGroup = new ObjectGroup();
+        piecesGroup.setId(nextObjectId++);
+        piecesGroup.setName("pieces");
+        piecesGroup.setVisible(false);
+        for (java.util.Map.Entry<Rectangle, Integer> entry : pieces.entrySet()) {
+            Rectangle rectangle = entry.getKey();
+            MapObject mapObject = new MapObject();
+            mapObject.setId(nextObjectId++);
+            mapObject.setName(String.format("%08X", entry.getValue()));
+            mapObject.setX(rectangle.getX() * 0x10);
+            mapObject.setY(rectangle.getY() * 0x10);
+            mapObject.setWidth(rectangle.getWidth() * 0x10);
+            mapObject.setHeight(rectangle.getHeight() * 0x10);
+
+            // 添加图块集矩形
+            piecesGroup.addObject(mapObject);
+        }
+
+
         world.addLayer(worldLayer);
+        world.addLayer(eventGroup);
+        world.addLayer(treasureGroup);
+        world.addLayer(entrances);
+        world.addLayer(spriteGroup);
+        world.addLayer(movable);
+        world.addLayer(piecesGroup);
+
+
         world.setNextobjectid(nextObjectId);
         world.setNextlayerid(nextLayerId);
         return world;

@@ -169,4 +169,10 @@ public class MapEntranceEditor extends AbstractEditor {
     public MapEntrance getMapEntrance(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map) {
         return mapEntrances.get(map);
     }
+    /**
+     * @return 世界地图的边界和出入口
+     */
+    public MapEntrance getWorldMapEntrance() {
+        return mapEntrances.get(0x00);
+    }
 }

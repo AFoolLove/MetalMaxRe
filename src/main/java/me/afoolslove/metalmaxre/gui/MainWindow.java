@@ -220,6 +220,11 @@ public class MainWindow extends JFrame {
                     output.createNewFile();
                     ImageIO.write(bufferedImage, "png", output);
                 }
+                String name = "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\04059495.png";
+                BufferedImage bufferedImage = tileSetEditor.generateSpriteTileSet(0x94);
+                File output = new File(name);
+                output.createNewFile();
+                ImageIO.write(bufferedImage, "png", output);
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
@@ -232,13 +237,23 @@ public class MainWindow extends JFrame {
                     tiles.importTileBitmap(
                             String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", integer),
                             new BasicTileCutter(0x10, 0x10, 0, 0));
+                    tiles.setName(String.format("%08X", integer));
                     collect.put(integer, tiles);
                 } catch (Exception exception) {
                     exception.printStackTrace();
                 }
             }
 
-            org.mapeditor.core.Map world = TiledMap.createWorld(WorldMapEditor.DEFAULT_PIECES, collect);
+            TileSet spriteTileSet = new TileSet();
+            try {
+                spriteTileSet.importTileBitmap("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\04059495.png",
+                        new BasicTileCutter(0x10, 0x10, 0, 0));
+                spriteTileSet.setName("04059495");
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+
+            org.mapeditor.core.Map world = TiledMap.createWorld(WorldMapEditor.DEFAULT_PIECES, collect, spriteTileSet);
             try {
                 new TMXMapWriter().writeMap(world, "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
             } catch (IOException ioException) {

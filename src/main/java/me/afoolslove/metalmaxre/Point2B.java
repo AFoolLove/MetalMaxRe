@@ -35,7 +35,7 @@ public class Point2B {
 
     @Range(from = 0x00, to = 0xFF)
     public int intX() {
-        return getX();
+        return getX() & 0xFF;
     }
 
     public void setX(byte x) {
@@ -52,7 +52,7 @@ public class Point2B {
 
     @Range(from = 0x00, to = 0xFF)
     public int intY() {
-        return getY();
+        return getY() & 0xFF;
     }
 
     public void setY(byte y) {

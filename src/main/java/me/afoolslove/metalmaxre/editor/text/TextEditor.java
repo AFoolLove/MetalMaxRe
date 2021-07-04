@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.text;
 
+import me.afoolslove.metalmaxre.Item;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -118,6 +119,19 @@ public class TextEditor extends AbstractEditor {
      * @return 装备、道具的名称
      */
     public String getItemName(@Range(from = 0x00, to = 0xFF) int item) {
+        if (item >= Item.ITEMS_MAX_COUNT){
+            return null;
+        }
         return paragraphsMap.get(POINTS.get(0x05)).get(item);
+    }
+
+    /**
+     * @return 装备、道具的名称
+     */
+    public String getItemName(byte item) {
+        if ((item & 0xFF) >= Item.ITEMS_MAX_COUNT){
+            return null;
+        }
+        return paragraphsMap.get(POINTS.get(0x05)).get(item & 0xFF);
     }
 }

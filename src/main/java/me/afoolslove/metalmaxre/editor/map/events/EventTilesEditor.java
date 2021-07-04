@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * 世界地图的总tile大小为0x100*0x100，其中每4*4为一个小块
  * 当世界地图使用时，单个tile数据控制此4*4的方块
  * 并且X、Y的计算方式变更为 X*4、Y*4，X、Y < 0x40
- *
+ * <p>
  * 起始：0x1DCCF
  * 结束：0x1DEAF
  * <p>
@@ -156,5 +156,12 @@ public class EventTilesEditor extends AbstractEditor {
      */
     public Map<Integer, List<EventTile>> getEventTile(int map) {
         return eventTiles.get(map);
+    }
+
+    /**
+     * @return 获取世界地图的事件图块
+     */
+    public Map<Integer, List<EventTile>> getWorldEventTile() {
+        return eventTiles.get(0x00);
     }
 }
