@@ -21,8 +21,8 @@
     ItemsEditor             物品编辑器 √ 后续考虑添加功能
     TextEditor              文本编辑器 √ 文本源后续继续添加测试
     TileSetEditor           图块编辑器 √ 后续考虑添加功能
+    WorldMapEditor          世界地图编辑 × 半成品（体验版？） 需要优化地图数据
     MonsterEditor           怪物编辑器 ... 卡关了。。。
-    WorldMapEditor          世界地图编辑 ...
 
     其它
 

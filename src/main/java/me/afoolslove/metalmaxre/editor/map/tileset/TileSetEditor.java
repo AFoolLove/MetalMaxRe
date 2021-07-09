@@ -244,7 +244,7 @@ public class TileSetEditor extends AbstractEditor {
         }
 
         // 写入世界地图tile组合
-        setChrRomPosition(buffer, TILE_SET_WORLD_COMPOSITIONS_START_OFFSET);
+        setPrgRomPosition(buffer, TILE_SET_WORLD_COMPOSITIONS_START_OFFSET);
         for (byte[][] composition : worldCompositions) {
             for (byte[] bytes : composition) {
                 buffer.put(bytes);
@@ -252,7 +252,7 @@ public class TileSetEditor extends AbstractEditor {
         }
 
         // 写入世界地图tile的特性和调色板
-        setChrRomPosition(buffer, TILE_SET_WORLD_COLOR_INDEX_START_OFFSET);
+        setPrgRomPosition(buffer, TILE_SET_WORLD_COLOR_INDEX_START_OFFSET);
         for (byte[] bytes : worldColorIndexes) {
             buffer.put(bytes);
         }

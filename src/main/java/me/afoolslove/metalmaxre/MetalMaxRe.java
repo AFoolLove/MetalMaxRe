@@ -239,6 +239,7 @@ public class MetalMaxRe {
             var itemsEditor = EditorManager.getEditor(ItemsEditor.class);
             var textEditor = EditorManager.getEditor(TextEditor.class);
             var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
+            var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
 
             // 无序
             treasureEditor.onWrite(buffer);
@@ -256,10 +257,11 @@ public class MetalMaxRe {
 
             // 顺序写入
             mapEditor.onWrite(buffer); // 影响 mapPropertiesEditor
-            eventTilesEditor.onWrite(buffer); // 影响 mapPropertiesEditor
+            eventTilesEditor.onWrite(buffer); // 影响 mapPropertiesEditor、worldMapEditor
             mapEntranceEditor.onWrite(buffer); // 影响 mapPropertiesEditor
             paletteEditor.onWrite(buffer); // 影响 mapPropertiesEditor // 暂时没有
             mapPropertiesEditor.onWrite(buffer);
+            worldMapEditor.onWrite(buffer);
 
             Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);
             return true;

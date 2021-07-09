@@ -3,27 +3,20 @@ package me.afoolslove.metalmaxre.gui;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
-import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
-import org.mapeditor.core.TileSet;
-import org.mapeditor.io.TMXMapWriter;
-import org.mapeditor.util.BasicTileCutter;
+import org.mapeditor.core.Map;
+import org.mapeditor.io.TMXMapReader;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 主窗口
@@ -210,55 +203,64 @@ public class MainWindow extends JFrame {
         helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         helpMenuTest.addActionListener(e -> {
             var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
-            var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
+//            var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
+//
+//            try {
+//                for (Map.Entry<Rectangle, Integer> entry : WorldMapEditor.DEFAULT_PIECES.entrySet()) {
+//                    String name = String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", entry.getValue());
+//                    BufferedImage bufferedImage = tileSetEditor.generateWorldTileSet(entry.getValue());
+//                    File output = new File(name);
+//                    output.createNewFile();
+//                    ImageIO.write(bufferedImage, "png", output);
+//                }
+//                String name = "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\04059495.png";
+//                BufferedImage bufferedImage = tileSetEditor.generateSpriteTileSet(0x94);
+//                File output = new File(name);
+//                output.createNewFile();
+//                ImageIO.write(bufferedImage, "png", output);
+//            } catch (IOException ioException) {
+//                ioException.printStackTrace();
+//            }
+//
+//            Map<Integer, TileSet> collect = new HashMap<>();
+//
+//            for (Integer integer : WorldMapEditor.DEFAULT_PIECES.values().parallelStream().distinct().collect(Collectors.toList())) {
+//                try {
+//                    TileSet tiles = new TileSet();
+//                    tiles.importTileBitmap(
+//                            String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", integer),
+//                            new BasicTileCutter(0x10, 0x10, 0, 0));
+//                    tiles.setName(String.format("%08X", integer));
+//                    collect.put(integer, tiles);
+//                } catch (Exception exception) {
+//                    exception.printStackTrace();
+//                }
+//            }
+//
+//            TileSet spriteTileSet = new TileSet();
+//            try {
+//                spriteTileSet.importTileBitmap("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\04059495.png",
+//                        new BasicTileCutter(0x10, 0x10, 0, 0));
+//                spriteTileSet.setName("04059495");
+//            } catch (IOException ioException) {
+//                ioException.printStackTrace();
+//            }
+//
+//            org.mapeditor.core.Map world = TiledMap.createWorld(WorldMapEditor.DEFAULT_PIECES, collect, spriteTileSet);
+//            try {
+//                new TMXMapWriter().writeMap(world, "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
+//            } catch (IOException ioException) {
+//                ioException.printStackTrace();
+//            }
+
 
             try {
-                for (Map.Entry<Rectangle, Integer> entry : WorldMapEditor.DEFAULT_PIECES.entrySet()) {
-                    String name = String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", entry.getValue());
-                    BufferedImage bufferedImage = tileSetEditor.generateWorldTileSet(entry.getValue());
-                    File output = new File(name);
-                    output.createNewFile();
-                    ImageIO.write(bufferedImage, "png", output);
-                }
-                String name = "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\04059495.png";
-                BufferedImage bufferedImage = tileSetEditor.generateSpriteTileSet(0x94);
-                File output = new File(name);
-                output.createNewFile();
-                ImageIO.write(bufferedImage, "png", output);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
+                Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
+                TiledMap.importWorldMap(mapLayers);
+            } catch (Exception exception) {
+                exception.printStackTrace();
             }
 
-            Map<Integer, TileSet> collect = new HashMap<>();
-
-            for (Integer integer : WorldMapEditor.DEFAULT_PIECES.values().parallelStream().distinct().collect(Collectors.toList())) {
-                try {
-                    TileSet tiles = new TileSet();
-                    tiles.importTileBitmap(
-                            String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", integer),
-                            new BasicTileCutter(0x10, 0x10, 0, 0));
-                    tiles.setName(String.format("%08X", integer));
-                    collect.put(integer, tiles);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-            }
-
-            TileSet spriteTileSet = new TileSet();
-            try {
-                spriteTileSet.importTileBitmap("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\04059495.png",
-                        new BasicTileCutter(0x10, 0x10, 0, 0));
-                spriteTileSet.setName("04059495");
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-
-            org.mapeditor.core.Map world = TiledMap.createWorld(WorldMapEditor.DEFAULT_PIECES, collect, spriteTileSet);
-            try {
-                new TMXMapWriter().writeMap(world, "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
 
             System.out.println("test.");
         });
