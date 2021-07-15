@@ -6,7 +6,6 @@ import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
-import org.mapeditor.core.Map;
 import org.mapeditor.io.TMXMapReader;
 
 import javax.swing.*;
@@ -255,7 +254,7 @@ public class MainWindow extends JFrame {
 
 
             try {
-                Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
+                org.mapeditor.core.Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
                 TiledMap.importWorldMap(mapLayers);
             } catch (Exception exception) {
                 exception.printStackTrace();

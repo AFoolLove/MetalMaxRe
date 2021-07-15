@@ -4,15 +4,18 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
+import me.afoolslove.metalmaxre.editor.map.events.WorldEventTile;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * 世界地图编辑器
+ * <p>
+ * TODO 事件数据，事件数据只能读取图块组A的 0x0C010+0x200 - 0x0E510 的地方
  *
  * @author AFoolLove
  */
@@ -58,7 +61,13 @@ public class WorldMapEditor extends AbstractEditor {
     public static final int REALM_INDEX_START = 0x39233;
     public static final int REALM_INDEX_END = 0x39332;
 
+    /**
+     * index与indexOffsets的比例是 1byte：2bit
+     */
     public byte[] indexOffsets = new byte[0x400]; // WORLD_MAP_TILES_INDEX_OFFSET_END - WORLD_MAP_TILES_INDEX_OFFSET_START + 1
+    /**
+     * index与x00410的比例是 8byte：1bit
+     */
     public byte[] x00410 = new byte[0x200]; // WORLD_MAP_X00410_END - WORLD_MAP_X00410_START + 1
     /**
      * 注：虽然写着0x03*0x100*0x10，但实际上只有 2.5*0x100*0x10
@@ -66,13 +75,6 @@ public class WorldMapEditor extends AbstractEditor {
     public byte[][] indexA = new byte[0x250][0x10]; // WORLD_MAP_INDEX_A_END - WORLD_MAP_INDEX_A_START + 1
     public byte[][] indexB = new byte[0x400][0x10]; // WORLD_MAP_INDEX_B_END - WORLD_MAP_INDEX_B_START + 1
     public byte[] index = new byte[0x1000]; // WORLD_MAP_INDEX_END - WORLD_MAP_INDEX_START + 1
-
-
-    public byte[] AindexOffsets = new byte[0x400]; // WORLD_MAP_TILES_INDEX_OFFSET_END - WORLD_MAP_TILES_INDEX_OFFSET_START + 1
-    public byte[] Ax00410 = new byte[0x200]; // WORLD_MAP_X00410_END - WORLD_MAP_X00410_START + 1
-    public byte[][] AindexA = new byte[0x250][0x10]; // WORLD_MAP_INDEX_A_END - WORLD_MAP_INDEX_A_START + 1
-    public byte[][] AindexB = new byte[0x400][0x10]; // WORLD_MAP_INDEX_B_END - WORLD_MAP_INDEX_B_START + 1
-    public byte[] Aindex = new byte[0x1000]; // WORLD_MAP_INDEX_END - WORLD_MAP_INDEX_START + 1
 
     /**
      * 地图
@@ -141,22 +143,6 @@ public class WorldMapEditor extends AbstractEditor {
         setPrgRomPosition(buffer, WORLD_MAP_INDEX_START);
         buffer.get(index);
 
-
-        AindexOffsets = Arrays.copyOf(indexOffsets, indexOffsets.length);
-        Ax00410 = Arrays.copyOf(x00410, x00410.length);
-        AindexA = new byte[0x250][0x10];
-        AindexB = new byte[0x400][0x10];
-
-        for (int i = 0; i < AindexA.length; i++) {
-            AindexA[i] = Arrays.copyOf(indexA[i], indexA[i].length);
-        }
-
-        for (int i = 0; i < AindexB.length; i++) {
-            AindexB[i] = Arrays.copyOf(indexB[i], indexB[i].length);
-        }
-
-        Aindex = Arrays.copyOf(index, index.length);
-
         for (int i = 0; i < 0x1000; i++) {
             // 得到索引偏移，索引与indexOffsets的比例是4:1
             // 1 index = 2 bit indexOffsets
@@ -202,25 +188,220 @@ public class WorldMapEditor extends AbstractEditor {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
+        // TODO 罗克东边涨潮退潮的4个4*4tile 变量
 
-        // 留下未使用的4*4tile
-        var tempIndexA = new HashSet<Integer>();
-        var tempIndexB = new HashSet<Integer>();
+        // 读取世界地图，使用set记录需要保留数据
+        // 通过set设置未使用的数据为null
+
+        // 对indexA、indexB去重，并将重复的数据设置为null，与x200重复时保留x200的数据
+
+        // 将世界地图的事件和罗克东边涨潮退潮4个数据添加进 x200
+        // 储存x200，如果储存不下，移动非必须的x200数据到x200以外的地方，再次存入
+
+        // 如果还是存不下，那没救了，等死吧
+
+        var eventTilesEditor = EditorManager.getEditor(EventTilesEditor.class);
+
+        // 必须存入x200的4*4tiles
+        Map<String, byte[]> x200 = new HashMap<>();
+        // 获取罗克东边涨潮退潮的4个4*4tile
+        setPrgRomPosition(buffer, 0x2818D);
+        byte[] oTiles = new byte[0x04];
+        buffer.get(oTiles);
+        for (byte oTile : oTiles) {
+            byte[] tiles = indexA[0x200 + (oTile & 0xFF)];
+            x200.put(Arrays.toString(tiles), tiles);
+        }
+
+        // 格式化地图数据
+        byte[][][] mapTiles = new byte[0x40][0x40][0x10];
+        for (int y = 0; y < 0x40; y++) {
+            for (int x = 0; x < 0x40; x++) {
+                mapTiles[y][x] = map1(map, x, y);
+            }
+        }
         // 新的4*4tile
-        var newIndex = new HashMap<byte[], Set<Integer>>();
+        List<byte[]> newTiles = new ArrayList<>();
+        // 可以保留的4*4tile
+        Set<Integer> keepTilesA = new HashSet<>();
+        Set<Integer> keepTilesB = new HashSet<>();
+        for (int y = 0; y < 0x40; y++) {
+            keepTilesX:
+            for (int x = 0; x < 0x40; x++) {
+                byte[] tiles = mapTiles[y][x];
+                for (int i = 0; i < indexA.length; i++) {
+                    if (Arrays.equals(indexA[i], tiles)) {
+                        keepTilesA.add(i);
+                        // 读取下一个
+                        continue keepTilesX;
+                    }
+                }
+                // 没有在indexA中找到，从indexB找
+                for (int i = 0; i < indexB.length; i++) {
+                    if (Arrays.equals(indexB[i], tiles)) {
+                        keepTilesB.add(i);
+                        continue keepTilesX;
+                    }
+                }
 
+                // 都没有找到，添加到newTiles中
+                // 添加之前判断是否已经添加过了
+                for (byte[] newTile : newTiles) {
+                    if (Arrays.equals(tiles, newTile)) {
+                        // 已经添加过了
+                        continue keepTilesX;
+                    }
+                }
+                // 添加到newTiles
+                newTiles.add(tiles);
+            }
+        }
+
+        // 将keepTiles以外的数据设置为null
+        for (int index = 0; index < indexA.length; index++) {
+            if (!keepTilesA.contains(index)) {
+                // 设置为null
+                indexA[index] = null;
+            }
+        }
+        for (int index = 0; index < indexB.length; index++) {
+            if (!keepTilesB.contains(index)) {
+                // 设置为null
+                indexB[index] = null;
+            }
+        }
+
+        // indexA、indexB 去重，与x200重复时保留x200的数据
+        for (int i = 0, length = indexA.length + indexB.length; i < length; i++) {
+            byte[][] index = i < indexA.length ? indexA : indexB;
+            int i1 = i < indexA.length ? i : i - indexA.length;
+            if (index[i1] == null) {
+                continue;
+            }
+            for (int j = i + 1; j < length; j++) {
+                byte[][] index1 = j < indexA.length ? indexA : indexB;
+                int j1 = j < indexA.length ? j : j - indexA.length;
+                if (index1[j1] == null) {
+                    continue;
+                }
+                if (Arrays.equals(index[i1], index1[j1])) {
+                    if (j1 >= 0x200) {
+                        // 0xC010+0x2000 的数据不变
+                        index[i1] = null;
+                    } else {
+                        index1[j1] = null;
+                    }
+                }
+            }
+        }
+
+        // 添加世界事件图块（4*4tile）到x200
+        for (List<EventTile> eventTiles : eventTilesEditor.getWorldEventTile().values()) {
+            for (EventTile eventTile : eventTiles) {
+                if (eventTile instanceof WorldEventTile worldEventTile) {
+                    x200.put(Arrays.toString(worldEventTile.getTiles()), worldEventTile.getTiles());
+                }
+            }
+        }
+
+        // 储存x200
+        List<byte[]> tempX200 = new ArrayList<>(x200.values());
+        Iterator<byte[]> x200Iterator = tempX200.iterator();
+        x200:
+        while (x200Iterator.hasNext()) {
+            byte[] tiles = x200Iterator.next();
+            // 判断x200是否已经存在，如果不存在就找位置添加
+            for (int index = 0x200; index < indexA.length; index++) {
+                if (Arrays.equals(indexA[index], tiles)) {
+                    // 已经存在
+                    x200Iterator.remove();
+                    continue x200;
+                }
+            }
+            // 不存在就找地方存入
+            for (int index = 0x200; index < indexA.length; index++) {
+                if (indexA[index] == null) {
+                    // 存入
+                    indexA[index] = tiles;
+                    x200Iterator.remove();
+                    continue x200;
+                }
+            }
+            // 没地方存了，跳出
+            break;
+        }
+
+        // 没能完全储存
+        // 将非必须存入x200的数据移动到其它地方
+        if (!tempX200.isEmpty()) {
+            // 需要被移动的数量
+            int count = tempX200.size();
+            x200:
+            for (int index = 0x200; index < indexA.length; index++) {
+                if (count == 0 || !x200Iterator.hasNext()) {
+                    break;
+                }
+                for (byte[] tiles : x200.values()) {
+                    if (Arrays.equals(indexA[index], tiles)) {
+                        // 跳过必须存入的4*4tile
+                        continue x200;
+                    }
+                }
+                // 非必须存入的4*4tile
+                // 移动到newTiles中
+                newTiles.add(indexA[index]);
+                // 替换
+                indexA[index] = x200Iterator.next();
+                x200Iterator.remove();
+                // 下一个
+                count--;
+            }
+        }
+
+        if (!tempX200.isEmpty()) {
+            // 什么？还没存完？解决不了，等死吧
+            for (byte[] tiles : tempX200) {
+                System.out.println("无法储存的世界地图4*4tile数据，可能会导致地图异常：" + Arrays.toString(tiles));
+            }
+        }
+
+        // 此处可能需要再次去重
+
+
+        // 将新的4*4tiles找地方存入
+        Iterator<byte[]> newTilesIterator = newTiles.iterator();
+        for (int index = 0; index < indexA.length; index++) {
+            if (indexA[index] == null && newTilesIterator.hasNext()) {
+                indexA[index] = newTilesIterator.next();
+            }
+        }
+        for (int index = 0; index < indexB.length; index++) {
+            if (indexB[index] == null && newTilesIterator.hasNext()) {
+                indexB[index] = newTilesIterator.next();
+            }
+        }
+
+
+        // 将indexA和indexB中值为null的数据替换为fillTiles
+        // 用来填充null的4*4tile
+        byte[] fillTiles = new byte[0x10];
+        Arrays.fill(fillTiles, (byte) 0x00);
         for (int i = 0; i < indexA.length; i++) {
-            tempIndexA.add(i);
+            if (indexA[i] == null) {
+                indexA[i] = fillTiles;
+            }
         }
         for (int i = 0; i < indexB.length; i++) {
-            tempIndexB.add(i);
+            if (indexB[i] == null) {
+                indexB[i] = fillTiles;
+            }
         }
 
         for (int i = 0; i < 0x1000; i++) {
-            int x = i % 64;
-            int y = i / 64;
+            int x = i % 0x40;
+            int y = i / 0x40;
             // 获取4*4图块
-            byte[] bytes = map1(map, x, y);
+            byte[] bytes = mapTiles[y][x];
 
             // 索引偏移
             Integer indexOffset = null;
@@ -237,8 +418,6 @@ public class WorldMapEditor extends AbstractEditor {
                     // 使用图块组A
                     x410 = 0B0000_0001;
                     offset = index % 0x100;
-
-                    tempIndexA.remove(index);
                     break;
                 }
             }
@@ -251,29 +430,13 @@ public class WorldMapEditor extends AbstractEditor {
                         // 使用图块组B
                         x410 = 0B0000_0000;
                         offset = index % 0x100;
-
-                        tempIndexB.remove(index);
                         break;
                     }
                 }
             }
 
             if (indexOffset == null) {
-                // 添加到新的4*4tile set中
-                for (Map.Entry<byte[], Set<Integer>> entry : newIndex.entrySet()) {
-                    // 如果是已经添加过了，只添加值
-                    if (Arrays.equals(entry.getKey(), bytes)) {
-                        bytes = entry.getKey();
-                        entry.getValue().add(i);
-                        break;
-                    }
-                }
-                // 如果没有添加过，创建一个HashSet并传入值后put
-                if (!newIndex.containsKey(bytes)) {
-                    HashSet<Integer> set = new HashSet<>();
-                    set.add(i);
-                    newIndex.put(bytes, set);
-                }
+                // 找不到？不存在的
                 continue;
             }
 
@@ -307,146 +470,35 @@ public class WorldMapEditor extends AbstractEditor {
             index[i] = (byte) (offset & 0xFF);
         }
 
-        // 移除4*4的事件图块
-        // 事件图块只使用indexA，offset = 0x200
-        for (List<EventTile> eventTiles : EditorManager.getEditor(EventTilesEditor.class).getWorldEventTile().values()) {
-            for (EventTile eventTile : eventTiles) {
-                tempIndexA.remove(0x200 + (eventTile.tile & 0xFF));
-            }
-        }
 
-        // 计算差异，将未使用的4*4tile替换为新的4*4tile，当前无法添加新的4*4tile和移除未使用的4*4tile
-        var tempIndexIteratorA = tempIndexA.iterator();
-        var tempIndexIteratorB = tempIndexB.iterator();
+        /*
+        A：|00|01|02|03|03|05|05|07|08|09|(04 04 06 06)|
+        B：|10|10|12|12|14|14|16|17|18|19|
 
-//        var strs = new HashMap<>();
-//        var s = new HashMap<>();
-//        var t = new HashMap<>();
-//
-//        for (int i = 0; i < indexA.length; i++) {
-//            var a = Arrays.toString(indexA[i]);
-//            if (strs.containsKey(a)) {
-//                s.put(i, indexA[i]);
-//            } else {
-//                strs.put(a, indexA[i]);
-//            }
-//        }
-//
-//        for (int i = 0; i < indexB.length; i++) {
-//            var a = Arrays.toString(indexB[i]);
-//            if (strs.containsKey(a)) {
-//                t.put(i, indexB[i]);
-//            } else {
-//                strs.put(a, indexB[i]);
-//            }
-//        }
-//
-//        var te = new ArrayList<>();
-//
-//        for (int i = 0; i < 0x1000; i++) {
-//            int x = i % 64;
-//            int y = i / 64;
-//            // 获取4*4图块
-//            byte[] bytes = map1(map, x, y);
-//            Iterator<Integer> iterator = tempIndexA.iterator();
-//            while (iterator.hasNext()){
-//                Integer a = iterator.next();
-//                if (Arrays.equals(indexA[a],bytes)){
-//                    te.add(i);
-//                    te.add(indexA[a]);
-//                    iterator.remove();
-////                    break;
-//                }
-//            }
-//            iterator = tempIndexB.iterator();
-//            while (iterator.hasNext()){
-//                Integer a = iterator.next();
-//                if (Arrays.equals(indexB[a],bytes)){
-//                    te.add(i);
-//                    te.add(indexB[a]);
-//                    iterator.remove();
-////                    break;
-//                }
-//            }
-//        }
+        有两个列表A和B，两个列表都可以存储数字
+        存储的数字可以是重复的
+        但是重复就会产生浪费，所以就需要最大化利用
 
-        // 未使用的4*4tile能装下多少新的4*4tile
-        int count = Math.min(tempIndexA.size() + tempIndexB.size(), newIndex.size());
+        所以简单的去重就会得到最优解：
 
-        if (count > 0) {
-            Iterator<Map.Entry<byte[], Set<Integer>>> newIndexIterator = newIndex.entrySet().iterator();
-            while (count > 0 && newIndexIterator.hasNext()) {
-                Map.Entry<byte[], Set<Integer>> entry = newIndexIterator.next();
+        A：|00|01|02|03|04|05|06|07|08|09|(10 12 14 16)|
+        B：|17|18|19|--|--|--|--|--|--|--|
 
-                for (int i : entry.getValue()) {
-                    // 索引偏移
-                    int indexOffset = 0;
-                    // 使用图块组A还是图块组B
-                    int x410 = 0;
-                    // 数据偏移
-                    int offset = 0;
+        这样就可以再储存7个数字
 
-                    if (tempIndexIteratorA.hasNext()) {
-                        x410 = 0B0000_0001;
-                        int data = tempIndexIteratorA.next();
-                        indexOffset = data / 0x100;
-                        offset = data % 0x100;
-                        count--;
+        条件：括号中的数字不能排序到括号以外的地方
+              括号内和括号外有重复的，保留括号内的，括号外的移除
+        所以解决的方法是
 
-                        indexA[data] = entry.getKey();
-                    } else if (tempIndexIteratorB.hasNext()) {
-                        x410 = 0B0000_0000;
-                        int data = tempIndexIteratorB.next();
-                        indexOffset = data / 0x100;
-                        offset = data % 0x100;
-                        count--;
+        A：|00|01|02|03|05|07|08|09|10|12|(04 06 -- --)|
+        B：|14|16|17|18|19|--|--|--|--|--|
 
-                        indexB[data] = entry.getKey();
-                    }
+        虽然空出来的位置不一样，但还是满足了条件
 
-                    if (count < 0) {
-                        // 无法添加剩余的4*4tile
-                        break;
-                    }
 
-                    // 配置索引偏移，索引与indexOffsets的比例是4:1
-                    // 1 index = 2 bit indexOffsets
-                    indexOffset <<= (6 - ((i % 4) * 2));
 
-                    int tempBit = 0B0000_0011;
-                    tempBit <<= (6 - ((i % 4) * 2));
-                    // 反码，目标2bit为0，其它bit为1
-                    tempBit = ~tempBit;
-                    // 将目标bit置0
-                    indexOffsets[i / 4] &= tempBit;
-                    // 加入到数据中
-                    indexOffsets[i / 4] |= indexOffset;
-
-                    // 图块组索引，索引与x00410的比例是8:1
-                    x410 <<= (7 - (i % 8));
-
-                    tempBit = 0B0000_0001;
-                    tempBit <<= (7 - (i % 8));
-                    // 反码，目标1bit为0，其它bit为1
-                    tempBit = ~tempBit;
-                    // 将目标bit置0
-                    x00410[i / 8] &= tempBit;
-                    // 加入到数据中
-                    x00410[i / 8] |= x410;
-
-                    // 配置数据偏移
-                    index[i] = (byte) (offset & 0xFF);
-                }
-            }
-        }
-
-//        var setsv = new HashSet<>();
-//        for (int i = 0; i < indexOffsets.length; i++) {
-//            if (indexOffsets[i] != AindexOffsets[i]) {
-//                setsv.add(i);
-//                System.out.print("");
-//            }
-//        }
+        问题：两个列表的全部数字都有可能会随机变更
+         */
 
         // 写入世界地图图块索引偏移
         setPrgRomPosition(buffer, WORLD_MAP_TILES_INDEX_OFFSET_START);

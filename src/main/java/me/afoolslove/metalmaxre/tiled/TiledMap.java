@@ -7,6 +7,7 @@ import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
 import me.afoolslove.metalmaxre.editor.map.*;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
+import me.afoolslove.metalmaxre.editor.map.events.WorldEventTile;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.editor.sprite.Sprite;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
@@ -837,12 +838,6 @@ public class TiledMap {
                         }
                     }
                 }
-            } else if (layer instanceof Group group) {
-                switch (group.getName()) {
-                    case "events":
-
-                        break;
-                }
             } else if (layer instanceof ObjectGroup objectGroup) {
                 switch (objectGroup.getName()) {
                     case "movable": // 可移动区域层
@@ -940,6 +935,57 @@ public class TiledMap {
                 }
             }
         }
+
+        // 事件图块需要地图解析完毕才能开始
+        for (MapLayer layer : worldMap.getLayers()) {
+            if (layer instanceof Group group && "events".equals(layer.getName())) {
+                var worldEventTile = eventTilesEditor.getWorldEventTile();
+                // 移除原事件图块
+                worldEventTile.clear();
+
+                for (MapLayer groupLayer : group.getLayers()) {
+                    if (groupLayer instanceof TileLayer eventTileLayer) {
+                        // 得到事件
+                        int event = Integer.parseInt(eventTileLayer.getName().substring(0, 4), 16) - 0x0441;
+                        // 得到bit位
+                        int offset = Integer.parseInt(eventTileLayer.getName().substring(5, 6), 16);
+
+                        // 合并
+                        event <<= 3;
+                        event |= offset;
+
+                        ArrayList<EventTile> events = new ArrayList<>();
+
+                        // 读取所有事件的4*4tile
+                        for (int y = 0; y < 0x40; y++) {
+                            for (int x = 0; x < 0x40; x++) {
+                                Tile tileAt = eventTileLayer.getTileAt(x * 4, y * 4);
+                                if (tileAt == null) {
+                                    // 该部分没有图块
+                                    continue;
+                                }
+                                // 读取4*4tile
+                                byte[] tiles = new byte[0x10];
+                                for (int offsetY = 0; offsetY < 0x04; offsetY++) {
+                                    for (int offsetX = 0; offsetX < 0x04; offsetX++) {
+                                        tiles[(offsetY * 0x04) + offsetX] = tileAt.getId().byteValue();
+                                    }
+                                }
+                                events.add(new WorldEventTile(x, y, 0, tiles));
+                            }
+                        }
+
+                        if (!events.isEmpty()) {
+                            // 添加事件图块
+                            worldEventTile.put(event, events);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
+
 //
 //        // 事件图块，显示时会覆盖对应的图块，相当于事件条件达成
 //        Group eventGroup = new Group();

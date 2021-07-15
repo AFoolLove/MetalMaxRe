@@ -5,6 +5,7 @@ import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.MapProperties;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
+import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -39,12 +40,15 @@ public class EventTilesEditor extends AbstractEditor {
     /**
      * K：Map
      * V：events
+     * -- K: event
+     * -- V: tile,x,y
      */
     private final HashMap<Integer, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
 
     @Override
-
     public boolean onRead(@NotNull ByteBuffer buffer) {
+        var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
+
         // 读取前清空数据
         eventTiles.clear();
 
@@ -79,10 +83,24 @@ public class EventTilesEditor extends AbstractEditor {
                 int count = buffer.get();
 
                 List<EventTile> eventTiles = new ArrayList<>();
-                // 读取事件图块：X、Y、图块
-                for (int i = count; i > 0; i--) {
-                    eventTiles.add(new EventTile(buffer.get(), buffer.get(), buffer.get()));
+
+                if (mapPropertiesEntry.getKey() == 0x00) {
+                    // 读取事件图块：X、Y、图块
+                    for (int i = count; i > 0; i--) {
+                        eventTiles.add(new WorldEventTile(buffer.get(), buffer.get(), buffer.get()));
+                    }
+                    // 世界地图的图块事件还需要读取图块内容
+                    for (EventTile eventTile : eventTiles) {
+                        byte[] tiles = worldMapEditor.indexA[0x200 + eventTile.intTile()];
+                        ((WorldEventTile) eventTile).setTiles(tiles);
+                    }
+                } else {
+                    // 读取事件图块：X、Y、图块
+                    for (int i = count; i > 0; i--) {
+                        eventTiles.add(new EventTile(buffer.get(), buffer.get(), buffer.get()));
+                    }
                 }
+
                 events.put(event, eventTiles);
             } while ((event = buffer.get()) != 0x00);
 
@@ -94,6 +112,28 @@ public class EventTilesEditor extends AbstractEditor {
                 }
             }
         }
+
+//        // 如果存在
+//        // 写入罗克东边涨潮退潮4*4 + 4*4图块
+//        for (Map.Entry<Integer, List<EventTile>> entry : getWorldEventTile().entrySet()) {
+//            if (entry.getKey() == ((0x0452 - 0x0441) << 3)) { // 涨潮退潮事件
+//                for (EventTile eventTile : entry.getValue()) {
+//                    if (eventTile.x == 0x3A && eventTile.y == 0x17) {
+//                        // 上部分
+//                        setPrgRomPosition(buffer, 0x2818D);
+//                        buffer.put(map[])
+//                    } else if (eventTile.x == 0x3A && eventTile.y == 0x18) {
+//                        // 下部分
+//                        setPrgRomPosition(buffer, 0x2818E);
+//                    }
+//                }
+//            }
+//        }
+//        for (List<EventTile> eventTiles : getWorldEventTile().values()) {
+//            for (EventTile eventTile : eventTiles) {
+//                if (eventTile.)
+//            }
+//        }
         return true;
     }
 

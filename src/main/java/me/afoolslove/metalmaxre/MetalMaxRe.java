@@ -82,6 +82,9 @@ public class MetalMaxRe {
         VendorEditor vendorEditor = new VendorEditor();
         EditorManager.register(vendorEditor);
 
+        WorldMapEditor worldMapEditor = new WorldMapEditor();
+        EditorManager.register(worldMapEditor);
+
         EventTilesEditor eventTilesEditor = new EventTilesEditor();
         EditorManager.register(eventTilesEditor);
 
@@ -111,9 +114,6 @@ public class MetalMaxRe {
 
         TileSetEditor tileSetEditor = new TileSetEditor();
         EditorManager.register(tileSetEditor);
-
-        WorldMapEditor worldMapEditor = new WorldMapEditor();
-        EditorManager.register(worldMapEditor);
     }
 
     public void setBuffer(ByteBuffer buffer) {
