@@ -257,11 +257,11 @@ public class MetalMaxRe {
 
             // 顺序写入
             mapEditor.onWrite(buffer); // 影响 mapPropertiesEditor
-            eventTilesEditor.onWrite(buffer); // 影响 mapPropertiesEditor、worldMapEditor
+            worldMapEditor.onWrite(buffer); // 影响 eventTilesEditor
+            eventTilesEditor.onWrite(buffer); // 影响 mapPropertiesEditor
             mapEntranceEditor.onWrite(buffer); // 影响 mapPropertiesEditor
             paletteEditor.onWrite(buffer); // 影响 mapPropertiesEditor // 暂时没有
             mapPropertiesEditor.onWrite(buffer);
-            worldMapEditor.onWrite(buffer);
 
             Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);
             return true;

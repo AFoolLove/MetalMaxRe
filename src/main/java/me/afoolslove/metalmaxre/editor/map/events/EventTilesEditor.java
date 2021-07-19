@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editor.map.events;
 
+import me.afoolslove.metalmaxre.NumberR;
+import me.afoolslove.metalmaxre.Point2B;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
@@ -7,6 +9,7 @@ import me.afoolslove.metalmaxre.editor.map.MapProperties;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -45,12 +48,20 @@ public class EventTilesEditor extends AbstractEditor {
      */
     private final HashMap<Integer, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
 
+    /**
+     * 特殊事件图块
+     * 罗克东部涨潮和退潮的4个4*4tile
+     */
+    @Nullable
+    private WorldMapInteractiveEvent worldMapInteractiveEvent;
+
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
         var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
 
         // 读取前清空数据
         eventTiles.clear();
+        worldMapInteractiveEvent = null;
 
         // 排除事件为 0x00 ！！！！
         // setPrgRomPosition(buffer, EVENT_TILES_START_OFFSET);
@@ -113,70 +124,168 @@ public class EventTilesEditor extends AbstractEditor {
             }
         }
 
-//        // 如果存在
-//        // 写入罗克东边涨潮退潮4*4 + 4*4图块
-//        for (Map.Entry<Integer, List<EventTile>> entry : getWorldEventTile().entrySet()) {
-//            if (entry.getKey() == ((0x0452 - 0x0441) << 3)) { // 涨潮退潮事件
-//                for (EventTile eventTile : entry.getValue()) {
-//                    if (eventTile.x == 0x3A && eventTile.y == 0x17) {
-//                        // 上部分
-//                        setPrgRomPosition(buffer, 0x2818D);
-//                        buffer.put(map[])
-//                    } else if (eventTile.x == 0x3A && eventTile.y == 0x18) {
-//                        // 下部分
-//                        setPrgRomPosition(buffer, 0x2818E);
-//                    }
-//                }
-//            }
-//        }
-//        for (List<EventTile> eventTiles : getWorldEventTile().values()) {
-//            for (EventTile eventTile : eventTiles) {
-//                if (eventTile.)
-//            }
-//        }
+        // 获取罗克东边涨潮退潮的4个4*4tile
+        worldMapInteractiveEvent = new WorldMapInteractiveEvent();
+        setPrgRomPosition(buffer, 0x28184);
+        int worldMapInteractiveEventA = (buffer.get() & 0xFF) + ((buffer.get() & 0xFF) << 8);
+        worldMapInteractiveEventA -= 0x7000;
+        setPrgRomPosition(buffer, 0x2818A);
+        int worldMapInteractiveEventB = (buffer.get() & 0xFF) + ((buffer.get() & 0xFF) << 8);
+        worldMapInteractiveEventB -= 0x7000;
+        for (Map.Entry<Integer, List<EventTile>> entry : getWorldEventTile().entrySet()) {
+            for (EventTile eventTile : entry.getValue()) {
+                int x = worldMapInteractiveEventA % 0x40;
+                int y = worldMapInteractiveEventA / 0x40;
+                if (eventTile.intX() == x && eventTile.intY() == y) {
+                    worldMapInteractiveEvent.aPoint = new Point2B(x, y);
+                    worldMapInteractiveEvent.aTrue = worldMapEditor.indexA[0x200 + eventTile.tile];
+                    worldMapInteractiveEvent.aFalse = worldMapEditor.getTiles(x, y);
+                    continue;
+                }
+                x = worldMapInteractiveEventB % 0x40;
+                y = worldMapInteractiveEventB / 0x40;
+                if (eventTile.intX() == x && eventTile.intY() == y) {
+                    worldMapInteractiveEvent.bPoint = new Point2B(x, y);
+                    worldMapInteractiveEvent.bTrue = worldMapEditor.indexA[0x200 + eventTile.tile];
+                    worldMapInteractiveEvent.bFalse = worldMapEditor.getTiles(x, y);
+                }
+            }
+        }
+        // 读取worldMapInteractiveEvent的触发坐标和朝向
+        setPrgRomPosition(buffer, 0x28165);
+        worldMapInteractiveEvent.setCameraX(buffer.get());
+        setPrgRomPosition(buffer, 0x2816B);
+        worldMapInteractiveEvent.setCameraY(buffer.get());
+        setPrgRomPosition(buffer, 0x28172);
+        worldMapInteractiveEvent.setDirection(buffer.get());
         return true;
     }
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
+        var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
+        var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
 
         // 排除事件为 0x00 ！！！！
         getEventTiles().values().forEach(each -> {
             each.entrySet().removeIf(entry -> entry.getKey() == 0x00);
         });
 
-        setPrgRomPosition(buffer, EVENT_TILES_START_OFFSET);
-        getEventTiles().values()
+        List<Map<Integer, List<EventTile>>> eventList = getEventTiles().values()
                 .parallelStream()
                 .filter(entry -> !entry.isEmpty()) // 过滤没有事件图块的地图
-                .distinct()
-                .forEachOrdered(events -> {
-                    // 计算新的事件图块索引，太长了！简称：索引
-                    char newEventTilesIndex = (char) (buffer.position() - 0x10 - 0x1C000 + 0x8000);
-                    // 将旧的索引替换为新的索引
-                    getEventTiles().entrySet()
-                            .parallelStream()
-                            .filter(entry1 -> entry1.getValue() == events) // 获取相同事件图块的地图
-                            .forEach(mapEntry -> {
-                                // 通过相同的事件图块组更新索引
-                                mapPropertiesEditor.getMapProperties(mapEntry.getKey()).eventTilesIndex = newEventTilesIndex;
-                            });
+                .distinct().collect(Collectors.toList());
 
-                    // 写入数据
-                    for (Map.Entry<Integer, List<EventTile>> eventsList : events.entrySet()) {
-                        // 写入事件
-                        buffer.put(eventsList.getKey().byteValue());
-                        // 写入事件数量
-                        buffer.put(((byte) eventsList.getValue().size()));
-                        // 写入 X、Y、Tile
-                        for (EventTile eventTile : eventsList.getValue()) {
-                            buffer.put(eventTile.toByteArray());
+        if (worldMapInteractiveEvent != null) {
+            // 写入worldMapInteractiveEvent的触发坐标和朝向
+            setPrgRomPosition(buffer, 0x28165);
+            buffer.put(worldMapInteractiveEvent.getX());
+            setPrgRomPosition(buffer, 0x2816B);
+            buffer.put(worldMapInteractiveEvent.getY());
+            setPrgRomPosition(buffer, 0x28172);
+            buffer.put(worldMapInteractiveEvent.getDirection());
+
+            Map<Integer, List<EventTile>> worldEventTile = getWorldEventTile();
+            for (int i = 0x200; i < worldMapEditor.indexA.length; i++) {
+                if (Arrays.equals(worldMapEditor.indexA[i], worldMapInteractiveEvent.aFalse)) {
+                    setPrgRomPosition(buffer, 0x2818D);
+                    buffer.put((byte) (i - 0x200));
+                    point:
+                    for (List<EventTile> value : worldEventTile.values()) {
+                        for (EventTile eventTile : value) {
+                            if (eventTile.intX() == worldMapInteractiveEvent.aPoint.intX()
+                                    && eventTile.intY() == worldMapInteractiveEvent.aPoint.intY()) {
+                                eventTile.setTile(i);
+                                break point;
+                            }
                         }
                     }
-                    // 写入事件组结束符
-                    buffer.put((byte) 0x00);
-                });
+                    continue;
+                }
+                if (Arrays.equals(worldMapEditor.indexA[i], worldMapInteractiveEvent.bFalse)) {
+                    setPrgRomPosition(buffer, 0x2818F);
+                    buffer.put((byte) (i - 0x200));
+                    point:
+                    for (List<EventTile> value : worldEventTile.values()) {
+                        for (EventTile eventTile : value) {
+                            if (eventTile.intX() == worldMapInteractiveEvent.bPoint.intX()
+                                    && eventTile.intY() == worldMapInteractiveEvent.bPoint.intY()) {
+                                eventTile.setTile((byte) (i - 0x200));
+                                break point;
+                            }
+                        }
+                    }
+                    continue;
+                }
+                if (Arrays.equals(worldMapEditor.indexA[i], worldMapInteractiveEvent.aTrue)) {
+                    setPrgRomPosition(buffer, 0x2818E);
+                    buffer.put((byte) (i - 0x200));
+                    point:
+                    for (List<EventTile> value : worldEventTile.values()) {
+                        for (EventTile eventTile : value) {
+                            if (eventTile.intX() == worldMapInteractiveEvent.aPoint.intX()
+                                    && eventTile.intY() == worldMapInteractiveEvent.aPoint.intY()) {
+                                eventTile.setTile((byte) (i - 0x200));
+                                break point;
+                            }
+                        }
+                    }
+                    continue;
+                }
+                if (Arrays.equals(worldMapEditor.indexA[i], worldMapInteractiveEvent.bTrue)) {
+                    setPrgRomPosition(buffer, 0x28190);
+                    buffer.put((byte) (i - 0x200));
+                    point:
+                    for (List<EventTile> value : worldEventTile.values()) {
+                        for (EventTile eventTile : value) {
+                            if (eventTile.intX() == worldMapInteractiveEvent.bPoint.intX()
+                                    && eventTile.intY() == worldMapInteractiveEvent.bPoint.intY()) {
+                                eventTile.setTile((byte) (i - 0x200));
+                                break point;
+                            }
+                        }
+                    }
+                    continue;
+                }
+            }
+
+            setPrgRomPosition(buffer, 0x28184);
+            int worldMapInteractiveEventA = worldMapInteractiveEvent.aPoint.intX() + (worldMapInteractiveEvent.aPoint.intY() * 0x40);
+            worldMapInteractiveEventA += 0x7000;
+            buffer.putChar(NumberR.parseChar(worldMapInteractiveEventA));
+            setPrgRomPosition(buffer, 0x2818A);
+            int worldMapInteractiveEventB = worldMapInteractiveEvent.bPoint.intX() + (worldMapInteractiveEvent.bPoint.intY() * 0x40);
+            worldMapInteractiveEventB += 0x7000;
+            buffer.putChar(NumberR.parseChar(worldMapInteractiveEventB));
+        }
+
+        setPrgRomPosition(buffer, EVENT_TILES_START_OFFSET);
+        eventList.forEach(events -> {
+            // 计算新的事件图块索引，太长了！简称：索引
+            char newEventTilesIndex = (char) (buffer.position() - 0x10 - 0x1C000 + 0x8000);
+            // 将旧的索引替换为新的索引
+            getEventTiles().entrySet()
+                    .parallelStream()
+                    .filter(entry1 -> entry1.getValue() == events) // 获取相同事件图块的地图
+                    .forEach(mapEntry -> {
+                        // 通过相同的事件图块组更新索引
+                        mapPropertiesEditor.getMapProperties(mapEntry.getKey()).eventTilesIndex = newEventTilesIndex;
+                    });
+
+            // 写入数据
+            for (Map.Entry<Integer, List<EventTile>> eventsList : events.entrySet()) {
+                // 写入事件
+                buffer.put(eventsList.getKey().byteValue());
+                // 写入事件数量
+                buffer.put(((byte) eventsList.getValue().size()));
+                // 写入 X、Y、Tile
+                for (EventTile eventTile : eventsList.getValue()) {
+                    buffer.put(eventTile.toByteArray());
+                }
+            }
+            // 写入事件组结束符
+            buffer.put((byte) 0x00);
+        });
 
         int end = buffer.position() - 1;
         if (end <= 0x1DEAF) {
@@ -203,5 +312,10 @@ public class EventTilesEditor extends AbstractEditor {
      */
     public Map<Integer, List<EventTile>> getWorldEventTile() {
         return eventTiles.get(0x00);
+    }
+
+    @Nullable
+    public WorldMapInteractiveEvent getWorldMapInteractiveEvent() {
+        return worldMapInteractiveEvent;
     }
 }

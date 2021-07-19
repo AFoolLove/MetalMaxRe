@@ -5,6 +5,7 @@ import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.WorldEventTile;
+import me.afoolslove.metalmaxre.editor.map.events.WorldMapInteractiveEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -51,8 +52,8 @@ public class WorldMapEditor extends AbstractEditor {
     /**
      * 相对图块索引
      */
-    public static final int WORLD_MAP_INDEX_START = 0xBA010 - 0x10;
-    public static final int WORLD_MAP_INDEX_END = 0xBB00F - 0x10;
+    public static final int WORLD_MAP_INDEX_START = 0x3A010 - 0x10; // CHR
+    public static final int WORLD_MAP_INDEX_END = 0x3B00F - 0x10; // CHR
 
     /**
      * 世界地图的怪物领域
@@ -140,7 +141,7 @@ public class WorldMapEditor extends AbstractEditor {
             buffer.get(index);
         }
         // 读取图块索引
-        setPrgRomPosition(buffer, WORLD_MAP_INDEX_START);
+        setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
         buffer.get(index);
 
         for (int i = 0; i < 0x1000; i++) {
@@ -205,13 +206,14 @@ public class WorldMapEditor extends AbstractEditor {
         // 必须存入x200的4*4tiles
         Map<String, byte[]> x200 = new HashMap<>();
         // 获取罗克东边涨潮退潮的4个4*4tile
-        setPrgRomPosition(buffer, 0x2818D);
-        byte[] oTiles = new byte[0x04];
-        buffer.get(oTiles);
-        for (byte oTile : oTiles) {
-            byte[] tiles = indexA[0x200 + (oTile & 0xFF)];
-            x200.put(Arrays.toString(tiles), tiles);
+        WorldMapInteractiveEvent worldMapInteractiveEvent = eventTilesEditor.getWorldMapInteractiveEvent();
+        if (worldMapInteractiveEvent != null) {
+            x200.put(Arrays.toString(worldMapInteractiveEvent.aFalse), worldMapInteractiveEvent.aFalse);
+            x200.put(Arrays.toString(worldMapInteractiveEvent.aTrue), worldMapInteractiveEvent.aTrue);
+            x200.put(Arrays.toString(worldMapInteractiveEvent.bFalse), worldMapInteractiveEvent.bFalse);
+            x200.put(Arrays.toString(worldMapInteractiveEvent.bTrue), worldMapInteractiveEvent.bTrue);
         }
+        x200.remove("null");
 
         // 格式化地图数据
         byte[][][] mapTiles = new byte[0x40][0x40][0x10];
@@ -300,6 +302,9 @@ public class WorldMapEditor extends AbstractEditor {
             for (EventTile eventTile : eventTiles) {
                 if (eventTile instanceof WorldEventTile worldEventTile) {
                     x200.put(Arrays.toString(worldEventTile.getTiles()), worldEventTile.getTiles());
+
+                    byte[] tiles = getTiles(worldEventTile.intX(), worldEventTile.intY());
+                    x200.put(Arrays.toString(tiles), tiles);
                 }
             }
         }
@@ -385,17 +390,23 @@ public class WorldMapEditor extends AbstractEditor {
         // 将indexA和indexB中值为null的数据替换为fillTiles
         // 用来填充null的4*4tile
         byte[] fillTiles = new byte[0x10];
-        Arrays.fill(fillTiles, (byte) 0x00);
+        Arrays.fill(fillTiles, (byte) 0xFF);
+        // 空闲的4*4tile数量
+        int fillCount = 0;
         for (int i = 0; i < indexA.length; i++) {
             if (indexA[i] == null) {
                 indexA[i] = fillTiles;
+                fillCount++;
             }
         }
         for (int i = 0; i < indexB.length; i++) {
             if (indexB[i] == null) {
                 indexB[i] = fillTiles;
+                fillCount++;
             }
         }
+
+        System.out.printf("世界地图编辑器：剩余%d个空闲4*4tile\n", fillCount);
 
         for (int i = 0; i < 0x1000; i++) {
             int x = i % 0x40;
@@ -470,36 +481,6 @@ public class WorldMapEditor extends AbstractEditor {
             index[i] = (byte) (offset & 0xFF);
         }
 
-
-        /*
-        A：|00|01|02|03|03|05|05|07|08|09|(04 04 06 06)|
-        B：|10|10|12|12|14|14|16|17|18|19|
-
-        有两个列表A和B，两个列表都可以存储数字
-        存储的数字可以是重复的
-        但是重复就会产生浪费，所以就需要最大化利用
-
-        所以简单的去重就会得到最优解：
-
-        A：|00|01|02|03|04|05|06|07|08|09|(10 12 14 16)|
-        B：|17|18|19|--|--|--|--|--|--|--|
-
-        这样就可以再储存7个数字
-
-        条件：括号中的数字不能排序到括号以外的地方
-              括号内和括号外有重复的，保留括号内的，括号外的移除
-        所以解决的方法是
-
-        A：|00|01|02|03|05|07|08|09|10|12|(04 06 -- --)|
-        B：|14|16|17|18|19|--|--|--|--|--|
-
-        虽然空出来的位置不一样，但还是满足了条件
-
-
-
-        问题：两个列表的全部数字都有可能会随机变更
-         */
-
         // 写入世界地图图块索引偏移
         setPrgRomPosition(buffer, WORLD_MAP_TILES_INDEX_OFFSET_START);
         buffer.put(indexOffsets);
@@ -517,9 +498,16 @@ public class WorldMapEditor extends AbstractEditor {
             buffer.put(tiles);
         }
         // 写入图块索引
-        setPrgRomPosition(buffer, WORLD_MAP_INDEX_START);
+        setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
         buffer.put(index);
         return true;
+    }
+
+    /**
+     * @return 4*4tile
+     */
+    public byte[] getTiles(int x, int y) {
+        return map1(map, x, y);
     }
 
     /**

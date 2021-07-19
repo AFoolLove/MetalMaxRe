@@ -268,11 +268,19 @@ public class DogSystemEditor extends AbstractEditor {
             this.x = (byte) (x & 0xFF);
         }
 
+        public void setCameraX(byte x) {
+            this.x = x;
+        }
+
         /**
          * 此坐标会下偏移7格坐标点
          */
         public void setCameraY(@Range(from = 0x00, to = 0xFF) int y) {
             this.y = (byte) (y & 0xFF);
+        }
+
+        public void setCameraY(byte y) {
+            this.y = y;
         }
 
         public void setCamera(@Range(from = 0x00, to = 0xFF) int x,
