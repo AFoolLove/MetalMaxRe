@@ -302,7 +302,7 @@ public class WorldMapEditor extends AbstractEditor {
             for (EventTile eventTile : eventTiles) {
                 if (eventTile instanceof WorldEventTile worldEventTile) {
                     x200.put(Arrays.toString(worldEventTile.getTiles()), worldEventTile.getTiles());
-
+                    // 将事件对应的4*4tile一并储存到x200
                     byte[] tiles = getTiles(worldEventTile.intX(), worldEventTile.intY());
                     x200.put(Arrays.toString(tiles), tiles);
                 }

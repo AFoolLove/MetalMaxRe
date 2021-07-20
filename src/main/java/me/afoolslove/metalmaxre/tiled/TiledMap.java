@@ -209,6 +209,20 @@ public class TiledMap {
 
             // 添加到入口的对象层
             entrances.addObject(mapObject);
+
+            // 设置视觉辅助用的出入口线段，仅在同地图有效
+            if (outPoint.intMap() == map) {
+                mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0, 0, 0);
+                mapObject.setId(nextObjectId++);
+                Polyline polyline = new Polyline();
+                polyline.setPoints(
+                        String.format("0,0 %d,%d",
+                                (outPoint.intX() - inPoint.intX()) * 0x10,
+                                (outPoint.intY() - inPoint.intY()) * 0x10));
+                mapObject.setPolyline(polyline);
+                // 添加
+                entrances.addObject(mapObject);
+            }
         }
 
         // ----------------
@@ -475,6 +489,20 @@ public class TiledMap {
 
             // 添加到入口的对象层
             entrances.addObject(mapObject);
+
+            // 设置视觉辅助用的出入口线段，仅在同地图有效
+            if (outPoint.intMap() == 0x00) {
+                mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0, 0, 0);
+                mapObject.setId(nextObjectId++);
+                Polyline polyline = new Polyline();
+                polyline.setPoints(
+                        String.format("0,0 %d,%d",
+                                (outPoint.intX() - inPoint.intX()) * 0x10,
+                                (outPoint.intY() - inPoint.intY()) * 0x10));
+                mapObject.setPolyline(polyline);
+                // 添加
+                entrances.addObject(mapObject);
+            }
         }
 
         // ----------------
@@ -922,6 +950,10 @@ public class TiledMap {
                         // 读取所有出入口
                         for (MapObject entranceObject : objectGroup.getObjects()) {
                             String[] split = entranceObject.getName().split(":");
+                            if (split.length != 3) {
+                                // 忽略3个数据以外的数据
+                                continue;
+                            }
                             MapPoint inPoint = new MapPoint((int) entranceObject.getX() / 0x10, (int) entranceObject.getY() / 0x10);
                             MapPoint outPoint = new MapPoint(
                                     Integer.parseInt(split[0], 16) & 0xFF,
