@@ -14,7 +14,7 @@ import java.util.Map;
  *
  * @author AFoolLove
  */
-public class MonsterEditor extends AbstractEditor {
+public class MonsterEditor extends AbstractEditor<MonsterEditor> {
     /**
      * 怪物种类的总数量
      */

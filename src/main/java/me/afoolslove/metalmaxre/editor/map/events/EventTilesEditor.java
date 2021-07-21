@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  *
  * @author AFoolLove
  */
-public class EventTilesEditor extends AbstractEditor {
+public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
     public static final int EVENT_TILES_START_OFFSET = 0x1DCCF - 0x10;
     public static final int EVENT_TILES_END_OFFSET = 0x1DEAF - 0x10;
 

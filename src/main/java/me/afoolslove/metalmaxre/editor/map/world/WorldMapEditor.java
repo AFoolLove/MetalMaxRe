@@ -20,7 +20,7 @@ import java.util.*;
  *
  * @author AFoolLove
  */
-public class WorldMapEditor extends AbstractEditor {
+public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
     /**
      * 世界地图图块索引偏移
      * 0x01 = 0x1000 byte
@@ -199,8 +199,6 @@ public class WorldMapEditor extends AbstractEditor {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        // TODO 罗克东边涨潮退潮的4个4*4tile 变量
-
         // 读取世界地图，使用set记录需要保留数据
         // 通过set设置未使用的数据为null
 

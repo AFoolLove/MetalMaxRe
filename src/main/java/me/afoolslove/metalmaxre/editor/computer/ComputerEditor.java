@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * @author AFoolLove
  */
-public class ComputerEditor extends AbstractEditor {
+public class ComputerEditor extends AbstractEditor<ComputerEditor> {
     /**
      * 计算机最大数量
      */

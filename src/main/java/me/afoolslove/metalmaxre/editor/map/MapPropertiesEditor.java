@@ -42,7 +42,7 @@ import java.util.*;
  *
  * @author AFoolLove
  */
-public class MapPropertiesEditor extends AbstractEditor {
+public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
     public static final int MAP_PROPERTIES_UP_ROLL_OFFSET = 0x0BE10 - 0x10;
     public static final int MAP_PROPERTIES_DOWN_ROLL_OFFSET = 0x1DEB0 - 0x10;
 

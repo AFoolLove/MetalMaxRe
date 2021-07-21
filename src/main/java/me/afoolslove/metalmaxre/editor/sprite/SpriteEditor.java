@@ -24,7 +24,7 @@ import java.util.*;
  *
  * @author AFoolLove
  */
-public class SpriteEditor extends AbstractEditor {
+public class SpriteEditor extends AbstractEditor<SpriteEditor> {
     public static final int SPRITE_INDEX_START_OFFSET = 0x24010 - 0x10;
 
     public static final int SPRITE_START_OFFSET = 0x24204 - 0x10;

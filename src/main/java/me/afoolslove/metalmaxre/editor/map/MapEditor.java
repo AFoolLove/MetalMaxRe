@@ -1,6 +1,5 @@
 package me.afoolslove.metalmaxre.editor.map;
 
-import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +30,7 @@ import java.util.function.Predicate;
  *
  * @author AFoolLove
  */
-public class MapEditor extends AbstractEditor {
+public class MapEditor extends AbstractEditor<MapEditor> {
     public static final int MAP_MAX_COUNT = 0xF0;
     public static final int[] MAP_CONTAINERS = {0x0B6D4 - 0x00610, 0xBF010 - 0xBB010};
     public static final int MAP_MAX_CAPACITY = Arrays.stream(MAP_CONTAINERS).sum();

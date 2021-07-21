@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author AFoolLove
  */
-public class PaletteEditor extends AbstractEditor {
+public class PaletteEditor extends AbstractEditor<PaletteEditor> {
     public static final int PALETTE_START_OFFSET = 0x1DAE0 - 0x10;
     public static final int PALETTE_LIST_COUNT = 0xA5;
     public static final int PALETTE_LIST_SPRITE = 0x7D737 - 0x10;

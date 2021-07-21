@@ -17,7 +17,7 @@ import java.util.*;
  *
  * @author AFoolLove
  */
-public class TextEditor extends AbstractEditor {
+public class TextEditor extends AbstractEditor<TextEditor> {
     public static final List<Map.Entry<Integer, Integer>> POINTS = new ArrayList<>();
 
     private final Map<Map.Entry<Integer, Integer>, TextParagraphs> paragraphsMap = new HashMap<>();

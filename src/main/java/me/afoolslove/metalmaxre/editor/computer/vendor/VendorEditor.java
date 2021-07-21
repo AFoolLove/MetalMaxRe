@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author AFoolLove
  */
-public class VendorEditor extends AbstractEditor {
+public class VendorEditor extends AbstractEditor<VendorEditor> {
     /**
      * 售货机商品的最大组合数量
      */

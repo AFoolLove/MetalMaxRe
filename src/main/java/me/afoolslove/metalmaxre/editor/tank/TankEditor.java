@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * @author AFoolLove
  */
-public class TankEditor extends AbstractEditor {
+public class TankEditor extends AbstractEditor<TankEditor> {
     public static final int TANK_INIT_EQUIPMENT_START_OFFSET = 0x22010 - 0x10;
 
     public static final int TANK_INIT_CHASSIS_WEIGHT_START_OFFSET = 0x28142 - 0x10;

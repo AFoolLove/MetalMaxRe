@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * @author AFoolLove
  */
-public class PlayerEditor extends AbstractEditor {
+public class PlayerEditor extends AbstractEditor<PlayerEditor> {
 
     public static final int PLAYER_START_OFFSET = 0x280CD - 0x10;
     /**

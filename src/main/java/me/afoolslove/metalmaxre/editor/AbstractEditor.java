@@ -2,17 +2,16 @@ package me.afoolslove.metalmaxre.editor;
 
 import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.MetalMaxRe;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Range;
 
 import java.nio.*;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * 基本的编辑器功能
@@ -20,8 +19,9 @@ import java.util.function.Predicate;
  *
  * @author AFoolLove
  */
-public abstract class AbstractEditor {
+public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     protected ByteBuffer buffer;
+    protected final List<Listener<T>> listeners = new ArrayList<>();
 
 
     public AbstractEditor() {
@@ -56,6 +56,9 @@ public abstract class AbstractEditor {
         buffer.position(getHeader().getChrRomStart(offset));
     }
 
+    public List<Listener<T>> getListeners() {
+        return listeners;
+    }
 
     public ByteBuffer slice() {
         return buffer.slice();
@@ -286,17 +289,21 @@ public abstract class AbstractEditor {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(getBuffer(), getListeners());
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AbstractEditor)) {
+        if (!(o instanceof AbstractEditor<?> editor)) {
             return false;
         }
-        AbstractEditor that = (AbstractEditor) o;
-        return Objects.equals(buffer, that.buffer);
+        return Objects.equals(getBuffer(), editor.getBuffer())
+                && Objects.equals(getListeners(), editor.getListeners());
     }
-
 
     public static <T> void limit(@NotNull Iterator<T> iterator, @NotNull BooleanSupplier condition, @Nullable Consumer<T> removed) {
         while (condition.getAsBoolean() && iterator.hasNext()) {
@@ -308,4 +315,42 @@ public abstract class AbstractEditor {
         }
     }
 
+    /**
+     * 编辑器读写监听器
+     *
+     * @param <T> 编辑器
+     */
+    public interface Listener<T extends AbstractEditor<T>> {
+        /**
+         * 编辑器读取之前执行
+         *
+         * @param editor 编辑器
+         */
+        default void onReadBefore(@NotNull T editor) {
+        }
+
+        /**
+         * 编辑器读取完毕之后执行
+         *
+         * @param editor 编辑器
+         */
+        default void onReadAfter(@NotNull T editor) {
+        }
+
+        /**
+         * 编辑器写入之前执行
+         *
+         * @param editor 编辑器
+         */
+        default void onWriteBefore(@NotNull T editor) {
+        }
+
+        /**
+         * 编辑器写入完毕后执行
+         *
+         * @param editor 编辑器
+         */
+        default void onWriteAfter(@NotNull T editor) {
+        }
+    }
 }

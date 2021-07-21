@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author AFoolLove
  */
-public class ItemsEditor extends AbstractEditor {
+public class ItemsEditor extends AbstractEditor<ItemsEditor> {
 
     public static final int TANK_ENGINE_MAX_CAPACITY_OFFSET = 0x21804 - 0x10;
     public static final int PLAYER_EQUIPMENT_CAN_EQUIPPED_OFFSET = 0x22285 - 0x10;

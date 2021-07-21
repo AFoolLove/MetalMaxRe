@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  *
  * @author AFoolLove
  */
-public class TreasureEditor extends AbstractEditor {
+public class TreasureEditor extends AbstractEditor<TreasureEditor> {
     public static final int TREASURE_MAX_COUNT = 0x5B;
 
     public static final int TREASURE_START_OFFSET = 0x39C50 - 0x10;

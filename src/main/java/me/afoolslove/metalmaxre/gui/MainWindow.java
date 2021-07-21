@@ -1,7 +1,9 @@
 package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
@@ -31,11 +33,10 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public class MainWindow extends JFrame {
-
     private JPanel contentPane;
     private JTabbedPane tabbedPane1;
-    private JComboBox<String> comboBox2;
     private JComboBox<String> comboBox1;
+    private JComboBox<String> comboBox2;
     private JComboBox<String> comboBox3;
     private JComboBox<String> comboBox4;
     private JComboBox<String> comboBox5;
@@ -67,10 +68,24 @@ public class MainWindow extends JFrame {
             return;
         }
 
-        loadGame(new File(resource.getFile()), true);
-
         createMenuBar();
         createLayout();
+
+        EditorManager.getEditor(DogSystemEditor.class).getListeners().add(new AbstractEditor.Listener<>() {
+            @Override
+            public void onReadAfter(@NotNull DogSystemEditor editor) {
+                JComboBox<String>[] comboBoxes = new JComboBox[]{
+                        comboBox1, comboBox2, comboBox3,
+                        comboBox4, comboBox5, comboBox6,
+                        comboBox7, comboBox8, comboBox9,
+                };
+                for (int i = 0; i < comboBoxes.length; i++) {
+                    comboBoxes[i].setSelectedIndex(editor.getTown(i) & 0xFF);
+                }
+            }
+        });
+
+        loadGame(new File(resource.getFile()), true);
 
         setContentPane(contentPane);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -78,7 +93,6 @@ public class MainWindow extends JFrame {
         setSize(854, 480);
 //        pack();
         setVisible(true);
-
     }
 
     /**
@@ -300,6 +314,26 @@ public class MainWindow extends JFrame {
                 return MapEditor.MAP_MAX_COUNT;
             }
         });
+
+        JComboBox<String>[] comboBoxes = new JComboBox[]{
+                comboBox1, comboBox2, comboBox3,
+                comboBox4, comboBox5, comboBox6,
+                comboBox7, comboBox8, comboBox9,
+        };
+        for (JComboBox<String> comboBox : comboBoxes) {
+            comboBox.setModel(new DefaultComboBoxModel<>() {
+                {
+                    for (int i = 0; i < MapEditor.MAP_MAX_COUNT; i++) {
+                        addElement(String.format("%02X", i));
+                    }
+                }
+
+                @Override
+                public int getSize() {
+                    return MapEditor.MAP_MAX_COUNT;
+                }
+            });
+        }
     }
 
     /**

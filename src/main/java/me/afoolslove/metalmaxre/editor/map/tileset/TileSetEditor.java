@@ -20,7 +20,7 @@ import java.util.Arrays;
  *
  * @author AFoolLove
  */
-public class TileSetEditor extends AbstractEditor {
+public class TileSetEditor extends AbstractEditor<TileSetEditor> {
     public static final int TILE_SET_START_OFFSET = 0x00000; // CHR
     public static final int TILE_SET_COMPOSITIONS_START_OFFSET = 0x35000; // CHR
     public static final int TILE_SET_COLOR_INDEX_START_OFFSET = 0x38700; // CHR

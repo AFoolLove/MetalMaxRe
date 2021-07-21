@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre;
 
+import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
@@ -23,11 +24,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 程序主体
@@ -241,28 +243,57 @@ public class MetalMaxRe {
             var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
             var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
 
-            // 无序
-            treasureEditor.onWrite(buffer);
-            computerEditor.onWrite(buffer);
-            dogSystemEditor.onWrite(buffer);
-            vendorEditor.onWrite(buffer);
-            spriteEditor.onWrite(buffer);
-            playerEditor.onWrite(buffer);
-            tankInitialAttributes.onWrite(buffer);
-            playerExperienceEditor.onWrite(buffer);
-            itemsEditor.onWrite(buffer);
-            textEditor.onWrite(buffer);
-            tileSetEditor.onWrite(buffer);
+            List<AbstractEditor<?>> unorderedEditors = new ArrayList<>();
+            List<AbstractEditor<?>> orderedEditors = new LinkedList<>();
 
+            // 无序
+            unorderedEditors.add(treasureEditor);
+            unorderedEditors.add(computerEditor);
+            unorderedEditors.add(dogSystemEditor);
+            unorderedEditors.add(vendorEditor);
+            unorderedEditors.add(spriteEditor);
+            unorderedEditors.add(playerEditor);
+            unorderedEditors.add(tankInitialAttributes);
+            unorderedEditors.add(playerExperienceEditor);
+            unorderedEditors.add(itemsEditor);
+            unorderedEditors.add(textEditor);
+            unorderedEditors.add(tileSetEditor);
 
             // 顺序写入
-            mapEditor.onWrite(buffer); // 影响 mapPropertiesEditor
-            worldMapEditor.onWrite(buffer); // 影响 eventTilesEditor
-            eventTilesEditor.onWrite(buffer); // 影响 mapPropertiesEditor
-            mapEntranceEditor.onWrite(buffer); // 影响 mapPropertiesEditor
-            paletteEditor.onWrite(buffer); // 影响 mapPropertiesEditor // 暂时没有
-            mapPropertiesEditor.onWrite(buffer);
+            orderedEditors.add(mapEditor); // 影响 mapPropertiesEditor
+            orderedEditors.add(worldMapEditor); // 影响 eventTilesEditor
+            orderedEditors.add(eventTilesEditor); // 影响 mapPropertiesEditor
+            orderedEditors.add(mapEntranceEditor); // 影响 mapPropertiesEditor
+            orderedEditors.add(paletteEditor); // 影响 mapPropertiesEditor // 暂时没有
+            orderedEditors.add(mapPropertiesEditor);
 
+            try {
+                Method onWriteBeforeMethod = AbstractEditor.Listener.class.getMethod("onWriteBefore", AbstractEditor.class);
+                Method onWriteAfterMethod = AbstractEditor.Listener.class.getMethod("onWriteAfter", AbstractEditor.class);
+                // 无序
+                for (AbstractEditor<?> unorderedEditor : unorderedEditors) {
+                    for (AbstractEditor.Listener<?> listener : unorderedEditor.getListeners()) {
+                        onWriteBeforeMethod.invoke(listener, unorderedEditor);
+                    }
+                    unorderedEditor.onWrite(buffer);
+                    for (AbstractEditor.Listener<?> listener : unorderedEditor.getListeners()) {
+                        onWriteAfterMethod.invoke(listener, unorderedEditor);
+                    }
+                }
+
+                // 有序
+                for (AbstractEditor<?> orderedEditor : orderedEditors) {
+                    for (AbstractEditor.Listener<?> listener : orderedEditor.getListeners()) {
+                        onWriteBeforeMethod.invoke(listener, orderedEditor);
+                    }
+                    orderedEditor.onWrite(buffer);
+                    for (AbstractEditor.Listener<?> listener : orderedEditor.getListeners()) {
+                        onWriteAfterMethod.invoke(listener, orderedEditor);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);
             return true;
         } catch (IOException e) {

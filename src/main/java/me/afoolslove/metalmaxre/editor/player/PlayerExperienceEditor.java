@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author AFoolLove
  */
-public class PlayerExperienceEditor extends AbstractEditor {
+public class PlayerExperienceEditor extends AbstractEditor<PlayerExperienceEditor> {
     /**
      * K：Level
      * V：exp required

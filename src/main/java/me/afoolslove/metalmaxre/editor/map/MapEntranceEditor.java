@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author AFoolLove
  */
-public class MapEntranceEditor extends AbstractEditor {
+public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
     public static final int MAP_ENTRANCE_START_OFFSET = 0x1E990 - 0x10;
     public static final int MAP_ENTRANCE_END_OFFSET = 0x1F990 - 0x10;
 

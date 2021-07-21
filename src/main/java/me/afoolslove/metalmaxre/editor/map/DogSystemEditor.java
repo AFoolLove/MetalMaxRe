@@ -24,7 +24,7 @@ import java.util.*;
  *
  * @author AFoolLove
  */
-public class DogSystemEditor extends AbstractEditor {
+public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
     /**
      * 目的地最大数量
      */

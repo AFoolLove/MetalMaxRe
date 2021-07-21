@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.List;
@@ -63,13 +64,21 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
             int successful = 0, failed = 0;
             if (!EditorManager.getEditors().isEmpty()) {
                 publish(Map.entry(ProcessState.MESSAGE, "开始加载编辑器"));
-                for (AbstractEditor editor : EditorManager.getEditors().values()) {
+                Method onReadBeforeMethod = AbstractEditor.Listener.class.getMethod("onReadBefore", AbstractEditor.class);
+                Method onReadAfterMethod = AbstractEditor.Listener.class.getMethod("onReadAfter", AbstractEditor.class);
+                for (AbstractEditor<?> editor : EditorManager.getEditors().values()) {
                     start = System.currentTimeMillis();
                     publish(Map.entry(ProcessState.MESSAGE, "加载编辑器：" + editor.getClass().getSimpleName()));
 
                     boolean state = false;
                     try {
+                        for (AbstractEditor.Listener<?> listener : editor.getListeners()) {
+                            onReadBeforeMethod.invoke(listener, editor);
+                        }
                         state = editor.onRead(buffer);
+                        for (AbstractEditor.Listener<?> listener : editor.getListeners()) {
+                            onReadAfterMethod.invoke(listener, editor);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
