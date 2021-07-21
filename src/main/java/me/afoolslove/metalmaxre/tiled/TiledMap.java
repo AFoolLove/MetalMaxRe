@@ -197,23 +197,16 @@ public class TiledMap {
         // 获取当前地图的边界和出入口
         MapEntrance mapEntrance = mapEntranceEditor.getMapEntrance(map);
         for (var entry : mapEntrance.getEntrances().entrySet()) {
+            MapObject mapObject;
             MapPoint inPoint = entry.getKey();
             MapPoint outPoint = entry.getValue();
-            // 设置入口坐标
-            MapObject mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
-            mapObject.setId(nextObjectId++);
-            // 设置出口坐标为名称 Map:X:Y
-            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
-
-            // TODO 没有添加边界属性
-
-            // 添加到入口的对象层
-            entrances.addObject(mapObject);
 
             // 设置视觉辅助用的出入口线段，仅在同地图有效
-            if (outPoint.intMap() == map) {
+            if (outPoint.intMap() == 0x00) {
                 mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0, 0, 0);
                 mapObject.setId(nextObjectId++);
+                // 默认隐藏
+                mapObject.setVisible(false);
                 Polyline polyline = new Polyline();
                 polyline.setPoints(
                         String.format("0,0 %d,%d",
@@ -223,6 +216,17 @@ public class TiledMap {
                 // 添加
                 entrances.addObject(mapObject);
             }
+
+            // 设置入口坐标
+            mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
+            mapObject.setId(nextObjectId++);
+            // 设置出口坐标为名称 Map:X:Y
+            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
+
+            // TODO 没有添加边界属性
+
+            // 添加到入口的对象层
+            entrances.addObject(mapObject);
         }
 
         // ----------------
@@ -408,6 +412,25 @@ public class TiledMap {
 
         // ----------------
 
+        // 领域，怪物出没的组合
+        ObjectGroup realms = new ObjectGroup();
+        realms.setId(nextObjectId++);
+        realms.setName("realms");
+        realms.setVisible(false);
+        for (int i = 0; i < WorldMapEditor.WORLD_MAP_REALM_INDEX_MAX_COUNT; i++) {
+            byte value = worldMapEditor.getRealms().get(i);
+            MapObject realm = new MapObject((i % 0x10) * 0x10 * 0x10, (int) (i / 0x10) * 0x10 * 0x10, 0x10 * 0x10, 0x10 * 0x10, 0x00);
+            realm.setId(nextObjectId++);
+            realm.setName(String.format("%02X:%02X", i, value));
+            if (value == 0x00) {
+                // 0x00为没有怪物出没
+                realm.setVisible(false);
+            }
+            realms.addObject(realm);
+        }
+
+        // ----------------
+
         // 事件图块，显示时会覆盖对应的图块，相当于事件条件达成
         Group eventGroup = new Group();
         eventGroup.setId(nextLayerId++);
@@ -479,21 +502,16 @@ public class TiledMap {
         // 获取当前地图的边界和出入口
         MapEntrance mapEntrance = mapEntranceEditor.getWorldMapEntrance();
         for (var entry : mapEntrance.getEntrances().entrySet()) {
+            MapObject mapObject;
             MapPoint inPoint = entry.getKey();
             MapPoint outPoint = entry.getValue();
-            // 设置入口坐标
-            MapObject mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
-            mapObject.setId(nextObjectId++);
-            // 设置出口坐标为名称 Map:X:Y
-            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
-
-            // 添加到入口的对象层
-            entrances.addObject(mapObject);
 
             // 设置视觉辅助用的出入口线段，仅在同地图有效
             if (outPoint.intMap() == 0x00) {
                 mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0, 0, 0);
                 mapObject.setId(nextObjectId++);
+                // 默认隐藏
+                mapObject.setVisible(false);
                 Polyline polyline = new Polyline();
                 polyline.setPoints(
                         String.format("0,0 %d,%d",
@@ -503,6 +521,15 @@ public class TiledMap {
                 // 添加
                 entrances.addObject(mapObject);
             }
+
+            // 设置入口坐标
+            mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
+            mapObject.setId(nextObjectId++);
+            // 设置出口坐标为名称 Map:X:Y
+            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
+
+            // 添加到入口的对象层
+            entrances.addObject(mapObject);
         }
 
         // ----------------
@@ -598,6 +625,7 @@ public class TiledMap {
 
 
         world.addLayer(worldLayer);
+        world.addLayer(realms);
         world.addLayer(eventGroup);
         world.addLayer(treasureGroup);
         world.addLayer(entrances);
@@ -962,6 +990,18 @@ public class TiledMap {
                             );
                             // 添加出入口
                             worldMapEntrance.getEntrances().put(inPoint, outPoint);
+                        }
+                        break;
+                    case "realms": // 怪物领域
+                        List<Byte> realms = worldMapEditor.getRealms();
+                        // 不需要清除领域
+                        // realms.clear();
+                        for (MapObject realm : objectGroup.getObjects()) {
+                            int index = (int) ((realm.getX() / 0x10) + ((realm.getY() / 0x10) * 0x40));
+                            String[] split = realm.getName().split(":");
+                            if (split.length >= 2) {
+                                realms.set(index, (byte) Integer.parseInt(split[1], 16));
+                            }
                         }
                         break;
                 }

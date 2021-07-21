@@ -636,6 +636,10 @@ public class TMXMapWriter {
         w.writeAttribute("x", mapObject.getX());
         w.writeAttribute("y", mapObject.getY());
 
+        if (mapObject.isVisible() != null && !mapObject.isVisible()) {
+            w.writeAttribute("visible", "0");
+        }
+
         // TODO: Implement Polygon, Ellipse & Polyline too
         boolean isPoint = mapObject.getPoint() != null;
         if (isPoint) {
