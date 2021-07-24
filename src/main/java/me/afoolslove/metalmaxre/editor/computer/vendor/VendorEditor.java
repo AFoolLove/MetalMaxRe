@@ -19,8 +19,6 @@ import java.util.List;
  * 0x07 - 0x0C  商品数量
  * 0x0D 中奖物品
  * 数量byte D7的值为1时，商品为无货
- * <p>
- * TODO 商品价格，毫无头绪，有了，但是没有测试（刚看见还有这个todo
  *
  * @author AFoolLove
  */

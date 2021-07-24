@@ -62,7 +62,7 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
         items.clear();
 
         // 初始化数据
-        // 初始化道具，战车还没写所以直接写道具数量 0x13
+        // 初始化道具
         for (int i = 0; i < PlayerItems.PLAYER_ITEMS_MAX_COUNT + TankItems.TANK_ITEMS_MAX_COUNT; i++) {
             items.add(i, new Item());
         }
@@ -281,7 +281,7 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
         for (int i = 0; i < TankItems.TANK_CHASSIS_MAX_COUNT; i++) {
             buffer.put(tankItems.chassis.get(i).getPrice());
         }
-        // 写入道具的价格，战车还没写所以直接写道具数量 0x13
+        // 写入道具的价格
         for (int i = 0; i < PlayerItems.PLAYER_ITEMS_MAX_COUNT + TankItems.TANK_ITEMS_MAX_COUNT; i++) {
             buffer.put(items.get(i).getPrice());
         }

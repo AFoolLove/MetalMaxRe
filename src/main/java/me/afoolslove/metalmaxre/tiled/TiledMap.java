@@ -9,6 +9,7 @@ import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.WorldEventTile;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
+import me.afoolslove.metalmaxre.editor.monster.MonsterEditor;
 import me.afoolslove.metalmaxre.editor.sprite.Sprite;
 import me.afoolslove.metalmaxre.editor.sprite.SpriteEditor;
 import me.afoolslove.metalmaxre.editor.text.TextEditor;
@@ -360,6 +361,7 @@ public class TiledMap {
         var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
         var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
         var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
+        var monsterEditor = EditorManager.getEditor(MonsterEditor.class);
 
         WorldMapProperties worldMapProperties = mapPropertiesEditor.getWorldMapProperties();
 
@@ -417,8 +419,8 @@ public class TiledMap {
         realms.setId(nextObjectId++);
         realms.setName("realms");
         realms.setVisible(false);
-        for (int i = 0; i < WorldMapEditor.WORLD_MAP_REALM_INDEX_MAX_COUNT; i++) {
-            byte value = worldMapEditor.getRealms().get(i);
+        for (int i = 0; i < MonsterEditor.WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT; i++) {
+            byte value = monsterEditor.getWorldMapRealms().get(i);
             MapObject realm = new MapObject((i % 0x10) * 0x10 * 0x10, (int) (i / 0x10) * 0x10 * 0x10, 0x10 * 0x10, 0x10 * 0x10, 0x00);
             realm.setId(nextObjectId++);
             realm.setName(String.format("%02X:%02X", i, value));
@@ -878,6 +880,7 @@ public class TiledMap {
         var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
         var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
         var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
+        var monsterEditor = EditorManager.getEditor(MonsterEditor.class);
 
         WorldMapProperties worldMapProperties = mapPropertiesEditor.getWorldMapProperties();
 
@@ -993,7 +996,7 @@ public class TiledMap {
                         }
                         break;
                     case "realms": // 怪物领域
-                        List<Byte> realms = worldMapEditor.getRealms();
+                        List<Byte> realms = monsterEditor.getWorldMapRealms();
                         // 不需要清除领域
                         // realms.clear();
                         for (MapObject realm : objectGroup.getObjects()) {

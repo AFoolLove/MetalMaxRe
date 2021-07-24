@@ -7,6 +7,7 @@ import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
+import me.afoolslove.metalmaxre.editor.monster.MonsterEditor;
 import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
 import org.mapeditor.core.TileSet;
@@ -282,6 +283,12 @@ public class MainWindow extends JFrame {
 //                exception.printStackTrace();
 //            }
 
+            MonsterEditor editor = EditorManager.getEditor(MonsterEditor.class);
+            editor.specialMonsterGroups[0x02].counts[0x00] = 0x3;
+
+            editor.monsterGroups[0].monsters[0x0E - 0x01] = 0x03;
+            editor.monsterGroups[0].monsters[0x00] = 0x20;
+            editor.monsterGroups[0].monsters[0x01] = 0x20;
 
             System.out.println("test.");
         });

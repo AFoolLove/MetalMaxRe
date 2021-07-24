@@ -12,6 +12,7 @@ import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
+import me.afoolslove.metalmaxre.editor.monster.MonsterEditor;
 import me.afoolslove.metalmaxre.editor.palette.PaletteEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerEditor;
 import me.afoolslove.metalmaxre.editor.player.PlayerExperienceEditor;
@@ -116,6 +117,9 @@ public class MetalMaxRe {
 
         TileSetEditor tileSetEditor = new TileSetEditor();
         EditorManager.register(tileSetEditor);
+
+        MonsterEditor monsterEditor = new MonsterEditor();
+        EditorManager.register(monsterEditor);
     }
 
     public void setBuffer(ByteBuffer buffer) {
@@ -242,6 +246,7 @@ public class MetalMaxRe {
             var textEditor = EditorManager.getEditor(TextEditor.class);
             var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
             var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
+            var monsterEditor = EditorManager.getEditor(MonsterEditor.class);
 
             List<AbstractEditor<?>> unorderedEditors = new ArrayList<>();
             List<AbstractEditor<?>> orderedEditors = new LinkedList<>();
@@ -258,6 +263,7 @@ public class MetalMaxRe {
             unorderedEditors.add(itemsEditor);
             unorderedEditors.add(textEditor);
             unorderedEditors.add(tileSetEditor);
+            unorderedEditors.add(monsterEditor);
 
             // 顺序写入
             orderedEditors.add(mapEditor); // 影响 mapPropertiesEditor

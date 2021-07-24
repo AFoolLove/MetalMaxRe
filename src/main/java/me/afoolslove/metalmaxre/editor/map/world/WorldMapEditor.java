@@ -15,8 +15,6 @@ import java.util.*;
 
 /**
  * 世界地图编辑器
- * <p>
- * TODO 事件数据，事件数据只能读取图块组A的 0x0C010+0x200 - 0x0E510 的地方
  *
  * @author AFoolLove
  */
@@ -54,16 +52,6 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
      */
     public static final int WORLD_MAP_INDEX_START = 0x3A010 - 0x10; // CHR
     public static final int WORLD_MAP_INDEX_END = 0x3B00F - 0x10; // CHR
-
-    /**
-     * 世界地图的怪物领域
-     * 1Byte = 16*16小块 = 256个领域，固定无法变更
-     */
-    public static final int WORLD_MAP_REALM_INDEX_START = 0x39233;
-    public static final int WORLD_MAP_REALM_INDEX_END = 0x39332;
-    public static final int WORLD_MAP_REALM_INDEX_MAX_COUNT = 0x100;
-
-    public List<Byte> realms = new ArrayList<>(WORLD_MAP_REALM_INDEX_MAX_COUNT);
 
     /**
      * index与indexOffsets的比例是 1byte：2bit
@@ -126,7 +114,6 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             }
         }
         Arrays.fill(index, (byte) 0x00);
-        realms.clear();
 
         // 读取世界地图图块索引偏移
         setPrgRomPosition(buffer, WORLD_MAP_TILES_INDEX_OFFSET_START);
@@ -187,12 +174,6 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             int x = i % 64;
             int y = i / 64;
             map0(map, x, y, tiles);
-        }
-
-        // 读取领域索引
-        setPrgRomPosition(buffer, WORLD_MAP_REALM_INDEX_START);
-        for (int i = 0; i < WORLD_MAP_REALM_INDEX_MAX_COUNT; i++) {
-            realms.add(buffer.get());
         }
         return true;
     }
@@ -508,11 +489,6 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         // 写入图块索引
         setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
         buffer.put(index);
-        // 写入领域索引
-        setPrgRomPosition(buffer, WORLD_MAP_REALM_INDEX_START);
-        for (int i = 0; i < WORLD_MAP_REALM_INDEX_MAX_COUNT; i++) {
-            buffer.put(realms.get(i));
-        }
         return true;
     }
 
@@ -521,10 +497,6 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
      */
     public byte[] getTiles(int x, int y) {
         return map1(map, x, y);
-    }
-
-    public List<Byte> getRealms() {
-        return realms;
     }
 
     /**
