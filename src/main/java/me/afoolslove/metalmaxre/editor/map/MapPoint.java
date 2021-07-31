@@ -11,11 +11,24 @@ import java.util.Objects;
  * X    地图X
  * Y    地图Y
  * Map  地图
+ * <p>
+ * CameraX 以相机坐标设置，左上角为原点
+ * CameraY 以相机坐标设置，左上角为原点
  *
  * @author AFoolLove
  */
 public class MapPoint extends Point2B {
     public byte map;
+
+    public static void main(String[] args) {
+        MapPoint point = new MapPoint();
+        point.setCamera(0xF8, 0xF9);
+        System.out.printf("%02X,%02X|%02X,%02X\n", point.getX(), point.getY(), point.getCameraX(), point.getCameraY());
+    }
+
+    public MapPoint() {
+        super(0, 0);
+    }
 
     public MapPoint(byte map, byte x, byte y) {
         super(x, y);
@@ -53,6 +66,15 @@ public class MapPoint extends Point2B {
         this.map = (byte) (map & 0xFF);
     }
 
+    public void offset(int map, int x, int y) {
+        this.map += map;
+        super.offset(x, y);
+    }
+
+    public void offsetMap(int map) {
+        this.map += map;
+    }
+
     @Override
     public void set(@Range(from = 0x00, to = 0xFF) int x,
                     @Range(from = 0x00, to = 0xFF) int y) {
@@ -66,6 +88,35 @@ public class MapPoint extends Point2B {
         setMap(map);
     }
 
+    public void setCameraX(@Range(from = 0x00, to = 0xFF) int x) {
+        setCameraX((byte) (x & 0xFF));
+    }
+
+    public void setCameraX(byte x) {
+        x += 0x08;
+        super.setX(x);
+    }
+
+    public void setCameraY(@Range(from = 0x00, to = 0xFF) int y) {
+        setCameraY((byte) (y & 0xFF));
+    }
+
+    public void setCameraY(byte y) {
+        y += 0x07;
+        super.setY(y);
+    }
+
+    public void setCamera(@Range(from = 0x00, to = 0xFF) int x,
+                          @Range(from = 0x00, to = 0xFF) int y) {
+        setCamera((byte) (x & 0xFF), (byte) (y & 0xFF));
+    }
+
+    public void setCamera(byte x, byte y) {
+        x += 0x08;
+        y += 0x07;
+        super.set(x, y);
+    }
+
     @Override
     public void set(byte x, byte y) {
         super.set(x, y);
@@ -77,9 +128,9 @@ public class MapPoint extends Point2B {
     }
 
     public void set(@NotNull MapPoint mapPoint) {
-        setMap(mapPoint.map);
-        setX(mapPoint.x);
-        setY(mapPoint.y);
+        setMap(mapPoint.getMap());
+        setX(mapPoint.getX());
+        setY(mapPoint.getY());
     }
 
     public byte getMap() {
@@ -89,6 +140,24 @@ public class MapPoint extends Point2B {
     @Range(from = 0x00, to = 0xFF)
     public int intMap() {
         return getMap() & 0xFF;
+    }
+
+    public byte getCameraX() {
+        return (byte) ((getX() - 0x08) & 0xFF);
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intCameraX() {
+        return getCameraX() & 0xFF;
+    }
+
+    public byte getCameraY() {
+        return (byte) ((getY() - 0x07) & 0xFF);
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intCameraY() {
+        return getCameraY() & 0xFF;
     }
 
     @Override

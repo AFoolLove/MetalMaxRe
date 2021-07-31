@@ -105,9 +105,10 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
 
         // 写入战斗时的精灵调色板
         setPrgRomPosition(buffer, PALETTE_LIST_BATTLE_SPRITE);
-        for (int i = 1; i < 0x04; i++) {
-            // 只有写入后三位
-            buffer.put(battleSpritePalette.get(i).colors);
+        for (int i = 0; i < 0x04; i++) {
+            byte[] palette = battleSpritePalette.get(i).colors;
+            // 只写入后三位
+            buffer.put(palette, 1, 3);
         }
         return true;
     }

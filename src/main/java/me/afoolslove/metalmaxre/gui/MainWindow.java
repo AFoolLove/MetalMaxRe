@@ -5,28 +5,17 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
-import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
-import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
-import me.afoolslove.metalmaxre.editor.monster.MonsterEditor;
-import me.afoolslove.metalmaxre.tiled.TiledMap;
+import me.afoolslove.metalmaxre.editor.map.MapPoint;
 import org.jetbrains.annotations.NotNull;
-import org.mapeditor.core.TileSet;
-import org.mapeditor.io.TMXMapWriter;
-import org.mapeditor.util.BasicTileCutter;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 主窗口
@@ -181,6 +170,11 @@ public class MainWindow extends JFrame {
             } // 其它皆为不不保存
         });
 
+        JMenuItem fileMenuExit = new JMenuItem("Exit");
+        fileMenuExit.addActionListener(e -> {
+            // 退出
+            System.exit(0);
+        });
 
 //        fileMenu.add(fileMenuOpen);
 //        fileMenu.addSeparator();
@@ -188,6 +182,8 @@ public class MainWindow extends JFrame {
         fileMenu.addSeparator();
         fileMenu.add(fileMenuSave);
         fileMenu.add(fileMenuSaveAs);
+        fileMenu.addSeparator();
+        fileMenu.add(fileMenuExit);
 
         JMenu toolsMenu = new JMenu("Tools");
 
@@ -224,72 +220,9 @@ public class MainWindow extends JFrame {
         // 快捷键：Ctrl + Shift + T
         helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         helpMenuTest.addActionListener(e -> {
-            var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
-            var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
-
-            try {
-                for (Map.Entry<Rectangle, Integer> entry : WorldMapEditor.DEFAULT_PIECES.entrySet()) {
-                    String name = String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", entry.getValue());
-                    BufferedImage bufferedImage = tileSetEditor.generateWorldTileSet(entry.getValue());
-                    File output = new File(name);
-                    output.createNewFile();
-                    ImageIO.write(bufferedImage, "png", output);
-                }
-                String name = "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\04059495.png";
-                BufferedImage bufferedImage = tileSetEditor.generateSpriteTileSet(0x94);
-                File output = new File(name);
-                output.createNewFile();
-                ImageIO.write(bufferedImage, "png", output);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-
-            Map<Integer, TileSet> collect = new HashMap<>();
-
-            for (Integer integer : WorldMapEditor.DEFAULT_PIECES.values().parallelStream().distinct().collect(Collectors.toList())) {
-                try {
-                    TileSet tiles = new TileSet();
-                    tiles.importTileBitmap(
-                            String.format("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\%08X.png", integer),
-                            new BasicTileCutter(0x10, 0x10, 0, 0));
-                    tiles.setName(String.format("%08X", integer));
-                    collect.put(integer, tiles);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-            }
-
-            TileSet spriteTileSet = new TileSet();
-            try {
-                spriteTileSet.importTileBitmap("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\04059495.png",
-                        new BasicTileCutter(0x10, 0x10, 0, 0));
-                spriteTileSet.setName("04059495");
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-
-            org.mapeditor.core.Map world = TiledMap.createWorld(WorldMapEditor.DEFAULT_PIECES, collect, spriteTileSet);
-            try {
-                new TMXMapWriter().writeMap(world, "C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-
-
-//            try {
-//                org.mapeditor.core.Map mapLayers = new TMXMapReader().readMap("C:\\Users\\AFoolLove\\IdeaProjects\\MetalMaxRe\\src\\main\\resources\\a.tmx");
-//                TiledMap.importWorldMap(mapLayers);
-//            } catch (Exception exception) {
-//                exception.printStackTrace();
-//            }
-
-            MonsterEditor editor = EditorManager.getEditor(MonsterEditor.class);
-            editor.specialMonsterGroups[0x02].counts[0x00] = 0x3;
-
-            editor.monsterGroups[0].monsters[0x0E - 0x01] = 0x03;
-            editor.monsterGroups[0].monsters[0x00] = 0x20;
-            editor.monsterGroups[0].monsters[0x01] = 0x20;
-
+            MapPoint teleport = EditorManager.getEditor(DogSystemEditor.class).getTeleport(0);
+            teleport.setMap(0);
+            teleport.offset(0, 1, 0);
             System.out.println("test.");
         });
 

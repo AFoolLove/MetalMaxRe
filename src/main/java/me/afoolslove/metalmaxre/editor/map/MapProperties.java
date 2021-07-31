@@ -98,6 +98,16 @@ public class MapProperties {
         }
     }
 
+    /**
+     * 将tilesIndexA、tilesIndexB、tilesIndexC、tilesIndexD合并为一个int
+     */
+    public int getIntTiles() {
+        return (tilesIndexD & 0xFF)
+                + ((tilesIndexC & 0xFF) << 8)
+                + ((tilesIndexB & 0xFF) << 16)
+                + ((tilesIndexA & 0xFF) << 24);
+    }
+
     public boolean hasEventTile() {
         return hasEventTile(this.head);
     }

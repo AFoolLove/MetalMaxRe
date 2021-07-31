@@ -7,6 +7,7 @@ import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.WorldEventTile;
 import me.afoolslove.metalmaxre.editor.map.events.WorldMapInteractiveEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
@@ -169,7 +170,24 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             // 得到数据偏移
             int offset = index[i] & 0xFF;
             // 判断使用图块组A还是图块组B
-            byte[] tiles = (x410 == 0 ? indexB : indexA)[(indexOffset * 0x100) + offset];
+            byte[][] tempIndex = x410 == 0 ? indexB : indexA;
+            offset += indexOffset * 0x100;
+
+            byte[] tiles;
+            if (offset >= tempIndex.length) {
+                // 超出安全可编辑的数据
+                if (tempIndex == indexA) {
+                    setPrgRomPosition(buffer, WORLD_MAP_INDEX_A_START + (offset * 0x10));
+                } else {
+                    setPrgRomPosition(buffer, WORLD_MAP_INDEX_B_START + (offset * 0x10));
+                }
+
+                tiles = new byte[0x10];
+                buffer.get(tiles);
+                System.out.println("世界地图编辑器：警告！使用了安全编辑范围外的地图数据 " + Arrays.toString(tiles));
+            } else {
+                tiles = tempIndex[offset];
+            }
 
             int x = i % 64;
             int y = i / 64;
@@ -490,6 +508,29 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
         buffer.put(index);
         return true;
+    }
+
+    /**
+     * 获取索引A的图块数据
+     *
+     * @param canOut 是否可以越界获取
+     * @return indexA的4*4tile
+     * @see #getIndexA(int)
+     */
+    public byte[] getIndexA(@Range(from = 0x00, to = 0x250) int offset, boolean canOut) {
+        if (offset < indexA.length) {
+            return indexA[offset];
+        } else if (canOut) {
+            setPrgRomPosition(WORLD_MAP_INDEX_A_START + (offset * 0x10));
+            byte[] bytes = new byte[0x10];
+            getBuffer().get(bytes);
+            return bytes;
+        }
+        return null;
+    }
+
+    public byte[] getIndexA(@Range(from = 0x00, to = 0x250) int offset) {
+        return getIndexA(offset, false);
     }
 
     /**

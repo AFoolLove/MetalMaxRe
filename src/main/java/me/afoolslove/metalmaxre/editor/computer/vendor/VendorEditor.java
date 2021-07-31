@@ -27,11 +27,16 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
      * 售货机商品的最大组合数量
      */
     public static final int VENDOR_MAX_COUNT = 0x12;
+    /**
+     * 售货机商品种类数量
+     */
+    public static final int VENDOR_ITEM_COUNT = 0x06;
 
     /**
      * 售货机数据地址起始
      */
     public static final int VENDOR_START_OFFSET = 0x23EC8 - 0x10;
+
     /**
      * 售货机数据地址结束
      */
@@ -47,9 +52,10 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
         // 读取前清空数据
         vendorItemLists.clear();
 
-        byte[] items = new byte[0x06];
-        byte[] counts = new byte[0x06];
+        byte[] items = new byte[VENDOR_ITEM_COUNT];
+        byte[] counts = new byte[VENDOR_ITEM_COUNT];
         // 读取售货机的商品组合
+        // 0x0D 为每组数据固定头字节，非头字节视为读取完毕
         setPrgRomPosition(buffer, VENDOR_START_OFFSET);
         while (buffer.get() == 0x0D) {
             // 读取商品
@@ -59,7 +65,7 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
 
             VendorItemList itemList = new VendorItemList();
             // 添加商品
-            for (int i = 0; i < 0x06; i++) {
+            for (int i = 0; i < VENDOR_ITEM_COUNT; i++) {
                 itemList.add(new VendorItem(items[i], counts[i]));
             }
             // 获取中奖物品
@@ -77,8 +83,8 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
             System.out.printf("售货机编辑器：移除多余的售货机商品组 %s", remove);
         });
 
-        byte[] items = new byte[0x06];
-        byte[] counts = new byte[0x06];
+        byte[] items = new byte[VENDOR_ITEM_COUNT];
+        byte[] counts = new byte[VENDOR_ITEM_COUNT];
         setPrgRomPosition(buffer, VENDOR_START_OFFSET);
         while (iterator.hasNext()) {
             VendorItemList vendorItemList = iterator.next();
@@ -86,7 +92,7 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
             // 写入固定头
             buffer.put((byte) 0x0D);
             // 写入商品和数量
-            for (int i = 0; i < 0x06; i++) {
+            for (int i = 0; i < VENDOR_ITEM_COUNT; i++) {
                 VendorItem item = vendorItemList.get(i);
                 items[i] = item.item;
                 counts[i] = item.count;

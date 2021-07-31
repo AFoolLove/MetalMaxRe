@@ -63,6 +63,19 @@ public class Point2B {
         setY((byte) (y & 0xFF));
     }
 
+    public void offset(int x, int y) {
+        this.x += x;
+        this.y += y;
+    }
+
+    public void offsetX(int x) {
+        this.x += x;
+    }
+
+    public void offsetY(int y) {
+        this.y += y;
+    }
+
     protected void set(byte x, byte y) {
         setX(x);
         setY(y);

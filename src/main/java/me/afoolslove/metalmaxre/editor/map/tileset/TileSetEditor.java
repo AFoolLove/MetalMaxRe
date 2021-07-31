@@ -264,8 +264,6 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         buffer.put(xA597);
         // 写入精灵的姿态
         buffer.put(xA59B);
-        buffer.put(xA59E);
-        buffer.put(xA5DD);
 
         // 写入精灵图像值
         setPrgRomPosition(buffer, 0x3459F);
@@ -302,6 +300,11 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
      * @see #generateTileSet(int, int, int, int, int, int, Color[][])
      */
     public BufferedImage generateTileSet(@NotNull MapProperties mapProperties, @Nullable Color[][] colors) {
+        if (colors == null) {
+            PaletteEditor paletteEditor = EditorManager.getEditor(PaletteEditor.class);
+            PaletteList palettes = paletteEditor.getPalettes(mapProperties.palette);
+            colors = palettes.toColors();
+        }
         return generateTileSet(
                 mapProperties.tilesIndexA & 0xFF,
                 mapProperties.tilesIndexB & 0xFF,
@@ -422,6 +425,9 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         return generate(0x100, 0xC0, x00, x40, x80, xC0, worldCompositions, worldColorIndexes, palettes.toColors());
     }
 
+    public BufferedImage generateSpriteTileSet(byte sprite) {
+        return generateSpriteTileSet(sprite & 0xFF);
+    }
 
     /**
      * 生成一张精灵的 TileSet 图片

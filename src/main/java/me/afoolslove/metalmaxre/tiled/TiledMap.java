@@ -8,6 +8,7 @@ import me.afoolslove.metalmaxre.editor.map.*;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.WorldEventTile;
+import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.editor.monster.MonsterEditor;
 import me.afoolslove.metalmaxre.editor.sprite.Sprite;
@@ -16,12 +17,17 @@ import me.afoolslove.metalmaxre.editor.text.TextEditor;
 import me.afoolslove.metalmaxre.editor.treasure.Treasure;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.mapeditor.core.Map;
 import org.mapeditor.core.Properties;
 import org.mapeditor.core.*;
+import org.mapeditor.io.TMXMapWriter;
+import org.mapeditor.util.BasicTileCutter;
 
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.*;
 
@@ -457,8 +463,8 @@ public class TiledMap {
                     // 找到该坐标的图块集
                     if (rectangleIntegerEntry.getKey().contains(x, y)) {
                         TileSet tileSet = tileSetMap.get(rectangleIntegerEntry.getValue());
-                        byte[] tiles = indexA[0x200 + (eventTile.tile & 0xFF)];
-
+                        int offset = 0x200 + eventTile.intTile();
+                        byte[] tiles = worldMapEditor.getIndexA(offset, true);
                         // 世界地图的事件图块为 4*4 个tile
                         for (int offsetY = 0; offsetY < 0x04; offsetY++) {
                             for (int offsetX = 0; offsetX < 0x04; offsetX++) {
@@ -512,8 +518,8 @@ public class TiledMap {
             if (outPoint.intMap() == 0x00) {
                 mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0, 0, 0);
                 mapObject.setId(nextObjectId++);
-                // 默认隐藏
-                mapObject.setVisible(false);
+                // 默认隐藏，还是启用吧，懒得点
+                mapObject.setVisible(true);
                 Polyline polyline = new Polyline();
                 polyline.setPoints(
                         String.format("0,0 %d,%d",
@@ -641,6 +647,71 @@ public class TiledMap {
         return world;
     }
 
+
+    /**
+     * 创建tileSet图片的tsx文件
+     * 文件名称格式：X00+X40+X80+XC0-combinationA+combinationB-PALETTE.tsx，均为十六进制
+     * e.g: 1C0E1E1F-0001-9AD9.tsx
+     */
+    public static TileSet createTsx(@Nullable TMXMapWriter tmxMapWriter, @NotNull File tileBitmap, int xXX, int combinationA, int combinationB, char palette, @NotNull File outputDir) throws IOException {
+        TileSetEditor tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
+        TileSet tileSet = new TileSet();
+        tileSet.setName(String.format("%02X%02X%02X%02X-%02X%02X-%04X",
+                (xXX & 0xFF000000) >> 24,
+                (xXX & 0x00FF0000) >> 16,
+                (xXX & 0x0000FF00) >> 8,
+                (xXX & 0x000000FF),
+                combinationA, combinationB,
+                palette & 0xFFFF));
+        tileSet.importTileBitmap(tileBitmap.getPath(), new BasicTileCutter(0x10, 0x10, 0, 0));
+
+        // 获取所有图块属性
+        byte[] tileEffect = new byte[0x40 + 0x40];
+        System.arraycopy(tileSetEditor.colorIndex[combinationA], 0, tileEffect, 0, 0x40);
+        System.arraycopy(tileSetEditor.colorIndex[combinationB], 0, tileEffect, 0x40, 0x40);
+
+        for (int i = 0; i < tileEffect.length; i++) {
+            Tile tile = tileSet.getTile(i);
+            tile.setType("tile");
+
+            // 添加图块属性
+            Properties properties = tile.getProperties();
+            byte effect = tileEffect[i];
+            if ((effect & 0B1000_0000) != 0x00) {
+                properties.setProperty("D7|墙壁", "true");
+            }
+            if ((effect & 0B0100_0000) != 0x00) {
+                properties.setProperty("D6|", "true");
+            }
+            if ((effect & 0B0010_0000) != 0x00) {
+                properties.setProperty("D5|", "true");
+            }
+            if ((effect & 0B0001_0000) != 0x00) {
+                properties.setProperty("D4|", "true");
+            }
+            if ((effect & 0B0000_1000) != 0x00) {
+                properties.setProperty("D3|", "true");
+            }
+            if ((effect & 0B0000_0100) != 0x00) {
+                properties.setProperty("D2|", "true");
+            }
+            if ((effect & 0B0000_0010) != 0x00) {
+                properties.setProperty("D1|color", "true");
+            }
+            if ((effect & 0B0000_0001) != 0x00) {
+                properties.setProperty("D0|color", "true");
+            }
+        }
+        if (tmxMapWriter == null) {
+            tmxMapWriter = new TMXMapWriter();
+        }
+        tmxMapWriter.writeTileset(tileSet, new File(outputDir, String.format("%s.tsx", tileSet.getName())).getPath());
+        return tileSet;
+    }
+
+    public static TileSet createTsx(@Nullable TMXMapWriter tmxMapWriter, @NotNull File tileBitmap, @NotNull MapProperties mapProperties, @NotNull File outputDir) throws IOException {
+        return createTsx(tmxMapWriter, tileBitmap, mapProperties.getIntTiles(), mapProperties.combinationA, mapProperties.combinationB, mapProperties.palette, outputDir);
+    }
 
     /**
      * 将已有的Tiled地图作为某个地图的数据

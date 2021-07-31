@@ -2,14 +2,14 @@ package me.afoolslove.metalmaxre.editor.map.events;
 
 
 import me.afoolslove.metalmaxre.Point2B;
-import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
+import me.afoolslove.metalmaxre.editor.map.MapPoint;
 
 /**
  * 罗克东部涨潮和退潮的4个4*4tile
  *
  * @author AFoolLove
  */
-public class WorldMapInteractiveEvent extends DogSystemEditor.Destination {
+public class WorldMapInteractiveEvent extends MapPoint {
     public byte event;
     public byte direction;
     public Point2B aPoint;

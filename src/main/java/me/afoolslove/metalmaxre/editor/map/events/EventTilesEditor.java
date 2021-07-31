@@ -102,7 +102,8 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
                     }
                     // 世界地图的图块事件还需要读取图块内容
                     for (EventTile eventTile : eventTiles) {
-                        byte[] tiles = worldMapEditor.indexA[0x200 + eventTile.intTile()];
+                        int offset = 0x200 + eventTile.intTile();
+                        byte[] tiles = worldMapEditor.getIndexA(offset,true);
                         ((WorldEventTile) eventTile).setTiles(tiles);
                     }
                 } else {

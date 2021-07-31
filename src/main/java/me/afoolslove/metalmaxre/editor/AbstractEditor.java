@@ -49,11 +49,19 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         buffer.position(getHeader().getPrgRomStart(offset));
     }
 
+    public void setPrgRomPosition(int offset) {
+        setPrgRomPosition(getBuffer(), offset);
+    }
+
     /**
      * 设置为 CHR COM 的偏移量
      */
     public void setChrRomPosition(@NotNull ByteBuffer buffer, int offset) {
         buffer.position(getHeader().getChrRomStart(offset));
+    }
+
+    public void setChrRomPosition(int offset) {
+        setChrRomPosition(getBuffer(), offset);
     }
 
     public List<Listener<T>> getListeners() {
