@@ -66,6 +66,9 @@ public class GameHeader {
         }
     }
 
+    public byte[] getHeader() {
+        return header;
+    }
 
     /**
      * @return 当前游戏的Mapper

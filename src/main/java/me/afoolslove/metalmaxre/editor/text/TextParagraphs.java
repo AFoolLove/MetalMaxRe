@@ -4,7 +4,6 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 
 import java.io.ByteArrayOutputStream;
-import java.lang.invoke.StringConcatFactory;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
@@ -152,8 +151,8 @@ public class TextParagraphs extends ArrayList<String> {
 
                     if (point != 0) {
                         // 从已知的文本中直接获取
-                        for (Map.Entry<Map.Entry<Integer, Integer>, TextParagraphs> entry : textEditor.getParagraphsMap().entrySet()) {
-                            if (entry.getKey().getKey() == point) {
+                        for (Map.Entry<Integer, TextParagraphs> entry : textEditor.getParagraphsMap().entrySet()) {
+                            if (entry.getKey() == point) {
                                 // 获取前再次格式化
                                 text.append(String.format("[F7%02X%02X]{%s}", inx, pointStart, entry.getValue().getFormatted(inx)));
                                 break;
@@ -250,13 +249,13 @@ public class TextParagraphs extends ArrayList<String> {
                         text.append(String.format("[%02X]", bytes[i - 1]));
                         break;
                     }
-                    Map.Entry<Integer, Integer> point = null;
+                    Integer point = null;
                     if (bytes[i] == (byte) 0xEA) {
-                        point = TextEditor.POINTS.get(0x04);
+                        point = TextEditor.POINTS.get(TextEditor.X_11933);
                     } else if (bytes[i] == (byte) 0xEC) {
-                        point = TextEditor.POINTS.get(0x00);
+                        point = TextEditor.POINTS.get(TextEditor.X_0BE90);
                     } else if (bytes[i] == (byte) 0xF2) {
-                        point = TextEditor.POINTS.get(0x01);
+                        point = TextEditor.POINTS.get(TextEditor.X_10010);
                     } // else 就不用了吧
 
                     // 下标

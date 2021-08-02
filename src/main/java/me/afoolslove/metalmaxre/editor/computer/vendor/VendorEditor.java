@@ -106,14 +106,19 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
     }
 
     /**
-     * @return 所有售货机的商品
+     * @return 所有售货机的商品列表
+     * @see #getVendorItemList(int)
      */
     public List<VendorItemList> getVendorItemLists() {
         return vendorItemLists;
     }
 
     /**
-     * @return 某一个售货机的商品
+     * 通过索引获取售货机的商品列表
+     *
+     * @param vendor 售货机索引
+     * @return 某个售货机的商品列表
+     * @see #getVendorItemLists()
      */
     public VendorItemList getVendorItemList(int vendor) {
         return vendorItemLists.get(vendor);

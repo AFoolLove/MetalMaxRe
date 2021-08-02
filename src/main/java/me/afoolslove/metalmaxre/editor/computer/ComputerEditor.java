@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editor.computer;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
@@ -59,7 +60,6 @@ public class ComputerEditor extends AbstractEditor<ComputerEditor> {
         buffer.get(xs);
         buffer.get(ys);
 
-        computers.clear();
         for (int i = 0; i < COMPUTER_MAX_COUNT; i++) {
             computers.add(new Computer(maps[i], types[i], xs[i], ys[i]));
         }
@@ -186,14 +186,21 @@ public class ComputerEditor extends AbstractEditor<ComputerEditor> {
     /**
      * 替换计算机
      *
-     * @param source  被替换的计算机
+     * @param source  被替换的计算机，为 null 时，替换任意一个计算机
      * @param replace 替换的计算机
      * @return 是否替换成功
      */
-    public boolean replace(@NotNull Computer source, @NotNull Computer replace) {
+    public boolean replace(@Nullable Computer source, @NotNull Computer replace) {
         if (computers.contains(replace)) {
             // 替换的计算机已存在
             return true;
+        }
+        if (source == null) {
+            Iterator<Computer> iterator = computers.iterator();
+            if (iterator.hasNext()) {
+                iterator.remove();
+                return true;
+            }
         }
 
         if (computers.remove(source)) {

@@ -190,6 +190,37 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         return true;
     }
 
+    /**
+     * @return 所有怪物属性
+     */
+    public HashMap<Integer, Monster> getMonsters() {
+        return monsters;
+    }
+
+
+    /**
+     * 通过怪物ID获取怪物的属性
+     *
+     * @param monsterId 怪物ID
+     * @return 怪物属性
+     * @see #getMonster(byte)
+     */
+    public Monster getMonster(int monsterId) {
+        return monsters.get(monsterId);
+    }
+
+    /**
+     * 通过怪物ID获取怪物的属性
+     *
+     * @param monsterId 怪物ID
+     * @return 怪物属性
+     * @see #getMonster(int)
+     */
+    public Monster getMonster(byte monsterId) {
+        return monsters.get(monsterId & 0xFF);
+    }
+
+
     public List<Byte> getWorldMapRealms() {
         return worldRealms;
     }

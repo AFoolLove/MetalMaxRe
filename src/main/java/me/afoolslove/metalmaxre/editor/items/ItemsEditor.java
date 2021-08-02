@@ -304,16 +304,28 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
     }
 
     /**
-     * @return 道具
+     * @return 坦克和人类道具
      */
     public List<Item> getItems() {
         return items;
     }
 
+    /**
+     * 获取某个物品
+     *
+     * @param item 物品id
+     * @return 物品
+     */
     public Item getItem(byte item) {
         return getItem(item & 0xFF);
     }
 
+    /**
+     * 获取某个物品
+     *
+     * @param item 物品id
+     * @return 物品
+     */
     public Item getItem(@Range(from = 0x00, to = 0xFF) int item) {
         int temp = 0; // 计数
         for (Integer itemType : ITEM_TYPES) {

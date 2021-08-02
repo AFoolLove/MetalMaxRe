@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editor.text;
 
 import me.afoolslove.metalmaxre.Item;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
+import me.afoolslove.metalmaxre.editor.monster.MonsterEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -18,20 +19,32 @@ import java.util.*;
  * @author AFoolLove
  */
 public class TextEditor extends AbstractEditor<TextEditor> {
-    public static final List<Map.Entry<Integer, Integer>> POINTS = new ArrayList<>();
+    public static final int X_0BE90 = 0x0BE90;
+    public static final int X_10010 = 0x10010;
+    public static final int X_10DB3 = 0x10DB3;
+    public static final int X_1157C = 0x1157C;
+    public static final int X_11933 = 0x11933;
+    public static final int X_11A20 = 0x11A20;
+    public static final int X_11F75 = 0x11F75;
+    public static final int X_12010 = 0x12010;
+    public static final int X_120E0 = 0x120E0;
+    public static final int X_21AF6 = 0x21AF6;
 
-    private final Map<Map.Entry<Integer, Integer>, TextParagraphs> paragraphsMap = new HashMap<>();
+    public static final Map<Integer, Integer> POINTS = new HashMap<>();
+
+    private final Map<Integer, TextParagraphs> paragraphsMap = new HashMap<>();
 
     static {
-        POINTS.add(Map.entry(0x0BE90, 0x0C00F)); // 0x00
-        POINTS.add(Map.entry(0x10010, 0x10DB2)); // 0x01
-        POINTS.add(Map.entry(0x10DB3, 0x1157B)); // 0x02
-        POINTS.add(Map.entry(0x1157C, 0x11932)); // 0x03
-        POINTS.add(Map.entry(0x11933, 0x11A1F)); // 0x04
-        POINTS.add(Map.entry(0x11A20, 0x11F74)); // 0x05
-        POINTS.add(Map.entry(0x11F75, 0x1200F)); // 0x06
-        POINTS.add(Map.entry(0x12010, 0x120DF)); // 0x07
-        POINTS.add(Map.entry(0x120E0, 0x132FE)); // 0x08
+        POINTS.put(X_0BE90, 0x0C00F); // 0x00
+        POINTS.put(X_10010, 0x10DB2); // 0x01
+        POINTS.put(X_10DB3, 0x1157B); // 0x02
+        POINTS.put(X_1157C, 0x11932); // 0x03
+        POINTS.put(X_11933, 0x11A1F); // 0x04
+        POINTS.put(X_11A20, 0x11F74); // 0x05
+        POINTS.put(X_11F75, 0x1200F); // 0x06
+        POINTS.put(X_12010, 0x120DF); // 0x07
+        POINTS.put(X_120E0, 0x132FE); // 0x08
+        POINTS.put(X_21AF6, 0x21E80); // 怪物名称
     }
 
     @Override
@@ -39,7 +52,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
         // 读取前初始化数据
         paragraphsMap.clear();
 
-        for (Map.Entry<Integer, Integer> point : POINTS) {
+        POINTS.entrySet().parallelStream().forEach(point -> {
             // 得到这段文本的数据长度
             byte[] bytes = new byte[point.getValue() - point.getKey() + 1];
             // 定位，读取
@@ -50,20 +63,21 @@ public class TextEditor extends AbstractEditor<TextEditor> {
             // 添加
             TextParagraphs textParagraphs = new TextParagraphs();
             textParagraphs.addAll(Arrays.asList(split));
-            paragraphsMap.put(point, textParagraphs);
-        }
+            paragraphsMap.put(point.getKey(), textParagraphs);
+        });
         return true;
     }
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        for (Map.Entry<Map.Entry<Integer, Integer>, TextParagraphs> entry : paragraphsMap.entrySet()) {
-            Map.Entry<Integer, Integer> point = entry.getKey();
+        for (Map.Entry<Integer, TextParagraphs> entry : paragraphsMap.entrySet()) {
+            int start = entry.getKey();
+            int end = POINTS.get(entry.getKey());
 
             // 获取长度
-            int length = point.getValue() - point.getKey() + 1;
+            int length = end - start + 1;
 
-            buffer.position(point.getKey());
+            buffer.position(start);
             // 转换为字节写入
 
             for (int i = 0, size = entry.getValue().size(); i < size; i++) {
@@ -111,7 +125,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
     }
 
 
-    public Map<Map.Entry<Integer, Integer>, TextParagraphs> getParagraphsMap() {
+    public Map<Integer, TextParagraphs> getParagraphsMap() {
         return paragraphsMap;
     }
 
@@ -119,19 +133,33 @@ public class TextEditor extends AbstractEditor<TextEditor> {
      * @return 装备、道具的名称
      */
     public String getItemName(@Range(from = 0x00, to = 0xFF) int item) {
-        if (item >= Item.ITEMS_MAX_COUNT){
+        if (item >= Item.ITEMS_MAX_COUNT) {
             return null;
         }
-        return paragraphsMap.get(POINTS.get(0x05)).get(item);
+        return paragraphsMap.get(X_11A20).get(item);
     }
 
     /**
      * @return 装备、道具的名称
      */
     public String getItemName(byte item) {
-        if ((item & 0xFF) >= Item.ITEMS_MAX_COUNT){
+        return getItemName(item & 0xFF);
+    }
+
+    /**
+     * @return 获取怪物名称
+     */
+    public String getMonsterName(@Range(from = 0x00, to = 0xFF) int monsterId) {
+        if (monsterId >= MonsterEditor.MONSTER_COUNT) {
             return null;
         }
-        return paragraphsMap.get(POINTS.get(0x05)).get(item & 0xFF);
+        return paragraphsMap.get(X_21AF6).get(monsterId);
+    }
+
+    /**
+     * @return 获取怪物名称
+     */
+    public String getMonsterName(byte monsterId) {
+        return getMonsterName(monsterId & 0xFF);
     }
 }

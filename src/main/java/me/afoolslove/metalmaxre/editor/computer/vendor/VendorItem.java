@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editor.computer.vendor;
 
+import org.jetbrains.annotations.Range;
+
 import java.util.Objects;
 
 /**
@@ -18,20 +20,53 @@ public class VendorItem {
 
     /**
      * 设置商品
+     *
+     * @param item 商品
+     * @see #setItem(byte)
+     * @see #getItem()
      */
-    public void setItem(int item) {
+    public void setItem(@Range(from = 0x00, to = 0xFF) int item) {
         this.item = (byte) (item & 0xFF);
     }
 
     /**
-     * 设置商品数量，包含是否有货
+     * 设置商品
+     *
+     * @param item 商品
+     * @see #setItem(int)
+     * @see #getItem()
      */
-    public void setCount(int count) {
+    public void setItem(byte item) {
+        this.item = item;
+    }
+
+    /**
+     * 设置商品数量，包含是否有货
+     *
+     * @param count 商品数量
+     * @see #setCount(byte)
+     * @see #getCount()
+     * @see #intCount()
+     */
+    public void setCount(@Range(from = 0x00, to = 0xFF) int count) {
         this.count = (byte) (count & 0xFF);
     }
 
     /**
+     * 设置商品数量，包含是否有货
+     *
+     * @param count 商品数量
+     * @see #setCount(int)
+     * @see #getCount()
+     * @see #intCount()
+     */
+    public void setCount(byte count) {
+        this.count = count;
+    }
+
+    /**
      * @return 商品
+     * @see #setItem(int)
      */
     public byte getItem() {
         return item;
@@ -39,20 +74,45 @@ public class VendorItem {
 
     /**
      * @return 商品数量，最大0x7F(127)
+     * @see #intCount()
+     * @see #setCount(byte)
+     * @see #setCount(int)
      */
     public byte getCount() {
         return (byte) (count & 0x7F);
     }
 
     /**
-     * 设置商品是否有货
+     * @return 商品数量，最大0x7F(127)
+     * @see #getCount()
+     * @see #setCount(byte)
+     * @see #setCount(int)
      */
-    public void setHasItems(boolean hasItems) {
+    @Range(from = 0x00, to = 0x7F)
+    public int intCount() {
+        return (byte) (count & 0x7F);
+    }
+
+    /**
+     * 设置商品是否有货
+     *
+     * @param hasItems true 为有货，false 为无货
+     * @see #hasItems()
+     */
+    public void hasItems(boolean hasItems) {
         if (hasItems) {
             count |= 0B1000_0000;
         } else {
             count &= 0B0111_1111;
         }
+    }
+
+    /**
+     * @return 商品是否有货
+     * @see #hasItems(boolean)
+     */
+    public boolean hasItems() {
+        return (count & 0B1000_0000) != 0x00;
     }
 
     @Override

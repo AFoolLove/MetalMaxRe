@@ -1,11 +1,9 @@
 package me.afoolslove.metalmaxre.editor.text;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 字库
@@ -38,6 +36,8 @@ public class WordBank {
 
 
     public static final List<Map.Entry<Character, ?>> ALL_FONTS = new ArrayList<>();
+
+    public static final String HEX_DIGITS = "0123456789ABCDEF";
 
 
     /**
@@ -284,7 +284,13 @@ public class WordBank {
                         continue charsLoop;
                     } else {
                         // 写入两个字符组成的十六进制
-                        outputStream.write(Integer.parseInt(String.valueOf(new char[]{ch, next}), 16));
+                        if (ch >= 'a' && ch <= 'f') {
+                            ch -= 32;
+                        }
+                        if (next >= 'a' && next <= 'f') {
+                            next -= 32;
+                        }
+                        outputStream.write((HEX_DIGITS.indexOf(ch) * 0x10) + HEX_DIGITS.indexOf(next));
                     }
                 }
             }
@@ -304,11 +310,9 @@ public class WordBank {
                 temp = FONTS_REPEATED.get(ch);
             }
             if (temp != null) {
-                if (temp instanceof byte[]) {
+                if (temp instanceof byte[] bytes) {
                     // 写入多字节
-                    for (byte b : (byte[]) temp) {
-                        outputStream.write(b);
-                    }
+                    outputStream.write(bytes, 0, bytes.length);
                 } else {
                     // 写入单字节
                     outputStream.write((byte) temp);

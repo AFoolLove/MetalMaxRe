@@ -5,7 +5,9 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
-import me.afoolslove.metalmaxre.editor.map.MapPoint;
+import me.afoolslove.metalmaxre.editor.monster.Monster;
+import me.afoolslove.metalmaxre.editor.monster.MonsterEditor;
+import me.afoolslove.metalmaxre.editor.text.TextEditor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -220,9 +222,10 @@ public class MainWindow extends JFrame {
         // 快捷键：Ctrl + Shift + T
         helpMenuTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         helpMenuTest.addActionListener(e -> {
-            MapPoint teleport = EditorManager.getEditor(DogSystemEditor.class).getTeleport(0);
-            teleport.setMap(0);
-            teleport.offset(0, 1, 0);
+            TextEditor textEditor = EditorManager.getEditor(TextEditor.class);
+            MonsterEditor monsterEditor = EditorManager.getEditor(MonsterEditor.class);
+            System.out.println(textEditor.getMonsterName(0x82));
+            Monster monster = monsterEditor.getMonster(0x82);
             System.out.println("test.");
         });
 

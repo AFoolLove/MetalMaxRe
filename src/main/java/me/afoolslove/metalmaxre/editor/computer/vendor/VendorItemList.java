@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editor.computer.vendor;
 
+import org.jetbrains.annotations.Range;
+
 import java.util.LinkedList;
 
 /**
@@ -8,20 +10,47 @@ import java.util.LinkedList;
  * @author AFoolLove
  */
 public class VendorItemList extends LinkedList<VendorItem> {
-    public byte award;
+    /**
+     * 售货机中奖后给予的奖品
+     */
+    public byte award = 0x00;
 
     /**
-     * @return 奖品
+     * @return 售货机中奖后给予的奖品
      */
     public byte getAward() {
         return award;
     }
 
     /**
-     * 设置奖品
+     * @return 售货机中奖后给予的奖品
      */
-    public void setAward(int award) {
+    public int intAward() {
+        return getAward() & 0xFF;
+    }
+
+    /**
+     * 设置售货机中奖后给予的奖品
+     *
+     * @param award 奖品
+     * @see #setAward(byte)
+     * @see #getAward()
+     * @see #intAward()
+     */
+    public void setAward(@Range(from = 0x00, to = 0xFF) int award) {
         this.award = (byte) (award & 0xFF);
+    }
+
+    /**
+     * 设置售货机中奖后给予的奖品
+     *
+     * @param award 奖品
+     * @see #setAward(int)
+     * @see #getAward()
+     * @see #intAward()
+     */
+    public void setAward(byte award) {
+        this.award = award;
     }
 
     @Override
