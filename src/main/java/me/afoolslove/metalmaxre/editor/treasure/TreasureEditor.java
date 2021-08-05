@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editor.treasure;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
@@ -191,10 +192,18 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
      * @param replace 替换的宝藏
      * @return 是否替换成功
      */
-    public boolean replace(@NotNull Treasure source, @NotNull Treasure replace) {
+    public boolean replace(@Nullable Treasure source, @NotNull Treasure replace) {
         if (treasures.contains(replace)) {
             // 替换的宝藏已存在
             return true;
+        }
+
+        if (source == null) {
+            Iterator<Treasure> iterator = treasures.iterator();
+            if (iterator.hasNext()) {
+                iterator.remove();
+                return true;
+            }
         }
 
         if (treasures.remove(source)) {

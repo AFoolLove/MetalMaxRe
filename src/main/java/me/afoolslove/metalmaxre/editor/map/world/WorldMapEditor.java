@@ -380,17 +380,35 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         // 此处可能需要再次去重
 
 
-        // 将新的4*4tiles找地方存入
-        Iterator<byte[]> newTilesIterator = newTiles.iterator();
-        for (int index = 0; index < indexA.length; index++) {
-            if (indexA[index] == null && newTilesIterator.hasNext()) {
-                indexA[index] = newTilesIterator.next();
+        if (!newTiles.isEmpty()) {
+            // 将剩下的新的4*4tiles找地方存入
+            Iterator<byte[]> newTilesIterator = newTiles.iterator();
+            for (int index = 0; index < indexA.length; index++) {
+                if (indexA[index] == null && newTilesIterator.hasNext()) {
+                    indexA[index] = newTilesIterator.next();
+                }
+            }
+            for (int index = 0; index < indexB.length; index++) {
+                if (indexB[index] == null && newTilesIterator.hasNext()) {
+                    indexB[index] = newTilesIterator.next();
+                }
             }
         }
-        for (int index = 0; index < indexB.length; index++) {
-            if (indexB[index] == null && newTilesIterator.hasNext()) {
-                indexB[index] = newTilesIterator.next();
-            }
+
+        // 因为重新排序过，所以要更新事件的tile索引
+        for (int index = 0x200; index < indexA.length; index++) {
+            byte[] tempIndexA = indexA[index];
+            final int tempIndex = index;
+            // 将所有使用该4*4tiles的事件全部更新
+            eventTilesEditor.getWorldEventTile().values().forEach(eventTiles -> {
+                for (EventTile eventTile : eventTiles) {
+                    if (eventTile instanceof WorldEventTile worldEventTile){
+                        if (Arrays.equals(worldEventTile.getTiles(), tempIndexA)){
+                            worldEventTile.setTile(tempIndex);
+                        }
+                    }
+                }
+            });
         }
 
 

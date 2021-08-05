@@ -14,12 +14,28 @@ import java.util.LinkedList;
  */
 public class MapBorder extends LinkedList<MapPoint> {
     /**
-     * 地图边界类型
+     * 地图边界的类型
      */
     public MapBorderType type;
 
     public MapBorder(@NotNull MapBorderType type) {
         this.type = type;
+    }
+
+    /**
+     * 设置地图边界的类型
+     *
+     * @param type 边界类型
+     */
+    public void setType(@NotNull MapBorderType type) {
+        this.type = type;
+    }
+
+    /**
+     * @return 地图边界的类型
+     */
+    public MapBorderType getType() {
+        return type;
     }
 
     public byte[] toByteArray() {

@@ -180,9 +180,9 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
         if (worldMapInteractiveEvent != null) {
             // 写入worldMapInteractiveEvent的触发坐标和朝向
             setPrgRomPosition(buffer, 0x28165);
-            buffer.put(worldMapInteractiveEvent.getX());
+            buffer.put(worldMapInteractiveEvent.getCameraX());
             setPrgRomPosition(buffer, 0x2816B);
-            buffer.put(worldMapInteractiveEvent.getY());
+            buffer.put(worldMapInteractiveEvent.getCameraY());
             setPrgRomPosition(buffer, 0x28172);
             buffer.put(worldMapInteractiveEvent.getDirection());
 

@@ -230,8 +230,6 @@ public class TiledMap {
             // 设置出口坐标为名称 Map:X:Y
             mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
 
-            // TODO 没有添加边界属性
-
             // 添加到入口的对象层
             entrances.addObject(mapObject);
         }
@@ -300,6 +298,61 @@ public class TiledMap {
 
         // ----------------
 
+        // 地图边界传送方式
+        ObjectGroup borderGroup = new ObjectGroup();
+        borderGroup.setId(nextObjectId++);
+        borderGroup.setName("border");
+
+        // 边界的四个方向
+        MapObject borderUP = new MapObject(0x00, -(0x03 * 0x10), width * 0x10, 0x03 * 0x10, 0);
+        borderUP.setId(nextObjectId++);
+        borderUP.setType("border");
+        MapObject borderDOWN = new MapObject(0x00, height * 0x10, width * 0x10, 0x03 * 0x10, 0);
+        borderDOWN.setId(nextObjectId++);
+        borderDOWN.setType("border");
+        MapObject borderLEFT = new MapObject(-(0x03 * 0x10), 0x00, 0x03 * 0x10, height * 0x10, 0);
+        borderLEFT.setId(nextObjectId++);
+        borderLEFT.setType("border");
+        MapObject borderRIGHT = new MapObject(width * 0x10, 0x00, 0x03 * 0x10, height * 0x10, 0);
+        borderRIGHT.setId(nextObjectId++);
+        borderRIGHT.setType("border");
+        borderGroup.addObject(borderUP);
+        borderGroup.addObject(borderDOWN);
+        borderGroup.addObject(borderLEFT);
+        borderGroup.addObject(borderRIGHT);
+
+        MapBorder border = mapEntrance.getBorder();
+        switch (border.type) {
+            case LAST -> {
+                borderUP.setName("LAST");
+                borderDOWN.setName("LAST");
+                borderLEFT.setName("LAST");
+                borderRIGHT.setName("LAST");
+            }
+            case FIXED -> {
+                MapPoint fixed = border.getFirst();
+                String fixedStr = String.format("%02X:%02X:%02X", fixed.getMap(), fixed.getX(), fixed.getY());
+                borderUP.setName(fixedStr);
+                borderDOWN.setName(fixedStr);
+                borderLEFT.setName(fixedStr);
+                borderRIGHT.setName(fixedStr);
+            }
+            case DIRECTION -> {
+                MapPoint up = border.get(0x00);
+                MapPoint down = border.get(0x01);
+                MapPoint left = border.get(0x02);
+                MapPoint right = border.get(0x03);
+
+                borderUP.setName(String.format("%02X:%02X:%02X", up.getMap(), up.getX(), up.getY()));
+                borderDOWN.setName(String.format("%02X:%02X:%02X", down.getMap(), down.getX(), down.getY()));
+                borderLEFT.setName(String.format("%02X:%02X:%02X", left.getMap(), left.getX(), left.getY()));
+                borderRIGHT.setName(String.format("%02X:%02X:%02X", right.getMap(), right.getX(), right.getY()));
+            }
+        }
+
+
+        // ----------------
+
         // 可移动区域，超出后按走出边界处理
         ObjectGroup movable = new ObjectGroup();
         movable.setId(nextObjectId++);
@@ -333,6 +386,7 @@ public class TiledMap {
         tiledMap.addLayer(entrances);
         tiledMap.addLayer(computerGroup);
         tiledMap.addLayer(spriteGroup);
+        tiledMap.addLayer(borderGroup);
         tiledMap.addLayer(movable);
 
         // 不可抗力的强制属性（写入文件时）
@@ -588,6 +642,60 @@ public class TiledMap {
 
         // ----------------
 
+        // 地图边界传送方式
+        ObjectGroup borderGroup = new ObjectGroup();
+        borderGroup.setId(nextObjectId++);
+        borderGroup.setName("border");
+
+        // 边界的四个方向
+        MapObject borderUP = new MapObject(0x00, -(0x03 * 0x10), 0x100 * 0x10, 0x03 * 0x10, 0);
+        borderUP.setId(nextObjectId++);
+        borderUP.setType("border");
+        MapObject borderDOWN = new MapObject(0x00, 0x100 * 0x10, 0x100 * 0x10, 0x03 * 0x10, 0);
+        borderDOWN.setId(nextObjectId++);
+        borderDOWN.setType("border");
+        MapObject borderLEFT = new MapObject(-(0x03 * 0x10), 0x00, 0x03 * 0x10, 0x100 * 0x10, 0);
+        borderLEFT.setId(nextObjectId++);
+        borderLEFT.setType("border");
+        MapObject borderRIGHT = new MapObject(0x100 * 0x10, 0x00, 0x03 * 0x10, 0x100 * 0x10, 0);
+        borderRIGHT.setId(nextObjectId++);
+        borderRIGHT.setType("border");
+        borderGroup.addObject(borderUP);
+        borderGroup.addObject(borderDOWN);
+        borderGroup.addObject(borderLEFT);
+        borderGroup.addObject(borderRIGHT);
+
+        MapBorder border = mapEntrance.getBorder();
+        switch (border.type) {
+            case LAST -> {
+                borderUP.setName("LAST");
+                borderDOWN.setName("LAST");
+                borderLEFT.setName("LAST");
+                borderRIGHT.setName("LAST");
+            }
+            case FIXED -> {
+                MapPoint fixed = border.getFirst();
+                String fixedStr = String.format("%02X:%02X:%02X", fixed.getMap(), fixed.getX(), fixed.getY());
+                borderUP.setName(fixedStr);
+                borderDOWN.setName(fixedStr);
+                borderLEFT.setName(fixedStr);
+                borderRIGHT.setName(fixedStr);
+            }
+            case DIRECTION -> {
+                MapPoint up = border.get(0x00);
+                MapPoint down = border.get(0x01);
+                MapPoint left = border.get(0x02);
+                MapPoint right = border.get(0x03);
+
+                borderUP.setName(String.format("%02X:%02X:%02X", up.getMap(), up.getX(), up.getY()));
+                borderDOWN.setName(String.format("%02X:%02X:%02X", down.getMap(), down.getX(), down.getY()));
+                borderLEFT.setName(String.format("%02X:%02X:%02X", left.getMap(), left.getX(), left.getY()));
+                borderRIGHT.setName(String.format("%02X:%02X:%02X", right.getMap(), right.getX(), right.getY()));
+            }
+        }
+
+        // ----------------
+
         // 可移动区域，超出后按走出边界处理
         ObjectGroup movable = new ObjectGroup();
         movable.setId(nextObjectId++);
@@ -639,6 +747,7 @@ public class TiledMap {
         world.addLayer(entrances);
         world.addLayer(spriteGroup);
         world.addLayer(movable);
+        world.addLayer(borderGroup);
         world.addLayer(piecesGroup);
 
 
@@ -774,6 +883,35 @@ public class TiledMap {
                             mapProperties.movableHeight = (byte) (movable.getHeight() / 0x10);
                             mapProperties.movableHeight += mapProperties.movableHeightOffset;
                         } // 不会没有吧？？？
+                        break;
+                    case "border": // 边界传送方式
+                        MapBorder mapBorder = mapEntranceEditor.getMapEntrance(map).getBorder();
+                        // 移除原本的边界传送方式
+                        mapBorder.clear();
+
+                        MapObject mapObject = objectGroup.getObjects().get(0x00);
+                        // 根据四个方向的目的地，设置不同的类型
+                        // 四个方向目的地相同：MapBorderType.FIXED
+                        // 四个方向目的地不同：MapBorderType.DIRECTION
+                        // 上方目的地空白或为LAST：MapBorderType.LAST
+                        if (mapObject.getName() == null || mapObject.getName().isEmpty() || "LAST".equalsIgnoreCase(mapObject.getName())) {
+                            // 名称无效或为 LAST 时
+                            // 返回入口
+                            mapBorder.setType(MapBorderType.LAST);
+                        } else {
+                            for (MapObject object : objectGroup.getObjects()) {
+                                if (!mapObject.getName().equalsIgnoreCase(object.getName())) {
+                                    mapObject = null; // 设置为null表示已经设置过类型了
+                                    // 设置类型为根据不同方向不同出口
+                                    mapBorder.setType(MapBorderType.DIRECTION);
+                                    break;
+                                }
+                            }
+                            if (mapObject != null) {
+                                // 设置为固定出口
+                                mapBorder.setType(MapBorderType.FIXED);
+                            }
+                        }
                         break;
                     case "sprites": // 精灵层
                         // 获取当前地图的精灵
@@ -986,6 +1124,35 @@ public class TiledMap {
                             mapProperties.movableHeight = (byte) (movable.getHeight() / 0x10);
                             mapProperties.movableHeight += mapProperties.movableHeightOffset;
                         } // 不会没有吧？？？
+                        break;
+                    case "border": // 边界传送方式
+                        MapBorder mapBorder = mapEntranceEditor.getWorldMapEntrance().getBorder();
+                        // 移除原本的边界传送方式
+                        mapBorder.clear();
+
+                        MapObject mapObject = objectGroup.getObjects().get(0x00);
+                        // 根据四个方向的目的地，设置不同的类型
+                        // 四个方向目的地相同：MapBorderType.FIXED
+                        // 四个方向目的地不同：MapBorderType.DIRECTION
+                        // 上方目的地空白或为LAST：MapBorderType.LAST
+                        if (mapObject.getName() == null || mapObject.getName().isEmpty() || "LAST".equalsIgnoreCase(mapObject.getName())) {
+                            // 名称无效或为 LAST 时
+                            // 返回入口
+                            mapBorder.setType(MapBorderType.LAST);
+                        } else {
+                            for (MapObject object : objectGroup.getObjects()) {
+                                if (!mapObject.getName().equalsIgnoreCase(object.getName())) {
+                                    mapObject = null; // 设置为null表示已经设置过类型了
+                                    // 设置类型为根据不同方向不同出口
+                                    mapBorder.setType(MapBorderType.DIRECTION);
+                                    break;
+                                }
+                            }
+                            if (mapObject != null) {
+                                // 设置为固定出口
+                                mapBorder.setType(MapBorderType.FIXED);
+                            }
+                        }
                         break;
                     case "sprites": // 精灵层
                         // 获取当前地图的精灵
