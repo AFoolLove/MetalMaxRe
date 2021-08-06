@@ -167,9 +167,9 @@ public class TextParagraphs extends ArrayList<String> {
                         case 0x00:
                             point = 0x11A20;
                             break;
-                        case 0x01:
-                            point = 0x21AF6;
-                            break;
+//                        case 0x01:
+//                            point = 0x21AF6;
+//                            break;
                         case 0x02:
                             point = 0x10129;
                             break;

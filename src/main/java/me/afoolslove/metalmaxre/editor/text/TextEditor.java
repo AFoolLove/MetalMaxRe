@@ -7,7 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 文本编辑器
@@ -52,7 +54,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
         // 读取前初始化数据
         paragraphsMap.clear();
 
-        POINTS.entrySet().parallelStream().forEach(point -> {
+        for (Map.Entry<Integer, Integer> point : POINTS.entrySet()) {
             // 得到这段文本的数据长度
             byte[] bytes = new byte[point.getValue() - point.getKey() + 1];
             // 定位，读取
@@ -64,7 +66,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
             TextParagraphs textParagraphs = new TextParagraphs();
             textParagraphs.addAll(Arrays.asList(split));
             paragraphsMap.put(point.getKey(), textParagraphs);
-        });
+        }
         return true;
     }
 
