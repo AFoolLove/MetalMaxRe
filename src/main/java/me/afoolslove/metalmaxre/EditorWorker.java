@@ -60,46 +60,57 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
 
             // 编辑器重新读取数据
 
-            long start = 0, count = 0;
+            long totalTime = 0;
             int successful = 0, failed = 0;
+            final int editorCount = EditorManager.getEditors().size();
             if (!EditorManager.getEditors().isEmpty()) {
                 publish(Map.entry(ProcessState.MESSAGE, "开始加载编辑器"));
-                Method onReadBeforeMethod = AbstractEditor.Listener.class.getMethod("onReadBefore", AbstractEditor.class);
-                Method onReadAfterMethod = AbstractEditor.Listener.class.getMethod("onReadAfter", AbstractEditor.class);
-                for (AbstractEditor<?> editor : EditorManager.getEditors().values()) {
-                    start = System.currentTimeMillis();
-                    publish(Map.entry(ProcessState.MESSAGE, "加载编辑器：" + editor.getClass().getSimpleName()));
+                final Method onReadBeforeMethod = AbstractEditor.Listener.class.getMethod("onReadBefore", AbstractEditor.class);
+                final Method onReadAfterMethod = AbstractEditor.Listener.class.getMethod("onReadAfter", AbstractEditor.class);
 
+                for (AbstractEditor<?> abstractEditor : EditorManager.getEditors().values()) {
+                    long start = 0, end = 0;
                     boolean state = false;
                     try {
-                        for (AbstractEditor.Listener<?> listener : editor.getListeners()) {
-                            onReadBeforeMethod.invoke(listener, editor);
+                        // 防止监听器抛出异常后无法得到编辑器读取起始时间
+                        start = System.currentTimeMillis();
+                        for (AbstractEditor.Listener<?> listener : abstractEditor.getListeners()) {
+                            onReadBeforeMethod.invoke(listener, abstractEditor);
                         }
-                        state = editor.onRead(buffer);
-                        for (AbstractEditor.Listener<?> listener : editor.getListeners()) {
-                            onReadAfterMethod.invoke(listener, editor);
+                        // 真正的编辑器读取起始时间
+                        start = System.currentTimeMillis();
+                        state = abstractEditor.onRead(buffer);
+                        // 真正的编辑器读取起始时间
+                        end = System.currentTimeMillis();
+                        for (AbstractEditor.Listener<?> listener : abstractEditor.getListeners()) {
+                            onReadAfterMethod.invoke(listener, abstractEditor);
                         }
                     } catch (Exception e) {
+                        if (end == 0) {
+                            // 编辑器未正常读取完毕
+                            end = System.currentTimeMillis();
+                        }
                         e.printStackTrace();
                     }
 
+                    long time = end - start;
+                    totalTime += time;
                     if (state) {
                         successful++;
-                        long time = System.currentTimeMillis() - start;
-                        count += time;
-                        publish(Map.entry(ProcessState.MESSAGE, String.format(" 加载成功！耗时：%dms", time)));
+                        publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器：%s 成功！耗时：%dms", abstractEditor.getClass().getSimpleName(), time)));
                         publish(Map.entry(ProcessState.RESULT, true));
                     } else {
                         failed++;
-                        long time = System.currentTimeMillis() - start;
-                        count += time;
-                        publish(Map.entry(ProcessState.MESSAGE, String.format(" 加载失败！耗时：%dms", time)));
+                        publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器：%s 失败！耗时：%dms", abstractEditor.getClass().getSimpleName(), time)));
                         publish(Map.entry(ProcessState.RESULT, false));
                     }
+
+                    if (successful + failed >= editorCount) {
+                        // 所有编辑器读取完毕
+                        publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器结束，共%d个编辑器，成功%d个，失败%d个", successful + failed, successful, failed)));
+                        publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器共计耗时：%dms", totalTime)));
+                    }
                 }
-                publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器结束，共%d个编辑器，成功%d个，失败%d个", successful + failed, successful, failed)));
-                publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器共计耗时：%dms", count)));
-                // 全部加载失败，那还得了？
                 return successful != 0;
             } else {
                 System.out.println("没有可用的编辑器！");

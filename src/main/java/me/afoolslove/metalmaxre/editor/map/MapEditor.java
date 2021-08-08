@@ -77,8 +77,8 @@ public class MapEditor extends AbstractEditor<MapEditor> {
             int size = (mapProperties.width & 0xFF) * (mapProperties.height & 0xFF);
 
             // 通过地图属性的地图数据索引读取地图数据
-            MapBuilder.parseMap(buffer, 0, bytes -> mapBuilder.getTileCount() < size, new Predicate<>() {
-                int one = 0;
+            MapBuilder.parseMap(buffer, bufferPosition, 0, bytes -> mapBuilder.getTileCount() < size, new Predicate<>() {
+                byte one = 0;
 
                 @Override
                 public boolean test(Byte aByte) {
@@ -96,8 +96,7 @@ public class MapEditor extends AbstractEditor<MapEditor> {
                             break;
                         case 2:
                             one = 0;
-                            int count = aByte & 0x7F;
-                            mapBuilder.getLast().setCount(count);
+                            mapBuilder.getLast().setCount(aByte & 0x7F);
                             break;
                     }
                     return true;
@@ -223,7 +222,7 @@ public class MapEditor extends AbstractEditor<MapEditor> {
             }
 //            System.out.println();
             // 写入地图数据
-            buffer.put(entry.getValue());
+            put(buffer, entry.getValue());
 
 //            MapBuilder mapTiles = maps.get(i);
 //            buffer.put(mapTiles.build());

@@ -29,19 +29,23 @@ public class Palette {
         setColors(colors);
     }
 
-    public Palette(@NotNull ByteBuffer buffer) {
+    public Palette(@NotNull ByteBuffer buffer, int bufferPosition) {
         this.colors = new byte[4];
         // 固定为黑色
         this.colors[0x00] = 0x0F;
         // 读取三种颜色
         for (int i = 0x01; i < 0x04; i++) {
-            if (i > (buffer.capacity() - buffer.position() - 1)) {
+            if (i > (buffer.capacity() - bufferPosition - 1)) {
                 // 使用黑色填充
                 this.colors[i] = 0x0F;
             } else {
-                this.colors[i] = buffer.get();
+                this.colors[i] = buffer.get(bufferPosition++);
             }
         }
+    }
+
+    public Palette(@NotNull ByteBuffer buffer) {
+        this(buffer, buffer.position());
     }
 
     public Palette(byte colorA, byte colorB, byte colorC) {

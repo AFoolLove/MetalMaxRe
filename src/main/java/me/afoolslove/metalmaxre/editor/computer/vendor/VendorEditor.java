@@ -57,11 +57,11 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
         // 读取售货机的商品组合
         // 0x0D 为每组数据固定头字节，非头字节视为读取完毕
         setPrgRomPosition(buffer, VENDOR_START_OFFSET);
-        while (buffer.get() == 0x0D) {
+        while (get(buffer) == 0x0D) {
             // 读取商品
-            buffer.get(items);
+            get(buffer, items);
             // 读取商品数量和是否有货
-            buffer.get(counts);
+            get(buffer, counts);
 
             VendorItemList itemList = new VendorItemList();
             // 添加商品
@@ -69,7 +69,7 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
                 itemList.add(new VendorItem(items[i], counts[i]));
             }
             // 获取中奖物品
-            itemList.setAward(buffer.get());
+            itemList.setAward(get(buffer));
             vendorItemLists.add(itemList);
         }
         return true;
@@ -90,17 +90,17 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
             VendorItemList vendorItemList = iterator.next();
 
             // 写入固定头
-            buffer.put((byte) 0x0D);
+            put(buffer, (byte) 0x0D);
             // 写入商品和数量
             for (int i = 0; i < VENDOR_ITEM_COUNT; i++) {
                 VendorItem item = vendorItemList.get(i);
                 items[i] = item.item;
                 counts[i] = item.count;
             }
-            buffer.put(items);
-            buffer.put(counts);
+            put(buffer, items);
+            put(buffer, counts);
             // 写入奖品
-            buffer.put(vendorItemList.award);
+            put(buffer, vendorItemList.award);
         }
         return true;
     }

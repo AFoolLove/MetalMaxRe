@@ -30,7 +30,10 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * 程序主体
@@ -124,6 +127,8 @@ public class MetalMaxRe {
 
     public void setBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
+        // 更新编辑器的 buffer
+        EditorManager.getEditors().values().forEach(abstractEditor -> abstractEditor.setBuffer(buffer));
     }
 
     /**
@@ -239,7 +244,7 @@ public class MetalMaxRe {
             var spriteEditor = EditorManager.getEditor(SpriteEditor.class);
             var mapEntranceEditor = EditorManager.getEditor(MapEntranceEditor.class);
             var playerEditor = EditorManager.getEditor(PlayerEditor.class);
-            var tankInitialAttributes = EditorManager.getEditor(TankEditor.class);
+            var tankEditor = EditorManager.getEditor(TankEditor.class);
             var playerExperienceEditor = EditorManager.getEditor(PlayerExperienceEditor.class);
             var paletteEditor = EditorManager.getEditor(PaletteEditor.class);
             var itemsEditor = EditorManager.getEditor(ItemsEditor.class);
@@ -258,7 +263,7 @@ public class MetalMaxRe {
             unorderedEditors.add(vendorEditor);
             unorderedEditors.add(spriteEditor);
             unorderedEditors.add(playerEditor);
-            unorderedEditors.add(tankInitialAttributes);
+            unorderedEditors.add(tankEditor);
             unorderedEditors.add(playerExperienceEditor);
             unorderedEditors.add(itemsEditor);
             unorderedEditors.add(textEditor);

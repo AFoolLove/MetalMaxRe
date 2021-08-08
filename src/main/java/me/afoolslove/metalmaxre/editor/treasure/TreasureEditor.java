@@ -59,10 +59,10 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
 
         // 宝藏的数据按顺序存放（地图、X、Y、物品
         setPrgRomPosition(buffer, TREASURE_START_OFFSET);
-        buffer.get(maps);
-        buffer.get(xs);
-        buffer.get(ys);
-        buffer.get(items);
+        get(buffer, maps);
+        get(buffer, xs);
+        get(buffer, ys);
+        get(buffer, items);
 
         treasures.clear();
         for (int i = 0; i < TREASURE_MAX_COUNT; i++) {
@@ -107,10 +107,10 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
         }
 
         setPrgRomPosition(buffer, TREASURE_START_OFFSET);
-        buffer.put(maps);
-        buffer.put(xs);
-        buffer.put(ys);
-        buffer.put(items);
+        put(buffer, maps);
+        put(buffer, xs);
+        put(buffer, ys);
+        put(buffer, items);
         return true;
     }
 

@@ -9,17 +9,18 @@ import java.util.LinkedHashMap;
  * @author AFoolLove
  */
 public final class EditorManager {
-    private static final HashMap<Class<? extends AbstractEditor>, AbstractEditor> EDITORS = new LinkedHashMap<>();
+    private static final HashMap<Class<AbstractEditor<?>>, AbstractEditor<?>> EDITORS = new LinkedHashMap<>();
 
-    public static HashMap<Class<? extends AbstractEditor>, AbstractEditor> getEditors() {
+    public static HashMap<Class<AbstractEditor<?>>, AbstractEditor<?>> getEditors() {
         return EDITORS;
     }
 
     /**
      * 注册一个编辑器
      */
-    public static <T extends AbstractEditor> void register(@NotNull T editor) {
-        EDITORS.put(editor.getClass(), editor);
+    @SuppressWarnings("unchecked")
+    public static <T extends AbstractEditor<T>> void register(@NotNull T editor) {
+        EDITORS.put((Class<AbstractEditor<?>>) editor.getClass(), editor);
     }
 
     /**
@@ -27,7 +28,7 @@ public final class EditorManager {
      *
      * @return 获取相应的编辑器
      */
-    public static <T extends AbstractEditor> T getEditor(Class<T> editor) {
+    public static <T extends AbstractEditor<T>> T getEditor(Class<T> editor) {
         return editor.cast(EDITORS.get(editor));
     }
 

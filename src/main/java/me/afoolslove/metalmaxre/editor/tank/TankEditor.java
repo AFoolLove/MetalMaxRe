@@ -49,42 +49,42 @@ public class TankEditor extends AbstractEditor<TankEditor> {
         setPrgRomPosition(buffer, TANK_INIT_EQUIPMENT_START_OFFSET);
         for (int tank = 0; tank < Tank.COUNT; tank++) {
             byte[] equipment = new byte[0x06];
-            buffer.get(equipment);
+            get(buffer, equipment);
             tankInitialAttributes[tank].setEquipment(Arrays.copyOf(equipment, equipment.length));
         }
         // 读取初始装备的 装备/卸下 状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            tankInitialAttributes[tank].setEquipmentState(buffer.get());
+            tankInitialAttributes[tank].setEquipmentState(get(buffer));
         }
         // 读取坦克弹仓大小
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            tankInitialAttributes[tank].setMaxShells(buffer.get());
+            tankInitialAttributes[tank].setMaxShells(get(buffer));
         }
         // 读取坦克底盘防御力（2byte）
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            tankInitialAttributes[tank].setDefense(buffer.get() + (buffer.get() << 8));
+            tankInitialAttributes[tank].setDefense(get(buffer) + (get(buffer) << 8));
         }
 
         // 读取坦克的底盘重量
         setPrgRomPosition(buffer, TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            tankInitialAttributes[noTank].setWeight(buffer.get() + (buffer.get() << 8));
+            tankInitialAttributes[noTank].setWeight(get(buffer) + (get(buffer) << 8));
         }
 
         // 读取出租坦克的底盘重量（2byte）
         setPrgRomPosition(buffer, TAX_TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
-            tankInitialAttributes[Tank.NO_COUNT + taxTank].setWeight(buffer.get() + (buffer.get() << 8));
+            tankInitialAttributes[Tank.NO_COUNT + taxTank].setWeight(get(buffer) + (get(buffer) << 8));
         }
         // 读取坦克开洞状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            tankInitialAttributes[tank].setSlot(buffer.get());
+            tankInitialAttributes[tank].setSlot(get(buffer));
         }
 
         // 读取坦克的初始SP
         setPrgRomPosition(buffer, TANK_INIT_SP_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            tankInitialAttributes[noTank].setSp(buffer.get() + (buffer.get() << 8));
+            tankInitialAttributes[noTank].setSp(get(buffer) + (get(buffer) << 8));
         }
         return true;
     }
@@ -102,41 +102,41 @@ public class TankEditor extends AbstractEditor<TankEditor> {
 
         setPrgRomPosition(buffer, TANK_INIT_EQUIPMENT_START_OFFSET);
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            buffer.put(tankInitialAttributes[tank].getEquipment());
+            put(buffer, tankInitialAttributes[tank].getEquipment());
         }
         // 写入初始装备的 装备/卸下 状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            buffer.put(tankInitialAttributes[tank].getEquipmentState());
+            put(buffer, tankInitialAttributes[tank].getEquipmentState());
         }
         // 写入坦克弹仓大小
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            buffer.put(tankInitialAttributes[tank].getMaxShells());
+            put(buffer, tankInitialAttributes[tank].getMaxShells());
         }
         // 写入坦克底盘防御力（2byte）
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            buffer.put(tankInitialAttributes[tank].getBytesDefense());
+            put(buffer, tankInitialAttributes[tank].getBytesDefense());
         }
 
         // 写入坦克的底盘重量
         setPrgRomPosition(buffer, TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            buffer.put(tankInitialAttributes[noTank].getBytesWeight());
+            put(buffer, tankInitialAttributes[noTank].getBytesWeight());
         }
 
         // 写入出租坦克的底盘重量（2byte）
         setPrgRomPosition(buffer, TAX_TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
-            buffer.put(tankInitialAttributes[Tank.NO_COUNT + taxTank].getBytesWeight());
+            put(buffer, tankInitialAttributes[Tank.NO_COUNT + taxTank].getBytesWeight());
         }
         // 写入坦克开洞状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            buffer.put(tankInitialAttributes[tank].getSlot());
+            put(buffer, tankInitialAttributes[tank].getSlot());
         }
 
         // 写入坦克的初始SP
         setPrgRomPosition(buffer, TANK_INIT_SP_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            buffer.put(tankInitialAttributes[noTank].getBytesSp());
+            put(buffer, tankInitialAttributes[noTank].getBytesSp());
         }
         return true;
     }

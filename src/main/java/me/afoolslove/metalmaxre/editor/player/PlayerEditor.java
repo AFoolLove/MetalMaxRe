@@ -45,85 +45,85 @@ public class PlayerEditor extends AbstractEditor<PlayerEditor> {
 
         // 从初始金钱开始读取
         setPrgRomPosition(buffer, PLAYER_START_OFFSET);
-        money = buffer.get();
-        money |= buffer.get() << 8;
-        money |= buffer.get() << 16;
+        money = get(buffer);
+        money |= get(buffer) << 8;
+        money |= get(buffer) << 16;
 
         // 读取初始最大生命值
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setMaxHealth(buffer.get() + (buffer.get() << 8));
+            playerInitialAttributes[i].setMaxHealth(get(buffer) + (get(buffer) << 8));
         }
         // 读取初始当前生命值
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setHealth(buffer.get() + (buffer.get() << 8));
+            playerInitialAttributes[i].setHealth(get(buffer) + (get(buffer) << 8));
         }
         // 读取初始攻击力（含已装备的武器
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setAttack(buffer.get() + (buffer.get() << 8));
+            playerInitialAttributes[i].setAttack(get(buffer) + (get(buffer) << 8));
         }
         // 读取初始防御力（含已装备的防具
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setDefense(buffer.get() + (buffer.get() << 8));
+            playerInitialAttributes[i].setDefense(get(buffer) + (get(buffer) << 8));
         }
         // 读取初始队伍状态
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setTeamStatus(buffer.get());
+            playerInitialAttributes[i].setTeamStatus(get(buffer));
         }
         // 读取初始异常状态
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setDeBuff(buffer.get());
+            playerInitialAttributes[i].setDeBuff(get(buffer));
         }
         // 读取初始等级
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setLevel(buffer.get());
+            playerInitialAttributes[i].setLevel(get(buffer));
         }
         // 读取初始力量
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setStrength(buffer.get());
+            playerInitialAttributes[i].setStrength(get(buffer));
         }
         // 读取初始智力
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setWisdom(buffer.get());
+            playerInitialAttributes[i].setWisdom(get(buffer));
         }
         // 读取初始速度
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setSpeed(buffer.get());
+            playerInitialAttributes[i].setSpeed(get(buffer));
         }
         // 读取初始体力
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setVitality(buffer.get());
+            playerInitialAttributes[i].setVitality(get(buffer));
         }
         // 读取初始战斗等级
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setBattleSkill(buffer.get());
+            playerInitialAttributes[i].setBattleSkill(get(buffer));
         }
         // 读取初始修理等级
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setRepairSkill(buffer.get());
+            playerInitialAttributes[i].setRepairSkill(get(buffer));
         }
         // 读取初始驾驶等级
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setDrivingSkill(buffer.get());
+            playerInitialAttributes[i].setDrivingSkill(get(buffer));
         }
 
         byte[] temp = new byte[0x08];
         // 读取初始装备
         for (int i = 0; i < 0x03; i++) {
-            buffer.get(temp);
+            get(buffer, temp);
             playerInitialAttributes[i].setEquipment(Arrays.copyOf(temp, temp.length));
         }
         // 读取初始道具
         for (int i = 0; i < 0x03; i++) {
-            buffer.get(temp);
+            get(buffer, temp);
             playerInitialAttributes[i].setInventory(Arrays.copyOf(temp, temp.length));
         }
         // 读取初始装备的装备/卸下状态
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setEquipmentState(buffer.get());
+            playerInitialAttributes[i].setEquipmentState(get(buffer));
         }
         // 读取初始经验值
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setExperience(buffer.get() + (buffer.get() << 8) + (buffer.get() << 16));
+            playerInitialAttributes[i].setExperience(get(buffer) + (get(buffer) << 8) + (get(buffer) << 16));
         }
         return true;
     }
@@ -140,80 +140,80 @@ public class PlayerEditor extends AbstractEditor<PlayerEditor> {
 
         // 从初始金钱开始写入
         setPrgRomPosition(buffer, PLAYER_START_OFFSET);
-        buffer.put((byte) (money & 0x0000FF));
-        buffer.put((byte) ((money & 0x00FF00) >>> 8));
-        buffer.put((byte) ((money & 0xFF0000) >>> 16));
+        put(buffer, (byte) (money & 0x0000FF));
+        put(buffer, (byte) ((money & 0x00FF00) >>> 8));
+        put(buffer, (byte) ((money & 0xFF0000) >>> 16));
         // 写入初始最大生命值
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getBytesMaxHealth());
+            put(buffer, playerInitialAttributes[i].getBytesMaxHealth());
         }
         // 写入初始当前生命值
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getBytesHealth());
+            put(buffer, playerInitialAttributes[i].getBytesHealth());
         }
         // 写入初始攻击力（含已装备的武器
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getBytesAttack());
+            put(buffer, playerInitialAttributes[i].getBytesAttack());
         }
         // 写入初始防御力（含已装备的防具
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getBytesDefense());
+            put(buffer, playerInitialAttributes[i].getBytesDefense());
         }
         // 写入初始队伍状态
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getTeamStatus());
+            put(buffer, playerInitialAttributes[i].getTeamStatus());
         }
         // 写入初始异常状态
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getDeBuff());
+            put(buffer, playerInitialAttributes[i].getDeBuff());
         }
         //  写入初始等级
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getLevel());
+            put(buffer, playerInitialAttributes[i].getLevel());
         }
         // 写入初始力量
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getStrength());
+            put(buffer, playerInitialAttributes[i].getStrength());
         }
         // 写入初始智力
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getWisdom());
+            put(buffer, playerInitialAttributes[i].getWisdom());
         }
         // 写入初始速度
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getSpeed());
+            put(buffer, playerInitialAttributes[i].getSpeed());
         }
         // 写入初始体力
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getVitality());
+            put(buffer, playerInitialAttributes[i].getVitality());
         }
         // 写入初始战斗等级
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getBattleSkill());
+            put(buffer, playerInitialAttributes[i].getBattleSkill());
         }
         // 写入初始修理等级
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getRepairSkill());
+            put(buffer, playerInitialAttributes[i].getRepairSkill());
         }
         // 写入初始驾驶等级
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getDrivingSkill());
+            put(buffer, playerInitialAttributes[i].getDrivingSkill());
         }
         // 写入初始装备
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getEquipment());
+            put(buffer, playerInitialAttributes[i].getEquipment());
         }
         // 写入初始道具
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getInventory());
+            put(buffer, playerInitialAttributes[i].getInventory());
         }
         // 写入初始装备的装备状态
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getEquipmentState());
+            put(buffer, playerInitialAttributes[i].getEquipmentState());
         }
         // 写入初始经验值
         for (int i = 0; i < 0x03; i++) {
-            buffer.put(playerInitialAttributes[i].getBytesExperience());
+            put(buffer, playerInitialAttributes[i].getBytesExperience());
         }
         return true;
     }

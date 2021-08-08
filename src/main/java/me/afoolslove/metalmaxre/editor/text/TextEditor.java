@@ -58,8 +58,8 @@ public class TextEditor extends AbstractEditor<TextEditor> {
             // 得到这段文本的数据长度
             byte[] bytes = new byte[point.getValue() - point.getKey() + 1];
             // 定位，读取
-            buffer.position(point.getKey());
-            buffer.get(bytes);
+            setPosition(point.getKey());
+            get(buffer, bytes);
             // 解析并通过换行分段
             String[] split = WordBank.toString(bytes).split("\n", -1);
             // 添加
@@ -79,7 +79,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
             // 获取长度
             int length = end - start + 1;
 
-            buffer.position(start);
+            setPosition(start);
             // 转换为字节写入
 
             for (int i = 0, size = entry.getValue().size(); i < size; i++) {
@@ -97,7 +97,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
                     // 最大写入的字节数量
                     int len = Math.min(bytes1.length, length);
                     // 写入
-                    buffer.put(bytes1, 0, len);
+                    put(buffer, bytes1, 0, len);
                     // 计算剩余可写入的空间
                     length -= len;
                 }
@@ -106,7 +106,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
                 // 最后一个文本段不写入0x9F
                 if (length > 0 && i != size - 1) {
                     // 文本段结束
-                    buffer.put((byte) 0x9F);
+                    put(buffer, (byte) 0x9F);
                     length--;
                 }
             }
@@ -120,7 +120,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
                 // 多余的空间使用 0x9F 填充
                 byte[] bytes = new byte[length];
                 Arrays.fill(bytes, (byte) 0x9F);
-                buffer.put(bytes);
+                put(buffer, bytes);
             }
         }
         return true;

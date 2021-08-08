@@ -118,23 +118,23 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
 
         // 读取世界地图图块索引偏移
         setPrgRomPosition(buffer, WORLD_MAP_TILES_INDEX_OFFSET_START);
-        buffer.get(indexOffsets);
+        get(buffer, indexOffsets);
         // 读取图块组索引
         setPrgRomPosition(buffer, WORLD_MAP_X00410_START);
-        buffer.get(x00410);
+        get(buffer, x00410);
         // 读取图块组A
         setPrgRomPosition(buffer, WORLD_MAP_INDEX_A_START);
         for (byte[] index : indexA) {
-            buffer.get(index);
+            get(buffer, index);
         }
         // 读取图块组B
         setPrgRomPosition(buffer, WORLD_MAP_INDEX_B_START);
         for (byte[] index : indexB) {
-            buffer.get(index);
+            get(buffer, index);
         }
         // 读取图块索引
         setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
-        buffer.get(index);
+        get(buffer, index);
 
         for (int i = 0; i < 0x1000; i++) {
             // 得到索引偏移，索引与indexOffsets的比例是4:1
@@ -183,7 +183,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
                 }
 
                 tiles = new byte[0x10];
-                buffer.get(tiles);
+                get(buffer, tiles);
                 System.out.println("世界地图编辑器：警告！使用了安全编辑范围外的地图数据 " + Arrays.toString(tiles));
             } else {
                 tiles = tempIndex[offset];
@@ -508,23 +508,23 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
 
         // 写入世界地图图块索引偏移
         setPrgRomPosition(buffer, WORLD_MAP_TILES_INDEX_OFFSET_START);
-        buffer.put(indexOffsets);
+        put(buffer, indexOffsets);
         // 写入图块组索引
         setPrgRomPosition(buffer, WORLD_MAP_X00410_START);
-        buffer.put(x00410);
+        put(buffer, x00410);
         // 写入图块组A
         setPrgRomPosition(buffer, WORLD_MAP_INDEX_A_START);
         for (byte[] tiles : indexA) {
-            buffer.put(tiles);
+            put(buffer, tiles);
         }
         // 写入图块组B
         setPrgRomPosition(buffer, WORLD_MAP_INDEX_B_START);
         for (byte[] tiles : indexB) {
-            buffer.put(tiles);
+            put(buffer, tiles);
         }
         // 写入图块索引
         setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
-        buffer.put(index);
+        put(buffer, index);
         return true;
     }
 

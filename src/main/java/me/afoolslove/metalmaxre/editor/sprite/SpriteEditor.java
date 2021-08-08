@@ -54,7 +54,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
 
         for (int i = 0; i < 0xF0 + 0x0A; i++) {
-            spritesIndexes[i] = (char) ((buffer.get() & 0xFF) + ((buffer.get() & 0xFF) << 0x08));
+            spritesIndexes[i] = (char) (getToInt(buffer) + (getToInt(buffer) << 0x08));
         }
 
 
@@ -73,12 +73,12 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
             // 读取精灵
             setPrgRomPosition(buffer, 0x24000 + spritesIndex - 0x8000);
             // 获取奖励数量
-            int count = buffer.get();
+            int count = get(buffer);
 
             List<Sprite> spriteList = new ArrayList<>();
             for (int j = 0; j < count; j++) {
                 // 读取精灵的 类型、X、Y、对话1、对话2和行动方式
-                spriteList.add(j, new Sprite(buffer.get(), buffer.get(), buffer.get(), buffer.get(), buffer.get(), buffer.get()));
+                spriteList.add(j, new Sprite(get(buffer), get(buffer), get(buffer), get(buffer), get(buffer), get(buffer)));
             }
             // 将精灵一样的地图一起设置
             for (int j = i; j < spritesIndexes.length; j++) {
@@ -113,7 +113,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
             // 排除已写入的精灵
             if (spritesIndexes[map] == null) {
                 // 获取新的精灵数据索引
-                char newSpritesIndex = (char) (buffer.position() - 0x24000 + 0x8000 - 0x10);
+                char newSpritesIndex = (char) (bufferPosition - 0x24000 + 0x8000 - 0x10);
                 // 将其它使用与此精灵数据一样的地图一起设置
                 for (int nextMap = map; nextMap < 0xF0 + 0x0A; nextMap++) {
                     if (getSprites(nextMap) == spriteList) {
@@ -123,15 +123,15 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
                 }
 
                 // 写入精灵数量
-                buffer.put((byte) spriteList.size());
+                put(buffer, (byte) spriteList.size());
                 // 写入精灵
                 for (Sprite sprite : spriteList) {
-                    buffer.put(sprite.toByteArray());
+                    put(buffer, sprite.toByteArray());
                 }
             }
         }
 
-        int end = buffer.position() - 1;
+        int end = bufferPosition - 1;
         if (end <= 0x25176) {
             System.out.printf("精灵编辑器：剩余%d个空闲字节\n", 0x25176 - end);
         } else {
@@ -141,8 +141,8 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
         // 写入精灵数据索引
         setPrgRomPosition(buffer, SPRITE_INDEX_START_OFFSET);
         for (Character spritesIndex : spritesIndexes) {
-            buffer.put((byte) (spritesIndex & 0x00FF));
-            buffer.put((byte) ((spritesIndex & 0xFF00) >> 0x08));
+            put(buffer, (byte) (spritesIndex & 0x00FF));
+            put(buffer, (byte) ((spritesIndex & 0xFF00) >> 0x08));
         }
         return true;
     }

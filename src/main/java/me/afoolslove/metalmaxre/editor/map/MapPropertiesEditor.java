@@ -5,9 +5,11 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 地图属性编辑器
@@ -53,14 +55,6 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
 
     private final LinkedHashMap<Integer, MapProperties> mapProperties = new LinkedHashMap<>(MapEditor.MAP_MAX_COUNT);
 
-    public static void main(String[] args) throws IOException {
-        HashMap<Integer, Character> map = new HashMap<>();
-        map.put(Objects.hash(0, 1), (char) 5);
-
-        Character character = map.get(Objects.hash(0, 1));
-        System.out.println(character);
-    }
-
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
@@ -72,31 +66,28 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         char[] mapIndexRoll = new char[0x40 + 0xB0];
         setPrgRomPosition(buffer, MAP_PROPERTIES_UP_ROLL_OFFSET);
         for (int i = 0; i < 0x40; i++) {
-            mapIndexRoll[i] = (char) ((buffer.get() & 0xFF) + ((buffer.get() & 0xFF) << 8));
+            mapIndexRoll[i] = (char) (getToInt(buffer) + (getToInt(buffer) << 8));
         }
         setPrgRomPosition(buffer, MAP_PROPERTIES_DOWN_ROLL_OFFSET);
-        for (int i = 0x40; i < mapIndexRoll.length; i++) {
-            mapIndexRoll[i] = (char) ((buffer.get() & 0xFF) + ((buffer.get() & 0xFF) << 8));
+        for (int i = 0; i < 0xB0; i++) {
+            mapIndexRoll[0x40 + i] = (char) (getToInt(buffer) + (getToInt(buffer) << 8));
         }
 
         // 通过地图属性索引读取地图属性
-        setPrgRomPosition(buffer, MAP_PROPERTIES_START_OFFSET);
-        buffer.mark();
         byte[] properties = new byte[MapProperties.PROPERTIES_MAX_LENGTH];
         for (char index : mapIndexRoll) {
-            buffer.reset();
-            buffer.position(buffer.position() + index);
+            setPrgRomPosition(buffer, MAP_PROPERTIES_START_OFFSET + index);
             // 获取基本属性，将两个不确定属性排除
-            buffer.get(properties, 0, MapProperties.PROPERTIES_MAX_LENGTH - 2 - 2);
+            get(buffer, properties, 0, MapProperties.PROPERTIES_MAX_LENGTH - 2 - 2);
             if (MapProperties.hasDyTile(properties[0])) {
                 // 如果存在动态图块，读取属性
-                properties[0x18] = buffer.get();
-                properties[0x19] = buffer.get();
+                properties[0x18] = get(buffer);
+                properties[0x19] = get(buffer);
             }
             if (MapProperties.hasEventTile(properties[0])) {
                 // 如果存在事件图块，读取属性
-                properties[0x1A] = buffer.get();
-                properties[0x1B] = buffer.get();
+                properties[0x1A] = get(buffer);
+                properties[0x1B] = get(buffer);
             }
             mapProperties.put(mapProperties.size(), new MapProperties(properties));
         }
@@ -130,7 +121,7 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         // 写入地图属性索引，上卷 0x40、下卷 0xB0
-        // 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
+        // 地图属性索引不建议被编辑！！所以不提供修改功能！！
 
         // 将地图属性整合为写入的格式，index=0无效
         byte[][] properties = new byte[MapEditor.MAP_MAX_COUNT + 1][];
@@ -149,8 +140,8 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
 
         setPrgRomPosition(buffer, MAP_PROPERTIES_UP_ROLL_OFFSET);
         // 固定值，无任何作用？
-        buffer.put((byte) 0x00);
-        buffer.put((byte) 0x00);
+        put(buffer, (byte) 0x00);
+        put(buffer, (byte) 0x00);
 //        mapIndexRoll[0x00] = 0x0000;
 
         char mapPropertiesIndex = 0x8500;
@@ -160,12 +151,12 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
             if (character != null) {
                 // 如果有相同的地图属性索引，则索引到同一个位置
 //                mapIndexRoll[i] = character;
-                buffer.putChar(NumberR.parseChar(character));
+                putChar(buffer, NumberR.parseChar(character));
             } else {
                 // 如果是新的地图属性，就设置地图属性索引和写入地图属性
                 mapping.put(hashCode, mapPropertiesIndex);
 //                mapIndexRoll[i] = mapPropertiesIndex;
-                buffer.putChar(NumberR.parseChar(mapPropertiesIndex));
+                putChar(buffer, NumberR.parseChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
             }
         }
@@ -177,12 +168,12 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
             if (character != null) {
                 // 如果有相同的地图属性索引，则索引到同一个位置
 //                mapIndexRoll[i] = character;
-                buffer.putChar(NumberR.parseChar(character));
+                putChar(buffer, NumberR.parseChar(character));
             } else {
                 // 如果是新的地图属性，就设置地图属性索引和写入地图属性
                 mapping.put(hashCode, mapPropertiesIndex);
 //                mapIndexRoll[i] = mapPropertiesIndex;
-                buffer.putChar(NumberR.parseChar(mapPropertiesIndex));
+                putChar(buffer, NumberR.parseChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
             }
         }
@@ -190,7 +181,7 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         // 写入地图属性
         setPrgRomPosition(buffer, MAP_PROPERTIES_OFFSET);
         for (int i = 0x01; i < properties.length - 1; i++) {
-            buffer.put(properties[i]);
+            put(buffer, properties[i]);
         }
 
         // 写入世界地图属性
@@ -206,7 +197,7 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         buffer.put(0x28AC7, (byte) ((worldMapProperties.eventTilesIndex & 0xFF00) >>> 8));
 
 
-        int end = buffer.position() - 1;
+        int end = bufferPosition - 1;
         if (end <= 0x0FBBD) {
             System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", 0x0FBBD - end);
         } else {

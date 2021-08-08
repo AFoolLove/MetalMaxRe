@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     protected ByteBuffer buffer;
     protected final List<Listener<T>> listeners = new ArrayList<>();
+    protected int bufferPosition;
 
 
     public AbstractEditor() {
@@ -46,7 +47,7 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
      * 设置为 PRG COM 的偏移量
      */
     public void setPrgRomPosition(@NotNull ByteBuffer buffer, int offset) {
-        buffer.position(getHeader().getPrgRomStart(offset));
+        bufferPosition = getHeader().getPrgRomStart(offset);
     }
 
     public void setPrgRomPosition(int offset) {
@@ -57,227 +58,94 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
      * 设置为 CHR COM 的偏移量
      */
     public void setChrRomPosition(@NotNull ByteBuffer buffer, int offset) {
-        buffer.position(getHeader().getChrRomStart(offset));
+        bufferPosition = getHeader().getChrRomStart(offset);
     }
 
     public void setChrRomPosition(int offset) {
-        setChrRomPosition(getBuffer(), offset);
+        bufferPosition = getHeader().getChrRomStart(offset);
+    }
+
+    public void setPosition(int position) {
+        bufferPosition = position;
     }
 
     public List<Listener<T>> getListeners() {
         return listeners;
     }
 
-    public ByteBuffer slice() {
-        return buffer.slice();
-    }
-
-    public ByteBuffer duplicate() {
-        return buffer.duplicate();
-    }
-
-    public ByteBuffer asReadOnlyBuffer() {
-        return buffer.asReadOnlyBuffer();
-    }
-
-    public byte get() {
-        return buffer.get();
-    }
-
-    public ByteBuffer put(byte b) {
-        return buffer.put(b);
-    }
-
-    public byte get(int index) {
-        return buffer.get(index);
-    }
-
-    public ByteBuffer put(int index, byte b) {
-        return buffer.put(index, b);
-    }
-
-    public ByteBuffer compact() {
-        return buffer.compact();
-    }
-
-    public boolean isDirect() {
-        return buffer.isDirect();
-    }
-
-    public char getChar() {
-        return buffer.getChar();
-    }
-
-    public ByteBuffer putChar(char value) {
-        return buffer.putChar(value);
-    }
-
-    public char getChar(int index) {
-        return buffer.getChar(index);
-    }
-
-    public ByteBuffer putChar(int index, char value) {
-        return buffer.putChar(index, value);
-    }
-
-    public CharBuffer asCharBuffer() {
-        return buffer.asCharBuffer();
-    }
-
-    public short getShort() {
-        return buffer.getShort();
-    }
-
-    public ByteBuffer putShort(short value) {
-        return buffer.putShort(value);
-    }
-
-    public short getShort(int index) {
-        return buffer.getShort(index);
-    }
-
-    public ByteBuffer putShort(int index, short value) {
-        return buffer.putShort(index, value);
-    }
-
-    public ShortBuffer asShortBuffer() {
-        return buffer.asShortBuffer();
-    }
-
-    public int getInt() {
-        return buffer.getInt();
-    }
-
-    public ByteBuffer putInt(int value) {
-        return buffer.putInt(value);
-    }
-
-    public int getInt(int index) {
-        return buffer.getInt(index);
-    }
-
-    public ByteBuffer putInt(int index, int value) {
-        return buffer.putInt(index, value);
-    }
-
-    public IntBuffer asIntBuffer() {
-        return buffer.asIntBuffer();
-    }
-
-    public long getLong() {
-        return buffer.getLong();
-    }
-
-    public ByteBuffer putLong(long value) {
-        return buffer.putLong(value);
-    }
-
-    public long getLong(int index) {
-        return buffer.getLong(index);
-    }
-
-    public ByteBuffer putLong(int index, long value) {
-        return buffer.putLong(index, value);
-    }
-
-    public LongBuffer asLongBuffer() {
-        return buffer.asLongBuffer();
-    }
-
-    public float getFloat() {
-        return buffer.getFloat();
-    }
-
-    public ByteBuffer putFloat(float value) {
-        return buffer.putFloat(value);
-    }
-
-    public float getFloat(int index) {
-        return buffer.getFloat(index);
-    }
-
-    public ByteBuffer putFloat(int index, float value) {
-        return buffer.putFloat(index, value);
-    }
-
-    public FloatBuffer asFloatBuffer() {
-        return buffer.asFloatBuffer();
-    }
-
-    public double getDouble() {
-        return buffer.getDouble();
-    }
-
-    public ByteBuffer putDouble(double value) {
-        return buffer.putDouble(value);
-    }
-
-    public double getDouble(int index) {
-        return buffer.getDouble(index);
-    }
-
-    public ByteBuffer putDouble(int index, double value) {
-        return buffer.putDouble(index, value);
-    }
-
-    public DoubleBuffer asDoubleBuffer() {
-        return buffer.asDoubleBuffer();
-    }
-
-    public boolean isReadOnly() {
-        return buffer.isReadOnly();
-    }
-
-    public ByteBuffer get(byte[] dst, int offset, int length) {
-        return buffer.get(dst, offset, length);
-    }
-
-    public ByteBuffer get(byte[] dst) {
-        return buffer.get(dst);
-    }
-
-    public ByteBuffer put(ByteBuffer src) {
-        return buffer.put(src);
-    }
-
-    public ByteBuffer put(byte[] src, int offset, int length) {
-        return buffer.put(src, offset, length);
-    }
-
-    public ByteBuffer position(int newPosition) {
-        return buffer.position(newPosition);
-    }
-
-    public ByteBuffer limit(int newLimit) {
-        return buffer.limit(newLimit);
-    }
-
-    public ByteBuffer mark() {
-        return buffer.mark();
-    }
-
-    public ByteBuffer reset() {
-        return buffer.reset();
-    }
-
-    public ByteBuffer clear() {
-        return buffer.clear();
-    }
-
-    public ByteBuffer flip() {
-        return buffer.flip();
-    }
-
-    public ByteBuffer rewind() {
-        return buffer.rewind();
-    }
-
-    public int mismatch(ByteBuffer that) {
-        return buffer.mismatch(that);
-    }
-
     public ByteBuffer getBuffer() {
         return buffer;
+    }
+
+    public void setBuffer(ByteBuffer buffer) {
+        this.buffer = buffer;
+    }
+
+    public byte get(@NotNull ByteBuffer buffer) {
+        return buffer.get(bufferPosition++);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T get(@NotNull ByteBuffer buffer, byte[] dst) {
+        buffer.get(bufferPosition, dst);
+        bufferPosition += dst.length;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T get(@NotNull ByteBuffer buffer, byte[] dst, int offset, int length) {
+        buffer.get(bufferPosition, dst, offset, length);
+        bufferPosition += length;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T put(@NotNull ByteBuffer buffer, byte b) {
+        buffer.put(bufferPosition, b);
+        bufferPosition++;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T put(@NotNull ByteBuffer buffer, byte[] dst) {
+        buffer.put(bufferPosition, dst);
+        bufferPosition += dst.length;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T put(@NotNull ByteBuffer buffer, byte[] dst, int offset, int length) {
+        buffer.put(bufferPosition, dst, offset, length);
+        bufferPosition += length;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T putChar(@NotNull ByteBuffer buffer, char value) {
+        buffer.putChar(bufferPosition, value);
+        bufferPosition += 2;
+        return (T) this;
+    }
+
+    /**
+     * 获取一个字节并转换为 int
+     *
+     * @param buffer buffer
+     * @return 转换为 int
+     */
+    public int getToInt(@NotNull ByteBuffer buffer) {
+        return getAndInt(buffer, 0xFF);
+    }
+
+    /**
+     * 获取一个字节并进行 & 后返回
+     *
+     * @param buffer buffer
+     * @param and    & 的数据
+     * @return 字节与 and & 后的数据
+     */
+    public int getAndInt(@NotNull ByteBuffer buffer, int and) {
+        return buffer.get(bufferPosition++) & and;
     }
 
     /**

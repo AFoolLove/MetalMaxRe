@@ -55,10 +55,10 @@ public class ComputerEditor extends AbstractEditor<ComputerEditor> {
         byte[] ys = new byte[COMPUTER_MAX_COUNT];
 
         setPrgRomPosition(buffer, COMPUTER_START_OFFSET);
-        buffer.get(maps);
-        buffer.get(types);
-        buffer.get(xs);
-        buffer.get(ys);
+        get(buffer, maps);
+        get(buffer, types);
+        get(buffer, xs);
+        get(buffer, ys);
 
         for (int i = 0; i < COMPUTER_MAX_COUNT; i++) {
             computers.add(new Computer(maps[i], types[i], xs[i], ys[i]));
@@ -104,10 +104,10 @@ public class ComputerEditor extends AbstractEditor<ComputerEditor> {
 
         // 写入
         setPrgRomPosition(buffer, COMPUTER_START_OFFSET);
-        buffer.put(maps);
-        buffer.put(types);
-        buffer.put(xs);
-        buffer.put(ys);
+        put(buffer, maps);
+        put(buffer, types);
+        put(buffer, xs);
+        put(buffer, ys);
         return true;
     }
 

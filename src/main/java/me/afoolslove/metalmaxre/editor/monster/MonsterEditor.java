@@ -90,15 +90,15 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
 
         // 读取怪物出手攻击速度
         setPrgRomPosition(buffer, MONSTER_SPEEDS_OFFSET);
-        buffer.get(speeds);
+        get(buffer, speeds);
 
         // 读取怪物命中率
 //        setPrgRomPosition(buffer, MONSTER_HIT_RATES_OFFSET);
-        buffer.get(hitRates);
+        get(buffer, hitRates);
 
         // 读取怪物掉落物
         setPrgRomPosition(buffer, MONSTER_DROPS_ITEMS_OFFSET);
-        buffer.get(dropsItems);
+        get(buffer, dropsItems);
 
         for (int monsterId = 0; monsterId < MONSTER_COUNT; monsterId++) {
             Monster monster = new Monster();
@@ -113,14 +113,14 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         // 读取领域索引
         setPrgRomPosition(buffer, WORLD_MAP_MONSTERS_REALM_INDEX_START);
         for (int i = 0; i < WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT; i++) {
-            worldRealms.add(buffer.get());
+            worldRealms.add(get(buffer));
         }
 
         // 读取怪物组合
         setPrgRomPosition(buffer, MONSTER_GROUP_OFFSET);
         for (int i = 0; i < MONSTER_GROUP_MAX_COUNT; i++) {
             byte[] monsters = new byte[0x0E];
-            buffer.get(monsters);
+            get(buffer, monsters);
             monsterGroups[i] = new MonsterGroup(monsters);
         }
 
@@ -131,8 +131,8 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
             byte[] monsters = new byte[0x04];
             byte[] counts = new byte[0x04];
             for (int j = 0; j < 0x04; j++) {
-                monsters[j] = buffer.get();
-                counts[j] = buffer.get();
+                monsters[j] = get(buffer);
+                counts[j] = get(buffer);
             }
             specialMonsterGroups[i] = new SpecialMonsterGroup(monsters, counts);
         }
@@ -157,25 +157,25 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
 
         // 写入怪物出手攻击的速度
         setPrgRomPosition(buffer, MONSTER_SPEEDS_OFFSET);
-        buffer.put(speeds);
+        put(buffer, speeds);
         // 写入怪物的命中率
 //        setPrgRomPosition(buffer, MONSTER_HIT_RATES_OFFSET);
-        buffer.put(hitRates);
+        put(buffer, hitRates);
         // 写入怪物的掉落物
         setPrgRomPosition(buffer, MONSTER_DROPS_ITEMS_OFFSET);
-        buffer.put(dropsItems);
+        put(buffer, dropsItems);
 
         // 写入领域索引
         setPrgRomPosition(buffer, WORLD_MAP_MONSTERS_REALM_INDEX_START);
         for (int i = 0; i < WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT; i++) {
-            buffer.put(worldRealms.get(i));
+            put(buffer, worldRealms.get(i));
         }
 
         // 写入怪物组合
         setPrgRomPosition(buffer, MONSTER_GROUP_OFFSET);
         for (int i = 0; i < MONSTER_GROUP_MAX_COUNT; i++) {
             MonsterGroup monsterGroup = monsterGroups[i];
-            buffer.put(monsterGroup.monsters);
+            put(buffer, monsterGroup.monsters);
         }
 
         // 写入特殊怪物组合数据
@@ -183,8 +183,8 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         for (int i = 0; i < SPECIAL_MONSTER_GROUP_MAX_COUNT; i++) {
             SpecialMonsterGroup specialMonsterGroup = specialMonsterGroups[i];
             for (int j = 0; j < 0x04; j++) {
-                buffer.put(specialMonsterGroup.monsters[j]);
-                buffer.put(specialMonsterGroup.counts[j]);
+                put(buffer, specialMonsterGroup.monsters[j]);
+                put(buffer, specialMonsterGroup.counts[j]);
             }
         }
         return true;

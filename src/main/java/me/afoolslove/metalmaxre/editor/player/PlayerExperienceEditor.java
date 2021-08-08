@@ -22,6 +22,7 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class PlayerExperienceEditor extends AbstractEditor<PlayerExperienceEditor> {
+    public static final int PLAYER_LEVEL_EXP_START = 0x27C52 - 0x10;
     /**
      * K：Level
      * V：exp required
@@ -33,25 +34,23 @@ public class PlayerExperienceEditor extends AbstractEditor<PlayerExperienceEdito
         // 读取前清空数据
         experiences.clear();
 
-        buffer.position(0x27C52);
-
         // 读取升级到2-99级的所需经验
+        setPrgRomPosition(buffer, PLAYER_LEVEL_EXP_START);
         for (int i = 2; i <= 99; i++) {
-            experiences.put(i, buffer.get() + (buffer.get() << 8) + (buffer.get() << 16));
+            experiences.put(i, get(buffer) + (get(buffer) << 8) + (get(buffer) << 16));
         }
         return true;
     }
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        buffer.position(0x27C52);
-
         // 写入升级到2-99级的所需经验
+        setPrgRomPosition(buffer, PLAYER_LEVEL_EXP_START);
         for (int i = 2; i <= 99; i++) {
             int experience = experiences.get(i);
-            buffer.put((byte) (experience & 0x0000FF));
-            buffer.put((byte) ((experience & 0x00FF00) >> 8));
-            buffer.put((byte) ((experience & 0xFF0000) >> 16));
+            put(buffer, (byte) (experience & 0x0000FF));
+            put(buffer, (byte) ((experience & 0x00FF00) >> 8));
+            put(buffer, (byte) ((experience & 0xFF0000) >> 16));
         }
         return true;
     }

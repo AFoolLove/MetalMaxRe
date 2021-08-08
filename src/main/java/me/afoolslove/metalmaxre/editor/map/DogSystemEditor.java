@@ -75,8 +75,8 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         // (0x30 & 0x0000_0111) // 指向的bit位
         // 读取目的地坐标
         setPrgRomPosition(buffer, DESTINATION_POINT_START_OFFSET);
-        buffer.get(xs);
-        buffer.get(ys);
+        get(buffer, xs);
+        get(buffer, ys);
 
         // 储存目的地坐标
         for (int i = 0; i < DESTINATION_MAX_COUNT; i++) {
@@ -90,13 +90,13 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
 
         // 读取城镇
         setPrgRomPosition(buffer, DESTINATION_START_OFFSET);
-        buffer.get(towns);
+        get(buffer, towns);
         // 读取城镇数据
         // 这个数据就厉害了
         // 可以修改0x0441-0x460的数据，但是只能 或(|)运算，无法移除
         // 有需求再修改
-        buffer.position(0x3471E);
-        buffer.get(townValues);
+        setPosition(0x3471E);
+        get(buffer, townValues);
 
         // 添加城镇映射
         for (int i = 0; i < DESTINATION_MAX_COUNT; i++) {
@@ -106,12 +106,12 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         // 城镇附属，最多2个，格式和城镇一样，就不重复注释了
         byte[] townSeries = new byte[0x02];
         byte[] townSeriesValues = new byte[0x02];
-        buffer.position(0x3471B);
-        buffer.get(townSeries);
-        buffer.position(0x34732);
-        buffer.get(townSeriesValues);
+        setPosition(0x3471B);
+        get(buffer, townSeries);
+        setPosition(0x34732);
+        get(buffer, townSeriesValues);
         for (int i = 0; i < 0x02; i++) {
-            getTownSeries().put(i, townSeries[i] & 0xFF);
+            getTownSeries().put(townSeries[i] & 0xFF, townSeriesValues[i] & 0xFF);
         }
 
         // 读取时空隧道目的地
@@ -120,13 +120,13 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         ys = new byte[TELEPORT_MAP_MAX_MAP_COUNT];
         // 读取时空隧道所有目的地地图
         setPrgRomPosition(buffer, TELEPORT_MAP_START_OFFSET);
-        buffer.get(maps);
+        get(buffer, maps);
         // 读取时空隧道所有目的地地图的X坐标
         setPrgRomPosition(buffer, TELEPORT_MAP_X_START_OFFSET);
-        buffer.get(xs);
+        get(buffer, xs);
         // 读取时空隧道所有目的地地图的Y坐标
         setPrgRomPosition(buffer, TELEPORT_MAP_Y_START_OFFSET);
-        buffer.get(ys);
+        get(buffer, ys);
         for (int i = 0; i < TELEPORT_MAP_MAX_MAP_COUNT; i++) {
             teleport.put(i, new MapPoint(maps[i], xs[i], ys[i]));
         }
@@ -160,8 +160,8 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
 
         // 写入目的地
         setPrgRomPosition(buffer, DESTINATION_POINT_START_OFFSET);
-        buffer.put(xs);
-        buffer.put(ys);
+        put(buffer, xs);
+        put(buffer, ys);
 
 
         // 写入城镇对应的地图
@@ -176,7 +176,7 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         setPrgRomPosition(buffer, DESTINATION_START_OFFSET);
         while (townIterator.hasNext()) {
             Integer next = townIterator.next();
-            buffer.put(next.byteValue());
+            put(buffer, next.byteValue());
         }
 
         // 城镇附属
@@ -198,11 +198,11 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
             j++;
         }
         // 写入附属地图
-        buffer.position(0x3471B);
-        buffer.put(townSeries);
+        setPosition(0x3471B);
+        put(buffer, townSeries);
         // 写入附属地图的所属地图（也可以是其它数据
-        buffer.position(0x34732);
-        buffer.put(townSeriesValues);
+        setPosition(0x34732);
+        put(buffer, townSeriesValues);
 
         // 写入时空隧道目的地和坐标
         byte[] maps = new byte[TELEPORT_MAP_MAX_MAP_COUNT];
@@ -216,13 +216,13 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         }
         // 写入时空隧道所有目的地地图
         setPrgRomPosition(buffer, TELEPORT_MAP_START_OFFSET);
-        buffer.put(maps);
+        put(buffer, maps);
         // 写入时空隧道所有目的地地图的X坐标
         setPrgRomPosition(buffer, TELEPORT_MAP_X_START_OFFSET);
-        buffer.put(xs);
+        put(buffer, xs);
         // 写入时空隧道所有目的地地图的Y坐标
         setPrgRomPosition(buffer, TELEPORT_MAP_Y_START_OFFSET);
-        buffer.put(ys);
+        put(buffer, ys);
         return true;
     }
 
