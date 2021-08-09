@@ -106,7 +106,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
                 // 最后一个文本段不写入0x9F
                 if (length > 0 && i != size - 1) {
                     // 文本段结束
-                    put(buffer, (byte) 0x9F);
+                    put(buffer, 0x9F);
                     length--;
                 }
             }

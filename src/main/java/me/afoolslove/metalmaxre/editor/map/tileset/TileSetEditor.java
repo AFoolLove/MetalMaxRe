@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.map.tileset;
 
+import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.MapProperties;
@@ -402,10 +403,10 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
     public BufferedImage generateWorldTileSet(int xXX,
                                               byte[][][] compositions, byte[][] colorIndexes,
                                               Color[][] colors) {
-        int x00 = (xXX >>> 24) & 0xFF;
-        int x40 = (xXX >>> 16) & 0xFF;
-        int x80 = (xXX >>> 8) & 0xFF;
-        int xC0 = xXX & 0xFF;
+        int x00 = NumberR.at(xXX, 3);
+        int x40 = NumberR.at(xXX, 2);
+        int x80 = NumberR.at(xXX, 1);
+        int xC0 = NumberR.at(xXX, 0);
         return generate(0x100, 0xC0, x00, x40, x80, xC0, compositions, colorIndexes, colors);
     }
 
@@ -417,10 +418,10 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
      * @param xXX 分割为4个，高位到低位分别为 x00、x40、x80、xC0
      */
     public BufferedImage generateWorldTileSet(int xXX) {
-        int x00 = (xXX >>> 24) & 0xFF;
-        int x40 = (xXX >>> 16) & 0xFF;
-        int x80 = (xXX >>> 8) & 0xFF;
-        int xC0 = xXX & 0xFF;
+        int x00 = NumberR.at(xXX, 3);
+        int x40 = NumberR.at(xXX, 2);
+        int x80 = NumberR.at(xXX, 1);
+        int xC0 = NumberR.at(xXX, 0);
         PaletteList palettes = EditorManager.getEditor(PaletteEditor.class).getPalettes(0x9AD0);
         return generate(0x100, 0xC0, x00, x40, x80, xC0, worldCompositions, worldColorIndexes, palettes.toColors());
     }
@@ -585,13 +586,11 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
                                 }
                             }
 
-
                             int x3 = x + (x2 * 0x08) + k; // 精灵图像X值绘制位置
                             int y3 = y + (y2 * 0x08) + b; // 精灵图像Y值绘制位置
                             graphics.drawLine(x3, y3, x3, y3);
                         }
                     }
-
                 }
             }
         }
@@ -658,7 +657,6 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
                                 graphics.drawLine(x2, y2, x2, y2);
                             }
                         }
-
                     }
                 }
             }

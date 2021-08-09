@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.player;
 
+import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -45,25 +46,23 @@ public class PlayerEditor extends AbstractEditor<PlayerEditor> {
 
         // 从初始金钱开始读取
         setPrgRomPosition(buffer, PLAYER_START_OFFSET);
-        money = get(buffer);
-        money |= get(buffer) << 8;
-        money |= get(buffer) << 16;
+        money = NumberR.toInt(get(buffer), get(buffer), get(buffer));
 
         // 读取初始最大生命值
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setMaxHealth(get(buffer) + (get(buffer) << 8));
+            playerInitialAttributes[i].setMaxHealth(NumberR.toInt(get(buffer), get(buffer)));
         }
         // 读取初始当前生命值
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setHealth(get(buffer) + (get(buffer) << 8));
+            playerInitialAttributes[i].setHealth(NumberR.toInt(get(buffer), get(buffer)));
         }
         // 读取初始攻击力（含已装备的武器
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setAttack(get(buffer) + (get(buffer) << 8));
+            playerInitialAttributes[i].setAttack(NumberR.toInt(get(buffer), get(buffer)));
         }
         // 读取初始防御力（含已装备的防具
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setDefense(get(buffer) + (get(buffer) << 8));
+            playerInitialAttributes[i].setDefense(NumberR.toInt(get(buffer), get(buffer)));
         }
         // 读取初始队伍状态
         for (int i = 0; i < 0x03; i++) {
@@ -123,7 +122,7 @@ public class PlayerEditor extends AbstractEditor<PlayerEditor> {
         }
         // 读取初始经验值
         for (int i = 0; i < 0x03; i++) {
-            playerInitialAttributes[i].setExperience(get(buffer) + (get(buffer) << 8) + (get(buffer) << 16));
+            playerInitialAttributes[i].setExperience(NumberR.toInt(get(buffer), get(buffer), get(buffer)));
         }
         return true;
     }
@@ -140,9 +139,7 @@ public class PlayerEditor extends AbstractEditor<PlayerEditor> {
 
         // 从初始金钱开始写入
         setPrgRomPosition(buffer, PLAYER_START_OFFSET);
-        put(buffer, (byte) (money & 0x0000FF));
-        put(buffer, (byte) ((money & 0x00FF00) >>> 8));
-        put(buffer, (byte) ((money & 0xFF0000) >>> 16));
+        put(buffer, getMoneyByteArray());
         // 写入初始最大生命值
         for (int i = 0; i < 0x03; i++) {
             put(buffer, playerInitialAttributes[i].getBytesMaxHealth());
@@ -250,7 +247,7 @@ public class PlayerEditor extends AbstractEditor<PlayerEditor> {
     /**
      * @return 数组形式的金钱
      */
-    public byte[] getBytesMoney() {
-        return new byte[]{(byte) (money & 0x0000FF), (byte) ((money & 0x00FF00) >>> 8), (byte) ((money & 0xFF0000) >>> 16)};
+    public byte[] getMoneyByteArray() {
+        return NumberR.toByteArray(money, 3, false);
     }
 }

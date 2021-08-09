@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editor.map;
 
+import me.afoolslove.metalmaxre.NumberR;
+
 import java.util.Objects;
 
 /**
@@ -70,14 +72,11 @@ public class MapProperties {
         this.movableHeightOffset = properties[0x04];
         this.movableWidth = properties[0x05];
         this.movableHeight = properties[0x06];
-        this.mapIndex = (char) (properties[0x07] & 0xFF);
-        this.mapIndex += (properties[0x08] & 0xFF) << 8;
+        this.mapIndex = (char) NumberR.toInt(properties[0x07], properties[0x08]);
         this.combinationA = properties[0x09];
         this.combinationB = properties[0x0A];
-        this.entrance = (char) (properties[0x0B] & 0xFF);
-        this.entrance += (properties[0x0C] & 0xFF) << 8;
-        this.palette = (char) (properties[0x0D] & 0xFF);
-        this.palette += (properties[0x0E] & 0xFF) << 8;
+        this.entrance = (char) NumberR.toInt(properties[0x0B], properties[0x0C]);
+        this.palette = (char) NumberR.toInt(properties[0x0D], properties[0x0E]);
         this.spriteIndex = properties[0x0F];
         this.tilesIndexA = properties[0x10];
         this.tilesIndexB = properties[0x11];
@@ -93,8 +92,7 @@ public class MapProperties {
             this.dyTile = properties[0x19];
         }
         if (hasEventTile()) {
-            this.eventTilesIndex = (char) (properties[0x1A] & 0xFF);
-            this.eventTilesIndex += (char) ((properties[0x1B] & 0xFF) << 8);
+            this.eventTilesIndex = (char) NumberR.toInt(properties[0x1A], properties[0x1B]);
         }
     }
 
@@ -102,10 +100,7 @@ public class MapProperties {
      * 将tilesIndexA、tilesIndexB、tilesIndexC、tilesIndexD合并为一个int
      */
     public int getIntTiles() {
-        return (tilesIndexD & 0xFF)
-                + ((tilesIndexC & 0xFF) << 8)
-                + ((tilesIndexB & 0xFF) << 16)
-                + ((tilesIndexA & 0xFF) << 24);
+        return NumberR.toInt(tilesIndexD, tilesIndexC, tilesIndexB, tilesIndexA);
     }
 
     public boolean hasEventTile() {
@@ -142,14 +137,14 @@ public class MapProperties {
         attributes[0x04] = this.movableHeightOffset;
         attributes[0x05] = this.movableWidth;
         attributes[0x06] = this.movableHeight;
-        attributes[0x07] = (byte) (this.mapIndex & 0x00FF);
-        attributes[0x08] = (byte) ((this.mapIndex & 0xFF00) >> 8);
+        attributes[0x07] = NumberR.at(this.mapIndex, 0);
+        attributes[0x08] = NumberR.at(this.mapIndex, 1);
         attributes[0x09] = this.combinationA;
         attributes[0x0A] = this.combinationB;
-        attributes[0x0B] = (byte) (this.entrance & 0x00FF);
-        attributes[0x0C] = (byte) ((this.entrance & 0xFF00) >> 8);
-        attributes[0x0D] = (byte) (this.palette & 0x00FF);
-        attributes[0x0E] = (byte) ((this.palette & 0xFF00) >> 8);
+        attributes[0x0B] = NumberR.at(this.entrance, 0);
+        attributes[0x0C] = NumberR.at(this.entrance, 1);
+        attributes[0x0D] = NumberR.at(this.palette, 0);
+        attributes[0x0E] = NumberR.at(this.palette, 1);
         attributes[0x0F] = this.spriteIndex;
         attributes[0x10] = this.tilesIndexA;
         attributes[0x11] = this.tilesIndexB;
@@ -167,8 +162,8 @@ public class MapProperties {
             attributes[index++] = this.dyTile;
         }
         if (hasEventTile(this.head)) {
-            attributes[index++] = (byte) (this.eventTilesIndex & 0x00FF);
-            attributes[index] = (byte) ((this.eventTilesIndex & 0xFF00) >> 8);
+            attributes[index++] = NumberR.at(this.eventTilesIndex, 0);
+            attributes[index] = NumberR.at(this.eventTilesIndex, 1);
         }
         return attributes;
     }
@@ -190,7 +185,30 @@ public class MapProperties {
         if (!(o instanceof MapProperties that)) {
             return false;
         }
-        return head == that.head && width == that.width && height == that.height && movableWidthOffset == that.movableWidthOffset && movableHeightOffset == that.movableHeightOffset && movableWidth == that.movableWidth && movableHeight == that.movableHeight && mapIndex == that.mapIndex && combinationA == that.combinationA && combinationB == that.combinationB && entrance == that.entrance && palette == that.palette && spriteIndex == that.spriteIndex && tilesIndexA == that.tilesIndexA && tilesIndexB == that.tilesIndexB && tilesIndexC == that.tilesIndexC && tilesIndexD == that.tilesIndexD && hideTile == that.hideTile && unknown == that.unknown && fillTile == that.fillTile && music == that.music && dyTileSpeed == that.dyTileSpeed && dyTile == that.dyTile && eventTilesIndex == that.eventTilesIndex;
+        return head == that.head
+                && width == that.width
+                && height == that.height
+                && movableWidthOffset == that.movableWidthOffset
+                && movableHeightOffset == that.movableHeightOffset
+                && movableWidth == that.movableWidth
+                && movableHeight == that.movableHeight
+                && mapIndex == that.mapIndex
+                && combinationA == that.combinationA
+                && combinationB == that.combinationB
+                && entrance == that.entrance
+                && palette == that.palette
+                && spriteIndex == that.spriteIndex
+                && tilesIndexA == that.tilesIndexA
+                && tilesIndexB == that.tilesIndexB
+                && tilesIndexC == that.tilesIndexC
+                && tilesIndexD == that.tilesIndexD
+                && hideTile == that.hideTile
+                && unknown == that.unknown
+                && fillTile == that.fillTile
+                && music == that.music
+                && dyTileSpeed == that.dyTileSpeed
+                && dyTile == that.dyTile
+                && eventTilesIndex == that.eventTilesIndex;
     }
 
     @Override

@@ -189,8 +189,8 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
                 tiles = tempIndex[offset];
             }
 
-            int x = i % 64;
-            int y = i / 64;
+            int x = i % 0x40;
+            int y = i / 0x40;
             map0(map, x, y, tiles);
         }
         return true;
@@ -436,7 +436,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         for (int i = 0; i < 0x1000; i++) {
             int x = i % 0x40;
             int y = i / 0x40;
-            // 获取4*4图块
+            // 获取4*4tiles
             byte[] bytes = mapTiles[y][x];
 
             // 索引偏移

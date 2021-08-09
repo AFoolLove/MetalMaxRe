@@ -63,7 +63,7 @@ public class TextParagraphs extends ArrayList<String> {
                     // 源字节结束
                     break;
                 }
-                byte b = (byte) ("0123456789ABCDEF".indexOf(ch) & 0x0F);
+                byte b = (byte) (WordBank.HEX_DIGITS.indexOf(ch) & 0x0F);
 
                 if (!buffer.hasRemaining()) {
                     // 读取完毕
@@ -86,7 +86,7 @@ public class TextParagraphs extends ArrayList<String> {
                 // 设置为高位
                 b <<= 4;
                 // 添加低位
-                b |= ("0123456789ABCDEF".indexOf(ch) & 0x0F);
+                b |= (WordBank.HEX_DIGITS.indexOf(ch) & 0x0F);
                 // 添加byte
                 outputStream.write(b);
             }
@@ -218,12 +218,11 @@ public class TextParagraphs extends ArrayList<String> {
                         // 散乱的点直接通过 0x9F 动态截取
 
                         ByteBuffer mainBuffer = MetalMaxRe.getInstance().getBuffer();
-                        mainBuffer.position(point);
 
                         // 因为是不知道结束点的文本，所以取了个较大的值（希望不要太大和太小）
                         // 应该消耗很大吧。。。
                         byte[] temp = new byte[inx + (inx * 0x80)]; // 0x1000 应该不会超过这个数量吧
-                        mainBuffer.get(temp);
+                        mainBuffer.get(point, temp);
                         String s = WordBank.toString(temp).split("\n", -1)[inx];
                         if (s != null) {
                             // 获取成功

@@ -107,6 +107,13 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     }
 
     @SuppressWarnings("unchecked")
+    public T put(@NotNull ByteBuffer buffer, int b) {
+        buffer.put(bufferPosition, (byte) (b & 0xFF));
+        bufferPosition++;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
     public T put(@NotNull ByteBuffer buffer, byte[] dst) {
         buffer.put(bufferPosition, dst);
         bufferPosition += dst.length;

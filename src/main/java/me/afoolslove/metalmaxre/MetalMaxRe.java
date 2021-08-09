@@ -225,8 +225,7 @@ public class MetalMaxRe {
         try {
             System.out.printf("保存修改到：%s\n", path);
             // 写入头属性
-            buffer.position(0x00);
-            buffer.put(header.getHeader());
+            buffer.put(0x00000, header.getHeader());
 
             // 保存所有更改
 //            for (AbstractEditor editor : EditorManager.getEditors().values()) {

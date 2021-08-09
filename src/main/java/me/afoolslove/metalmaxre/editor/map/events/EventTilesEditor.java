@@ -103,7 +103,7 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
                     // 世界地图的图块事件还需要读取图块内容
                     for (EventTile eventTile : eventTiles) {
                         int offset = 0x200 + eventTile.intTile();
-                        byte[] tiles = worldMapEditor.getIndexA(offset,true);
+                        byte[] tiles = worldMapEditor.getIndexA(offset, true);
                         ((WorldEventTile) eventTile).setTiles(tiles);
                     }
                 } else {
@@ -128,10 +128,10 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
         // 获取罗克东边涨潮退潮的4个4*4tile
         worldMapInteractiveEvent = new WorldMapInteractiveEvent();
         setPrgRomPosition(buffer, 0x28184);
-        int worldMapInteractiveEventA = (get(buffer) & 0xFF) + ((get(buffer) & 0xFF) << 8);
+        int worldMapInteractiveEventA = NumberR.toInt(get(buffer), get(buffer));
         worldMapInteractiveEventA -= 0x7000;
         setPrgRomPosition(buffer, 0x2818A);
-        int worldMapInteractiveEventB = (get(buffer) & 0xFF) + ((get(buffer) & 0xFF) << 8);
+        int worldMapInteractiveEventB = NumberR.toInt(get(buffer), get(buffer));
         worldMapInteractiveEventB -= 0x7000;
         for (Map.Entry<Integer, List<EventTile>> entry : getWorldEventTile().entrySet()) {
             for (EventTile eventTile : entry.getValue()) {
@@ -190,7 +190,7 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
             for (int i = 0x200; i < worldMapEditor.indexA.length; i++) {
                 if (Arrays.equals(worldMapEditor.indexA[i], worldMapInteractiveEvent.aFalse)) {
                     setPrgRomPosition(buffer, 0x2818D);
-                    put(buffer, (byte) (i - 0x200));
+                    put(buffer, i - 0x200);
                     point:
                     for (List<EventTile> value : worldEventTile.values()) {
                         for (EventTile eventTile : value) {
@@ -205,7 +205,7 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
                 }
                 if (Arrays.equals(worldMapEditor.indexA[i], worldMapInteractiveEvent.bFalse)) {
                     setPrgRomPosition(buffer, 0x2818F);
-                    put(buffer, (byte) (i - 0x200));
+                    put(buffer, i - 0x200);
                     point:
                     for (List<EventTile> value : worldEventTile.values()) {
                         for (EventTile eventTile : value) {
@@ -220,7 +220,7 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
                 }
                 if (Arrays.equals(worldMapEditor.indexA[i], worldMapInteractiveEvent.aTrue)) {
                     setPrgRomPosition(buffer, 0x2818E);
-                    put(buffer, (byte) (i - 0x200));
+                    put(buffer, i - 0x200);
                     point:
                     for (List<EventTile> value : worldEventTile.values()) {
                         for (EventTile eventTile : value) {
@@ -235,7 +235,7 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
                 }
                 if (Arrays.equals(worldMapEditor.indexA[i], worldMapInteractiveEvent.bTrue)) {
                     setPrgRomPosition(buffer, 0x28190);
-                    put(buffer, (byte) (i - 0x200));
+                    put(buffer, i - 0x200);
                     point:
                     for (List<EventTile> value : worldEventTile.values()) {
                         for (EventTile eventTile : value) {
@@ -253,11 +253,11 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
             setPrgRomPosition(buffer, 0x28184);
             int worldMapInteractiveEventA = worldMapInteractiveEvent.aPoint.intX() + (worldMapInteractiveEvent.aPoint.intY() * 0x40);
             worldMapInteractiveEventA += 0x7000;
-            putChar(buffer, NumberR.parseChar(worldMapInteractiveEventA));
+            putChar(buffer, NumberR.toChar(worldMapInteractiveEventA));
             setPrgRomPosition(buffer, 0x2818A);
             int worldMapInteractiveEventB = worldMapInteractiveEvent.bPoint.intX() + (worldMapInteractiveEvent.bPoint.intY() * 0x40);
             worldMapInteractiveEventB += 0x7000;
-            putChar(buffer, NumberR.parseChar(worldMapInteractiveEventB));
+            putChar(buffer, NumberR.toChar(worldMapInteractiveEventB));
         }
 
         setPrgRomPosition(buffer, EVENT_TILES_START_OFFSET);
@@ -278,14 +278,14 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
                 // 写入事件
                 put(buffer, eventsList.getKey().byteValue());
                 // 写入事件数量
-                put(buffer, ((byte) eventsList.getValue().size()));
+                put(buffer, eventsList.getValue().size());
                 // 写入 X、Y、Tile
                 for (EventTile eventTile : eventsList.getValue()) {
                     put(buffer, eventTile.toByteArray());
                 }
             }
             // 写入事件组结束符
-            put(buffer, (byte) 0x00);
+            put(buffer, 0x00);
         });
 
         int end = bufferPosition - 1;

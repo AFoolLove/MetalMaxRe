@@ -66,11 +66,11 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         char[] mapIndexRoll = new char[0x40 + 0xB0];
         setPrgRomPosition(buffer, MAP_PROPERTIES_UP_ROLL_OFFSET);
         for (int i = 0; i < 0x40; i++) {
-            mapIndexRoll[i] = (char) (getToInt(buffer) + (getToInt(buffer) << 8));
+            mapIndexRoll[i] = (char) NumberR.toInt(get(buffer), get(buffer));
         }
         setPrgRomPosition(buffer, MAP_PROPERTIES_DOWN_ROLL_OFFSET);
         for (int i = 0; i < 0xB0; i++) {
-            mapIndexRoll[0x40 + i] = (char) (getToInt(buffer) + (getToInt(buffer) << 8));
+            mapIndexRoll[0x40 + i] = (char) NumberR.toInt(get(buffer), get(buffer));
         }
 
         // 通过地图属性索引读取地图属性
@@ -140,8 +140,8 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
 
         setPrgRomPosition(buffer, MAP_PROPERTIES_UP_ROLL_OFFSET);
         // 固定值，无任何作用？
-        put(buffer, (byte) 0x00);
-        put(buffer, (byte) 0x00);
+        put(buffer, 0x00);
+        put(buffer, 0x00);
 //        mapIndexRoll[0x00] = 0x0000;
 
         char mapPropertiesIndex = 0x8500;
@@ -151,12 +151,12 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
             if (character != null) {
                 // 如果有相同的地图属性索引，则索引到同一个位置
 //                mapIndexRoll[i] = character;
-                putChar(buffer, NumberR.parseChar(character));
+                putChar(buffer, NumberR.toChar(character));
             } else {
                 // 如果是新的地图属性，就设置地图属性索引和写入地图属性
                 mapping.put(hashCode, mapPropertiesIndex);
 //                mapIndexRoll[i] = mapPropertiesIndex;
-                putChar(buffer, NumberR.parseChar(mapPropertiesIndex));
+                putChar(buffer, NumberR.toChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
             }
         }
@@ -168,12 +168,12 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
             if (character != null) {
                 // 如果有相同的地图属性索引，则索引到同一个位置
 //                mapIndexRoll[i] = character;
-                putChar(buffer, NumberR.parseChar(character));
+                putChar(buffer, NumberR.toChar(character));
             } else {
                 // 如果是新的地图属性，就设置地图属性索引和写入地图属性
                 mapping.put(hashCode, mapPropertiesIndex);
 //                mapIndexRoll[i] = mapPropertiesIndex;
-                putChar(buffer, NumberR.parseChar(mapPropertiesIndex));
+                putChar(buffer, NumberR.toChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
             }
         }
@@ -193,8 +193,8 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         // 写入可移动区域，同上
         buffer.put(0x28A95, worldMapProperties.movableWidth);
         // 写入事件图块索引
-        buffer.put(0x28AC3, (byte) (worldMapProperties.eventTilesIndex & 0x00FF));
-        buffer.put(0x28AC7, (byte) ((worldMapProperties.eventTilesIndex & 0xFF00) >>> 8));
+        buffer.put(0x28AC3, NumberR.at(worldMapProperties.eventTilesIndex, 0));
+        buffer.put(0x28AC7, NumberR.at(worldMapProperties.eventTilesIndex, 1));
 
 
         int end = bufferPosition - 1;

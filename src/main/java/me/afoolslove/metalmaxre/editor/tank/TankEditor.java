@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.tank;
 
+import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,19 +63,19 @@ public class TankEditor extends AbstractEditor<TankEditor> {
         }
         // 读取坦克底盘防御力（2byte）
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            tankInitialAttributes[tank].setDefense(get(buffer) + (get(buffer) << 8));
+            tankInitialAttributes[tank].setDefense(NumberR.toInt(get(buffer), get(buffer)));
         }
 
         // 读取坦克的底盘重量
         setPrgRomPosition(buffer, TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            tankInitialAttributes[noTank].setWeight(get(buffer) + (get(buffer) << 8));
+            tankInitialAttributes[noTank].setWeight(NumberR.toInt(get(buffer), get(buffer)));
         }
 
         // 读取出租坦克的底盘重量（2byte）
         setPrgRomPosition(buffer, TAX_TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
-            tankInitialAttributes[Tank.NO_COUNT + taxTank].setWeight(get(buffer) + (get(buffer) << 8));
+            tankInitialAttributes[Tank.NO_COUNT + taxTank].setWeight(NumberR.toInt(get(buffer), get(buffer)));
         }
         // 读取坦克开洞状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
@@ -84,7 +85,7 @@ public class TankEditor extends AbstractEditor<TankEditor> {
         // 读取坦克的初始SP
         setPrgRomPosition(buffer, TANK_INIT_SP_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            tankInitialAttributes[noTank].setSp(get(buffer) + (get(buffer) << 8));
+            tankInitialAttributes[noTank].setSp(NumberR.toInt(get(buffer), get(buffer)));
         }
         return true;
     }
@@ -114,19 +115,19 @@ public class TankEditor extends AbstractEditor<TankEditor> {
         }
         // 写入坦克底盘防御力（2byte）
         for (int tank = 0; tank < Tank.COUNT; tank++) {
-            put(buffer, tankInitialAttributes[tank].getBytesDefense());
+            put(buffer, tankInitialAttributes[tank].getDefenseByteArray());
         }
 
         // 写入坦克的底盘重量
         setPrgRomPosition(buffer, TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            put(buffer, tankInitialAttributes[noTank].getBytesWeight());
+            put(buffer, tankInitialAttributes[noTank].getWeightByteArray());
         }
 
         // 写入出租坦克的底盘重量（2byte）
         setPrgRomPosition(buffer, TAX_TANK_INIT_CHASSIS_WEIGHT_START_OFFSET);
         for (int taxTank = 0; taxTank < Tank.TAX_COUNT; taxTank++) {
-            put(buffer, tankInitialAttributes[Tank.NO_COUNT + taxTank].getBytesWeight());
+            put(buffer, tankInitialAttributes[Tank.NO_COUNT + taxTank].getWeightByteArray());
         }
         // 写入坦克开洞状态
         for (int tank = 0; tank < Tank.COUNT; tank++) {
@@ -136,7 +137,7 @@ public class TankEditor extends AbstractEditor<TankEditor> {
         // 写入坦克的初始SP
         setPrgRomPosition(buffer, TANK_INIT_SP_START_OFFSET);
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
-            put(buffer, tankInitialAttributes[noTank].getBytesSp());
+            put(buffer, tankInitialAttributes[noTank].getSpByteArray());
         }
         return true;
     }

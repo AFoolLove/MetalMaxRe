@@ -143,6 +143,21 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
     }
 
     /**
+     * 通过另一个宝藏对象获取已储存的宝藏对象
+     *
+     * @param treasure 宝藏对象
+     * @return 符合的宝藏
+     */
+    public Treasure find(@NotNull Treasure treasure) {
+        for (Treasure t : treasures) {
+            if (t.equals(treasure)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    /**
      * 添加一个宝藏
      *
      * @param treasure 宝藏

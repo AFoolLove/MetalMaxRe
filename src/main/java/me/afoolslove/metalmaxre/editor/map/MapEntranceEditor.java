@@ -52,20 +52,21 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
 
             MapBorder mapBorder;
             switch (MapBorderType.getType(temp)) {
+                // 上一个位置，不需要读取额外数据
                 case LAST -> mapBorder = new MapBorder(MapBorderType.LAST);
 
-                // 上一个位置，不需要读取额外数据
+                // 固定位置
                 case FIXED -> {
                     mapBorder = new MapBorder(MapBorderType.FIXED);
-                    // 固定位置，读取1个目标地图位置
+                    // 只读取1个目标地图位置
                     mapBorder.add(new MapPoint(get(buffer), get(buffer), get(buffer)));
                 }
+                // 不同的目标地图位置
                 default -> {
                     mapBorder = new MapBorder(MapBorderType.DIRECTION);
-                    // 不同的目标地图位置，读取4个目标地图位置
-
                     // 回退1byte，该byte属于地图数据
                     bufferPosition--;
+                    // 读取4个目标地图位置
                     // 分别读取：上下左右，的目标地图位置
                     for (int i = 0; i < 0x04; i++) {
                         mapBorder.add(new MapPoint(get(buffer), get(buffer), get(buffer)));
@@ -100,7 +101,6 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
                         getMapEntrances().put(entry.getKey(), mapEntrance);
                     });
         }
-
         return true;
     }
 
@@ -125,7 +125,7 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
                     put(buffer, mapEntrance.getBorder().toByteArray());
 
                     // 写入地图出入口数量
-                    put(buffer, (byte) mapEntrance.getEntrances().size());
+                    put(buffer, mapEntrance.getEntrances().size());
 
                     if (!mapEntrance.getEntrances().isEmpty()) {
                         // 写入地图出入口数据
@@ -134,14 +134,14 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
                         LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(mapEntrance.getEntrances());
                         // 写入入口 X、Y
                         for (MapPoint mapPoint : linkedEntrances.keySet()) {
-                            put(buffer, mapPoint.x);
-                            put(buffer, mapPoint.y);
+                            put(buffer, mapPoint.getX());
+                            put(buffer, mapPoint.getY());
                         }
                         // 写入出口 Map、X、Y
                         for (MapPoint mapPoint : linkedEntrances.values()) {
-                            put(buffer, mapPoint.map);
-                            put(buffer, mapPoint.x);
-                            put(buffer, mapPoint.y);
+                            put(buffer, mapPoint.getMap());
+                            put(buffer, mapPoint.getX());
+                            put(buffer, mapPoint.getY());
                         }
                     }
                 });
@@ -167,6 +167,7 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
     public MapEntrance getMapEntrance(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map) {
         return mapEntrances.get(map);
     }
+
     /**
      * @return 世界地图的边界和出入口
      */

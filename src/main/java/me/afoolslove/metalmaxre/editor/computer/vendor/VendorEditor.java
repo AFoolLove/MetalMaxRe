@@ -90,7 +90,7 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
             VendorItemList vendorItemList = iterator.next();
 
             // 写入固定头
-            put(buffer, (byte) 0x0D);
+            put(buffer, 0x0D);
             // 写入商品和数量
             for (int i = 0; i < VENDOR_ITEM_COUNT; i++) {
                 VendorItem item = vendorItemList.get(i);

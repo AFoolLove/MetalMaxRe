@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.sprite;
 
+import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +55,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
 
         for (int i = 0; i < 0xF0 + 0x0A; i++) {
-            spritesIndexes[i] = (char) (getToInt(buffer) + (getToInt(buffer) << 0x08));
+            spritesIndexes[i] = (char) NumberR.toInt(get(buffer), get(buffer));
         }
 
 
@@ -123,7 +124,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
                 }
 
                 // 写入精灵数量
-                put(buffer, (byte) spriteList.size());
+                put(buffer, spriteList.size());
                 // 写入精灵
                 for (Sprite sprite : spriteList) {
                     put(buffer, sprite.toByteArray());
@@ -141,8 +142,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
         // 写入精灵数据索引
         setPrgRomPosition(buffer, SPRITE_INDEX_START_OFFSET);
         for (Character spritesIndex : spritesIndexes) {
-            put(buffer, (byte) (spritesIndex & 0x00FF));
-            put(buffer, (byte) ((spritesIndex & 0xFF00) >> 0x08));
+            putChar(buffer, NumberR.toChar(spritesIndex));
         }
         return true;
     }

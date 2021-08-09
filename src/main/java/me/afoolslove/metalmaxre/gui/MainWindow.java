@@ -5,10 +5,13 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
+import me.afoolslove.metalmaxre.editor.treasure.Treasure;
+import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -34,6 +37,14 @@ public class MainWindow extends JFrame {
     private JComboBox<String> comboBox8;
     private JComboBox<String> comboBox9;
     private JComboBox<String> maps;
+    private JTable treasures;
+    private JTextField treasureMap;
+    private JTextField treasureX;
+    private JTextField treasureY;
+    private JButton treasureAdd;
+    private JButton treasureRemove;
+    private JButton treasureUpdate;
+    private JTextField treasureItem;
 
     public MainWindow() {
         URL url = getClass().getResource("");
@@ -70,6 +81,22 @@ public class MainWindow extends JFrame {
                 };
                 for (int i = 0; i < comboBoxes.length; i++) {
                     comboBoxes[i].setSelectedIndex(editor.getTown(i) & 0xFF);
+                }
+            }
+        });
+
+        EditorManager.getEditor(TreasureEditor.class).getListeners().add(new AbstractEditor.Listener<>() {
+            @Override
+            public void onReadAfter(@NotNull TreasureEditor editor) {
+                treasures.removeAll();
+                DefaultTableModel treasuresModel = ((DefaultTableModel) treasures.getModel());
+                for (Treasure treasure : editor.getTreasures()) {
+                    treasuresModel.addRow(new String[]{
+                            String.format("%02X", treasure.getMap()),
+                            String.format("%02X", treasure.getX()),
+                            String.format("%02X", treasure.getY()),
+                            String.format("%02X", treasure.getItem())
+                    });
                 }
             }
         });
@@ -270,6 +297,54 @@ public class MainWindow extends JFrame {
                 }
             });
         }
+
+        treasures.setModel(new DefaultTableModel(0, 4) {
+            final String[] columnNames = {"Map", "X", "Y", "Item"};
+
+            @Override
+            public String getColumnName(int column) {
+                return columnNames[column];
+            }
+        });
+        treasures.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = treasures.getSelectedRow();
+            if (selectedRow != -1) {
+                treasureMap.setText(treasures.getValueAt(selectedRow, 0).toString());
+                treasureX.setText(treasures.getValueAt(selectedRow, 1).toString());
+                treasureY.setText(treasures.getValueAt(selectedRow, 2).toString());
+                treasureItem.setText(treasures.getValueAt(selectedRow, 3).toString());
+            }
+        });
+        treasureUpdate.addActionListener(e -> {
+            int selectedRow = treasures.getSelectedRow();
+            if (selectedRow == -1) {
+                return;
+            }
+            Treasure source = new Treasure(
+                    Integer.parseInt(treasures.getValueAt(selectedRow, 0).toString(), 16),
+                    Integer.parseInt(treasures.getValueAt(selectedRow, 1).toString(), 16),
+                    Integer.parseInt(treasures.getValueAt(selectedRow, 2).toString(), 16),
+                    Integer.parseInt(treasures.getValueAt(selectedRow, 3).toString(), 16)
+            );
+
+            TreasureEditor treasureEditor = EditorManager.getEditor(TreasureEditor.class);
+            Treasure treasure = treasureEditor.find(source);
+            if (treasure == null) {
+                return;
+            }
+
+            int map = Integer.parseInt(treasureMap.getText(), 16);
+            int x = Integer.parseInt(treasureX.getText(), 16);
+            int y = Integer.parseInt(treasureY.getText(), 16);
+            int item = Integer.parseInt(treasureItem.getText(), 16);
+
+            treasureEditor.replace(treasure, new Treasure(map, x, y, item));
+            treasures.setValueAt(String.format("%02X", map), selectedRow, 0);
+            treasures.setValueAt(String.format("%02X", x), selectedRow, 1);
+            treasures.setValueAt(String.format("%02X", y), selectedRow, 2);
+            treasures.setValueAt(String.format("%02X", item), selectedRow, 3);
+            treasures.validate();
+        });
     }
 
     /**

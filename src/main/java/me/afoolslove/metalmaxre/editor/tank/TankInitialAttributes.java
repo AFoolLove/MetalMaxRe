@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.tank;
 
+import me.afoolslove.metalmaxre.NumberR;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -220,8 +221,8 @@ public class TankInitialAttributes {
     /**
      * @return 数组形式的防御力
      */
-    public byte[] getBytesDefense() {
-        return new byte[]{(byte) (defense & 0x00FF), (byte) ((defense & 0xFF00) >>> 8)};
+    public byte[] getDefenseByteArray() {
+        return NumberR.toByteArray(defense, 2, false);
     }
 
     /**
@@ -234,8 +235,8 @@ public class TankInitialAttributes {
     /**
      * @return 数组形式的底盘重量
      */
-    public byte[] getBytesWeight() {
-        return new byte[]{(byte) (weight & 0x00FF), (byte) ((weight & 0xFF00) >>> 8)};
+    public byte[] getWeightByteArray() {
+        return NumberR.toByteArray(weight, 2, false);
     }
 
     /**
@@ -248,8 +249,8 @@ public class TankInitialAttributes {
     /**
      * @return 数组形式的装甲片
      */
-    public byte[] getBytesSp() {
-        return new byte[]{(byte) (sp & 0x0000FF), (byte) ((sp & 0x00FF00) >>> 8)};
+    public byte[] getSpByteArray() {
+        return NumberR.toByteArray(sp, 2, false);
     }
 
     /**
