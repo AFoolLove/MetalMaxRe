@@ -45,6 +45,7 @@ public class MainWindow extends JFrame {
     private JButton treasureRemove;
     private JButton treasureUpdate;
     private JTextField treasureItem;
+    private JLabel treasureMessage;
 
     public MainWindow() {
         URL url = getClass().getResource("");
@@ -196,6 +197,8 @@ public class MainWindow extends JFrame {
             } // 其它皆为不不保存
         });
 
+        JMenu fileMenuExport = new JMenu("Export");
+
         JMenuItem fileMenuExit = new JMenuItem("Exit");
         fileMenuExit.addActionListener(e -> {
             // 退出
@@ -208,6 +211,8 @@ public class MainWindow extends JFrame {
         fileMenu.addSeparator();
         fileMenu.add(fileMenuSave);
         fileMenu.add(fileMenuSaveAs);
+        fileMenu.addSeparator();
+        fileMenu.add(fileMenuExport);
         fileMenu.addSeparator();
         fileMenu.add(fileMenuExit);
 
@@ -344,6 +349,55 @@ public class MainWindow extends JFrame {
             treasures.setValueAt(String.format("%02X", y), selectedRow, 2);
             treasures.setValueAt(String.format("%02X", item), selectedRow, 3);
             treasures.validate();
+        });
+        treasureAdd.addActionListener(e -> {
+            Treasure source = new Treasure(
+                    Integer.parseInt(treasureMap.getText(), 16),
+                    Integer.parseInt(treasureX.getText(), 16),
+                    Integer.parseInt(treasureY.getText(), 16),
+                    Integer.parseInt(treasureItem.getText(), 16)
+            );
+
+            TreasureEditor treasureEditor = EditorManager.getEditor(TreasureEditor.class);
+            if (treasureEditor.add(source)) {
+                DefaultTableModel treasuresModel = (DefaultTableModel) treasures.getModel();
+                treasuresModel.insertRow(0, new String[]{
+                        String.format("%02X", source.getMap()),
+                        String.format("%02X", source.getX()),
+                        String.format("%02X", source.getY()),
+                        String.format("%02X", source.getItem())
+                });
+                treasures.validate();
+                treasures.setRowSelectionInterval(0, 0);
+            }
+        });
+
+        treasureRemove.addActionListener(e -> {
+            int selectedRow = treasures.getSelectedRow();
+            if (selectedRow == -1) {
+                return;
+            }
+            Treasure source = new Treasure(
+                    Integer.parseInt(treasures.getValueAt(selectedRow, 0).toString(), 16),
+                    Integer.parseInt(treasures.getValueAt(selectedRow, 1).toString(), 16),
+                    Integer.parseInt(treasures.getValueAt(selectedRow, 2).toString(), 16),
+                    Integer.parseInt(treasures.getValueAt(selectedRow, 3).toString(), 16)
+            );
+
+            TreasureEditor treasureEditor = EditorManager.getEditor(TreasureEditor.class);
+            if (treasureEditor.remove(source)) {
+                DefaultTableModel treasuresModel = ((DefaultTableModel) treasures.getModel());
+                treasuresModel.removeRow(selectedRow);
+                treasures.validate();
+                if (treasuresModel.getRowCount() > 0) {
+                    if (treasuresModel.getRowCount() > selectedRow) {
+                        treasures.setRowSelectionInterval(selectedRow, selectedRow);
+                    } else {
+                        treasures.setRowSelectionInterval(treasuresModel.getRowCount() - 1, treasuresModel.getRowCount() - 1);
+                    }
+                }
+            }
+
         });
     }
 
