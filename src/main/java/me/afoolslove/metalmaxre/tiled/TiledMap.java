@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.tiled;
 
+import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.computer.Computer;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
@@ -474,25 +475,6 @@ public class TiledMap {
 
         // ----------------
 
-        // 领域，怪物出没的组合
-        ObjectGroup realms = new ObjectGroup();
-        realms.setId(nextObjectId++);
-        realms.setName("realms");
-        realms.setVisible(false);
-        for (int i = 0; i < MonsterEditor.WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT; i++) {
-            byte value = monsterEditor.getWorldMapRealms().get(i);
-            MapObject realm = new MapObject((i % 0x10) * 0x10 * 0x10, (int) (i / 0x10) * 0x10 * 0x10, 0x10 * 0x10, 0x10 * 0x10, 0x00);
-            realm.setId(nextObjectId++);
-            realm.setName(String.format("%02X:%02X", i, value));
-            if (value == 0x00) {
-                // 0x00为没有怪物出没
-                realm.setVisible(false);
-            }
-            realms.addObject(realm);
-        }
-
-        // ----------------
-
         // 事件图块，显示时会覆盖对应的图块，相当于事件条件达成
         Group eventGroup = new Group();
         eventGroup.setId(nextLayerId++);
@@ -532,6 +514,41 @@ public class TiledMap {
             }
             // 添加到事件图块组中
             eventGroup.getLayers().add(eventLayer);
+        }
+
+        // ----------------
+
+        // 领域，怪物出没的组合
+        ObjectGroup realms = new ObjectGroup();
+        realms.setId(nextObjectId++);
+        realms.setName("realms");
+        realms.setVisible(false);
+        for (int i = 0; i < MonsterEditor.WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT; i++) {
+            byte value = monsterEditor.getWorldMapRealms().get(i);
+            MapObject realm = new MapObject((i % 0x10) * 0x10 * 0x10, (int) (i / 0x10) * 0x10 * 0x10, 0x10 * 0x10, 0x10 * 0x10, 0x00);
+            realm.setId(nextObjectId++);
+            realm.setName(String.format("%02X:%02X", i, value));
+            if (value == 0x00) {
+                // 0x00为没有怪物出没
+                realm.setVisible(false);
+            }
+            realms.addObject(realm);
+        }
+
+        // ----------------
+
+        ObjectGroup mineGroup = new ObjectGroup();
+        mineGroup.setId(nextObjectId++);
+        mineGroup.setName("mines");
+        for (int i = 0; i < 0x04; i++) {
+            MapPoint minePoint = worldMapEditor.getMines().get(i);
+            MapObject mineObject = new MapObject(0x00, 0x00, 0x10, 0x10, 0);
+            mineObject.setId(nextObjectId++);
+            if (minePoint != null) {
+                mineObject.setX(minePoint.intX() * 0x10);
+                mineObject.setY(minePoint.intY() * 0x10);
+                mineGroup.addObject(mineObject);
+            }
         }
 
         // ----------------
@@ -741,8 +758,9 @@ public class TiledMap {
 
 
         world.addLayer(worldLayer);
-        world.addLayer(realms);
         world.addLayer(eventGroup);
+        world.addLayer(realms);
+        world.addLayer(mineGroup);
         world.addLayer(treasureGroup);
         world.addLayer(entrances);
         world.addLayer(spriteGroup);
@@ -766,10 +784,10 @@ public class TiledMap {
         TileSetEditor tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
         TileSet tileSet = new TileSet();
         tileSet.setName(String.format("%02X%02X%02X%02X-%02X%02X-%04X",
-                (xXX & 0xFF000000) >> 24,
-                (xXX & 0x00FF0000) >> 16,
-                (xXX & 0x0000FF00) >> 8,
-                (xXX & 0x000000FF),
+                NumberR.at(xXX, 3),
+                NumberR.at(xXX, 2),
+                NumberR.at(xXX, 1),
+                NumberR.at(xXX, 0),
                 combinationA, combinationB,
                 palette & 0xFFFF));
         tileSet.importTileBitmap(tileBitmap.getPath(), new BasicTileCutter(0x10, 0x10, 0, 0));
@@ -820,6 +838,62 @@ public class TiledMap {
 
     public static TileSet createTsx(@Nullable TMXMapWriter tmxMapWriter, @NotNull File tileBitmap, @NotNull MapProperties mapProperties, @NotNull File outputDir) throws IOException {
         return createTsx(tmxMapWriter, tileBitmap, mapProperties.getIntTiles(), mapProperties.combinationA, mapProperties.combinationB, mapProperties.palette, outputDir);
+    }
+
+    public static TileSet createWorldTsx(@Nullable TMXMapWriter tmxMapWriter, @NotNull File tileBitmap, int xXX, @NotNull File outputDir) throws IOException {
+        TileSetEditor tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
+        TileSet tileSet = new TileSet();
+        tileSet.setName(String.format("%02X%02X%02X%02X-000102-%04X",
+                NumberR.at(xXX, 3),
+                NumberR.at(xXX, 2),
+                NumberR.at(xXX, 1),
+                NumberR.at(xXX, 0),
+                0x9AD0));
+        tileSet.importTileBitmap(tileBitmap.getPath(), new BasicTileCutter(0x10, 0x10, 0, 0));
+
+        // 获取所有图块属性
+        byte[] tileEffect = new byte[0x40 + 0x40 + 0x40];
+        System.arraycopy(tileSetEditor.worldColorIndexes[0x00], 0, tileEffect, 0x00, 0x40);
+        System.arraycopy(tileSetEditor.worldColorIndexes[0x01], 0, tileEffect, 0x40, 0x40);
+        System.arraycopy(tileSetEditor.worldColorIndexes[0x02], 0, tileEffect, 0x80, 0x40);
+
+        for (int i = 0; i < tileEffect.length; i++) {
+            Tile tile = tileSet.getTile(i);
+            tile.setType("tile");
+
+            // 添加图块属性
+            Properties properties = tile.getProperties();
+            byte effect = tileEffect[i];
+            if ((effect & 0B1000_0000) != 0x00) {
+                properties.setProperty("D7|墙壁", "true");
+            }
+            if ((effect & 0B0100_0000) != 0x00) {
+                properties.setProperty("D6|", "true");
+            }
+            if ((effect & 0B0010_0000) != 0x00) {
+                properties.setProperty("D5|", "true");
+            }
+            if ((effect & 0B0001_0000) != 0x00) {
+                properties.setProperty("D4|", "true");
+            }
+            if ((effect & 0B0000_1000) != 0x00) {
+                properties.setProperty("D3|", "true");
+            }
+            if ((effect & 0B0000_0100) != 0x00) {
+                properties.setProperty("D2|", "true");
+            }
+            if ((effect & 0B0000_0010) != 0x00) {
+                properties.setProperty("D1|color", "true");
+            }
+            if ((effect & 0B0000_0001) != 0x00) {
+                properties.setProperty("D0|color", "true");
+            }
+        }
+        if (tmxMapWriter == null) {
+            tmxMapWriter = new TMXMapWriter();
+        }
+        tmxMapWriter.writeTileset(tileSet, new File(outputDir, String.format("%s.tsx", tileSet.getName())).getPath());
+        return tileSet;
     }
 
     /**
@@ -1059,7 +1133,7 @@ public class TiledMap {
                                 for (byte x = 0; x < bounds.width; x++) {
                                     Tile tileAt = eventLayer.getTileAt(x, y);
                                     // 将所有有效的图块作为事件图块
-                                    if (tileAt != null && tileAt.getId() != 0x00) {
+                                    if (tileAt != null) {
                                         events.add(new EventTile(x, y, tileAt.getId().byteValue()));
                                     }
                                 }
@@ -1096,13 +1170,26 @@ public class TiledMap {
         byte[][] map = worldMapEditor.map;
 
 
+        for (TileSet tileSet : worldMap.getTileSets()) {
+            // TODO 导入世界地图的 图块属性更新
+
+        }
+
         for (MapLayer layer : worldMap.getLayers()) {
             if (layer instanceof TileLayer tileLayer) {
                 if ("world".equals(layer.getName())) { // 世界地图
                     // 导入世界地图
                     for (int y = 0; y < 0x100; y++) {
                         for (int x = 0; x < 0x100; x++) {
-                            map[y][x] = tileLayer.getTileAt(x, y).getId().byteValue();
+                            byte tileId = tileLayer.getTileAt(x, y).getId().byteValue();
+                            if (tileId == 0x03 || tileId == 0x0A || tileId == 0x0B) {
+                                // 0x03 山脉
+                                // 0x0A 山脉起始
+                                // 0x0B 山脉结束
+                                // 这些在数据中都属于 0x02，游戏中会自动替换
+                                tileId = 0x02;
+                            }
+                            map[y][x] = tileId;
                         }
                     }
                 }
@@ -1233,15 +1320,24 @@ public class TiledMap {
                             worldMapEntrance.getEntrances().put(inPoint, outPoint);
                         }
                         break;
+                    case "mines": // 4个地雷
+                        List<MapPoint> mines = worldMapEditor.getMines();
+                        // 清除地雷
+                        mines.clear();
+                        // 读取所有地雷，尽管最多写入4个
+                        for (MapObject mine : objectGroup.getObjects()) {
+                            mines.add(new MapPoint((int) mine.getX() / 0x10, (int) mine.getY() / 0x10));
+                        }
+                        break;
                     case "realms": // 怪物领域
                         List<Byte> realms = monsterEditor.getWorldMapRealms();
                         // 不需要清除领域
                         // realms.clear();
                         for (MapObject realm : objectGroup.getObjects()) {
-                            int index = (int) ((realm.getX() / 0x10) + ((realm.getY() / 0x10) * 0x40));
+//                            int index = (int) ((realm.getX() / 0x10) + ((realm.getY() / 0x10) * 0x40));
                             String[] split = realm.getName().split(":");
                             if (split.length >= 2) {
-                                realms.set(index, (byte) Integer.parseInt(split[1], 16));
+                                realms.set(Integer.parseInt(split[0], 16), (byte) Integer.parseInt(split[1], 16));
                             }
                         }
                         break;
@@ -1281,7 +1377,7 @@ public class TiledMap {
                                 byte[] tiles = new byte[0x10];
                                 for (int offsetY = 0; offsetY < 0x04; offsetY++) {
                                     for (int offsetX = 0; offsetX < 0x04; offsetX++) {
-                                        tiles[(offsetY * 0x04) + offsetX] = tileAt.getId().byteValue();
+                                        tiles[(offsetY * 0x04) + offsetX] = eventTileLayer.getTileAt((x * 4) + offsetX, (y * 4) + offsetY).getId().byteValue();
                                     }
                                 }
                                 events.add(new WorldEventTile(x, y, 0, tiles));
@@ -1297,97 +1393,5 @@ public class TiledMap {
                 break;
             }
         }
-
-
-//
-//        // 事件图块，显示时会覆盖对应的图块，相当于事件条件达成
-//        Group eventGroup = new Group();
-//        eventGroup.setId(nextLayerId++);
-//        eventGroup.setName("events");
-//        // 默认隐藏
-//        eventGroup.setVisible(false);
-//        byte[][] indexA = worldMapEditor.indexA[0x02];
-//        // 获取该地图的所有事件图块
-//        for (var entry : eventTilesEditor.getWorldEventTile().entrySet()) {
-//            TileLayer eventLayer = new TileLayer(0x100, 0x100);
-//            eventLayer.setId(nextLayerId++);
-//            // event:index
-//            // 事件内存地址和地址的bit位
-//            eventLayer.setName(String.format("%04X:%01X", 0x0441 + ((entry.getKey() & 0xF8) >>> 3), (entry.getKey() & 0x07)));
-//
-//            // 设置该事件影响的图块
-//            for (EventTile eventTile : entry.getValue()) {
-//                // 为不同地方的图块集使用不同的图块源
-//                for (java.util.Map.Entry<Rectangle, Integer> rectangleIntegerEntry : pieces.entrySet()) {
-//                    int x = eventTile.intX() * 4;
-//                    int y = eventTile.intY() * 4;
-//                    // 找到该坐标的图块集
-//                    if (rectangleIntegerEntry.getKey().contains(x, y)) {
-//                        TileSet tileSet = tileSetMap.get(rectangleIntegerEntry.getValue());
-//                        byte[] tiles = indexA[eventTile.tile & 0xFF];
-//
-//                        // 世界地图的事件图块为 4*4 个tile
-//                        for (int offsetY = 0; offsetY < 0x04; offsetY++) {
-//                            for (int offsetX = 0; offsetX < 0x04; offsetX++) {
-//                                Tile tile = tileSet.getTile(tiles[(offsetY * 4) + offsetX] & 0xFF);
-//                                eventLayer.setTileAt(x + offsetX, y + offsetY, tile);
-//                            }
-//                        }
-//                        break;
-//                    }
-//                }
-//            }
-//            // 添加到事件图块组中
-//            eventGroup.getLayers().add(eventLayer);
-//        }
-//
-//        // 图块集分割
-//        ObjectGroup piecesGroup = new ObjectGroup();
-//        piecesGroup.setId(nextObjectId++);
-//        piecesGroup.setName("pieces");
-//        piecesGroup.setVisible(false);
-//        for (java.util.Map.Entry<Rectangle, Integer> entry : pieces.entrySet()) {
-//            Rectangle rectangle = entry.getKey();
-//            MapObject mapObject = new MapObject();
-//            mapObject.setId(nextObjectId++);
-//            mapObject.setName(String.format("%08X", entry.getValue()));
-//            mapObject.setX(rectangle.getX() * 0x10);
-//            mapObject.setY(rectangle.getY() * 0x10);
-//            mapObject.setWidth(rectangle.getWidth() * 0x10);
-//            mapObject.setHeight(rectangle.getHeight() * 0x10);
-//
-//            // 添加图块集矩形
-//            piecesGroup.addObject(mapObject);
-//        }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

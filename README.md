@@ -177,3 +177,19 @@ java -jar metalmaxre.jar gui
 * 怪物组合在大地图上的分布
 
 **和其它未提及的小功能数据修改**
+
+# Tiled 
+
+## Script
+
+### [Format Peak](tiled/script/FormatPeak.js)（格式化山脉）
+
+Menu: Map -> Format Peak
+
+可以将导出的 tmx世界地图 中的山脉格式化为游戏中的样子  
+![Format Before](tiled/script/screenshot/FormatPeak-before.jpg)![Format After](tiled/script/screenshot/FormatPeak-after.jpg)
+
+## objecttypes
+Menu: View -> Object Types Editor -> Import  
+Select [this](tiled/objecttypes.xml) xml file to import  
+导入后可以简便的修改精灵和图块集中的图块属性（注：需要设置type

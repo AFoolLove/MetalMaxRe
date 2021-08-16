@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objecttypes>
+ <objecttype name="sprites" color="#a0a0a4">
+  <property name="XD6|禁用移动动画" type="bool" default="false"/>
+  <property name="XD7|锁定朝向" type="bool" default="false"/>
+  <property name="YD6|无视地形" type="bool" default="false"/>
+  <property name="YD7|可被推动" type="bool" default="false"/>
+ </objecttype>
+ <objecttype name="tile" color="#a0a0a4">
+  <property name="D0|color" type="bool" default="false"/>
+  <property name="D1|color" type="bool" default="false"/>
+  <property name="D2|" type="bool" default="false"/>
+  <property name="D3|" type="bool" default="false"/>
+  <property name="D4|" type="bool" default="false"/>
+  <property name="D5|" type="bool" default="false"/>
+  <property name="D6|" type="bool" default="false"/>
+  <property name="D7|墙壁" type="bool" default="false"/>
+ </objecttype>
+</objecttypes>

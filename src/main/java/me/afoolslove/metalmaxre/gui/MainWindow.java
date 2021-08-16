@@ -5,19 +5,33 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
+import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
+import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.editor.treasure.Treasure;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
+import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
+import org.mapeditor.core.TileSet;
+import org.mapeditor.io.TMXMapReader;
+import org.mapeditor.io.TMXMapWriter;
+import org.mapeditor.util.BasicTileCutter;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 主窗口
@@ -197,7 +211,120 @@ public class MainWindow extends JFrame {
             } // 其它皆为不不保存
         });
 
+        JMenu fileMenuImport = new JMenu("Import");
+        JMenuItem fileMenuImportWorld = new JMenuItem("Import Tmx World");
+        fileMenuImportWorld.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int state = fileChooser.showOpenDialog(this);
+            if (state == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+
+                int result = 0;
+                if (selectedFile.exists()) {
+                    result = JOptionPane.showConfirmDialog(this,
+                            "导入世界地图会覆盖现有的世界地图数据！", "覆盖数据",
+                            JOptionPane.OK_CANCEL_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                if (result == JOptionPane.OK_OPTION) {
+                    // 导入世界地图
+                    try {
+                        TiledMap.importWorldMap(new TMXMapReader().readMap(selectedFile.getAbsolutePath()));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        PrintWriter printWriter = new PrintWriter(out);
+                        ex.printStackTrace(printWriter);
+                        JOptionPane.showMessageDialog(this, "导入失败\n" + out);
+                    }
+                }
+            }
+        });
+
+        fileMenuImport.add(fileMenuImportWorld);
+
         JMenu fileMenuExport = new JMenu("Export");
+
+        JMenuItem fileMenuExportWorldTmx = new JMenuItem("Export Tmx World");
+        fileMenuExportWorldTmx.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int state = fileChooser.showOpenDialog(this);
+            if (state == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                // selectedDir -> tsx
+                //                -> png
+                //             -> sprite
+                //                -> png
+                //             -> world.tmx
+                selectedFile.mkdirs();
+                final TMXMapWriter tmxMapWriter = new TMXMapWriter();
+                var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
+
+                Map<Integer, TileSet> collect = WorldMapEditor.DEFAULT_PIECES.values().parallelStream().distinct().map(integer -> {
+                            String name = String.format("%08X", integer);
+                            File out = new File(selectedFile, "tsx/png/" + name + ".png");
+                            if (!out.exists()) {
+                                out.getParentFile().mkdirs();
+                                try {
+                                    if (out.createNewFile()) {
+                                        BufferedImage bufferedImage = tileSetEditor.generateWorldTileSet(integer);
+                                        ImageIO.write(bufferedImage, "PNG", out);
+                                    }
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+                            File tsxOut = new File(selectedFile, "tsx");
+                            tsxOut.mkdirs();
+                            try {
+                                return Map.entry(integer, TiledMap.createWorldTsx(tmxMapWriter, out, integer, tsxOut));
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull) // 移除 null
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+
+                String spriteName = String.format("0405%02X%02X", 0x94, 0x95);
+                File spritePng = new File(selectedFile, "sprite/png/" + spriteName + ".png");
+                try {
+                    if (!spritePng.exists()) {
+                        spritePng.getParentFile().mkdirs();
+                        if (spritePng.createNewFile()) {
+                            BufferedImage spriteBufferedImage = tileSetEditor.generateSpriteTileSet(0x94);
+                            ImageIO.write(spriteBufferedImage, "PNG", spritePng);
+                        }
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                TileSet spriteTileSet = new TileSet();
+                spriteTileSet.setName(spriteName);
+                try {
+                    spriteTileSet.importTileBitmap(spritePng.getAbsolutePath(), new BasicTileCutter(0x10, 0x10, 0, 0));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+
+                org.mapeditor.core.Map world = TiledMap.createWorld(WorldMapEditor.DEFAULT_PIECES, collect, spriteTileSet);
+                try {
+                    File worldTmx = new File(selectedFile, "world.tmx");
+                    if (!worldTmx.exists()) {
+                        if (worldTmx.createNewFile()) {
+                            return;
+                        }
+                    }
+                    tmxMapWriter.writeMap(world, worldTmx.getAbsolutePath());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        });
+
+        fileMenuExport.add(fileMenuExportWorldTmx);
 
         JMenuItem fileMenuExit = new JMenuItem("Exit");
         fileMenuExit.addActionListener(e -> {
@@ -212,6 +339,7 @@ public class MainWindow extends JFrame {
         fileMenu.add(fileMenuSave);
         fileMenu.add(fileMenuSaveAs);
         fileMenu.addSeparator();
+        fileMenu.add(fileMenuImport);
         fileMenu.add(fileMenuExport);
         fileMenu.addSeparator();
         fileMenu.add(fileMenuExit);

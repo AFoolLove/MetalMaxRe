@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editor.map.world;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.map.MapPoint;
 import me.afoolslove.metalmaxre.editor.map.events.EventTile;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
 import me.afoolslove.metalmaxre.editor.map.events.WorldEventTile;
@@ -55,6 +56,29 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
     public static final int WORLD_MAP_INDEX_END = 0x3B00F - 0x10; // CHR
 
     /**
+     * 地雷坐标起始 4x + 4y
+     */
+    public static final int WORLD_MAP_MINES_START = 0x35EC1 - 0x10;
+
+
+    /**
+     * 图块集组合矩形化
+     */
+    public static final java.util.Map<Rectangle, Integer> DEFAULT_PIECES = java.util.Map.ofEntries(
+            java.util.Map.entry(new Rectangle(0x88, 0x08, 0x78, 0x60), 0x84858889),
+            java.util.Map.entry(new Rectangle(0x88, 0x68, 0x78, 0x98), 0x84858687),
+            java.util.Map.entry(new Rectangle(0x08, 0x08, 0x80, 0x90), 0x848C8D8E),
+            java.util.Map.entry(new Rectangle(0x08, 0x98, 0x60, 0x68), 0x84858A8B),
+            java.util.Map.entry(new Rectangle(0x68, 0x98, 0x20, 0x68), 0x84858687),
+            java.util.Map.entry(new Rectangle(0x88, 0x00, 0x78, 0x08), 0x84858687),
+            java.util.Map.entry(new Rectangle(0x08, 0x00, 0x60, 0x08), 0x84858A8B),
+            java.util.Map.entry(new Rectangle(0x68, 0x00, 0x20, 0x08), 0x84858687),
+            java.util.Map.entry(new Rectangle(0x00, 0x00, 0x08, 0x08), 0x84858687),
+            java.util.Map.entry(new Rectangle(0x00, 0x08, 0x08, 0x60), 0x84858889),
+            java.util.Map.entry(new Rectangle(0x00, 0x68, 0x08, 0x98), 0x84858687)
+    );
+
+    /**
      * index与indexOffsets的比例是 1byte：2bit
      */
     public byte[] indexOffsets = new byte[0x400]; // WORLD_MAP_TILES_INDEX_OFFSET_END - WORLD_MAP_TILES_INDEX_OFFSET_START + 1
@@ -74,23 +98,11 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
      * 值为图块索引
      */
     public byte[][] map = new byte[0x100][0x100];
-    /**
-     * 图块集组合矩形化
-     */
-    public static final java.util.Map<Rectangle, Integer> DEFAULT_PIECES = java.util.Map.ofEntries(
-            java.util.Map.entry(new Rectangle(0x88, 0x08, 0x78, 0x60), 0x84858889),
-            java.util.Map.entry(new Rectangle(0x88, 0x68, 0x78, 0x98), 0x84858687),
-            java.util.Map.entry(new Rectangle(0x08, 0x08, 0x80, 0x90), 0x848C8D8E),
-            java.util.Map.entry(new Rectangle(0x08, 0x98, 0x60, 0x68), 0x84858A8B),
-            java.util.Map.entry(new Rectangle(0x68, 0x98, 0x20, 0x68), 0x84858687),
-            java.util.Map.entry(new Rectangle(0x88, 0x00, 0x78, 0x08), 0x84858687),
-            java.util.Map.entry(new Rectangle(0x08, 0x00, 0x60, 0x08), 0x84858A8B),
-            java.util.Map.entry(new Rectangle(0x68, 0x00, 0x20, 0x08), 0x84858687),
-            java.util.Map.entry(new Rectangle(0x00, 0x00, 0x08, 0x08), 0x84858687),
-            java.util.Map.entry(new Rectangle(0x00, 0x08, 0x08, 0x60), 0x84858889),
-            java.util.Map.entry(new Rectangle(0x00, 0x68, 0x08, 0x98), 0x84858687)
-    );
 
+    /**
+     * 地图中的4个地雷
+     */
+    private final List<MapPoint> mines = new ArrayList<>(4);
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
@@ -115,6 +127,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             }
         }
         Arrays.fill(index, (byte) 0x00);
+        mines.clear();
 
         // 读取世界地图图块索引偏移
         setPrgRomPosition(buffer, WORLD_MAP_TILES_INDEX_OFFSET_START);
@@ -192,6 +205,16 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             int x = i % 0x40;
             int y = i / 0x40;
             map0(map, x, y, tiles);
+        }
+
+        // 读取地雷
+        setPrgRomPosition(WORLD_MAP_MINES_START);
+        byte[] mineXs = new byte[0x04];
+        byte[] mineYs = new byte[0x04];
+        get(buffer, mineXs);
+        get(buffer, mineYs);
+        for (int i = 0; i < 0x04; i++) {
+            mines.add(new MapPoint(mineXs[i], mineYs[i]));
         }
         return true;
     }
@@ -402,8 +425,8 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             // 将所有使用该4*4tiles的事件全部更新
             eventTilesEditor.getWorldEventTile().values().forEach(eventTiles -> {
                 for (EventTile eventTile : eventTiles) {
-                    if (eventTile instanceof WorldEventTile worldEventTile){
-                        if (Arrays.equals(worldEventTile.getTiles(), tempIndexA)){
+                    if (eventTile instanceof WorldEventTile worldEventTile) {
+                        if (Arrays.equals(worldEventTile.getTiles(), tempIndexA)) {
                             worldEventTile.setTile(tempIndex);
                         }
                     }
@@ -525,6 +548,18 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         // 写入图块索引
         setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
         put(buffer, index);
+
+        // 写入4个地雷坐标
+        setPrgRomPosition(WORLD_MAP_MINES_START);
+        byte[] mineXs = new byte[0x04];
+        byte[] mineYs = new byte[0x04];
+        for (int i = 0, size = Math.min(0x04, mines.size()); i < size; i++) {
+            MapPoint minePoint = mines.get(i);
+            mineXs[i] = minePoint.getX();
+            mineYs[i] = minePoint.getY();
+        }
+        put(buffer, mineXs);
+        put(buffer, mineYs);
         return true;
     }
 
@@ -556,6 +591,14 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
      */
     public byte[] getTiles(int x, int y) {
         return map1(map, x, y);
+    }
+
+    /**
+     *
+     * @return 地雷坐标
+     */
+    public List<MapPoint> getMines() {
+        return mines;
     }
 
     /**

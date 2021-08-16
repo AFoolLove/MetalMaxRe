@@ -403,10 +403,10 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
     public BufferedImage generateWorldTileSet(int xXX,
                                               byte[][][] compositions, byte[][] colorIndexes,
                                               Color[][] colors) {
-        int x00 = NumberR.at(xXX, 3);
-        int x40 = NumberR.at(xXX, 2);
-        int x80 = NumberR.at(xXX, 1);
-        int xC0 = NumberR.at(xXX, 0);
+        int x00 = NumberR.at(xXX, 3) & 0xFF;
+        int x40 = NumberR.at(xXX, 2) & 0xFF;
+        int x80 = NumberR.at(xXX, 1) & 0xFF;
+        int xC0 = NumberR.at(xXX, 0) & 0xFF;
         return generate(0x100, 0xC0, x00, x40, x80, xC0, compositions, colorIndexes, colors);
     }
 
@@ -418,10 +418,10 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
      * @param xXX 分割为4个，高位到低位分别为 x00、x40、x80、xC0
      */
     public BufferedImage generateWorldTileSet(int xXX) {
-        int x00 = NumberR.at(xXX, 3);
-        int x40 = NumberR.at(xXX, 2);
-        int x80 = NumberR.at(xXX, 1);
-        int xC0 = NumberR.at(xXX, 0);
+        int x00 = NumberR.at(xXX, 3) & 0xFF;
+        int x40 = NumberR.at(xXX, 2) & 0xFF;
+        int x80 = NumberR.at(xXX, 1) & 0xFF;
+        int xC0 = NumberR.at(xXX, 0) & 0xFF;
         PaletteList palettes = EditorManager.getEditor(PaletteEditor.class).getPalettes(0x9AD0);
         return generate(0x100, 0xC0, x00, x40, x80, xC0, worldCompositions, worldColorIndexes, palettes.toColors());
     }
