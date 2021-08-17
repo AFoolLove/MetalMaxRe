@@ -60,6 +60,21 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
      */
     public static final int WORLD_MAP_MINES_START = 0x35EC1 - 0x10;
 
+    /**
+     * 航线起始
+     */
+    public static final int WORLD_MAP_OUT_LINE_START = 0x258C6 - 0x10;
+
+    /**
+     * 航线起始
+     */
+    public static final int WORLD_MAP_BACK_LINE_START = 0x258EA - 0x10;
+
+    /**
+     * 航线最大点
+     */
+    public static final int WORLD_MAP_LINE_MAX_POINT = 0x10;
+
 
     /**
      * 图块集组合矩形化
@@ -103,6 +118,19 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
      * 地图中的4个地雷
      */
     private final List<MapPoint> mines = new ArrayList<>(4);
+
+    /**
+     * 航线
+     * K: line
+     * V：目的地
+     */
+    private final Map.Entry<List<MapPoint>, MapPoint> shippingLineOut = Map.entry(new ArrayList<>(0x1), new MapPoint());
+    /**
+     * 航线
+     * K: line
+     * V：目的地
+     */
+    private final Map.Entry<List<MapPoint>, MapPoint> shippingLineBack = Map.entry(new ArrayList<>(0x10), new MapPoint());
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
@@ -216,6 +244,66 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         for (int i = 0; i < 0x04; i++) {
             mines.add(new MapPoint(mineXs[i], mineYs[i]));
         }
+
+        // 读取出航航线
+        setPrgRomPosition(WORLD_MAP_OUT_LINE_START);
+        // 坐标是相对路径，进入世界地图的坐标开始算起
+        List<MapPoint> linePoint = shippingLineOut.getKey();
+        linePoint.clear();
+
+        while (linePoint.size() < 0x10) {
+            byte action = get(buffer);
+            if (action == (byte) 0xE7) {
+                // 读取到目的地数据，立即结束
+                break;
+            }
+            switch (action) {
+                case 0x50 -> { // 上
+                    // 移动格数
+                    linePoint.add(new MapPoint(0x00, -getToInt(buffer)));
+                }
+                case 0x51 -> { // 下
+                    linePoint.add(new MapPoint(0x00, getToInt(buffer)));
+                }
+                case 0x52 -> { // 左
+                    linePoint.add(new MapPoint(-getToInt(buffer), 0x00));
+                }
+                case 0x53 -> { // 右
+                    linePoint.add(new MapPoint(getToInt(buffer), 0x00));
+                }
+            }
+        }
+        // 读取出航目的地
+        shippingLineOut.getValue().set(get(buffer), get(buffer), get(buffer));
+
+        // 读取归航航线
+        setPrgRomPosition(WORLD_MAP_BACK_LINE_START);
+        linePoint = shippingLineBack.getKey();
+        linePoint.clear();
+        while (linePoint.size() < 0x10) {
+            byte action = get(buffer);
+            if (action == (byte) 0xE7) {
+                // 读取到目的地数据，立即结束
+                break;
+            }
+            switch (action) {
+                case 0x50 -> { // 上
+                    // 移动格数
+                    linePoint.add(new MapPoint(0x00, -getToInt(buffer)));
+                }
+                case 0x51 -> { // 下
+                    linePoint.add(new MapPoint(0x00, getToInt(buffer)));
+                }
+                case 0x52 -> { // 左
+                    linePoint.add(new MapPoint(-getToInt(buffer), 0x00));
+                }
+                case 0x53 -> { // 右
+                    linePoint.add(new MapPoint(getToInt(buffer), 0x00));
+                }
+            }
+        }
+        // 读取归航目的地
+        shippingLineBack.getValue().set(get(buffer), get(buffer), get(buffer));
         return true;
     }
 
@@ -560,6 +648,34 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         }
         put(buffer, mineXs);
         put(buffer, mineYs);
+
+        // 写入出航路径点和目的地
+        setPrgRomPosition(WORLD_MAP_OUT_LINE_START);
+        for (int i = 0, size = Math.min(0x04, shippingLineOut.getKey().size()); i < size; i++) {
+            MapPoint linePoint = shippingLineOut.getKey().get(i);
+            put(buffer, linePoint.getX());
+            put(buffer, linePoint.getY());
+        }
+        // 写入出航目的地
+        put(buffer, 0xE7);
+        put(buffer, shippingLineOut.getValue().getMap());
+        put(buffer, shippingLineOut.getValue().getX());
+        put(buffer, shippingLineOut.getValue().getY());
+
+        // 写入归航路径点和目的地
+        setPrgRomPosition(WORLD_MAP_BACK_LINE_START);
+        for (int i = 0, size = Math.min(0x04, shippingLineBack.getKey().size()); i < size; i++) {
+            MapPoint linePoint = shippingLineBack.getKey().get(i);
+            put(buffer, linePoint.getX());
+            put(buffer, linePoint.getY());
+        }
+        // 写入归航目的地
+        put(buffer, 0xE7);
+        put(buffer, shippingLineBack.getValue().getMap());
+        put(buffer, shippingLineBack.getValue().getX());
+        put(buffer, shippingLineBack.getValue().getY());
+
+
         return true;
     }
 
@@ -594,11 +710,24 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
     }
 
     /**
-     *
      * @return 地雷坐标
      */
     public List<MapPoint> getMines() {
         return mines;
+    }
+
+    /**
+     * @return 出航路径点和目的地
+     */
+    public Map.Entry<List<MapPoint>, MapPoint> getShippingLineOut() {
+        return shippingLineOut;
+    }
+
+    /**
+     * @return 归航路径点和目的地
+     */
+    public Map.Entry<List<MapPoint>, MapPoint> getShippingLineBack() {
+        return shippingLineBack;
     }
 
     /**

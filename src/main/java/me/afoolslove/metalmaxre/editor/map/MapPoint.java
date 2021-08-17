@@ -183,4 +183,9 @@ public class MapPoint extends Point2B {
     public int hashCode() {
         return Objects.hash(super.hashCode(), getMap());
     }
+
+    @NotNull
+    public MapPoint copy() {
+        return new MapPoint(map, x, y);
+    }
 }
