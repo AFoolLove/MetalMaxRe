@@ -24,6 +24,12 @@ var action = tiled.registerAction("FormatPeak", function(action){
             for(var index = 0; index < (0x100 * 0x100); index++){
                 var x = index % 0x100;
                 var y = index / 0x100;
+
+                var tile = layer.tileAt(x, y);
+                if(tile == null){
+                    continue;
+                }
+
                 var offset = (y & 1) == 1 ? 0 : 1;
 
                 // 在新行中，如果上一行的山脉未结束，立即结束并重置连续山脉计数器
@@ -37,10 +43,6 @@ var action = tiled.registerAction("FormatPeak", function(action){
                     continuous = 0x00;
                 }
 
-                var tile = layer.tileAt(x, y);
-                if(tile == null){
-                    continue;
-                }
                 // 获取当前图块是否为山脉
                 // 如果山脉刚开始计数，设置山脉起始
                 // 否则判断山脉是否结束，设置山脉结束
@@ -72,6 +74,5 @@ var action = tiled.registerAction("FormatPeak", function(action){
 action.text = "Format Peak"
 
 tiled.extendMenu("Map", [
-    {action:"FormatPeak"},
-    {separator: true}
+    {action:"FormatPeak"}
 ])

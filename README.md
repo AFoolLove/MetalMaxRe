@@ -183,7 +183,7 @@ java -jar metalmaxre.jar gui
 ## Script
 
 ### [Format Peak](tiled/script/FormatPeak.js)（格式化山脉）
-
+Restore Script: [Format Peak Restore](tiled/script/FormatPeakRestore.js)  
 Menu: Map -> Format Peak
 
 可以将导出的 tmx世界地图 中的山脉格式化为游戏中的样子  
