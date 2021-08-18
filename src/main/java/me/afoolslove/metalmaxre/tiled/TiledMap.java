@@ -590,7 +590,7 @@ public class TiledMap {
         outLineObject.setPolyline(new Polyline());
 
         StringBuilder outLinePoints = new StringBuilder("0,0");
-        List<MapPoint> outLine = new ArrayList<>(worldMapEditor.getShippingLineOut().getKey());
+        List<MapPoint> outLine = worldMapEditor.getShippingLineOut().getKey();
 
         lastOffsetLinePoint.setLocation(0, 0);
         for (MapPoint linePoint : outLine) {
@@ -1383,6 +1383,8 @@ public class TiledMap {
                         break;
                     case "line":
                         List<MapObject> lineObjects = objectGroup.getObjects();
+                        // 因为是反的需要倒序摆正
+                        Collections.reverse(lineObjects);
                         if (lineObjects.size() > 1) {
                             // 设置出航路径点和目的地
                             MapObject out = lineObjects.get(0);
@@ -1400,7 +1402,7 @@ public class TiledMap {
                                 ));
                             }
                             // 转换为相对路径
-                            for (int i = Math.min(0x10, outLine.size()) - 1; i > 0; i--) {
+                            for (int i = Math.min(0x10, outLine.size() - 1); i > 0; i--) {
                                 MapPoint point = outLine.get(i);
                                 MapPoint previousPoint = outLine.get(i - 1);
                                 point.offset(-previousPoint.getX(), -previousPoint.getY());
@@ -1431,7 +1433,7 @@ public class TiledMap {
                                 ));
                             }
                             // 转换为相对路径
-                            for (int i = Math.min(0x10, backLine.size()) - 1; i > 0; i--) {
+                            for (int i = Math.min(0x10, backLine.size() - 1); i > 0; i--) {
                                 MapPoint point = backLine.get(i);
                                 MapPoint previousPoint = backLine.get(i - 1);
                                 point.offset(-previousPoint.getX(), -previousPoint.getY());

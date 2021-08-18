@@ -253,7 +253,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
 
         while (linePoint.size() < 0x10) {
             byte action = get(buffer);
-            if (action == (byte) 0xE7) {
+            if (action == 0x5E) {
                 // 读取到目的地数据，立即结束
                 break;
             }
@@ -273,6 +273,9 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
                 }
             }
         }
+        if (linePoint.size() == 0x10) {
+            get(buffer); // 所有路径点全部使用，跳过 0xE5
+        }
         // 读取出航目的地
         shippingLineOut.getValue().set(get(buffer), get(buffer), get(buffer));
 
@@ -282,7 +285,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         linePoint.clear();
         while (linePoint.size() < 0x10) {
             byte action = get(buffer);
-            if (action == (byte) 0xE7) {
+            if (action == (byte) 0x5E) {
                 // 读取到目的地数据，立即结束
                 break;
             }
@@ -301,6 +304,9 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
                     linePoint.add(new MapPoint(getToInt(buffer), 0x00));
                 }
             }
+        }
+        if (linePoint.size() == 0x10) {
+            get(buffer); // 所有路径点全部使用，跳过 0xE5
         }
         // 读取归航目的地
         shippingLineBack.getValue().set(get(buffer), get(buffer), get(buffer));
@@ -651,31 +657,69 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
 
         // 写入出航路径点和目的地
         setPrgRomPosition(WORLD_MAP_OUT_LINE_START);
-        for (int i = 0, size = Math.min(0x04, shippingLineOut.getKey().size()); i < size; i++) {
+        for (int i = 0, size = Math.min(0x10, shippingLineOut.getKey().size()); i < size; i++) {
             MapPoint linePoint = shippingLineOut.getKey().get(i);
-            put(buffer, linePoint.getX());
-            put(buffer, linePoint.getY());
+            // X或Y等于0，就是另一个的方向
+            if (linePoint.getX() == 0x00) {
+                // 上或下移动
+                if ((linePoint.getY() & 0B1000_0000) == 0x00) {
+                    // 不是负数，下方移动
+                    put(buffer, 0x51);
+                } else {
+                    // 是负数，上方移动
+                    put(buffer, 0x50);
+                }
+                put(buffer, Math.abs(linePoint.getY())); // 得到正数的移动格数
+            } else {
+                // 左或右移动
+                if ((linePoint.getX() & 0B1000_0000) == 0x00) {
+                    // 不是负数，右方移动
+                    put(buffer, 0x53);
+                } else {
+                    // 是负数，左方移动
+                    put(buffer, 0x52);
+                }
+                put(buffer, Math.abs(linePoint.getX())); // 得到正数的移动格数
+            }
         }
         // 写入出航目的地
-        put(buffer, 0xE7);
+        put(buffer, 0x5E);
         put(buffer, shippingLineOut.getValue().getMap());
         put(buffer, shippingLineOut.getValue().getX());
         put(buffer, shippingLineOut.getValue().getY());
 
         // 写入归航路径点和目的地
         setPrgRomPosition(WORLD_MAP_BACK_LINE_START);
-        for (int i = 0, size = Math.min(0x04, shippingLineBack.getKey().size()); i < size; i++) {
+        for (int i = 0, size = Math.min(0x10, shippingLineBack.getKey().size()); i < size; i++) {
             MapPoint linePoint = shippingLineBack.getKey().get(i);
-            put(buffer, linePoint.getX());
-            put(buffer, linePoint.getY());
+            // X或Y等于0，就是另一个的方向
+            if (linePoint.getX() == 0x00) {
+                // 上或下移动
+                if ((linePoint.getY() & 0B1000_0000) == 0x00) {
+                    // 不是负数，下方移动
+                    put(buffer, 0x51);
+                } else {
+                    // 是负数，上方移动
+                    put(buffer, 0x50);
+                }
+                put(buffer, Math.abs(linePoint.getX())); // 得到正数的移动格数
+            } else {
+                // 左或右移动
+                if ((linePoint.getX() & 0B1000_0000) == 0x00) {
+                    // 不是负数，右方移动
+                    put(buffer, 0x53);
+                } else {
+                    // 是负数，左方移动
+                    put(buffer, 0x52);
+                }
+                put(buffer, Math.abs(linePoint.getY())); // 得到正数的移动格数
+            }
         }
         // 写入归航目的地
-        put(buffer, 0xE7);
+        put(buffer, 0x5E);
         put(buffer, shippingLineBack.getValue().getMap());
         put(buffer, shippingLineBack.getValue().getX());
         put(buffer, shippingLineBack.getValue().getY());
-
-
         return true;
     }
 
