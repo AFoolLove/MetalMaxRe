@@ -47,7 +47,7 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
 
 
             // 索引到数据
-            setPrgRomPosition(buffer, 0x1E000 + mapProperties.entrance - 0x8000);
+            setPrgRomPosition(0x1E000 + mapProperties.entrance - 0x8000);
             int temp = getToInt(buffer);
 
             MapBorder mapBorder;
@@ -108,7 +108,7 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
-        setPrgRomPosition(buffer, MAP_ENTRANCE_START_OFFSET);
+        setPrgRomPosition(MAP_ENTRANCE_START_OFFSET);
         getMapEntrances().values().parallelStream()
                 .distinct() // 去重
                 .forEachOrdered(mapEntrance -> {

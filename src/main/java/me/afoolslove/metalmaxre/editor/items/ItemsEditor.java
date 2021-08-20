@@ -92,13 +92,13 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
         }
 
         // 读取战车引擎的最大载重
-        setPrgRomPosition(buffer, TANK_ENGINE_MAX_CAPACITY_OFFSET);
+        setPrgRomPosition(TANK_ENGINE_MAX_CAPACITY_OFFSET);
         for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
             tankItems.engines.get(i).setCapacity(get(buffer));
         }
 
         // 读取人类防具的可装备角色的数据
-        setPrgRomPosition(buffer, PLAYER_EQUIPMENT_CAN_EQUIPPED_OFFSET);
+        setPrgRomPosition(PLAYER_EQUIPMENT_CAN_EQUIPPED_OFFSET);
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             playerItems.armors.get(i).setCanEquipped(get(buffer));
         }
@@ -191,13 +191,13 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        setPrgRomPosition(buffer, TANK_ENGINE_MAX_CAPACITY_OFFSET);
+        setPrgRomPosition(TANK_ENGINE_MAX_CAPACITY_OFFSET);
         // 写入战车引擎的最大载重
         for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
             put(buffer, tankItems.engines.get(i).getCapacity());
         }
 
-        setPrgRomPosition(buffer, PLAYER_EQUIPMENT_CAN_EQUIPPED_OFFSET);
+        setPrgRomPosition(PLAYER_EQUIPMENT_CAN_EQUIPPED_OFFSET);
         // 写入人类防具的可装备角色的数据
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             put(buffer, playerItems.armors.get(i).canEquipped);

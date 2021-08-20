@@ -65,11 +65,11 @@ public class MapEditor extends AbstractEditor<MapEditor> {
             int mapIndex = mapProperties.mapIndex;
             if (mapIndex >= 0xC000) {
                 // 0xBB010
-                setChrRomPosition(buffer, 0x2F000 + mapIndex);
+                setChrRomPosition(0x2F000 + mapIndex);
             } else {
                 // 0x00000(610)
                 mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
-                setPrgRomPosition(buffer, mapIndex);
+                setPrgRomPosition(mapIndex);
             }
 
             MapBuilder mapBuilder = new MapBuilder();
@@ -203,7 +203,7 @@ public class MapEditor extends AbstractEditor<MapEditor> {
 
             // 定位到地图数据的起始地址
             if (mapIndex >= 0xC000) {
-                setChrRomPosition(buffer, 0x2F000 + mapIndex);
+                setChrRomPosition(0x2F000 + mapIndex);
 //                int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
 //                if (i >= 0xBF010) {
@@ -212,7 +212,7 @@ public class MapEditor extends AbstractEditor<MapEditor> {
 //                }
             } else {
                 mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
-                setPrgRomPosition(buffer, mapIndex);
+                setPrgRomPosition(mapIndex);
 //                int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
 //                if (i >= 0x0B6D4) {

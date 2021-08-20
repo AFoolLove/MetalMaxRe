@@ -1,7 +1,9 @@
 package me.afoolslove.metalmaxre.editor.monster;
 
+import me.afoolslove.metalmaxre.DataValues;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -57,6 +59,17 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
     public static final int SPECIAL_MONSTER_GROUP_MAX_COUNT = 0x38;
 
     /**
+     * 赏金首的赏金起始
+     *
+     * @see DataValues#get3ByteValue()
+     */
+    public static final int WANTED_MONSTER_BOUNTY_OFFSET = 0x7EBE0 - 0x10;
+    /**
+     * 赏金首的赏金数量，也是赏金首的数量
+     */
+    public static final int WANTED_MONSTER_BOUNTY_MAX_COUNT = 0x0B;
+
+    /**
      * 世界地图的怪物领域
      * 1Byte = 16*16小块 = 256个领域，固定无法变更
      */
@@ -89,21 +102,32 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
 
         // 读取怪物出手攻击速度
-        setPrgRomPosition(buffer, MONSTER_SPEEDS_OFFSET);
+        setPrgRomPosition(MONSTER_SPEEDS_OFFSET);
         get(buffer, speeds);
 
         // 读取怪物命中率
-//        setPrgRomPosition(buffer, MONSTER_HIT_RATES_OFFSET);
+//        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
         get(buffer, hitRates);
 
         // 读取怪物掉落物
-        setPrgRomPosition(buffer, MONSTER_DROPS_ITEMS_OFFSET);
+        setPrgRomPosition(MONSTER_DROPS_ITEMS_OFFSET);
         get(buffer, dropsItems);
 
         for (int monsterId = 0; monsterId < MONSTER_COUNT; monsterId++) {
-            Monster monster = new Monster();
-            if (monsterId >= 0x18) {
-                monster.setDropsItem(dropsItems[monsterId - 0x18]);
+            Monster monster;
+            if (monsterId > 0x00 && monsterId <= WANTED_MONSTER_BOUNTY_MAX_COUNT) {
+                // 通缉怪物
+                monster = new WantedMonster();
+                // 读取赏金数据
+                // 赏金怪物的ID从1开始，所以要-1
+                setPrgRomPosition(WANTED_MONSTER_BOUNTY_OFFSET + (monsterId - 1));
+                ((WantedMonster) monster).setBounty(get(buffer));
+            } else {
+                monster = new Monster();
+                if (monsterId >= 0x18) {
+                    // 普通怪物
+                    monster.setDropsItem(dropsItems[monsterId - 0x18]);
+                }
             }
             monster.setSpeed(speeds[monsterId]);
             monster.setHitRate(hitRates[monsterId]);
@@ -111,13 +135,13 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         }
 
         // 读取领域索引
-        setPrgRomPosition(buffer, WORLD_MAP_MONSTERS_REALM_INDEX_START);
+        setPrgRomPosition(WORLD_MAP_MONSTERS_REALM_INDEX_START);
         for (int i = 0; i < WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT; i++) {
             worldRealms.add(get(buffer));
         }
 
         // 读取怪物组合
-        setPrgRomPosition(buffer, MONSTER_GROUP_OFFSET);
+        setPrgRomPosition(MONSTER_GROUP_OFFSET);
         for (int i = 0; i < MONSTER_GROUP_MAX_COUNT; i++) {
             byte[] monsters = new byte[0x0E];
             get(buffer, monsters);
@@ -126,7 +150,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
 
         // 读取特殊怪物组合数据
         // 覆盖式读取，不需要保留现有的数据
-        setPrgRomPosition(buffer, SPECIAL_MONSTER_GROUP_OFFSET);
+        setPrgRomPosition(SPECIAL_MONSTER_GROUP_OFFSET);
         for (int i = 0; i < SPECIAL_MONSTER_GROUP_MAX_COUNT; i++) {
             byte[] monsters = new byte[0x04];
             byte[] counts = new byte[0x04];
@@ -144,42 +168,47 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         byte[] speeds = new byte[MONSTER_COUNT];
         byte[] hitRates = new byte[MONSTER_COUNT];
         byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
+        byte[] bounty = new byte[WANTED_MONSTER_BOUNTY_MAX_COUNT];
 
         for (Map.Entry<Integer, Monster> entry : monsters.entrySet()) {
             Monster monster = entry.getValue();
             int monsterId = entry.getKey();
             speeds[monsterId] = monster.speed;
             hitRates[monsterId] = monster.hitRate;
-            if (monsterId >= 0x18) {
-                dropsItems[monsterId - 0x18] = monster.dropsItem;
+            if (monsterId > 0x00 && monsterId <= WANTED_MONSTER_BOUNTY_MAX_COUNT && monster instanceof WantedMonster wantedMonster) {
+                bounty[monsterId - 1] = wantedMonster.getBounty();
+            } else {
+                if (monsterId >= 0x18) {
+                    dropsItems[monsterId - 0x18] = monster.dropsItem;
+                }
             }
         }
 
         // 写入怪物出手攻击的速度
-        setPrgRomPosition(buffer, MONSTER_SPEEDS_OFFSET);
+        setPrgRomPosition(MONSTER_SPEEDS_OFFSET);
         put(buffer, speeds);
         // 写入怪物的命中率
-//        setPrgRomPosition(buffer, MONSTER_HIT_RATES_OFFSET);
+//        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
         put(buffer, hitRates);
         // 写入怪物的掉落物
-        setPrgRomPosition(buffer, MONSTER_DROPS_ITEMS_OFFSET);
+        setPrgRomPosition(MONSTER_DROPS_ITEMS_OFFSET);
         put(buffer, dropsItems);
 
         // 写入领域索引
-        setPrgRomPosition(buffer, WORLD_MAP_MONSTERS_REALM_INDEX_START);
+        setPrgRomPosition(WORLD_MAP_MONSTERS_REALM_INDEX_START);
         for (int i = 0; i < WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT; i++) {
             put(buffer, worldRealms.get(i));
         }
 
         // 写入怪物组合
-        setPrgRomPosition(buffer, MONSTER_GROUP_OFFSET);
+        setPrgRomPosition(MONSTER_GROUP_OFFSET);
         for (int i = 0; i < MONSTER_GROUP_MAX_COUNT; i++) {
             MonsterGroup monsterGroup = monsterGroups[i];
             put(buffer, monsterGroup.monsters);
         }
 
         // 写入特殊怪物组合数据
-        setPrgRomPosition(buffer, SPECIAL_MONSTER_GROUP_OFFSET);
+        setPrgRomPosition(SPECIAL_MONSTER_GROUP_OFFSET);
         for (int i = 0; i < SPECIAL_MONSTER_GROUP_MAX_COUNT; i++) {
             SpecialMonsterGroup specialMonsterGroup = specialMonsterGroups[i];
             for (int j = 0; j < 0x04; j++) {
@@ -187,6 +216,10 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
                 put(buffer, specialMonsterGroup.counts[j]);
             }
         }
+
+        // 写入赏金首的赏金数据
+        setPrgRomPosition(WANTED_MONSTER_BOUNTY_OFFSET);
+        put(buffer, bounty);
         return true;
     }
 
@@ -220,6 +253,15 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         return monsters.get(monsterId & 0xFF);
     }
 
+    /**
+     * 获取赏金首怪物
+     *
+     * @param monsterId 赏金首怪物id
+     * @return 赏金首属性
+     */
+    public WantedMonster getWantedMonster(@Range(from = 0x01, to = WANTED_MONSTER_BOUNTY_MAX_COUNT) byte monsterId) {
+        return ((WantedMonster) monsters.get(monsterId & 0xFF));
+    }
 
     public List<Byte> getWorldMapRealms() {
         return worldRealms;

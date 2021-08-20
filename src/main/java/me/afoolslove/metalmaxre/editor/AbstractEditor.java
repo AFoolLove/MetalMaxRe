@@ -42,25 +42,16 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
      */
     public abstract boolean onWrite(@NotNull ByteBuffer buffer);
 
-
     /**
      * 设置为 PRG COM 的偏移量
      */
-    public void setPrgRomPosition(@NotNull ByteBuffer buffer, int offset) {
-        bufferPosition = getHeader().getPrgRomStart(offset);
-    }
-
     public void setPrgRomPosition(int offset) {
-        setPrgRomPosition(getBuffer(), offset);
+        bufferPosition = getHeader().getPrgRomStart(offset);
     }
 
     /**
      * 设置为 CHR COM 的偏移量
      */
-    public void setChrRomPosition(@NotNull ByteBuffer buffer, int offset) {
-        bufferPosition = getHeader().getChrRomStart(offset);
-    }
-
     public void setChrRomPosition(int offset) {
         bufferPosition = getHeader().getChrRomStart(offset);
     }
@@ -97,6 +88,14 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         buffer.get(bufferPosition, dst, offset, length);
         bufferPosition += length;
         return (T) this;
+    }
+
+    public byte getChrRom(@NotNull ByteBuffer buffer, int offset) {
+        return buffer.get(getHeader().getChrRomStart(offset));
+    }
+
+    public byte getPrgRom(@NotNull ByteBuffer buffer, int offset) {
+        return buffer.get(getHeader().getPrgRomStart(offset));
     }
 
     @SuppressWarnings("unchecked")

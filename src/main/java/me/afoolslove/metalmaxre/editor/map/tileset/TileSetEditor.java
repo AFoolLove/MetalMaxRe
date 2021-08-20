@@ -112,7 +112,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         // 读取所有 tile：0x00-0xFF
         // 0x10byte = 1tile
         // 0x40tile = x40（0x00、0x80、0xC0）
-        setChrRomPosition(buffer, TILE_SET_START_OFFSET);
+        setChrRomPosition(TILE_SET_START_OFFSET);
         // 一共0x100个 x40
         for (int count = 0; count <= 0xFF; count++) {
             byte[][] x40 = tiles[count] != null ? tiles[count] : new byte[0x40][0x10];
@@ -130,7 +130,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         // 读取所有Tile组合 0x00-0x37
         // 0x04byte = 1tile composition
         // 0x40tile = x40（0x00、0x80、0xC0）
-        setChrRomPosition(buffer, TILE_SET_COMPOSITIONS_START_OFFSET);
+        setChrRomPosition(TILE_SET_COMPOSITIONS_START_OFFSET);
         for (int count = 0; count < 0x37; count++) {
             // 0x40 tile composition
             byte[][] tileCompositions = compositions[count] != null ? compositions[count] : new byte[0x40][0x04];
@@ -146,7 +146,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         // 读取tile的特性和调色板 0x00-0x37
         // 0x01byte = 1tile特性和调色板
         // 0x40tile = 0x40（0x00、0x80、0xC0）
-        setChrRomPosition(buffer, TILE_SET_COLOR_INDEX_START_OFFSET);
+        setChrRomPosition(TILE_SET_COLOR_INDEX_START_OFFSET);
         for (int count = 0; count < 0x37; count++) {
             byte[] color = colorIndex[count] != null ? colorIndex[count] : new byte[0x40];
             colorIndex[count] = color;
@@ -155,7 +155,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         }
 
         // 读取世界地图的tile组合
-        setPrgRomPosition(buffer, TILE_SET_WORLD_COMPOSITIONS_START_OFFSET);
+        setPrgRomPosition(TILE_SET_WORLD_COMPOSITIONS_START_OFFSET);
         for (int count = 0; count < 0x03; count++) {
             // 0x40 tile composition
             byte[][] tileCompositions = worldCompositions[count] != null ? worldCompositions[count] : new byte[0x40][0x04];
@@ -169,7 +169,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         }
 
         // 读取世界地图的特性和调色板
-        setPrgRomPosition(buffer, TILE_SET_WORLD_COLOR_INDEX_START_OFFSET);
+        setPrgRomPosition(TILE_SET_WORLD_COLOR_INDEX_START_OFFSET);
         for (int count = 0; count < 0x03; count++) {
             byte[] color = worldColorIndexes[count] != null ? worldColorIndexes[count] : new byte[0x40];
             worldColorIndexes[count] = color;
@@ -180,7 +180,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         // 读取精灵相关数据，太杂乱了，未命名
 
         // 精灵朝向帧
-        setPrgRomPosition(buffer, 0x34597);
+        setPrgRomPosition(0x34597);
         get(buffer, xA597);
         // 精灵的姿态
         get(buffer, xA59B);
@@ -188,34 +188,34 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         // 精灵图像值
         // 起始值最小为1，所以需要减1
         // 但避免使用 索引0 这个无效数据
-        setPrgRomPosition(buffer, 0x3459F - 0x01);
+        setPrgRomPosition(0x3459F - 0x01);
         get(buffer, xA59E);
 
         // 精灵的姿态和调色板值
         // 起始值最小为1，所以需要减1
         // 但避免使用 索引0 这个无效数据
-        setPrgRomPosition(buffer, 0x345DE - 0x01);
+        setPrgRomPosition(0x345DE - 0x01);
         get(buffer, xA5DD);
 
         // 精灵的上半部分图像块差值
-        setPrgRomPosition(buffer, 0x263F2);
+        setPrgRomPosition(0x263F2);
         get(buffer, x83F2);
         // 精灵的下半部分图像块差值
         get(buffer, x83FA);
 
         // 精灵图像块差值索引等
-        setPrgRomPosition(buffer, 0x2647B);
+        setPrgRomPosition(0x2647B);
         get(buffer, x847B);
 
         // 精灵的图像上半部分索引
         // 起始值最小为1，所以需要减1
         // 但避免使用 索引0 这个无效数据
-        setPrgRomPosition(buffer, 0x26553 - 0x01);
+        setPrgRomPosition(0x26553 - 0x01);
         get(buffer, x8552);
         // 精灵的图像下半部分索引
         // 起始值最小为1，所以需要减1
         // 但避免使用 索引0 这个无效数据
-        setPrgRomPosition(buffer, 0x2662A - 0x01);
+        setPrgRomPosition(0x2662A - 0x01);
         get(buffer, x8629);
         return true;
     }
@@ -223,7 +223,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         // 写入所有tile
-        setChrRomPosition(buffer, TILE_SET_START_OFFSET);
+        setChrRomPosition(TILE_SET_START_OFFSET);
         for (byte[][] tile : tiles) {
             for (byte[] bytes : tile) {
                 put(buffer, bytes);
@@ -231,7 +231,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         }
 
         // 写入tile组合
-        setChrRomPosition(buffer, TILE_SET_COMPOSITIONS_START_OFFSET);
+        setChrRomPosition(TILE_SET_COMPOSITIONS_START_OFFSET);
         for (byte[][] composition : compositions) {
             for (byte[] bytes : composition) {
                 put(buffer, bytes);
@@ -239,13 +239,13 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         }
 
         // 写入tile的特性和调色板
-        setChrRomPosition(buffer, TILE_SET_COLOR_INDEX_START_OFFSET);
+        setChrRomPosition(TILE_SET_COLOR_INDEX_START_OFFSET);
         for (byte[] bytes : colorIndex) {
             put(buffer, bytes);
         }
 
         // 写入世界地图tile组合
-        setPrgRomPosition(buffer, TILE_SET_WORLD_COMPOSITIONS_START_OFFSET);
+        setPrgRomPosition(TILE_SET_WORLD_COMPOSITIONS_START_OFFSET);
         for (byte[][] composition : worldCompositions) {
             for (byte[] bytes : composition) {
                 put(buffer, bytes);
@@ -253,7 +253,7 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         }
 
         // 写入世界地图tile的特性和调色板
-        setPrgRomPosition(buffer, TILE_SET_WORLD_COLOR_INDEX_START_OFFSET);
+        setPrgRomPosition(TILE_SET_WORLD_COLOR_INDEX_START_OFFSET);
         for (byte[] bytes : worldColorIndexes) {
             put(buffer, bytes);
         }
@@ -261,37 +261,37 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
         // 写入精灵相关数据
 
         // 写入精灵朝向帧
-        setPrgRomPosition(buffer, 0x34597);
+        setPrgRomPosition(0x34597);
         put(buffer, xA597);
         // 写入精灵的姿态
         put(buffer, xA59B);
 
         // 写入精灵图像值
-        setPrgRomPosition(buffer, 0x3459F);
+        setPrgRomPosition(0x3459F);
         put(buffer, xA59E, 1, xA59E.length - 1);
         // 写入精灵的姿态和调色板值
-        setPrgRomPosition(buffer, 0x345DE);
+        setPrgRomPosition(0x345DE);
         put(buffer, xA5DD, 1, xA5DD.length - 1);
 
         // 写入精灵的上半部分图像块差值
-        setPrgRomPosition(buffer, 0x263F2);
+        setPrgRomPosition(0x263F2);
         put(buffer, x83F2);
         // 写入精灵的下半部分图像块差值
         put(buffer, x83FA);
 
         // 写入精灵图像块差值索引等
-        setPrgRomPosition(buffer, 0x2647B);
+        setPrgRomPosition(0x2647B);
         put(buffer, x847B);
 
         // 精灵的图像上半部分索引
         // 起始值最小为1
         // 第一个数据为无效数据
-        setPrgRomPosition(buffer, 0x26553);
+        setPrgRomPosition(0x26553);
         put(buffer, x8552, 1, x8552.length - 1);
         // 精灵的图像下半部分索引
         // 起始值最小为1
         // 第一个数据为无效数据
-        setPrgRomPosition(buffer, 0x2662A);
+        setPrgRomPosition(0x2662A);
         put(buffer, x8629, 1, x8629.length - 1);
         return true;
     }

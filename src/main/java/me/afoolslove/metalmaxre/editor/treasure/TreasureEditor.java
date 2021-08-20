@@ -58,7 +58,7 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
         byte[] items = new byte[TREASURE_MAX_COUNT];
 
         // 宝藏的数据按顺序存放（地图、X、Y、物品
-        setPrgRomPosition(buffer, TREASURE_START_OFFSET);
+        setPrgRomPosition(TREASURE_START_OFFSET);
         get(buffer, maps);
         get(buffer, xs);
         get(buffer, ys);
@@ -106,7 +106,7 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
             i++;
         }
 
-        setPrgRomPosition(buffer, TREASURE_START_OFFSET);
+        setPrgRomPosition(TREASURE_START_OFFSET);
         put(buffer, maps);
         put(buffer, xs);
         put(buffer, ys);

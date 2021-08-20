@@ -32,7 +32,7 @@ public class PlayerArmor extends PlayerEquipmentItem {
      * @see DataValues#get2ByteValue()
      */
     public int getDefenseValue() {
-        return DataValues.VALUES.get(value);
+        return DataValues.VALUES.get(value & 0xFF);
     }
 
 }

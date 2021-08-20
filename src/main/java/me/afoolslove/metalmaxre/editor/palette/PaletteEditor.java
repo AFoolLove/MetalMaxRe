@@ -44,7 +44,7 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
         spritePalette.clear();
         battleSpritePalette.clear();
 
-        setPrgRomPosition(buffer, PALETTE_START_OFFSET);
+        setPrgRomPosition(PALETTE_START_OFFSET);
         // 读取所有调色板集（9byte）
         for (int i = 0; i < (PALETTE_LIST_COUNT / 0x03); i++) {
             PaletteList palettes = new PaletteList();
@@ -60,7 +60,7 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
         }
 
         // 读取精灵调色板，固定数值
-        setPrgRomPosition(buffer, PALETTE_LIST_SPRITE);
+        setPrgRomPosition(PALETTE_LIST_SPRITE);
         for (int i = 0; i < 0x04; i++) {
             bufferPosition++; // 跳过 0x0F
             spritePalette.add(new Palette(buffer, bufferPosition));
@@ -68,7 +68,7 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
         }
 
         // 读取战斗时的精灵调色板
-        setPrgRomPosition(buffer, PALETTE_LIST_BATTLE_SPRITE);
+        setPrgRomPosition(PALETTE_LIST_BATTLE_SPRITE);
         for (int i = 0; i < 0x04; i++) {
             battleSpritePalette.add(new Palette(buffer, bufferPosition));
             bufferPosition += 3;
@@ -78,7 +78,7 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        setPrgRomPosition(buffer, PALETTE_START_OFFSET);
+        setPrgRomPosition(PALETTE_START_OFFSET);
         // 写入所有调色板集
         // 限制数据
         Iterator<PaletteList> iterator = paletteLists.iterator();
@@ -103,13 +103,13 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
         }
 
         // 写入精灵调色板
-        setPrgRomPosition(buffer, PALETTE_LIST_SPRITE);
+        setPrgRomPosition(PALETTE_LIST_SPRITE);
         for (int i = 0; i < 0x04; i++) {
             put(buffer, spritePalette.get(i).colors);
         }
 
         // 写入战斗时的精灵调色板
-        setPrgRomPosition(buffer, PALETTE_LIST_BATTLE_SPRITE);
+        setPrgRomPosition(PALETTE_LIST_BATTLE_SPRITE);
         for (int i = 0; i < 0x04; i++) {
             byte[] palette = battleSpritePalette.get(i).colors;
             // 只写入后三位

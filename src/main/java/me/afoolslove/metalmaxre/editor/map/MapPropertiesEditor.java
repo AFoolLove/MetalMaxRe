@@ -64,11 +64,11 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         // 读取地图属性索引，上卷 0x40、下卷 0xB0
         // 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
         char[] mapIndexRoll = new char[0x40 + 0xB0];
-        setPrgRomPosition(buffer, MAP_PROPERTIES_UP_ROLL_OFFSET);
+        setPrgRomPosition(MAP_PROPERTIES_UP_ROLL_OFFSET);
         for (int i = 0; i < 0x40; i++) {
             mapIndexRoll[i] = (char) NumberR.toInt(get(buffer), get(buffer));
         }
-        setPrgRomPosition(buffer, MAP_PROPERTIES_DOWN_ROLL_OFFSET);
+        setPrgRomPosition(MAP_PROPERTIES_DOWN_ROLL_OFFSET);
         for (int i = 0; i < 0xB0; i++) {
             mapIndexRoll[0x40 + i] = (char) NumberR.toInt(get(buffer), get(buffer));
         }
@@ -76,7 +76,7 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         // 通过地图属性索引读取地图属性
         byte[] properties = new byte[MapProperties.PROPERTIES_MAX_LENGTH];
         for (char index : mapIndexRoll) {
-            setPrgRomPosition(buffer, MAP_PROPERTIES_START_OFFSET + index);
+            setPrgRomPosition(MAP_PROPERTIES_START_OFFSET + index);
             // 获取基本属性，将两个不确定属性排除
             get(buffer, properties, 0, MapProperties.PROPERTIES_MAX_LENGTH - 2 - 2);
             if (MapProperties.hasDyTile(properties[0])) {
@@ -138,7 +138,7 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         Map<Integer, Character> mapping = new HashMap<>();
 //        char[] mapIndexRoll = new char[0x40 + 0xB0];
 
-        setPrgRomPosition(buffer, MAP_PROPERTIES_UP_ROLL_OFFSET);
+        setPrgRomPosition(MAP_PROPERTIES_UP_ROLL_OFFSET);
         // 固定值，无任何作用？
         put(buffer, 0x00);
         put(buffer, 0x00);
@@ -161,7 +161,7 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
             }
         }
 
-        setPrgRomPosition(buffer, MAP_PROPERTIES_DOWN_ROLL_OFFSET);
+        setPrgRomPosition(MAP_PROPERTIES_DOWN_ROLL_OFFSET);
         for (int i = 0x40; i < (0x40 + 0xB0); i++) {
             int hashCode = Arrays.hashCode(properties[i]);
             Character character = mapping.get(hashCode);
@@ -179,7 +179,7 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         }
 
         // 写入地图属性
-        setPrgRomPosition(buffer, MAP_PROPERTIES_OFFSET);
+        setPrgRomPosition(MAP_PROPERTIES_OFFSET);
         for (int i = 0x01; i < properties.length - 1; i++) {
             put(buffer, properties[i]);
         }

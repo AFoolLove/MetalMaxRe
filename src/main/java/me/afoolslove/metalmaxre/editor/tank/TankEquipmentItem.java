@@ -68,6 +68,6 @@ public class TankEquipmentItem extends Item {
      * @see DataValues#get2ByteValue()
      */
     public int getDefenseValue() {
-        return DataValues.VALUES.get(defense);
+        return DataValues.VALUES.get(defense & 0xFF);
     }
 }

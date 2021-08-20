@@ -51,7 +51,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
         sprites.clear();
 
         // 读取精灵数据索引
-        setPrgRomPosition(buffer, SPRITE_INDEX_START_OFFSET);
+        setPrgRomPosition(SPRITE_INDEX_START_OFFSET);
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
 
         for (int i = 0; i < 0xF0 + 0x0A; i++) {
@@ -72,7 +72,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
             }
 
             // 读取精灵
-            setPrgRomPosition(buffer, 0x24000 + spritesIndex - 0x8000);
+            setPrgRomPosition(0x24000 + spritesIndex - 0x8000);
             // 获取奖励数量
             int count = get(buffer);
 
@@ -99,7 +99,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
         // 不提供精灵数据索引的修改！！
 
         // 指向精灵数据
-        setPrgRomPosition(buffer, SPRITE_START_OFFSET);
+        setPrgRomPosition(SPRITE_START_OFFSET);
 
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
 
@@ -140,7 +140,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
         }
 
         // 写入精灵数据索引
-        setPrgRomPosition(buffer, SPRITE_INDEX_START_OFFSET);
+        setPrgRomPosition(SPRITE_INDEX_START_OFFSET);
         for (Character spritesIndex : spritesIndexes) {
             putChar(buffer, NumberR.toChar(spritesIndex));
         }

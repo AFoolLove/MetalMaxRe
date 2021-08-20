@@ -45,7 +45,7 @@ public class PlayerEditor extends AbstractEditor<PlayerEditor> {
         }
 
         // 从初始金钱开始读取
-        setPrgRomPosition(buffer, PLAYER_START_OFFSET);
+        setPrgRomPosition(PLAYER_START_OFFSET);
         money = NumberR.toInt(get(buffer), get(buffer), get(buffer));
 
         // 读取初始最大生命值
@@ -138,7 +138,7 @@ public class PlayerEditor extends AbstractEditor<PlayerEditor> {
         }
 
         // 从初始金钱开始写入
-        setPrgRomPosition(buffer, PLAYER_START_OFFSET);
+        setPrgRomPosition(PLAYER_START_OFFSET);
         put(buffer, getMoneyByteArray());
         // 写入初始最大生命值
         for (int i = 0; i < 0x03; i++) {

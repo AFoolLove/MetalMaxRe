@@ -43,6 +43,6 @@ public class Item {
      * @see DataValues
      */
     public int getPriceValue() {
-        return DataValues.VALUES.get(price);
+        return DataValues.VALUES.get(price & 0xFF);
     }
 }

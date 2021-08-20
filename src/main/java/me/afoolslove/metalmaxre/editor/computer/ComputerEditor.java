@@ -54,7 +54,7 @@ public class ComputerEditor extends AbstractEditor<ComputerEditor> {
         byte[] xs = new byte[COMPUTER_MAX_COUNT];
         byte[] ys = new byte[COMPUTER_MAX_COUNT];
 
-        setPrgRomPosition(buffer, COMPUTER_START_OFFSET);
+        setPrgRomPosition(COMPUTER_START_OFFSET);
         get(buffer, maps);
         get(buffer, types);
         get(buffer, xs);
@@ -103,7 +103,7 @@ public class ComputerEditor extends AbstractEditor<ComputerEditor> {
         }
 
         // 写入
-        setPrgRomPosition(buffer, COMPUTER_START_OFFSET);
+        setPrgRomPosition(COMPUTER_START_OFFSET);
         put(buffer, maps);
         put(buffer, types);
         put(buffer, xs);

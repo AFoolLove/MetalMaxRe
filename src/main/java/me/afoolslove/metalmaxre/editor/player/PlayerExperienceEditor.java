@@ -36,7 +36,7 @@ public class PlayerExperienceEditor extends AbstractEditor<PlayerExperienceEdito
         experiences.clear();
 
         // 读取升级到2-99级的所需经验
-        setPrgRomPosition(buffer, PLAYER_LEVEL_EXP_START);
+        setPrgRomPosition(PLAYER_LEVEL_EXP_START);
         for (int i = 2; i <= 99; i++) {
             experiences.put(i, NumberR.toInt(get(buffer), get(buffer), get(buffer)));
         }
@@ -46,7 +46,7 @@ public class PlayerExperienceEditor extends AbstractEditor<PlayerExperienceEdito
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         // 写入升级到2-99级的所需经验
-        setPrgRomPosition(buffer, PLAYER_LEVEL_EXP_START);
+        setPrgRomPosition(PLAYER_LEVEL_EXP_START);
         for (int i = 2; i <= 99; i++) {
             int experience = experiences.get(i);
             put(buffer, NumberR.toByteArray(experience, 3, false));

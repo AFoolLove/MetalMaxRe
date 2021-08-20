@@ -74,7 +74,7 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         // (0x30 & 0B1111_1000) >>> 3 // 0x0441的偏移量
         // (0x30 & 0x0000_0111) // 指向的bit位
         // 读取目的地坐标
-        setPrgRomPosition(buffer, DESTINATION_POINT_START_OFFSET);
+        setPrgRomPosition(DESTINATION_POINT_START_OFFSET);
         get(buffer, xs);
         get(buffer, ys);
 
@@ -89,7 +89,7 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         byte[] townValues = new byte[DESTINATION_MAX_COUNT];
 
         // 读取城镇
-        setPrgRomPosition(buffer, DESTINATION_START_OFFSET);
+        setPrgRomPosition(DESTINATION_START_OFFSET);
         get(buffer, towns);
         // 读取城镇数据
         // 这个数据就厉害了
@@ -119,13 +119,13 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         xs = new byte[TELEPORT_MAP_MAX_MAP_COUNT];
         ys = new byte[TELEPORT_MAP_MAX_MAP_COUNT];
         // 读取时空隧道所有目的地地图
-        setPrgRomPosition(buffer, TELEPORT_MAP_START_OFFSET);
+        setPrgRomPosition(TELEPORT_MAP_START_OFFSET);
         get(buffer, maps);
         // 读取时空隧道所有目的地地图的X坐标
-        setPrgRomPosition(buffer, TELEPORT_MAP_X_START_OFFSET);
+        setPrgRomPosition(TELEPORT_MAP_X_START_OFFSET);
         get(buffer, xs);
         // 读取时空隧道所有目的地地图的Y坐标
-        setPrgRomPosition(buffer, TELEPORT_MAP_Y_START_OFFSET);
+        setPrgRomPosition(TELEPORT_MAP_Y_START_OFFSET);
         get(buffer, ys);
         for (int i = 0; i < TELEPORT_MAP_MAX_MAP_COUNT; i++) {
             teleport.put(i, new MapPoint(maps[i], xs[i], ys[i]));
@@ -159,7 +159,7 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         }
 
         // 写入目的地
-        setPrgRomPosition(buffer, DESTINATION_POINT_START_OFFSET);
+        setPrgRomPosition(DESTINATION_POINT_START_OFFSET);
         put(buffer, xs);
         put(buffer, ys);
 
@@ -173,7 +173,7 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         });
 
         // 写入城镇
-        setPrgRomPosition(buffer, DESTINATION_START_OFFSET);
+        setPrgRomPosition(DESTINATION_START_OFFSET);
         while (townIterator.hasNext()) {
             Integer next = townIterator.next();
             put(buffer, next.byteValue());
@@ -215,13 +215,13 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
             ys[i] = point.getY();
         }
         // 写入时空隧道所有目的地地图
-        setPrgRomPosition(buffer, TELEPORT_MAP_START_OFFSET);
+        setPrgRomPosition(TELEPORT_MAP_START_OFFSET);
         put(buffer, maps);
         // 写入时空隧道所有目的地地图的X坐标
-        setPrgRomPosition(buffer, TELEPORT_MAP_X_START_OFFSET);
+        setPrgRomPosition(TELEPORT_MAP_X_START_OFFSET);
         put(buffer, xs);
         // 写入时空隧道所有目的地地图的Y坐标
-        setPrgRomPosition(buffer, TELEPORT_MAP_Y_START_OFFSET);
+        setPrgRomPosition(TELEPORT_MAP_Y_START_OFFSET);
         put(buffer, ys);
         return true;
     }

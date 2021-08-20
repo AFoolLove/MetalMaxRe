@@ -158,23 +158,23 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         mines.clear();
 
         // 读取世界地图图块索引偏移
-        setPrgRomPosition(buffer, WORLD_MAP_TILES_INDEX_OFFSET_START);
+        setPrgRomPosition(WORLD_MAP_TILES_INDEX_OFFSET_START);
         get(buffer, indexOffsets);
         // 读取图块组索引
-        setPrgRomPosition(buffer, WORLD_MAP_X00410_START);
+        setPrgRomPosition(WORLD_MAP_X00410_START);
         get(buffer, x00410);
         // 读取图块组A
-        setPrgRomPosition(buffer, WORLD_MAP_INDEX_A_START);
+        setPrgRomPosition(WORLD_MAP_INDEX_A_START);
         for (byte[] index : indexA) {
             get(buffer, index);
         }
         // 读取图块组B
-        setPrgRomPosition(buffer, WORLD_MAP_INDEX_B_START);
+        setPrgRomPosition(WORLD_MAP_INDEX_B_START);
         for (byte[] index : indexB) {
             get(buffer, index);
         }
         // 读取图块索引
-        setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
+        setChrRomPosition(WORLD_MAP_INDEX_START);
         get(buffer, index);
 
         for (int i = 0; i < 0x1000; i++) {
@@ -218,9 +218,9 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             if (offset >= tempIndex.length) {
                 // 超出安全可编辑的数据
                 if (tempIndex == indexA) {
-                    setPrgRomPosition(buffer, WORLD_MAP_INDEX_A_START + (offset * 0x10));
+                    setPrgRomPosition(WORLD_MAP_INDEX_A_START + (offset * 0x10));
                 } else {
-                    setPrgRomPosition(buffer, WORLD_MAP_INDEX_B_START + (offset * 0x10));
+                    setPrgRomPosition(WORLD_MAP_INDEX_B_START + (offset * 0x10));
                 }
 
                 tiles = new byte[0x10];
@@ -624,23 +624,23 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         }
 
         // 写入世界地图图块索引偏移
-        setPrgRomPosition(buffer, WORLD_MAP_TILES_INDEX_OFFSET_START);
+        setPrgRomPosition(WORLD_MAP_TILES_INDEX_OFFSET_START);
         put(buffer, indexOffsets);
         // 写入图块组索引
-        setPrgRomPosition(buffer, WORLD_MAP_X00410_START);
+        setPrgRomPosition(WORLD_MAP_X00410_START);
         put(buffer, x00410);
         // 写入图块组A
-        setPrgRomPosition(buffer, WORLD_MAP_INDEX_A_START);
+        setPrgRomPosition(WORLD_MAP_INDEX_A_START);
         for (byte[] tiles : indexA) {
             put(buffer, tiles);
         }
         // 写入图块组B
-        setPrgRomPosition(buffer, WORLD_MAP_INDEX_B_START);
+        setPrgRomPosition(WORLD_MAP_INDEX_B_START);
         for (byte[] tiles : indexB) {
             put(buffer, tiles);
         }
         // 写入图块索引
-        setChrRomPosition(buffer, WORLD_MAP_INDEX_START);
+        setChrRomPosition(WORLD_MAP_INDEX_START);
         put(buffer, index);
 
         // 写入4个地雷坐标

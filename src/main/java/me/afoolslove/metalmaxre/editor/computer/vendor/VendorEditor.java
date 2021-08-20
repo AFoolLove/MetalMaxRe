@@ -56,7 +56,7 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
         byte[] counts = new byte[VENDOR_ITEM_COUNT];
         // 读取售货机的商品组合
         // 0x0D 为每组数据固定头字节，非头字节视为读取完毕
-        setPrgRomPosition(buffer, VENDOR_START_OFFSET);
+        setPrgRomPosition(VENDOR_START_OFFSET);
         while (get(buffer) == 0x0D) {
             // 读取商品
             get(buffer, items);
@@ -85,7 +85,7 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
 
         byte[] items = new byte[VENDOR_ITEM_COUNT];
         byte[] counts = new byte[VENDOR_ITEM_COUNT];
-        setPrgRomPosition(buffer, VENDOR_START_OFFSET);
+        setPrgRomPosition(VENDOR_START_OFFSET);
         while (iterator.hasNext()) {
             VendorItemList vendorItemList = iterator.next();
 
