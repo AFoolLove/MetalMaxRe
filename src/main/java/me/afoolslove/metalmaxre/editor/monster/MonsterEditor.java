@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 怪物编辑器
@@ -31,6 +32,10 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
      * 怪物命中率
      */
     public static final int MONSTER_HIT_RATES_OFFSET = 0x38C23 - 0x10;
+    /**
+     * 怪物战斗等级
+     */
+    public static final int MONSTER_BATTLE_LEVEL_OFFSET = 0x38CA6 - 0x10;
 
     /**
      * 怪物的掉落物
@@ -100,6 +105,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         byte[] speeds = new byte[MONSTER_COUNT];
         byte[] hitRates = new byte[MONSTER_COUNT];
         byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
+        byte[] battleLevels = new byte[MONSTER_COUNT];
 
         // 读取怪物出手攻击速度
         setPrgRomPosition(MONSTER_SPEEDS_OFFSET);
@@ -108,10 +114,13 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         // 读取怪物命中率
 //        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
         get(buffer, hitRates);
+//        setPrgRomPosition(MONSTER_BATTLE_LEVEL_OFFSET);
+        get(buffer, battleLevels);
 
         // 读取怪物掉落物
         setPrgRomPosition(MONSTER_DROPS_ITEMS_OFFSET);
         get(buffer, dropsItems);
+
 
         for (int monsterId = 0; monsterId < MONSTER_COUNT; monsterId++) {
             Monster monster;
@@ -129,8 +138,13 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
                     monster.setDropsItem(dropsItems[monsterId - 0x18]);
                 }
             }
+            // 设置速度
             monster.setSpeed(speeds[monsterId]);
+            // 设置命中率
             monster.setHitRate(hitRates[monsterId]);
+            // 设置战斗等级
+            monster.setBattleLevel(battleLevels[monsterId]);
+
             monsters.put(monsterId, monster);
         }
 
@@ -251,6 +265,52 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
      */
     public Monster getMonster(byte monsterId) {
         return monsters.get(monsterId & 0xFF);
+    }
+
+    /**
+     * @return 所有怪物组合集
+     */
+    public MonsterGroup[] getMonsterGroups() {
+        return monsterGroups;
+    }
+
+    /**
+     * 获取指定位置的怪物组合
+     *
+     * @param index 索引
+     * @return 怪物组合
+     */
+    public MonsterGroup getMonsterGroup(@Range(from = 0x00, to = MONSTER_GROUP_MAX_COUNT - 1) int index) {
+        return monsterGroups[index];
+    }
+
+    /**
+     * 获取所有特殊怪物组合集
+     *
+     * @return 所有特殊怪物组合集
+     */
+    public SpecialMonsterGroup[] getSpecialMonsterGroups() {
+        return specialMonsterGroups;
+    }
+
+    /**
+     * 获取指定位置的特殊怪物组合集
+     *
+     * @param index 索引
+     * @return 特殊怪物组合集
+     */
+    public SpecialMonsterGroup getSpecialMonsterGroup(@Range(from = 0x00, to = SPECIAL_MONSTER_GROUP_MAX_COUNT - 1) int index) {
+        return specialMonsterGroups[index];
+    }
+
+    /**
+     * @return 所有赏金首怪物的属性
+     */
+    public List<WantedMonster> getWantedMonsters() {
+        return monsters.values().parallelStream()
+                .filter(monster -> monster instanceof WantedMonster)
+                .map(monster -> ((WantedMonster) monster))
+                .collect(Collectors.toList());
     }
 
     /**

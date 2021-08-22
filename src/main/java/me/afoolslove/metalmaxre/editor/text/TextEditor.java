@@ -30,6 +30,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
     public static final int X_11F75 = 0x11F75;
     public static final int X_12010 = 0x12010;
     public static final int X_120E0 = 0x120E0;
+    public static final int X_17680 = 0x17680;
     public static final int X_21AF6 = 0x21AF6;
 
     public static final Map<Integer, Integer> POINTS = new HashMap<>();
@@ -37,6 +38,8 @@ public class TextEditor extends AbstractEditor<TextEditor> {
     private final Map<Integer, TextParagraphs> paragraphsMap = new HashMap<>();
 
     static {
+        // K: startPosition
+        // V: endPosition
         POINTS.put(X_0BE90, 0x0C00F); // 0x00
         POINTS.put(X_10010, 0x10DB2); // 0x01
         POINTS.put(X_10DB3, 0x1157B); // 0x02
@@ -46,6 +49,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
         POINTS.put(X_11F75, 0x1200F); // 0x06
         POINTS.put(X_12010, 0x120DF); // 0x07
         POINTS.put(X_120E0, 0x132FE); // 0x08
+        POINTS.put(X_17680, 0x1800F); // 对话
         POINTS.put(X_21AF6, 0x21E80); // 怪物名称
     }
 

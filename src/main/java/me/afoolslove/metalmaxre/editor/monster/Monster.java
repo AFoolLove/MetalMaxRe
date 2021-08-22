@@ -80,6 +80,20 @@ public class Monster {
     }
 
     /**
+     * 设置怪物的战斗等级
+     * 0B0111_1111 战斗等级（0x00-0x7F）
+     * 0B1000_0000 影响 $72CC（未测试淦什么的），效果与命中率数据一致
+     */
+    public void setBattleLevel(byte battleLevel) {
+        this.battleLevel = battleLevel;
+    }
+
+    public void setBattleLevel(@Range(from = 0x00, to = 0xFF) int battleLevel) {
+        this.battleLevel = (byte) (battleLevel & 0xFF);
+    }
+
+
+    /**
      * 设置掉落物
      * 注：只有怪物ID范围在0x18-0x82内才能设置为有效的战利品
      */
@@ -115,6 +129,17 @@ public class Monster {
     @Range(from = 0x00, to = 0xFF)
     public int intHitRate() {
         return getHitRate() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的战斗等级
+     */
+    public byte getBattleLevel() {
+        return battleLevel;
+    }
+
+    public int intBattleLevel() {
+        return battleLevel;
     }
 
     /**

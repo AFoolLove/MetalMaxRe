@@ -237,6 +237,7 @@ public class MainWindow extends JFrame {
                         ex.printStackTrace(printWriter);
                         JOptionPane.showMessageDialog(this, "导入失败\n" + out);
                     }
+                    System.out.format("Import world map from %s OK.",selectedFile.getAbsolutePath());
                 }
             }
         });
@@ -321,6 +322,7 @@ public class MainWindow extends JFrame {
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
+                System.out.format("Export world map to %s OK.", selectedFile.getAbsolutePath());
             }
         });
 

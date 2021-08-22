@@ -53,6 +53,10 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
     public static final int MAP_PROPERTIES_START_OFFSET = MAP_PROPERTIES_OFFSET - 0x08500;
     public static final int MAP_PROPERTIES_END_OFFSET = 0x0FBBD - 0x08500 - 0x10;
 
+    public static final int MAP_PROPERTIES_MONSTER_GROUP_INDEX_START_OFFSET = 0x39343 - 0x10;
+    public static final int MAP_PROPERTIES_MONSTER_GROUP_INDEX_END_OFFSET = 0x393B2 - 0x10;
+
+
     private final LinkedHashMap<Integer, MapProperties> mapProperties = new LinkedHashMap<>(MapEditor.MAP_MAX_COUNT);
 
 
@@ -61,42 +65,9 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         // 读取前清空数据
         mapProperties.clear();
 
-        // 读取地图属性索引，上卷 0x40、下卷 0xB0
-        // 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
-        char[] mapIndexRoll = new char[0x40 + 0xB0];
-        setPrgRomPosition(MAP_PROPERTIES_UP_ROLL_OFFSET);
-        for (int i = 0; i < 0x40; i++) {
-            mapIndexRoll[i] = (char) NumberR.toInt(get(buffer), get(buffer));
-        }
-        setPrgRomPosition(MAP_PROPERTIES_DOWN_ROLL_OFFSET);
-        for (int i = 0; i < 0xB0; i++) {
-            mapIndexRoll[0x40 + i] = (char) NumberR.toInt(get(buffer), get(buffer));
-        }
-
-        // 通过地图属性索引读取地图属性
-        byte[] properties = new byte[MapProperties.PROPERTIES_MAX_LENGTH];
-        for (char index : mapIndexRoll) {
-            setPrgRomPosition(MAP_PROPERTIES_START_OFFSET + index);
-            // 获取基本属性，将两个不确定属性排除
-            get(buffer, properties, 0, MapProperties.PROPERTIES_MAX_LENGTH - 2 - 2);
-            if (MapProperties.hasDyTile(properties[0])) {
-                // 如果存在动态图块，读取属性
-                properties[0x18] = get(buffer);
-                properties[0x19] = get(buffer);
-            }
-            if (MapProperties.hasEventTile(properties[0])) {
-                // 如果存在事件图块，读取属性
-                properties[0x1A] = get(buffer);
-                properties[0x1B] = get(buffer);
-            }
-            mapProperties.put(mapProperties.size(), new MapProperties(properties));
-        }
-
-        // 移除世界地图（无效数据
-        mapProperties.remove(0x00);
 
         // 读取世界地图属性
-        Arrays.fill(properties, (byte) 0x00);
+        byte[] properties = new byte[MapProperties.PROPERTIES_MAX_LENGTH];
         // 读取宽度、高度，因为在代码中使用同一个数据赋值，所以宽高只能一样
         properties[0x01] = buffer.get(0x28A87);
         properties[0x02] = properties[0x01];
@@ -115,6 +86,45 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
 
         // 添加世界地图属性
         mapProperties.put(0x00, new WorldMapProperties(properties));
+
+        // 读取地图属性索引，上卷 0x40、下卷 0xB0
+        // 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
+        char[] mapIndexRoll = new char[0x40 + 0xB0];
+        setPrgRomPosition(MAP_PROPERTIES_UP_ROLL_OFFSET);
+        for (int i = 0; i < 0x40; i++) {
+            mapIndexRoll[i] = (char) NumberR.toInt(get(buffer), get(buffer));
+        }
+        setPrgRomPosition(MAP_PROPERTIES_DOWN_ROLL_OFFSET);
+        for (int i = 0; i < 0xB0; i++) {
+            mapIndexRoll[0x40 + i] = (char) NumberR.toInt(get(buffer), get(buffer));
+        }
+
+        // 通过地图属性索引读取地图属性
+        // MapID从1开始，0是世界地图
+        for (int mapId = 1; mapId < mapIndexRoll.length; mapId++) {
+            char index = mapIndexRoll[mapId];
+            setPrgRomPosition(MAP_PROPERTIES_START_OFFSET + index);
+            // 获取基本属性，将两个不确定属性排除
+            get(buffer, properties, 0, MapProperties.PROPERTIES_MAX_LENGTH - 2 - 2);
+            if (MapProperties.hasDyTile(properties[0])) {
+                // 如果存在动态图块，读取属性
+                properties[0x18] = get(buffer);
+                properties[0x19] = get(buffer);
+            }
+            if (MapProperties.hasEventTile(properties[0])) {
+                // 如果存在事件图块，读取属性
+                properties[0x1A] = get(buffer);
+                properties[0x1B] = get(buffer);
+            }
+
+            MapProperties mapProperties = new MapProperties(properties);
+            if (mapId >= 0x80) {
+                // 读取地图怪物组合索引
+                setPrgRomPosition(MAP_PROPERTIES_MONSTER_GROUP_INDEX_START_OFFSET + (mapId - 0x80));
+                mapProperties.monsterGroupIndex = get(buffer);
+            }
+            this.mapProperties.put(mapId, mapProperties);
+        }
         return true;
     }
 
@@ -176,6 +186,13 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
                 putChar(buffer, NumberR.toChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
             }
+        }
+
+        // 写入地图怪物组合索引
+        setPrgRomPosition(MAP_PROPERTIES_MONSTER_GROUP_INDEX_START_OFFSET);
+        for (int mapId = 0x80; mapId < MapEditor.MAP_MAX_COUNT; mapId++) {
+            MapProperties mapProperties = this.mapProperties.get(mapId);
+            put(buffer, mapProperties.monsterGroupIndex);
         }
 
         // 写入地图属性

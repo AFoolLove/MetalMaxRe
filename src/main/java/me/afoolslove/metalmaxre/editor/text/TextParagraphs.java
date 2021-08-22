@@ -125,25 +125,31 @@ public class TextParagraphs extends ArrayList<String> {
                     // 判断是否为已知的文本段
                     switch (pointStart) {
                         case 0x14:
-                            point = 0x0BE90;
+                            point = TextEditor.X_0BE90;
                             break;
                         case 0x09:
-                            point = 0x10010;
+                            point = TextEditor.X_10010;
                             break;
                         case 0x03:
-                            point = 0x10DB3;
-                            break;
-                        case 0x0C:
-                            point = 0x12010;
-                            break;
-                        case 0x0D:
-                            point = 0x120E0;
+                            point = TextEditor.X_10DB3;
                             break;
                         case 0x12:
-                            point = 0x1157C;
+                            point = TextEditor.X_1157C;
                             break;
                         case 0x13:
-                            point = 0x11933;
+                            point = TextEditor.X_11933;
+                            break;
+                        case 0x0C:
+                            point = TextEditor.X_12010;
+                            break;
+                        case 0x0D:
+                            point = TextEditor.X_120E0;
+                            break;
+                        case 0x0F:
+                            point = TextEditor.X_17680;
+                            break;
+                        case 0x01:
+                            point = TextEditor.X_21AF6;
                             break;
                         default:
                             break;
@@ -167,9 +173,6 @@ public class TextParagraphs extends ArrayList<String> {
                         case 0x00:
                             point = 0x11A20;
                             break;
-//                        case 0x01:
-//                            point = 0x21AF6;
-//                            break;
                         case 0x02:
                             point = 0x10129;
                             break;
@@ -196,9 +199,6 @@ public class TextParagraphs extends ArrayList<String> {
                             break;
                         case 0x0E:
                             point = 0x18010;
-                            break;
-                        case 0x0F:
-                            point = 0x17680;
                             break;
                         case 0x10:
                             point = 0x13320;

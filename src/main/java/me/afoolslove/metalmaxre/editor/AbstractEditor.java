@@ -5,7 +5,7 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -124,6 +124,38 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         buffer.put(bufferPosition, dst, offset, length);
         bufferPosition += length;
         return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T put(@NotNull ByteBuffer buffer, int index, byte b) {
+        buffer.put(index, b);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T put(@NotNull ByteBuffer buffer, int index, byte[] src) {
+        buffer.put(index, src);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T putChrRom(@NotNull ByteBuffer buffer, int offset, byte b) {
+        buffer.put(getHeader().getChrRomStart(offset), b);
+        return (T) this;
+    }
+
+    public T putChrRom(@NotNull ByteBuffer buffer, int offset, int b) {
+        return putChrRom(buffer, offset, (byte) (b & 0xFF));
+    }
+
+    @SuppressWarnings("unchecked")
+    public T putPrgRom(@NotNull ByteBuffer buffer, int offset, byte b) {
+        buffer.put(getHeader().getPrgRomStart(offset), b);
+        return (T) this;
+    }
+
+    public T putPrgRom(@NotNull ByteBuffer buffer, int offset, int b) {
+        return putPrgRom(buffer, offset, (byte) (b & 0xFF));
     }
 
     @SuppressWarnings("unchecked")

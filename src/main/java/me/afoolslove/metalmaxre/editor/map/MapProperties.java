@@ -56,9 +56,15 @@ public class MapProperties {
      */
     public byte dyTileSpeed, dyTile;
     /**
+     * 事件图块索引
      * 可能不存在
      */
     public char eventTilesIndex;
+    /**
+     * 怪物组合索引
+     * 地图ID 0x80及之后的地图才会拥有
+     */
+    public byte monsterGroupIndex;
 
     public MapProperties(byte[] properties) {
         setProperties(properties);
