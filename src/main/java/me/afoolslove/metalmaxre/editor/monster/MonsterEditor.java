@@ -24,6 +24,20 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
      * 怪物种类的总数量
      */
     public static final int MONSTER_COUNT = 0x83;
+
+    /**
+     * 怪物的类型
+     * 怪物的经验值和金钱值是否 *100
+     * 等其它未测试的数据
+     */
+    public static final int MONSTER_ATTRIBUTE_OFFSET = 0x3886E - 0x10;
+
+    /**
+     * 怪物的抗性
+     * 怪物自动恢复HP
+     */
+    public static final int MONSTER_RESISTANCE_OFFSET = 0x3886E - 0x10;
+
     /**
      * 怪物出手攻击的速度
      */
@@ -36,6 +50,16 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
      * 怪物战斗等级
      */
     public static final int MONSTER_BATTLE_LEVEL_OFFSET = 0x38CA6 - 0x10;
+
+    /**
+     * 怪物被击败后玩家获取的经验
+     */
+    public static final int MONSTER_BATTLE_EXPERIENCE_OFFSET = 0x38D29 - 0x10;
+    /**
+     * 怪物被击败后玩家获取的金钱
+     */
+    public static final int MONSTER_BATTLE_GOLD_OFFSET = 0x38DAC - 0x10;
+
 
     /**
      * 怪物的掉落物
@@ -102,20 +126,36 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         monsters.clear();
         worldRealms.clear();
 
+        byte[] attributes = new byte[MONSTER_COUNT];
+        byte[] resistances = new byte[MONSTER_COUNT];
         byte[] speeds = new byte[MONSTER_COUNT];
         byte[] hitRates = new byte[MONSTER_COUNT];
-        byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
         byte[] battleLevels = new byte[MONSTER_COUNT];
+        byte[] experiences = new byte[MONSTER_COUNT];
+        byte[] golds = new byte[MONSTER_COUNT];
+
+        byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
+
+        // 读取怪物的属性
+        setPrgRomPosition(MONSTER_ATTRIBUTE_OFFSET);
+        get(buffer, attributes);
+
+        // 读取怪物的抗性和自动恢复HP
+        setPrgRomPosition(MONSTER_RESISTANCE_OFFSET);
+        get(buffer, resistances);
 
         // 读取怪物出手攻击速度
         setPrgRomPosition(MONSTER_SPEEDS_OFFSET);
         get(buffer, speeds);
-
         // 读取怪物命中率
 //        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
         get(buffer, hitRates);
 //        setPrgRomPosition(MONSTER_BATTLE_LEVEL_OFFSET);
         get(buffer, battleLevels);
+//        setPrgRomPosition(MONSTER_BATTLE_EXPERIENCE_OFFSET);
+        get(buffer, experiences);
+//        setPrgRomPosition(MONSTER_BATTLE_GOLD_OFFSET);
+        get(buffer, golds);
 
         // 读取怪物掉落物
         setPrgRomPosition(MONSTER_DROPS_ITEMS_OFFSET);
@@ -138,12 +178,20 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
                     monster.setDropsItem(dropsItems[monsterId - 0x18]);
                 }
             }
+            // 设置属性
+            monster.setAttribute(attributes[monsterId]);
+            // 设置抗性和自动恢复HP
+            monster.setResistance(resistances[monsterId]);
             // 设置速度
             monster.setSpeed(speeds[monsterId]);
             // 设置命中率
             monster.setHitRate(hitRates[monsterId]);
             // 设置战斗等级
             monster.setBattleLevel(battleLevels[monsterId]);
+            // 设置经验值
+            monster.setExperience(experiences[monsterId]);
+            // 设置金钱值
+            monster.setGold(golds[monsterId]);
 
             monsters.put(monsterId, monster);
         }
@@ -179,16 +227,28 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
+        byte[] attributes = new byte[MONSTER_COUNT];
+        byte[] resistances = new byte[MONSTER_COUNT];
         byte[] speeds = new byte[MONSTER_COUNT];
         byte[] hitRates = new byte[MONSTER_COUNT];
+        byte[] battleLevels = new byte[MONSTER_COUNT];
+        byte[] experiences = new byte[MONSTER_COUNT];
+        byte[] golds = new byte[MONSTER_COUNT];
+
         byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
         byte[] bounty = new byte[WANTED_MONSTER_BOUNTY_MAX_COUNT];
 
         for (Map.Entry<Integer, Monster> entry : monsters.entrySet()) {
             Monster monster = entry.getValue();
             int monsterId = entry.getKey();
+            resistances[monsterId] = monster.resistance;
             speeds[monsterId] = monster.speed;
             hitRates[monsterId] = monster.hitRate;
+            battleLevels[monsterId] = monster.battleLevel;
+            experiences[monsterId] = monster.experience;
+            golds[monsterId] = monster.gold;
+
+            attributes[monsterId] = monster.attribute;
             if (monsterId > 0x00 && monsterId <= WANTED_MONSTER_BOUNTY_MAX_COUNT && monster instanceof WantedMonster wantedMonster) {
                 bounty[monsterId - 1] = wantedMonster.getBounty();
             } else {
@@ -198,12 +258,30 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
             }
         }
 
+        // 写入怪物的属性
+        setPrgRomPosition(MONSTER_ATTRIBUTE_OFFSET);
+        put(buffer, attributes);
+
+        // 写入怪物的抗性和自动恢复HP
+        setPrgRomPosition(MONSTER_RESISTANCE_OFFSET);
+        put(buffer, resistances);
+
         // 写入怪物出手攻击的速度
         setPrgRomPosition(MONSTER_SPEEDS_OFFSET);
         put(buffer, speeds);
         // 写入怪物的命中率
 //        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
         put(buffer, hitRates);
+        // 写入怪物的战斗等级
+//        setPrgRomPosition(MONSTER_BATTLE_LEVEL_OFFSET);
+        put(buffer, battleLevels);
+        // 写入怪物被击败后玩家获取的经验
+//        setPrgRomPosition(MONSTER_BATTLE_EXPERIENCE_OFFSET);
+        put(buffer, experiences);
+        // 写入怪物被击败后玩家获取的金钱
+//        setPrgRomPosition(MONSTER_BATTLE_GOLD_OFFSET);
+        put(buffer, golds);
+
         // 写入怪物的掉落物
         setPrgRomPosition(MONSTER_DROPS_ITEMS_OFFSET);
         put(buffer, dropsItems);

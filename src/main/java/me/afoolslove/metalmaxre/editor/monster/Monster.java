@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.monster;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 /**
@@ -39,18 +40,40 @@ public class Monster {
     /**
      * 经验值
      */
-    public char experience;
+    public byte experience;
     /**
      * 掉落金钱
      */
-    public char gold;
+    public byte gold;
     /**
      * 掉落物
      */
     public byte dropsItem;
 
+    /**
+     * 怪物的类型，等其它属性
+     */
+    public byte attribute;
+
+    /**
+     * 属性抗性和自动恢复HP
+     */
+    public byte resistance;
 
     public Monster() {
+    }
+
+    /**
+     * 设置怪物的属性抗性和战斗回合自动恢复HP
+     *
+     * @param resistance 属性
+     */
+    public void setResistance(byte resistance) {
+        this.resistance = resistance;
+    }
+
+    public void setResistance(@Range(from = 0x00, to = 0xFF) int resistance) {
+        this.resistance = (byte) (resistance & 0xFF);
     }
 
     /**
@@ -92,6 +115,78 @@ public class Monster {
         this.battleLevel = (byte) (battleLevel & 0xFF);
     }
 
+    /**
+     * 设置怪物被击败后玩家获取的经验值
+     * 可以通过 {@link #setHundredfoldExp(boolean)} 将该值*100
+     *
+     * @param experience 经验值
+     * @see #setHundredfoldExp(boolean)
+     */
+    public void setExperience(byte experience) {
+        this.experience = experience;
+    }
+
+    public void setExperience(@Range(from = 0x00, to = 0xFF) int experience) {
+        this.experience = (byte) (experience & 0xFF);
+    }
+
+    /**
+     * 设置怪物的类型等数据
+     * 0B1100_0000 怪物的类型
+     * 0B0010_0000 怪物的经验值*100
+     * 0B0001_0000 怪物的金钱值*100
+     *
+     * @param attribute 属性
+     */
+    public void setAttribute(byte attribute) {
+        this.attribute = attribute;
+    }
+
+    public void setAttribute(@Range(from = 0x00, to = 0xFF) int attribute) {
+        this.attribute = (byte) (attribute & 0xFF);
+    }
+
+    public void setType(@NotNull MonsterType monsterType) {
+        this.attribute &= 0B0011_1111;
+        this.attribute |= monsterType.getValue();
+    }
+
+    /**
+     * 设置被被击败后玩家获取的金钱 *100(当前怪物的金钱)
+     *
+     * @param hundredfoldGold 是否*100
+     */
+    public void setHundredfoldGold(boolean hundredfoldGold) {
+        this.attribute &= 0B1110_1111;
+        if (hundredfoldGold) {
+            this.attribute |= 0B0001_0000;
+        }
+    }
+
+    /**
+     * 设置被被击败后玩家获取的经验值 *100(当前怪物的经验值)
+     *
+     * @param hundredfoldExp 是否*100
+     */
+    public void setHundredfoldExp(boolean hundredfoldExp) {
+        this.attribute &= 0B1101_1111;
+        if (hundredfoldExp) {
+            this.attribute |= 0B0010_0000;
+        }
+    }
+
+    /**
+     * 设置被击败后玩家获取的金钱
+     *
+     * @param gold 金钱
+     */
+    public void setGold(byte gold) {
+        this.gold = gold;
+    }
+
+    public void setGold(@Range(from = 0x00, to = 0xFF) int gold) {
+        this.gold = (byte) (gold & 0xFF);
+    }
 
     /**
      * 设置掉落物
@@ -106,6 +201,17 @@ public class Monster {
     }
 
     // --------------
+
+    /**
+     * @return 属性抗性和自动恢复HP
+     */
+    public byte getResistance() {
+        return resistance;
+    }
+
+    public int intResistance() {
+        return getResistance() & 0xFF;
+    }
 
     /**
      * @return 怪物出手攻击速度
@@ -139,7 +245,64 @@ public class Monster {
     }
 
     public int intBattleLevel() {
-        return battleLevel;
+        return getBattleLevel() & 0xFF;
+    }
+
+    /**
+     * @return 怪物被击破后的玩家获得的经验值
+     */
+    public byte getExperience() {
+        return experience;
+    }
+
+    public int intExperience() {
+        return getExperience() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的类型等属性
+     */
+    public byte getAttribute() {
+        return attribute;
+    }
+
+    public int intAttribute() {
+        return getAttribute() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的类型
+     */
+    public MonsterType getType() {
+        return MonsterType.getType(attribute);
+    }
+
+    /**
+     * @return 怪物的金钱是否*100
+     */
+    public boolean isHundredfoldGold() {
+        return (this.attribute & 0B1110_1111) != 0x00;
+    }
+
+    /**
+     * @return 怪物的经验值是否*100
+     */
+    public boolean isHundredfoldExp() {
+        return (this.attribute & 0B1101_1111) != 0x00;
+    }
+
+    /**
+     * @return 被击败后的金钱
+     */
+    public byte getGold() {
+        return gold;
+    }
+
+    /**
+     * @return 被击败后的金钱
+     */
+    public int intGold() {
+        return getGold() & 0xFF;
     }
 
     /**
