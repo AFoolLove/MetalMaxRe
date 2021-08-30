@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre.editor.map;
 
 import me.afoolslove.metalmaxre.NumberR;
+import org.jetbrains.annotations.Range;
 
 import java.util.Objects;
 
@@ -109,6 +110,105 @@ public class MapProperties {
         return NumberR.toInt(tilesIndexD, tilesIndexC, tilesIndexB, tilesIndexA);
     }
 
+    /**
+     * 设置地图的宽度
+     *
+     * @param width 宽度
+     */
+    public void setWidth(byte width) {
+        this.width = width;
+    }
+
+    public void setWidth(@Range(from = 0x00, to = 0xFF) int width) {
+        setWidth((byte) (width & 0xFF));
+    }
+
+    /**
+     * 设置地图的高度
+     *
+     * @param height 高度
+     */
+    public void setHeight(byte height) {
+        this.height = height;
+    }
+
+    public void setHeight(@Range(from = 0x00, to = 0xFF) int height) {
+        setHeight((byte) (height & 0xFF));
+    }
+
+    /**
+     * 设置地图的填充图块
+     *
+     * @param fillTile 用于填充的图块
+     */
+    public void setFillTile(@Range(from = 0x00, to = 0x7F) byte fillTile) {
+        this.fillTile = fillTile;
+    }
+
+    public void setFillTile(@Range(from = 0x00, to = 0x7F) int fillTile) {
+        setFillTile((byte) (fillTile & 0x7F));
+    }
+
+    /**
+     * 设置地图的隐藏图块（门下图块
+     *
+     * @param hideTile 隐藏的图块
+     */
+    public void setHideTile(byte hideTile) {
+        this.hideTile = hideTile;
+    }
+
+    public void setHideTile(@Range(from = 0x00, to = 0xFF) int hideTile) {
+        setHideTile((byte) (hideTile & 0xFF));
+    }
+
+    /**
+     * @return 地图的宽度
+     */
+    public byte getWidth() {
+        return width;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intWidth() {
+        return getWidth() & 0xFF;
+    }
+
+    /**
+     * @return 地图的高度
+     */
+    public byte getHeight() {
+        return height;
+    }
+
+    public int intHeight() {
+        return getHeight() & 0xFF;
+    }
+
+    /**
+     * @return 用于填充的图块
+     */
+    public byte getFillTile() {
+        return fillTile;
+    }
+
+    @Range(from = 0x00, to = 0x7F)
+    public int intFillTile() {
+        return getFillTile() & 0x7F;
+    }
+
+    /**
+     * @return 隐藏的图块（门下图块
+     */
+    public byte getHideTile() {
+        return hideTile;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intHideTile() {
+        return getHideTile() & 0xFF;
+    }
+
     public boolean hasEventTile() {
         return hasEventTile(this.head);
     }
@@ -121,11 +221,9 @@ public class MapProperties {
         return isUnderground(this.head);
     }
 
-    public boolean isUnderground(int head) {
-        return (head & FLAG_UNDERGROUND) == FLAG_UNDERGROUND;
-    }
-
-
+    /**
+     * @return 将基本属性打包为数组，写入数据时直接写入该数组
+     */
     public byte[] toByteArray() {
         int length = PROPERTIES_MAX_LENGTH;
         if (!hasDyTile()) {
@@ -174,13 +272,22 @@ public class MapProperties {
         return attributes;
     }
 
-
+    /**
+     * @return 是否拥有事件图块
+     */
     public static boolean hasEventTile(int head) {
         return (head & FLAG_EVENT_TILE) == FLAG_EVENT_TILE;
     }
 
     public static boolean hasDyTile(int head) {
         return (head & FLAG_DY_TILE) == FLAG_DY_TILE;
+    }
+
+    /**
+     * @return 是否为地下地图（传送时提示是否返回到地面）
+     */
+    public static boolean isUnderground(int head) {
+        return (head & FLAG_UNDERGROUND) == FLAG_UNDERGROUND;
     }
 
     @Override

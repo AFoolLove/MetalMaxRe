@@ -20,7 +20,7 @@ import java.io.OutputStream;
  */
 public class PatternTables {
     public byte[] chr;
-    public byte[] compositions;
+    public byte[] combinations;
     public Color[][] colors;
 
     /**

@@ -855,8 +855,8 @@ public class TiledMap {
 
         // 获取所有图块属性
         byte[] tileEffect = new byte[0x40 + 0x40];
-        System.arraycopy(tileSetEditor.colorIndex[combinationA], 0, tileEffect, 0, 0x40);
-        System.arraycopy(tileSetEditor.colorIndex[combinationB], 0, tileEffect, 0x40, 0x40);
+        System.arraycopy(tileSetEditor.attributes[combinationA], 0, tileEffect, 0, 0x40);
+        System.arraycopy(tileSetEditor.attributes[combinationB], 0, tileEffect, 0x40, 0x40);
 
         for (int i = 0; i < tileEffect.length; i++) {
             Tile tile = tileSet.getTile(i);
@@ -916,9 +916,9 @@ public class TiledMap {
 
         // 获取所有图块属性
         byte[] tileEffect = new byte[0x40 + 0x40 + 0x40];
-        System.arraycopy(tileSetEditor.worldColorIndexes[0x00], 0, tileEffect, 0x00, 0x40);
-        System.arraycopy(tileSetEditor.worldColorIndexes[0x01], 0, tileEffect, 0x40, 0x40);
-        System.arraycopy(tileSetEditor.worldColorIndexes[0x02], 0, tileEffect, 0x80, 0x40);
+        System.arraycopy(tileSetEditor.worldAttributes[0x00], 0, tileEffect, 0x00, 0x40);
+        System.arraycopy(tileSetEditor.worldAttributes[0x01], 0, tileEffect, 0x40, 0x40);
+        System.arraycopy(tileSetEditor.worldAttributes[0x02], 0, tileEffect, 0x80, 0x40);
 
         for (int i = 0; i < tileEffect.length; i++) {
             Tile tile = tileSet.getTile(i);
