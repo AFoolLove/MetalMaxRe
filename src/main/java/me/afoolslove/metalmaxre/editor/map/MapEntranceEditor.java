@@ -11,23 +11,25 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 地图边界和出入口编辑器
- * <p>
- * 包含世界地图
- * <p>
- * 起始：0x1E990
- * 结束：0x1F999
- * <p>
- * 修改地图的边界类型和地图的出入口
- * <p>
+ * 地图边界和出入口编辑器<p>
+ * 包含世界地图<p>
+ * 起始：0x1E990<p>
+ * 结束：0x1F999<p>
+ * 修改地图的边界类型和地图的出入口<p>
  * 2021年5月31日：已完成并通过测试基本编辑功能
  *
  * @author AFoolLove
  */
 public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
+    /**
+     * 地图边界和出入口数据
+     */
     public static final int MAP_ENTRANCE_START_OFFSET = 0x1E990 - 0x10;
     public static final int MAP_ENTRANCE_END_OFFSET = 0x1F990 - 0x10;
 
+    /**
+     * K：map
+     */
     private final Map<Integer, MapEntrance> mapEntrances = new HashMap<>();
 
     @Override

@@ -5,6 +5,8 @@ import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
+import me.afoolslove.metalmaxre.editor.map.MapProperties;
+import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
 import me.afoolslove.metalmaxre.editor.map.tileset.TileSetEditor;
 import me.afoolslove.metalmaxre.editor.map.world.WorldMapEditor;
 import me.afoolslove.metalmaxre.editor.treasure.Treasure;
@@ -29,6 +31,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -237,7 +241,7 @@ public class MainWindow extends JFrame {
                         ex.printStackTrace(printWriter);
                         JOptionPane.showMessageDialog(this, "导入失败\n" + out);
                     }
-                    System.out.format("Import world map from %s OK.",selectedFile.getAbsolutePath());
+                    System.out.printf("Import world map from %s OK.\n", selectedFile.getAbsolutePath());
                 }
             }
         });
@@ -314,7 +318,7 @@ public class MainWindow extends JFrame {
                 try {
                     File worldTmx = new File(selectedFile, "world.tmx");
                     if (!worldTmx.exists()) {
-                        if (worldTmx.createNewFile()) {
+                        if (!worldTmx.createNewFile()) {
                             return;
                         }
                     }
@@ -322,11 +326,84 @@ public class MainWindow extends JFrame {
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
-                System.out.format("Export world map to %s OK.", selectedFile.getAbsolutePath());
+                System.out.printf("Export world map to %s OK.\n", selectedFile.getAbsolutePath());
+            }
+        });
+
+        JMenuItem fileMenuExportMapTmx = new JMenuItem("Export Map");
+        fileMenuExportMapTmx.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int state = fileChooser.showOpenDialog(this);
+            if (state == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+
+                String maps = JOptionPane.showInputDialog(this, """
+                        导出单个地图：1
+                        导出多个地图：1-2
+                        导出多个地图：1-2,5-6,9,12
+                        地图ID范围： 1-239\
+                        """, "导出地图", JOptionPane.QUESTION_MESSAGE);
+                HashSet<Integer> mapIds = new HashSet<>();
+                for (String ids : maps.strip().split(",")) {
+                    ids = ids.strip();
+                    if (ids.contains("-")) {
+                        String[] range = ids.split("-");
+                        for (int i = Integer.parseInt(range[0]), end = Integer.parseInt(range[1]); i <= end; i++) {
+                            mapIds.add(i);
+                        }
+                    } else {
+                        mapIds.add(Integer.parseInt(ids));
+                    }
+                }
+
+                if (mapIds.isEmpty()) {
+                    return;
+                }
+
+                // selectedDir -> tsx
+                //                -> png
+                //             -> sprite
+                //                -> png
+                //             -> [MapId].tmx
+                selectedFile.mkdirs();
+                final TMXMapWriter tmxMapWriter = new TMXMapWriter();
+                var tileSetEditor = EditorManager.getEditor(TileSetEditor.class);
+                var mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
+
+                for (int mapId : mapIds) {
+                    MapProperties mapProperties = mapPropertiesEditor.getMapProperties(mapId);
+                    String tileSetName = String.format("%08X-%02X%02X-%04X", mapProperties.getIntTiles(), mapProperties.combinationA, mapProperties.combinationB, (int) mapProperties.palette);
+
+                    try {
+                        BufferedImage tileSetBufferedImage = tileSetEditor.generateTileSet(mapProperties, null);
+                        File output = new File(selectedFile, String.format("/tsx/png/%s.png", tileSetName));
+                        output.getParentFile().mkdirs();
+                        ImageIO.write(tileSetBufferedImage, "PNG", output);
+                        TileSet tsx = TiledMap.createTsx(tmxMapWriter, output, mapProperties, new File(selectedFile, "tsx"));
+                        tsx.setName(tileSetName);
+                        BufferedImage spriteBufferedImage = tileSetEditor.generateSpriteTileSet(mapProperties.spriteIndex);
+                        String spriteName = String.format("0405%02X%02X", mapProperties.spriteIndex, mapProperties.spriteIndex + 1);
+                        output = new File(selectedFile, String.format("/sprite/%s.png", spriteName));
+                        output.getParentFile().mkdirs();
+                        ImageIO.write(spriteBufferedImage, "PNG", output);
+
+                        TileSet spriteTileSet = new TileSet();
+                        spriteTileSet.setName(spriteName);
+                        spriteTileSet.importTileBitmap(output.getAbsolutePath(), new BasicTileCutter(0x10, 0x10, 0, 0));
+
+                        tmxMapWriter.writeMap(TiledMap.create(mapId, tsx, spriteTileSet), new File(selectedFile, String.format("%02X.tmx", mapId)).getAbsolutePath());
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+
+                }
+                System.out.printf("Export %s maps OK.\n", Arrays.toString(mapIds.toArray()));
             }
         });
 
         fileMenuExport.add(fileMenuExportWorldTmx);
+        fileMenuExport.add(fileMenuExportMapTmx);
 
         JMenuItem fileMenuExit = new JMenuItem("Exit");
         fileMenuExit.addActionListener(e -> {
@@ -372,7 +449,10 @@ public class MainWindow extends JFrame {
 
         JMenuItem helpMenuAbout = new JMenuItem("About");
         helpMenuAbout.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "这是一个FC游戏 MetalMax 的编辑器");
+            JOptionPane.showMessageDialog(this, """
+                    这是一个FC游戏 MetalMax 的编辑器
+                    Copyright 2021 AFoolLove
+                    """);
         });
 
 

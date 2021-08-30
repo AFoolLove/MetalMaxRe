@@ -22,54 +22,53 @@ import java.util.*;
  */
 public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
     /**
-     * 世界地图图块索引偏移
+     * 世界地图图块索引偏移<p>
      * 0x01 = 0x1000 byte
      */
-    public static final int WORLD_MAP_TILES_INDEX_OFFSET_START = 0x00010 - 0x10;
-    public static final int WORLD_MAP_TILES_INDEX_OFFSET_END = 0x0040F - 0x10;
+    public static final int WORLD_MAP_TILES_INDEX_START_OFFSET = 0x00010 - 0x10;
+    public static final int WORLD_MAP_TILES_INDEX_END_OFFSET = 0x0040F - 0x10;
 
     /**
-     * 图块组索引
-     * 0B0101_0101
-     * 0(bit)：使用图块组A
+     * 图块组索引<p>
+     * 0B0101_0101<p>
+     * 0(bit)：使用图块组A<p>
      * 1(bit)：使用图块组B
      */
-    public static final int WORLD_MAP_X00410_START = 0x00410 - 0x10;
-    public static final int WORLD_MAP_X00410_END = 0x0060F - 0x10;
+    public static final int WORLD_MAP_X00410_START_OFFSET = 0x00410 - 0x10;
+    public static final int WORLD_MAP_X00410_END_OFFSET = 0x0060F - 0x10;
 
     /**
      * 图块组A，一组16（byte）个图块
      */
-    public static final int WORLD_MAP_INDEX_A_START = 0x0C010 - 0x10;
-    public static final int WORLD_MAP_INDEX_A_END = 0x00E50F - 0x10;
+    public static final int WORLD_MAP_INDEX_A_START_OFFSET = 0x0C010 - 0x10;
+    public static final int WORLD_MAP_INDEX_A_END_OFFSET = 0x00E50F - 0x10;
 
     /**
      * 图块组B，一组16（byte）个图块
      */
-    public static final int WORLD_MAP_INDEX_B_START = 0x2A010 - 0x10;
-    public static final int WORLD_MAP_INDEX_B_END = 0x2E00F - 0x10;
+    public static final int WORLD_MAP_INDEX_B_START_OFFSET = 0x2A010 - 0x10;
+    public static final int WORLD_MAP_INDEX_B_END_OFFSET = 0x2E00F - 0x10;
 
     /**
-     * 相对图块索引
+     * 相对图块索引<p>
+     * CHR ROM
      */
-    public static final int WORLD_MAP_INDEX_START = 0x3A010 - 0x10; // CHR
-    public static final int WORLD_MAP_INDEX_END = 0x3B00F - 0x10; // CHR
+    public static final int WORLD_MAP_INDEX_START_OFFSET = 0x3A010 - 0x10; // CHR
+    public static final int WORLD_MAP_INDEX_END_OFFSET = 0x3B00F - 0x10; // CHR
 
     /**
      * 地雷坐标起始 4x + 4y
      */
-    public static final int WORLD_MAP_MINES_START = 0x35EC1 - 0x10;
+    public static final int WORLD_MAP_MINES_START_OFFSET = 0x35EC1 - 0x10;
 
     /**
      * 航线起始
      */
-    public static final int WORLD_MAP_OUT_LINE_START = 0x258C6 - 0x10;
-
+    public static final int WORLD_MAP_OUT_LINE_START_OFFSET = 0x258C6 - 0x10;
     /**
      * 航线起始
      */
-    public static final int WORLD_MAP_BACK_LINE_START = 0x258EA - 0x10;
-
+    public static final int WORLD_MAP_BACK_LINE_START_OFFSET = 0x258EA - 0x10;
     /**
      * 航线最大点
      */
@@ -109,8 +108,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
     public byte[] index = new byte[0x1000]; // WORLD_MAP_INDEX_END - WORLD_MAP_INDEX_START + 1
 
     /**
-     * 地图
-     * 值为图块索引
+     * 地图，值为图块索引
      */
     public byte[][] map = new byte[0x100][0x100];
 
@@ -120,14 +118,14 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
     private final List<MapPoint> mines = new ArrayList<>(4);
 
     /**
-     * 航线
-     * K: line
+     * 出航的航线<p>
+     * K: line<p>
      * V：目的地
      */
     private final Map.Entry<List<MapPoint>, MapPoint> shippingLineOut = Map.entry(new ArrayList<>(0x1), new MapPoint());
     /**
-     * 航线
-     * K: line
+     * 归航的航线<p>
+     * K: line<p>
      * V：目的地
      */
     private final Map.Entry<List<MapPoint>, MapPoint> shippingLineBack = Map.entry(new ArrayList<>(0x10), new MapPoint());
@@ -158,23 +156,23 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         mines.clear();
 
         // 读取世界地图图块索引偏移
-        setPrgRomPosition(WORLD_MAP_TILES_INDEX_OFFSET_START);
+        setPrgRomPosition(WORLD_MAP_TILES_INDEX_START_OFFSET);
         get(buffer, indexOffsets);
         // 读取图块组索引
-        setPrgRomPosition(WORLD_MAP_X00410_START);
+        setPrgRomPosition(WORLD_MAP_X00410_START_OFFSET);
         get(buffer, x00410);
         // 读取图块组A
-        setPrgRomPosition(WORLD_MAP_INDEX_A_START);
+        setPrgRomPosition(WORLD_MAP_INDEX_A_START_OFFSET);
         for (byte[] index : indexA) {
             get(buffer, index);
         }
         // 读取图块组B
-        setPrgRomPosition(WORLD_MAP_INDEX_B_START);
+        setPrgRomPosition(WORLD_MAP_INDEX_B_START_OFFSET);
         for (byte[] index : indexB) {
             get(buffer, index);
         }
         // 读取图块索引
-        setChrRomPosition(WORLD_MAP_INDEX_START);
+        setChrRomPosition(WORLD_MAP_INDEX_START_OFFSET);
         get(buffer, index);
 
         for (int i = 0; i < 0x1000; i++) {
@@ -218,9 +216,9 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             if (offset >= tempIndex.length) {
                 // 超出安全可编辑的数据
                 if (tempIndex == indexA) {
-                    setPrgRomPosition(WORLD_MAP_INDEX_A_START + (offset * 0x10));
+                    setPrgRomPosition(WORLD_MAP_INDEX_A_START_OFFSET + (offset * 0x10));
                 } else {
-                    setPrgRomPosition(WORLD_MAP_INDEX_B_START + (offset * 0x10));
+                    setPrgRomPosition(WORLD_MAP_INDEX_B_START_OFFSET + (offset * 0x10));
                 }
 
                 tiles = new byte[0x10];
@@ -236,7 +234,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         }
 
         // 读取地雷
-        setPrgRomPosition(WORLD_MAP_MINES_START);
+        setPrgRomPosition(WORLD_MAP_MINES_START_OFFSET);
         byte[] mineXs = new byte[0x04];
         byte[] mineYs = new byte[0x04];
         get(buffer, mineXs);
@@ -246,7 +244,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         }
 
         // 读取出航航线
-        setPrgRomPosition(WORLD_MAP_OUT_LINE_START);
+        setPrgRomPosition(WORLD_MAP_OUT_LINE_START_OFFSET);
         // 坐标是相对路径，进入世界地图的坐标开始算起
         List<MapPoint> linePoint = shippingLineOut.getKey();
         linePoint.clear();
@@ -280,7 +278,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         shippingLineOut.getValue().set(get(buffer), get(buffer), get(buffer));
 
         // 读取归航航线
-        setPrgRomPosition(WORLD_MAP_BACK_LINE_START);
+        setPrgRomPosition(WORLD_MAP_BACK_LINE_START_OFFSET);
         linePoint = shippingLineBack.getKey();
         linePoint.clear();
         while (linePoint.size() < 0x10) {
@@ -624,27 +622,27 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         }
 
         // 写入世界地图图块索引偏移
-        setPrgRomPosition(WORLD_MAP_TILES_INDEX_OFFSET_START);
+        setPrgRomPosition(WORLD_MAP_TILES_INDEX_START_OFFSET);
         put(buffer, indexOffsets);
         // 写入图块组索引
-        setPrgRomPosition(WORLD_MAP_X00410_START);
+        setPrgRomPosition(WORLD_MAP_X00410_START_OFFSET);
         put(buffer, x00410);
         // 写入图块组A
-        setPrgRomPosition(WORLD_MAP_INDEX_A_START);
+        setPrgRomPosition(WORLD_MAP_INDEX_A_START_OFFSET);
         for (byte[] tiles : indexA) {
             put(buffer, tiles);
         }
         // 写入图块组B
-        setPrgRomPosition(WORLD_MAP_INDEX_B_START);
+        setPrgRomPosition(WORLD_MAP_INDEX_B_START_OFFSET);
         for (byte[] tiles : indexB) {
             put(buffer, tiles);
         }
         // 写入图块索引
-        setChrRomPosition(WORLD_MAP_INDEX_START);
+        setChrRomPosition(WORLD_MAP_INDEX_START_OFFSET);
         put(buffer, index);
 
         // 写入4个地雷坐标
-        setPrgRomPosition(WORLD_MAP_MINES_START);
+        setPrgRomPosition(WORLD_MAP_MINES_START_OFFSET);
         byte[] mineXs = new byte[0x04];
         byte[] mineYs = new byte[0x04];
         for (int i = 0, size = Math.min(0x04, mines.size()); i < size; i++) {
@@ -656,7 +654,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         put(buffer, mineYs);
 
         // 写入出航路径点和目的地
-        setPrgRomPosition(WORLD_MAP_OUT_LINE_START);
+        setPrgRomPosition(WORLD_MAP_OUT_LINE_START_OFFSET);
         for (int i = 0, size = Math.min(0x10, shippingLineOut.getKey().size()); i < size; i++) {
             MapPoint linePoint = shippingLineOut.getKey().get(i);
             // X或Y等于0，就是另一个的方向
@@ -689,7 +687,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         put(buffer, shippingLineOut.getValue().getY());
 
         // 写入归航路径点和目的地
-        setPrgRomPosition(WORLD_MAP_BACK_LINE_START);
+        setPrgRomPosition(WORLD_MAP_BACK_LINE_START_OFFSET);
         for (int i = 0, size = Math.min(0x10, shippingLineBack.getKey().size()); i < size; i++) {
             MapPoint linePoint = shippingLineBack.getKey().get(i);
             // X或Y等于0，就是另一个的方向
@@ -734,7 +732,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         if (offset < indexA.length) {
             return indexA[offset];
         } else if (canOut) {
-            setPrgRomPosition(WORLD_MAP_INDEX_A_START + (offset * 0x10));
+            setPrgRomPosition(WORLD_MAP_INDEX_A_START_OFFSET + (offset * 0x10));
             byte[] bytes = new byte[0x10];
             getBuffer().get(bytes);
             return bytes;

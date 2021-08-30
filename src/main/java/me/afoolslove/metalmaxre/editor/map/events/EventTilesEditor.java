@@ -37,19 +37,22 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
+    /**
+     * 事件图块数据
+     */
     public static final int EVENT_TILES_START_OFFSET = 0x1DCCF - 0x10;
     public static final int EVENT_TILES_END_OFFSET = 0x1DEAF - 0x10;
 
     /**
-     * K：Map
-     * V：events
-     * -- K: event
+     * K：Map<p>
+     * V：events<p>
+     * -- K: event<p>
      * -- V: tile,x,y
      */
     private final HashMap<Integer, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
 
     /**
-     * 特殊事件图块
+     * 特殊事件图块<p>
      * 罗克东部涨潮和退潮的4个4*4tile
      */
     @Nullable

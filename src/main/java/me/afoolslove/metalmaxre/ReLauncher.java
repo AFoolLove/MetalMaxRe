@@ -46,21 +46,31 @@ public class ReLauncher {
             }
             new MainWindow();
         } else {
-            metalMaxRe.loadGame(false, new File("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax.nes"),
-                    new EditorWorker() {
-                        @Override
-                        protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
-                            for (Map.Entry<ProcessState, Object> chunk : chunks) {
-                                System.out.println(chunk.getValue());
+            try {
+                Object lock = new Object();
+                metalMaxRe.loadGame(true, new File("/"),
+                        new EditorWorker() {
+                            @Override
+                            protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
+                                for (Map.Entry<ProcessState, Object> chunk : chunks) {
+                                    System.out.println(chunk.getValue());
+                                }
                             }
-                        }
 
-                        @Override
-                        protected void done() {
+                            @Override
+                            protected void done() {
+                                synchronized (lock) {
+                                    lock.notify();
+                                }
+                            }
+                        });
 
-                            metalMaxRe.saveAs("C:/Users/AFoolLove/IdeaProjects/MetalMaxRe/src/main/resources/MetalMax-Test.nes");
-                        }
-                    });
+                synchronized (lock) {
+                    lock.wait();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

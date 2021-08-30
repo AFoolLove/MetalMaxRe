@@ -26,56 +26,77 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
     public static final int MONSTER_COUNT = 0x83;
 
     /**
-     * 怪物的类型
-     * 怪物的经验值和金钱值是否 *100
-     * 等其它未测试的数据
-     */
-    public static final int MONSTER_ATTRIBUTE_OFFSET = 0x3886E - 0x10;
-
-    /**
-     * 怪物的抗性
-     * 怪物自动恢复HP
-     */
-    public static final int MONSTER_RESISTANCE_OFFSET = 0x3886E - 0x10;
-
-    /**
-     * 怪物出手攻击的速度
-     */
-    public static final int MONSTER_SPEEDS_OFFSET = 0x38BA0 - 0x10;
-    /**
-     * 怪物命中率
-     */
-    public static final int MONSTER_HIT_RATES_OFFSET = 0x38C23 - 0x10;
-    /**
-     * 怪物战斗等级
-     */
-    public static final int MONSTER_BATTLE_LEVEL_OFFSET = 0x38CA6 - 0x10;
-
-    /**
-     * 怪物被击败后玩家获取的经验
-     */
-    public static final int MONSTER_BATTLE_EXPERIENCE_OFFSET = 0x38D29 - 0x10;
-    /**
-     * 怪物被击败后玩家获取的金钱
-     */
-    public static final int MONSTER_BATTLE_GOLD_OFFSET = 0x38DAC - 0x10;
-
-
-    /**
-     * 怪物的掉落物
+     * 怪物的掉落物<p>
      * 注：ID范围为0x18-0x82才能设置有效的战利品
      */
     public static final int MONSTER_DROPS_ITEMS_OFFSET = 0x2253F - 0x10;
 
     /**
-     * 特殊怪物组合数据起始
+     * 怪物的类型<p>
+     * 怪物的经验值和金钱值是否 *100<p>
+     * 等其它未测试的数据
      */
-    public static final int MONSTER_GROUP_OFFSET = 0x393B3 - 0x10;
+    public static final int MONSTER_ATTRIBUTE_START_OFFSET = 0x3886E - 0x10;
+    public static final int MONSTER_ATTRIBUTE_END_OFFSET = 0x388EF - 0x10;
+
+    /**
+     * 怪物的抗性<p>
+     * 怪物自动恢复HP
+     */
+    public static final int MONSTER_RESISTANCE_START_OFFSET = 0x388F1 - 0x10;
+    public static final int MONSTER_RESISTANCE_END_OFFSET = 0x38973 - 0x10;
+    /**
+     * 怪物的生命值<p>
+     * *生命值根据怪物类型不同而不同
+     */
+    public static final int MONSTER_HEALTH_START_OFFSET = 0x38A17 - 0x10;
+    public static final int MONSTER_HEALTH_END_OFFSET = 0x38A99 - 0x10;
+
+    /**
+     * 怪物出手攻击的速度
+     */
+    public static final int MONSTER_SPEEDS_START_OFFSET = 0x38BA0 - 0x10;
+    public static final int MONSTER_SPEEDS_END_OFFSET = 0x38C22 - 0x10;
+    /**
+     * 怪物命中率
+     */
+    public static final int MONSTER_HIT_RATES_START_OFFSET = 0x38C23 - 0x10;
+    public static final int MONSTER_HIT_RATES_END_OFFSET = 0x38CA5 - 0x10;
+    /**
+     * 怪物战斗等级
+     */
+    public static final int MONSTER_BATTLE_LEVEL_START_OFFSET = 0x38CA6 - 0x10;
+    public static final int MONSTER_BATTLE_LEVEL_END_OFFSET = 0x38D28 - 0x10;
+
+    /**
+     * 怪物被击败后玩家获取的经验
+     */
+    public static final int MONSTER_BATTLE_EXPERIENCE_START_OFFSET = 0x38D29 - 0x10;
+    public static final int MONSTER_BATTLE_EXPERIENCE_END_OFFSET = 0x38DAB - 0x10;
+    /**
+     * 怪物被击败后玩家获取的金钱
+     */
+    public static final int MONSTER_BATTLE_GOLD_START_OFFSET = 0x38DAC - 0x10;
+    public static final int MONSTER_BATTLE_GOLD_END_OFFSET = 0x38E2E - 0x10;
 
     /**
      * 特殊怪物组合数据起始
      */
-    public static final int SPECIAL_MONSTER_GROUP_OFFSET = 0x39979 - 0x10;
+    public static final int MONSTER_GROUP_START_OFFSET = 0x393B3 - 0x10;
+    public static final int MONSTER_GROUP_END_OFFSET = 0x398C8 - 0x10;
+
+    /**
+     * 特殊怪物组合数据起始
+     */
+    public static final int SPECIAL_MONSTER_GROUP_START_OFFSET = 0x39979 - 0x10;
+    public static final int SPECIAL_MONSTER_GROUP_END_OFFSET = 0x39B38 - 0x10;
+
+    /**
+     * 赏金首的赏金起始
+     *
+     * @see DataValues#get3ByteValue()
+     */
+    public static final int WANTED_MONSTER_BOUNTY_OFFSET = 0x7EBE0 - 0x10;
 
     /**
      * 怪物组合最大数量
@@ -88,26 +109,26 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
     public static final int SPECIAL_MONSTER_GROUP_MAX_COUNT = 0x38;
 
     /**
-     * 赏金首的赏金起始
-     *
-     * @see DataValues#get3ByteValue()
-     */
-    public static final int WANTED_MONSTER_BOUNTY_OFFSET = 0x7EBE0 - 0x10;
-    /**
      * 赏金首的赏金数量，也是赏金首的数量
      */
     public static final int WANTED_MONSTER_BOUNTY_MAX_COUNT = 0x0B;
 
     /**
-     * 世界地图的怪物领域
+     * 世界地图的怪物领域<p>
      * 1Byte = 16*16小块 = 256个领域，固定无法变更
      */
     public static final int WORLD_MAP_MONSTERS_REALM_INDEX_START = 0x39243 - 0x10;
     public static final int WORLD_MAP_MONSTERS_REALM_INDEX_END = 0x39342 - 0x10;
     public static final int WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT = 0x100;
 
+    /**
+     * 世界地图的怪物领域
+     */
     private final List<Byte> worldRealms = new ArrayList<>(WORLD_MAP_MONSTERS_REALM_INDEX_MAX_COUNT);
 
+    /**
+     * 所有怪物
+     */
     private final HashMap<Integer, Monster> monsters = new HashMap<>();
 
     /**
@@ -128,6 +149,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
 
         byte[] attributes = new byte[MONSTER_COUNT];
         byte[] resistances = new byte[MONSTER_COUNT];
+        byte[] healths = new byte[MONSTER_COUNT];
         byte[] speeds = new byte[MONSTER_COUNT];
         byte[] hitRates = new byte[MONSTER_COUNT];
         byte[] battleLevels = new byte[MONSTER_COUNT];
@@ -137,15 +159,19 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
 
         // 读取怪物的属性
-        setPrgRomPosition(MONSTER_ATTRIBUTE_OFFSET);
+        setPrgRomPosition(MONSTER_ATTRIBUTE_START_OFFSET);
         get(buffer, attributes);
 
         // 读取怪物的抗性和自动恢复HP
-        setPrgRomPosition(MONSTER_RESISTANCE_OFFSET);
+        setPrgRomPosition(MONSTER_RESISTANCE_START_OFFSET);
         get(buffer, resistances);
 
+        // 读取怪物的生命值
+        setPrgRomPosition(MONSTER_HEALTH_START_OFFSET);
+        get(buffer, healths);
+
         // 读取怪物出手攻击速度
-        setPrgRomPosition(MONSTER_SPEEDS_OFFSET);
+        setPrgRomPosition(MONSTER_SPEEDS_START_OFFSET);
         get(buffer, speeds);
         // 读取怪物命中率
 //        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
@@ -182,6 +208,8 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
             monster.setAttribute(attributes[monsterId]);
             // 设置抗性和自动恢复HP
             monster.setResistance(resistances[monsterId]);
+            // 设置生命值
+            monster.setHealth(healths[monsterId]);
             // 设置速度
             monster.setSpeed(speeds[monsterId]);
             // 设置命中率
@@ -203,7 +231,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         }
 
         // 读取怪物组合
-        setPrgRomPosition(MONSTER_GROUP_OFFSET);
+        setPrgRomPosition(MONSTER_GROUP_START_OFFSET);
         for (int i = 0; i < MONSTER_GROUP_MAX_COUNT; i++) {
             byte[] monsters = new byte[0x0E];
             get(buffer, monsters);
@@ -212,7 +240,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
 
         // 读取特殊怪物组合数据
         // 覆盖式读取，不需要保留现有的数据
-        setPrgRomPosition(SPECIAL_MONSTER_GROUP_OFFSET);
+        setPrgRomPosition(SPECIAL_MONSTER_GROUP_START_OFFSET);
         for (int i = 0; i < SPECIAL_MONSTER_GROUP_MAX_COUNT; i++) {
             byte[] monsters = new byte[0x04];
             byte[] counts = new byte[0x04];
@@ -229,6 +257,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         byte[] attributes = new byte[MONSTER_COUNT];
         byte[] resistances = new byte[MONSTER_COUNT];
+        byte[] healths = new byte[MONSTER_COUNT];
         byte[] speeds = new byte[MONSTER_COUNT];
         byte[] hitRates = new byte[MONSTER_COUNT];
         byte[] battleLevels = new byte[MONSTER_COUNT];
@@ -242,6 +271,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
             Monster monster = entry.getValue();
             int monsterId = entry.getKey();
             resistances[monsterId] = monster.resistance;
+            healths[monsterId] = monster.health;
             speeds[monsterId] = monster.speed;
             hitRates[monsterId] = monster.hitRate;
             battleLevels[monsterId] = monster.battleLevel;
@@ -259,15 +289,19 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         }
 
         // 写入怪物的属性
-        setPrgRomPosition(MONSTER_ATTRIBUTE_OFFSET);
+        setPrgRomPosition(MONSTER_ATTRIBUTE_START_OFFSET);
         put(buffer, attributes);
 
         // 写入怪物的抗性和自动恢复HP
-        setPrgRomPosition(MONSTER_RESISTANCE_OFFSET);
+        setPrgRomPosition(MONSTER_RESISTANCE_START_OFFSET);
         put(buffer, resistances);
 
+        // 写入怪物的生命值
+        setPrgRomPosition(MONSTER_HEALTH_START_OFFSET);
+        put(buffer, healths);
+
         // 写入怪物出手攻击的速度
-        setPrgRomPosition(MONSTER_SPEEDS_OFFSET);
+        setPrgRomPosition(MONSTER_SPEEDS_START_OFFSET);
         put(buffer, speeds);
         // 写入怪物的命中率
 //        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
@@ -293,14 +327,14 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         }
 
         // 写入怪物组合
-        setPrgRomPosition(MONSTER_GROUP_OFFSET);
+        setPrgRomPosition(MONSTER_GROUP_START_OFFSET);
         for (int i = 0; i < MONSTER_GROUP_MAX_COUNT; i++) {
             MonsterGroup monsterGroup = monsterGroups[i];
             put(buffer, monsterGroup.monsters);
         }
 
         // 写入特殊怪物组合数据
-        setPrgRomPosition(SPECIAL_MONSTER_GROUP_OFFSET);
+        setPrgRomPosition(SPECIAL_MONSTER_GROUP_START_OFFSET);
         for (int i = 0; i < SPECIAL_MONSTER_GROUP_MAX_COUNT; i++) {
             SpecialMonsterGroup specialMonsterGroup = specialMonsterGroups[i];
             for (int j = 0; j < 0x04; j++) {
@@ -358,8 +392,8 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
      * @param index 索引
      * @return 怪物组合
      */
-    public MonsterGroup getMonsterGroup(@Range(from = 0x00, to = MONSTER_GROUP_MAX_COUNT - 1) int index) {
-        return monsterGroups[index];
+    public MonsterGroup getMonsterGroup(@Range(from = 0x01, to = MONSTER_GROUP_MAX_COUNT) int index) {
+        return monsterGroups[index - 1];
     }
 
     /**
@@ -377,8 +411,8 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
      * @param index 索引
      * @return 特殊怪物组合集
      */
-    public SpecialMonsterGroup getSpecialMonsterGroup(@Range(from = 0x00, to = SPECIAL_MONSTER_GROUP_MAX_COUNT - 1) int index) {
-        return specialMonsterGroups[index];
+    public SpecialMonsterGroup getSpecialMonsterGroup(@Range(from = 0x01, to = SPECIAL_MONSTER_GROUP_MAX_COUNT) int index) {
+        return specialMonsterGroups[index - 1];
     }
 
     /**

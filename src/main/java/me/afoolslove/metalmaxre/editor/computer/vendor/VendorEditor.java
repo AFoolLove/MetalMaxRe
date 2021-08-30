@@ -27,19 +27,16 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
      * 售货机商品的最大组合数量
      */
     public static final int VENDOR_MAX_COUNT = 0x12;
+
     /**
      * 售货机商品种类数量
      */
     public static final int VENDOR_ITEM_COUNT = 0x06;
 
     /**
-     * 售货机数据地址起始
+     * 售货机数据地址
      */
     public static final int VENDOR_START_OFFSET = 0x23EC8 - 0x10;
-
-    /**
-     * 售货机数据地址结束
-     */
     public static final int VENDOR_END_OFFSET = 0x23FC4 - 0x10;
 
     /**
@@ -80,7 +77,7 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
         // 移除多余的商品组合
         Iterator<VendorItemList> iterator = vendorItemLists.iterator();
         limit(iterator, () -> vendorItemLists.size() > VENDOR_MAX_COUNT, remove -> {
-            System.out.printf("售货机编辑器：移除多余的售货机商品组 %s", remove);
+            System.out.printf("售货机编辑器：移除多余的售货机商品组 %s\n", remove);
         });
 
         byte[] items = new byte[VENDOR_ITEM_COUNT];

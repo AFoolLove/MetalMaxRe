@@ -26,18 +26,22 @@ import java.util.*;
  * @author AFoolLove
  */
 public class SpriteEditor extends AbstractEditor<SpriteEditor> {
-    public static final int SPRITE_INDEX_START_OFFSET = 0x24010 - 0x10;
-
-    public static final int SPRITE_START_OFFSET = 0x24204 - 0x10;
-
     /**
      * 地图的精灵数据索引
-     * <p>
-     * 0x24010-0x24203
-     * <p>
-     * 0x0A是干嘛来的来着？
-     * <p>
-     * K：Map
+     */
+    public static final int SPRITE_INDEX_START_OFFSET = 0x24010 - 0x10;
+    public static final int SPRITE_INDEX_END_OFFSET = 0x24203 - 0x10;
+
+    /**
+     * 精灵数据
+     */
+    public static final int SPRITE_START_OFFSET = 0x24204 - 0x10;
+    public static final int SPRITE_END_OFFSET = 0x25176 - 0x10;
+
+    /**
+     * 地图的精灵<p>
+     * 0x0A是干嘛来的来着？<p>
+     * K：Map<p>
      * V：sprites
      */
     private final HashMap<Integer, List<Sprite>> sprites = new HashMap<>(0xF0 + 0x0A);

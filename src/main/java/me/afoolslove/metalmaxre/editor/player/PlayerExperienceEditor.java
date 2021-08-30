@@ -23,9 +23,15 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class PlayerExperienceEditor extends AbstractEditor<PlayerExperienceEditor> {
-    public static final int PLAYER_LEVEL_EXP_START = 0x27C52 - 0x10;
     /**
-     * K：Level
+     * 玩家升级所需的经验<p>
+     * 注：从经验0开始算，不是以上一等级的经验为基础
+     */
+    public static final int PLAYER_LEVEL_EXP_START_OFFSET = 0x27C52 - 0x10;
+    public static final int PLAYER_LEVEL_EXP_END_OFFSET = 0x27D7A - 0x10;
+
+    /**
+     * K：Level<p>
      * V：exp required
      */
     private final Map<Integer, Integer> experiences = new HashMap<>();
@@ -36,7 +42,7 @@ public class PlayerExperienceEditor extends AbstractEditor<PlayerExperienceEdito
         experiences.clear();
 
         // 读取升级到2-99级的所需经验
-        setPrgRomPosition(PLAYER_LEVEL_EXP_START);
+        setPrgRomPosition(PLAYER_LEVEL_EXP_START_OFFSET);
         for (int i = 2; i <= 99; i++) {
             experiences.put(i, NumberR.toInt(get(buffer), get(buffer), get(buffer)));
         }
@@ -46,7 +52,7 @@ public class PlayerExperienceEditor extends AbstractEditor<PlayerExperienceEdito
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         // 写入升级到2-99级的所需经验
-        setPrgRomPosition(PLAYER_LEVEL_EXP_START);
+        setPrgRomPosition(PLAYER_LEVEL_EXP_START_OFFSET);
         for (int i = 2; i <= 99; i++) {
             int experience = experiences.get(i);
             put(buffer, NumberR.toByteArray(experience, 3, false));

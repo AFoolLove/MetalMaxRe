@@ -117,7 +117,7 @@ public class WordBank {
         OPCODES.put((byte) 0x33, 1);  // 不显示精灵和上半部分，第二字节未知
         OPCODES.put((byte) 0xE2, 0);
         OPCODES.put((byte) 0xE3, 0);
-        OPCODES.put((byte) 0xE4, 0);
+        OPCODES.put((byte) 0xE4, 0);  // 等待确认后继续对话
         OPCODES.put((byte) 0xE5, 0);  // 换行
         OPCODES.put((byte) 0xE6, 0);  // 未知，没有实际占用文本？似乎通过判断读取文本
         OPCODES.put((byte) 0xE7, 0);

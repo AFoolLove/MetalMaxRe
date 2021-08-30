@@ -25,15 +25,19 @@ import java.util.*;
  */
 public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
     /**
-     * 目的地最大数量
+     * 使用犬系统传送城镇的目的地<p>
+     * 只支持，X和Y坐标，地图为固定的世界地图
      */
     public static final int DESTINATION_MAX_COUNT = 0x0C;
-
     public static final int DESTINATION_POINT_START_OFFSET = 0x3272D - 0x10;
     public static final int DESTINATION_POINT_END_OFFSET = 0x32738 - 0x10;
     public static final int DESTINATION_START_OFFSET = 0x34707 - 0x10;
     public static final int DESTINATION_END_OFFSET = 0x34712 - 0x10;
 
+    /**
+     * 使用传送机器传送时的目的地<p>
+     * 支持地图和X、Y坐标修改
+     */
     public static final int TELEPORT_MAP_MAX_MAP_COUNT = 0x0D;
     public static final int TELEPORT_MAP_START_OFFSET = 0x3538C - 0x10;
     public static final int TELEPORT_MAP_X_START_OFFSET = 0x35399 - 0x10;
@@ -50,7 +54,7 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
     private final HashMap<Integer, Integer> towns = new HashMap<>(DESTINATION_MAX_COUNT);
 
     /**
-     * 可以将一个地图设置为某一个城镇
+     * 可以将一个地图设置为某一个城镇<p>
      * 只能设置两个！
      */
     private final HashMap<Integer, Integer> townSeries = new HashMap<>(0x02);

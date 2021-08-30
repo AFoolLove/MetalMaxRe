@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editor.treasure;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
-import me.afoolslove.metalmaxre.editor.EditorManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -33,19 +32,21 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public class TreasureEditor extends AbstractEditor<TreasureEditor> {
+    /**
+     * 宝藏最大数量
+     */
     public static final int TREASURE_MAX_COUNT = 0x5B;
 
+    /**
+     * 宝藏数据
+     */
     public static final int TREASURE_START_OFFSET = 0x39C50 - 0x10;
     public static final int TREASURE_END_OFFSET = 0x39DBB - 0x10;
 
+    /**
+     * 所有宝藏
+     */
     private final LinkedHashSet<Treasure> treasures = new LinkedHashSet<>(TREASURE_MAX_COUNT);
-
-    public static void main(String[] args) {
-        var editor = EditorManager.getEditor(TreasureEditor.class);
-        HashSet<Treasure> treasures = editor.getTreasures();
-        // 添加一个古币宝藏到家楼下的售货机旁边
-        treasures.add(new Treasure(0x02, 0x04, 0x06, 0xB2));
-    }
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {

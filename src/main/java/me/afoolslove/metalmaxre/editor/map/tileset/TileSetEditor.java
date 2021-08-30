@@ -22,11 +22,33 @@ import java.util.Arrays;
  * @author AFoolLove
  */
 public class TileSetEditor extends AbstractEditor<TileSetEditor> {
+    /**
+     * 图块数据起始<p>
+     * CHR ROM
+     */
     public static final int TILE_SET_START_OFFSET = 0x00000; // CHR
-    public static final int TILE_SET_COMPOSITIONS_START_OFFSET = 0x35000; // CHR
-    public static final int TILE_SET_COLOR_INDEX_START_OFFSET = 0x38700; // CHR
 
+    /**
+     * 图块组合数据<p>
+     * CHR ROM
+     */
+    public static final int TILE_SET_COMPOSITIONS_START_OFFSET = 0x35000; // CHR
+    public static final int TILE_SET_COMPOSITIONS_END_OFFSET = 0x386FF; // CHR
+
+    /**
+     * 图块颜色和图块的特性数据<p>
+     * CHR ROM
+     */
+    public static final int TILE_SET_COLOR_INDEX_START_OFFSET = 0x38700; // CHR
+    public static final int TILE_SET_COLOR_INDEX_END_OFFSET = 0x394C0; // CHR
+
+    /**
+     * 世界地图图块组合数据
+     */
     public static final int TILE_SET_WORLD_COMPOSITIONS_START_OFFSET = 0x0FBBE - 0x10;
+    /**
+     * 世界地图图块颜色和图块的特性数据
+     */
     public static final int TILE_SET_WORLD_COLOR_INDEX_START_OFFSET = 0x0FEAA - 0x10;
 
 
@@ -44,13 +66,13 @@ public class TileSetEditor extends AbstractEditor<TileSetEditor> {
     public byte[][] worldColorIndexes = new byte[0x03][0x40];
 
 
-    public byte[] xA597 = new byte[0x04]; // 精灵的朝向帧，全局属性（移动和未移动的图像
-    public byte[] xA59B = new byte[0x04]; // 精灵的姿态，全局属性（翻转、调色板等
-    public byte[] xA59E = new byte[0x40]; // 精灵图像值 value + spriteId = $0150，该数据大小待验证
-    public byte[] xA5DD = new byte[0x40]; // 精灵的姿态和调色板的值，(value + spriteId) | xA59B = $0160，该数据大小待验证
+    public byte[] xA597 = new byte[0x004]; // 精灵的朝向帧，全局属性（移动和未移动的图像
+    public byte[] xA59B = new byte[0x004]; // 精灵的姿态，全局属性（翻转、调色板等
+    public byte[] xA59E = new byte[0x040]; // 精灵图像值 value + spriteId = $0150，该数据大小待验证
+    public byte[] xA5DD = new byte[0x040]; // 精灵的姿态和调色板的值，(value + spriteId) | xA59B = $0160，该数据大小待验证
 
-    public byte[] x83F2 = new byte[0x08]; // 精灵上半部分两个图像块的差值
-    public byte[] x83FA = new byte[0x08]; // 精灵下半部分两个图像块的差值
+    public byte[] x83F2 = new byte[0x008]; // 精灵上半部分两个图像块的差值
+    public byte[] x83FA = new byte[0x008]; // 精灵下半部分两个图像块的差值
     public byte[] x847B = new byte[0x100]; // 精灵图像块差值索引等，该数据大小待验证
     public byte[] x8552 = new byte[0x100]; // 精灵图像上半部分的图像索引，该数据大小待验证
     public byte[] x8629 = new byte[0x100]; // 精灵图像下半部分的图像索引，该数据大小待验证

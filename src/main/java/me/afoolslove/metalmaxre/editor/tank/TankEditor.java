@@ -22,12 +22,35 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class TankEditor extends AbstractEditor<TankEditor> {
+    /**
+     * 坦克的初始装备（包含出租坦克
+     */
     public static final int TANK_INIT_EQUIPMENT_START_OFFSET = 0x22010 - 0x10;
+    public static final int TANK_INIT_EQUIPMENT_END_OFFSET = 0x2207B - 0x10;
 
-    public static final int TANK_INIT_CHASSIS_WEIGHT_START_OFFSET = 0x28142 - 0x10;
+    /**
+     * 出租坦克的底盘重量（TAX1 - TAXA
+     */
     public static final int TAX_TANK_INIT_CHASSIS_WEIGHT_START_OFFSET = 0x220D4 - 0x10;
+    public static final int TAX_TANK_INIT_CHASSIS_WEIGHT_END_OFFSET = 0x220E7 - 0x10;
 
+    /**
+     * 坦克的底盘重量（NO.1 - NO.8
+     */
+    public static final int TANK_INIT_CHASSIS_WEIGHT_START_OFFSET = 0x28142 - 0x10;
+    public static final int TANK_INIT_CHASSIS_WEIGHT_END_OFFSET = 0x28151 - 0x10;
+
+    /**
+     * 坦克的初始SP（NO.1 - NO.8
+     */
     public static final int TANK_INIT_SP_START_OFFSET = 0x28158 - 0x10;
+    public static final int TANK_INIT_SP_END_OFFSET = 0x28167 - 0x10;
+
+    /**
+     * 坦克的初始坐标（NO.1 - NO.8 +（TAX1 map - TAXA map）
+     */
+    public static final int TANK_INIT_LOCATION_START_OFFSET = 0x38E5C - 0x10;
+    public static final int TANK_INIT_LOCATION_END_OFFSET = 0x38E76 - 0x10;
 
     /**
      * NO.1 - NO.8 - TAX1 - TAXA 的初始属性
@@ -87,6 +110,23 @@ public class TankEditor extends AbstractEditor<TankEditor> {
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
             tankInitialAttributes[noTank].setSp(NumberR.toInt(get(buffer), get(buffer)));
         }
+
+        // 读取坦克的初始坐标
+        setPrgRomPosition(TANK_INIT_LOCATION_START_OFFSET);
+        byte[] maps = new byte[Tank.AVAILABLE_COUNT];
+        byte[] xs = new byte[Tank.NO_COUNT];
+        byte[] ys = new byte[Tank.NO_COUNT];
+        get(buffer, maps);
+        get(buffer, xs);
+        get(buffer, ys);
+        for (int tank = 0; tank < Tank.AVAILABLE_COUNT; tank++) {
+            // 读取所在地图，包括出租坦克
+            tankInitialAttributes[tank].setMap(maps[tank]);
+            if (tank < Tank.NO_COUNT) {
+                // 读取坐标，出租坦克不能设置坐标
+                tankInitialAttributes[tank].set(xs[tank], ys[tank]);
+            }
+        }
         return true;
     }
 
@@ -139,6 +179,24 @@ public class TankEditor extends AbstractEditor<TankEditor> {
         for (int noTank = 0; noTank < Tank.NO_COUNT; noTank++) {
             put(buffer, tankInitialAttributes[noTank].getSpByteArray());
         }
+
+        // 写入坦克的初始坐标
+        setPrgRomPosition(TANK_INIT_LOCATION_START_OFFSET);
+        byte[] maps = new byte[Tank.AVAILABLE_COUNT];
+        byte[] xs = new byte[Tank.NO_COUNT];
+        byte[] ys = new byte[Tank.NO_COUNT];
+        for (int tank = 0; tank < Tank.AVAILABLE_COUNT; tank++) {
+            // 写入所在地图，包括出租坦克
+            maps[tank] = tankInitialAttributes[tank].getMap();
+            if (tank < Tank.NO_COUNT) {
+                // 写入坐标，出租坦克不能设置坐标
+                xs[tank] = tankInitialAttributes[tank].getX();
+                ys[tank] = tankInitialAttributes[tank].getY();
+            }
+        }
+        put(buffer, maps);
+        put(buffer, xs);
+        put(buffer, ys);
         return true;
     }
 

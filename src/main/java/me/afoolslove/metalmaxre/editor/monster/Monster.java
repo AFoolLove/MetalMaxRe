@@ -12,7 +12,7 @@ public class Monster {
     /**
      * 生命值
      */
-    public char health;
+    public byte health;
     /**
      * 攻击力
      */
@@ -74,6 +74,20 @@ public class Monster {
 
     public void setResistance(@Range(from = 0x00, to = 0xFF) int resistance) {
         this.resistance = (byte) (resistance & 0xFF);
+    }
+
+    /**
+     * 设置怪物的生命值
+     * *生命值会根据怪物的类型不同而不同
+     *
+     * @param health 生命值
+     */
+    public void setHealth(byte health) {
+        this.health = health;
+    }
+
+    public void setHealth(@Range(from = 0x00, to = 0xFF) int health) {
+        this.health = (byte) (health & 0xFF);
     }
 
     /**
@@ -211,6 +225,17 @@ public class Monster {
 
     public int intResistance() {
         return getResistance() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的生命值
+     */
+    public byte getHealth() {
+        return health;
+    }
+
+    public int intHealth() {
+        return getHealth() & 0xFF;
     }
 
     /**

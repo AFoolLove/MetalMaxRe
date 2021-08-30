@@ -139,6 +139,9 @@ public class TextParagraphs extends ArrayList<String> {
                         case 0x13:
                             point = TextEditor.X_11933;
                             break;
+                        case 0x00:
+                            point = TextEditor.X_11A20;
+                            break;
                         case 0x0C:
                             point = TextEditor.X_12010;
                             break;
@@ -148,8 +151,14 @@ public class TextParagraphs extends ArrayList<String> {
                         case 0x0F:
                             point = TextEditor.X_17680;
                             break;
+                        case 0x11:
+                            point = TextEditor.X_1F99A;
+                            break;
                         case 0x01:
                             point = TextEditor.X_21AF6;
+                            break;
+                        case 0x0B:
+                            point = TextEditor.X_36010;
                             break;
                         default:
                             break;
@@ -170,9 +179,6 @@ public class TextParagraphs extends ArrayList<String> {
 
                     // 散乱的点，还没有验证有效的结束点
                     switch (pointStart) {
-                        case 0x00:
-                            point = 0x11A20;
-                            break;
                         case 0x02:
                             point = 0x10129;
                             break;
@@ -194,17 +200,11 @@ public class TextParagraphs extends ArrayList<String> {
                         case 0x0A:
                             point = 0x16BDD;
                             break;
-                        case 0x0B:
-                            point = 0x36010;
-                            break;
                         case 0x0E:
                             point = 0x18010;
                             break;
                         case 0x10:
                             point = 0x13320;
-                            break;
-                        case 0x11:
-                            point = 0x1F99A;
                             break;
                         case 0x15:
                             point = 0x384B5;

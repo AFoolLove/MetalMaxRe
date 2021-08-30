@@ -57,6 +57,7 @@ public enum Tank {
     public static final int COUNT = 0x12;
     public static final int TAX_COUNT = 0x0A;
     public static final int NO_COUNT = 0x08;
+    public static final int AVAILABLE_COUNT = 0x0B;
 
     private final byte id;
 

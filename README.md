@@ -32,7 +32,46 @@
 
 ### 使用
 
-请确保已经安装了`java 16`或以上的版本
+* 使用前请确保已经安装了`java 16`或以上的版本
+
+* 初始化和加载游戏ROM：
+
+~~~java
+class Main {
+    public static void main(String[] args) throws InterruptedException {
+        final Object lock = new Object();
+        
+        // 初始化
+        MetalMaxRe instance = MetalMaxRe.getInstance();
+        // 加载游戏ROM
+        instance.loadGame(true, gamePath, new EditorWorker(){
+            @Override
+            protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
+                // 编辑器输出的信息
+            }
+
+            @Override
+            protected void done(){
+                // 所有编辑器读取完毕后将执行此方法
+                // code
+                
+                synchronized (lock) {
+                    lock.notify();
+                }
+            }
+        });
+        
+        synchronized (lock) {
+            lock.wait();
+        }
+    }
+}
+~~~
+* 程序不会等待编辑器读取完毕，所以这里添加了一个同步锁防止直接执行结束。。。
+* 保存到文件
+~~~
+MetalMaxRe.saveAs(outputPath);
+~~~
 
 如果需要可视化界面（未完成），可以添加 `gui` 参数，如下：
 
@@ -133,6 +172,7 @@ java -jar metalmaxre.jar gui
 * 坦克的初始装备
 * 坦克的初始属性
 * 坦克的初始装甲片
+* 坦克的初始位置（出租坦克只能修改初始地图，但这有什么用呢）
 
 ### [PlayerExperienceEditor](src/main/java/me/afoolslove/metalmaxre/editor/player/PlayerExperienceEditor.java)（玩家经验值编辑器）
 
@@ -156,7 +196,14 @@ java -jar metalmaxre.jar gui
 
 ### [TextEditor](src/main/java/me/afoolslove/metalmaxre/editor/text/TextEditor.java)（文本编辑器）
 
-* 多
+所有已知的文本
+
+* get/set 城镇名称
+* get/set 怪物名称
+* get/set 物品名称
+
+注：所有的文本都使用该类修改  
+字库：[WordBank](src/main/java/me/afoolslove/metalmaxre/editor/text/WordBank.java)
 
 ### [TileSetEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/tileset/TileSetEditor.java)（图块集编辑器）
 
@@ -166,6 +213,7 @@ java -jar metalmaxre.jar gui
 ### [WorldMapEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/world/WorldMapEditor.java)（世界地图编辑器）
 
 * 编辑世界地图
+* 修改出航/归航的航线，出航/归航航线的路径点各最大16条
 
 ### [MonsterEditor](src/main/java/me/afoolslove/metalmaxre/editor/monster/MonsterEditor.java)（怪物编辑器）
 
@@ -178,11 +226,12 @@ java -jar metalmaxre.jar gui
 
 **和其它未提及的小功能数据修改**
 
-# Tiled 
+# Tiled
 
 ## Script
 
 ### [Format Peak](tiled/script/FormatPeak.js)（格式化山脉）
+
 Restore Script: [Format Peak Restore](tiled/script/FormatPeakRestore.js)  
 Menu: Map -> Format Peak
 
@@ -190,6 +239,7 @@ Menu: Map -> Format Peak
 ![Format Before](tiled/script/screenshot/FormatPeak-before.jpg)![Format After](tiled/script/screenshot/FormatPeak-after.jpg)
 
 ## objecttypes
+
 Menu: View -> Object Types Editor -> Import  
 Select [this](tiled/objecttypes.xml) xml file to import  
 导入后可以简便的修改精灵和图块集中的图块属性（注：需要设置type

@@ -17,42 +17,50 @@ import java.util.Map;
  * 起始：0x0E510
  * 结束：0x0FBBD
  * <p>
- * 0x01 byte:特殊属性：地下地图、事件图块、传送带动画速度？
- * 0x02 byte:地图宽度、地图高度：宽 * 高 不能超过 0x1000(4096)，超出后会死机
- * 0x02 byte:可移动的宽度偏移量、可以移动的高度偏移量：玩家只能在该范围内移动，否则算入离开地图，无宽高限制
- * 0x02 byte:可移动的宽度、可以移动的高度：玩家只能在该范围内移动，否则算入离开地图，无宽高限制
- * 0x02 byte:组成地图的数据的索引
- * 0x01 byte:图块组合A
- * 0x01 byte:图块组合B
- * 0x02 byte:边界和入口目的地
- * 0x02 byte:调色盘
- * 0x01 byte:精灵表
- * 0x04 byte:图块表
- * 0x01 byte:门后图块，玩家开门后门替换的图块，图块图像受图块组合影响
- * 0x01 byte:边界填充图块，图块图像受图块组合影响
- * 0x01 byte:背景音乐
- * 0x02 byte:事件图块索引
+ * 0x01 byte:特殊属性：地下地图、事件图块、传送带动画速度？<p>
+ * 0x02 byte:地图宽度、地图高度：宽 * 高 不能超过 0x1000(4096)，超出后会死机<p>
+ * 0x02 byte:可移动的宽度偏移量、可以移动的高度偏移量：玩家只能在该范围内移动，否则算入离开地图，无宽高限制<p>
+ * 0x02 byte:可移动的宽度、可以移动的高度：玩家只能在该范围内移动，否则算入离开地图，无宽高限制<p>
+ * 0x02 byte:组成地图的数据的索引<p>
+ * 0x01 byte:图块组合A<p>
+ * 0x01 byte:图块组合B<p>
+ * 0x02 byte:边界和入口目的地<p>
+ * 0x02 byte:调色盘<p>
+ * 0x01 byte:精灵表<p>
+ * 0x04 byte:图块表<p>
+ * 0x01 byte:门后图块，玩家开门后门替换的图块，图块图像受图块组合影响<p>
+ * 0x01 byte:边界填充图块，图块图像受图块组合影响<p>
+ * 0x01 byte:背景音乐<p>
+ * 0x02 byte:事件图块索引<p>
  * <p>
+ * 支持世界地图的部分属性 {@link WorldMapProperties}<p>
  * <p>
- * 支持世界地图的部分属性 {@link WorldMapProperties}
- * <p>
- * <p>
- * <p>
- * 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
- * <p>
- * 2021年5月14日：已完成并通过测试基本编辑功能
+ * 地图属性索引不需要建议被编辑！！所以不提供修改功能！！<p>
+ * 2021年5月14日：已完成并通过测试基本编辑功能<p>
  *
- * @author AFoolLove
+ * @author AFoolLove<p>
  */
 public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
+    /**
+     * 地图属性索引上卷和下卷地址
+     */
     public static final int MAP_PROPERTIES_UP_ROLL_OFFSET = 0x0BE10 - 0x10;
     public static final int MAP_PROPERTIES_DOWN_ROLL_OFFSET = 0x1DEB0 - 0x10;
 
+    /**
+     * 地图属性数据
+     */
     public static final int MAP_PROPERTIES_OFFSET = 0x0E510 - 0x10;
 
+    /**
+     * 地图属性
+     */
     public static final int MAP_PROPERTIES_START_OFFSET = MAP_PROPERTIES_OFFSET - 0x08500;
     public static final int MAP_PROPERTIES_END_OFFSET = 0x0FBBD - 0x08500 - 0x10;
 
+    /**
+     * 地图怪物组合索引
+     */
     public static final int MAP_PROPERTIES_MONSTER_GROUP_INDEX_START_OFFSET = 0x39343 - 0x10;
     public static final int MAP_PROPERTIES_MONSTER_GROUP_INDEX_END_OFFSET = 0x393B2 - 0x10;
 

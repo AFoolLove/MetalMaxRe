@@ -292,24 +292,12 @@ public class DataValues {
                 .filter(entry -> switch (length) {
                     case 1 -> entry.getValue() <= 0x0000FF;
                     case 2 -> entry.getValue() <= 0x00FFFF;
-//                        case 3:
-//                            return entry.getValue() <= 0xFFFFFF;
+//                    case 3 -> entry.getValue() <= 0xFFFFFF;
                     default -> true;
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public static void main(String[] args) {
-        var a = get1ByteValue();
-        var b = get2ByteValue();
-        var c = get3ByteValue();
-        for (Number value : getKeys(0x00)) {
-            System.out.println(value);
-        }
-        System.out.println();
-    }
-
     private DataValues() {
     }
-
 }

@@ -317,10 +317,10 @@ public class TiledMap {
         MapObject borderRIGHT = new MapObject(width * 0x10, 0x00, 0x03 * 0x10, height * 0x10, 0);
         borderRIGHT.setId(nextObjectId++);
         borderRIGHT.setType("border");
-        borderGroup.addObject(borderUP);
-        borderGroup.addObject(borderDOWN);
-        borderGroup.addObject(borderLEFT);
         borderGroup.addObject(borderRIGHT);
+        borderGroup.addObject(borderLEFT);
+        borderGroup.addObject(borderDOWN);
+        borderGroup.addObject(borderUP);
 
         MapBorder border = mapEntrance.getBorder();
         switch (border.type) {
@@ -737,10 +737,10 @@ public class TiledMap {
         MapObject borderRIGHT = new MapObject(0x100 * 0x10, 0x00, 0x03 * 0x10, 0x100 * 0x10, 0);
         borderRIGHT.setId(nextObjectId++);
         borderRIGHT.setType("border");
-        borderGroup.addObject(borderUP);
-        borderGroup.addObject(borderDOWN);
-        borderGroup.addObject(borderLEFT);
         borderGroup.addObject(borderRIGHT);
+        borderGroup.addObject(borderLEFT);
+        borderGroup.addObject(borderDOWN);
+        borderGroup.addObject(borderUP);
 
         MapBorder border = mapEntrance.getBorder();
         switch (border.type) {
@@ -893,7 +893,9 @@ public class TiledMap {
         if (tmxMapWriter == null) {
             tmxMapWriter = new TMXMapWriter();
         }
-        tmxMapWriter.writeTileset(tileSet, new File(outputDir, String.format("%s.tsx", tileSet.getName())).getPath());
+        File source = new File(outputDir, String.format("%s.tsx", tileSet.getName()));
+        tmxMapWriter.writeTileset(tileSet, source.getPath());
+        tileSet.setSource(source.getPath());
         return tileSet;
     }
 
@@ -953,7 +955,9 @@ public class TiledMap {
         if (tmxMapWriter == null) {
             tmxMapWriter = new TMXMapWriter();
         }
-        tmxMapWriter.writeTileset(tileSet, new File(outputDir, String.format("%s.tsx", tileSet.getName())).getPath());
+        File source = new File(outputDir, String.format("%s.tsx", tileSet.getName()));
+        tmxMapWriter.writeTileset(tileSet, source.getPath());
+        tileSet.setSource(source.getPath());
         return tileSet;
     }
 
@@ -1024,7 +1028,10 @@ public class TiledMap {
                         // 移除原本的边界传送方式
                         mapBorder.clear();
 
-                        MapObject mapObject = objectGroup.getObjects().get(0x00);
+                        List<MapObject> objects = new ArrayList<>(objectGroup.getObjects());
+                        Collections.reverse(objects);
+
+                        MapObject mapObject = objects.get(0x00);
                         // 根据四个方向的目的地，设置不同的类型
                         // 四个方向目的地相同：MapBorderType.FIXED
                         // 四个方向目的地不同：MapBorderType.DIRECTION
@@ -1034,17 +1041,32 @@ public class TiledMap {
                             // 返回入口
                             mapBorder.setType(MapBorderType.LAST);
                         } else {
-                            for (MapObject object : objectGroup.getObjects()) {
+                            for (MapObject object : objects) {
                                 if (!mapObject.getName().equalsIgnoreCase(object.getName())) {
-                                    mapObject = null; // 设置为null表示已经设置过类型了
                                     // 设置类型为根据不同方向不同出口
                                     mapBorder.setType(MapBorderType.DIRECTION);
+                                    for (int i = 0; i < 0x04; i++) {
+                                        mapObject = objects.get(i);
+                                        String[] split = mapObject.getName().split(":");
+                                        mapBorder.add(new MapPoint(
+                                                Integer.parseInt(split[0], 16),
+                                                Integer.parseInt(split[1], 16),
+                                                Integer.parseInt(split[2], 16)
+                                        ));
+                                    }
+                                    mapObject = null; // 设置为null表示已经设置过类型了
                                     break;
                                 }
                             }
                             if (mapObject != null) {
                                 // 设置为固定出口
                                 mapBorder.setType(MapBorderType.FIXED);
+                                String[] split = objects.get(0x00).getName().split(":");
+                                mapBorder.add(new MapPoint(
+                                        Integer.parseInt(split[0], 16),
+                                        Integer.parseInt(split[1], 16),
+                                        Integer.parseInt(split[2], 16)
+                                ));
                             }
                         }
                         break;
@@ -1055,6 +1077,10 @@ public class TiledMap {
                         sprites.clear();
 
                         for (MapObject sprite : objectGroup.getObjects()) {
+                            if (sprite.isVisible() != null && !sprite.isVisible()) {
+                                // 不添加被隐藏的精灵
+                                continue;
+                            }
                             // 精灵坐标
                             byte x = (byte) (((int) sprite.getX() / 0x10) & 0xFF);
                             byte y = (byte) ((((int) sprite.getY() / 0x10) & 0xFF) - 1);
@@ -1309,6 +1335,10 @@ public class TiledMap {
                         sprites.clear();
 
                         for (MapObject sprite : objectGroup.getObjects()) {
+                            if (sprite.isVisible() != null && !sprite.isVisible()) {
+                                // 不添加被隐藏的精灵
+                                continue;
+                            }
                             // 精灵坐标
                             byte x = (byte) (((int) sprite.getX() / 0x10) & 0xFF);
                             byte y = (byte) ((((int) sprite.getY() / 0x10) & 0xFF) - 1);
@@ -1467,7 +1497,11 @@ public class TiledMap {
 //                            int index = (int) ((realm.getX() / 0x10) + ((realm.getY() / 0x10) * 0x40));
                             String[] split = realm.getName().split(":");
                             if (split.length >= 2) {
-                                realms.set(Integer.parseInt(split[0], 16), (byte) Integer.parseInt(split[1], 16));
+                                if (realm.isVisible() != null && !realm.isVisible()) {
+                                    realms.set(Integer.parseInt(split[0], 16), (byte) 0x00);
+                                } else {
+                                    realms.set(Integer.parseInt(split[0], 16), (byte) Integer.parseInt(split[1], 16));
+                                }
                             }
                         }
                         break;

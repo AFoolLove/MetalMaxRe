@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre.editor.tank;
 
 import me.afoolslove.metalmaxre.NumberR;
+import me.afoolslove.metalmaxre.editor.map.MapPoint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.Range;
  *
  * @author AFoolLove
  */
-public class TankInitialAttributes {
+public class TankInitialAttributes extends MapPoint {
     /**
      * 开洞状态
      */
