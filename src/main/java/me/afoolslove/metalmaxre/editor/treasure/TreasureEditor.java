@@ -1,6 +1,8 @@
 package me.afoolslove.metalmaxre.editor.treasure;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
+import me.afoolslove.metalmaxre.editor.map.MapCheckPoints;
+import me.afoolslove.metalmaxre.editor.map.MapPoint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -38,6 +40,13 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
     public static final int TREASURE_MAX_COUNT = 0x5B;
 
     /**
+     * 地图的调查点坐标
+     */
+    public static final int MAP_CHECK_POINTS_MAX_COUNT = 0x06;
+    public static final int MAP_CHECK_POINTS_START_OFFSET = 0x35CB5 - 0x10;
+    public static final int MAP_CHECK_POINTS_END_OFFSET = 0x35CC6 - 0x10;
+
+    /**
      * 宝藏数据
      */
     public static final int TREASURE_START_OFFSET = 0x39C50 - 0x10;
@@ -47,6 +56,11 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
      * 所有宝藏
      */
     private final LinkedHashSet<Treasure> treasures = new LinkedHashSet<>(TREASURE_MAX_COUNT);
+
+    /**
+     * 地图的调查点，算是"宝藏"吧
+     */
+    private final MapCheckPoints mapCheckPoints = new MapCheckPoints();
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
@@ -75,6 +89,30 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
                 System.out.format("位置：Map:%05X, X:%05X, Y:%05X,Item:%05X\n", treasure.getMap(), treasure.getX(), treasure.getY(), treasure.getItem());
             }
         }
+
+        // 读取地图的调查点
+        setPrgRomPosition(MAP_CHECK_POINTS_START_OFFSET);
+        get(buffer, maps, 0, MAP_CHECK_POINTS_MAX_COUNT);
+        get(buffer, xs, 0, MAP_CHECK_POINTS_MAX_COUNT);
+        get(buffer, ys, 0, MAP_CHECK_POINTS_MAX_COUNT);
+        mapCheckPoints.entrance.getKey().set(maps[0x00], xs[0x00], ys[0x00]);
+        mapCheckPoints.text.getKey().set(maps[0x01], xs[0x01], ys[0x01]);
+        mapCheckPoints.reviveCapsule.getKey().set(maps[0x02], xs[0x02], ys[0x02]);
+        mapCheckPoints.urumi.getKey().set(maps[0x03], xs[0x03], ys[0x03]);
+        mapCheckPoints.drawers.getKey().set(maps[0x04], xs[0x04], ys[0x04]);
+        mapCheckPoints.text2.getKey().set(maps[0x05], xs[0x05], ys[0x05]);
+
+        mapCheckPoints.entrance.getValue().setCamera(
+                getPrgRom(buffer, 0x35CDD - 0x10),
+                getPrgRom(buffer, 0x35CE1 - 0x10),
+                getPrgRom(buffer, 0x35CE5 - 0x10)
+        );
+        mapCheckPoints.reviveCapsule.setValue(getPrgRom(buffer, 0x35D01 - 0x10));
+        mapCheckPoints.drawers.getValue().clear();
+        mapCheckPoints.drawers.getValue().addAll(Arrays.asList(
+                getPrgRom(buffer, 0x35D48 - 0x10),
+                getPrgRom(buffer, 0x35D49 - 0x10)
+        ));
         return true;
     }
 
@@ -112,6 +150,39 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
         put(buffer, xs);
         put(buffer, ys);
         put(buffer, items);
+
+
+        // 写入地图的调查点
+        setPrgRomPosition(MAP_CHECK_POINTS_START_OFFSET);
+        List<MapPoint> checkPoints = Arrays.asList(mapCheckPoints.entrance.getKey(),
+                mapCheckPoints.text.getKey(),
+                mapCheckPoints.reviveCapsule.getKey(),
+                mapCheckPoints.urumi.getKey(),
+                mapCheckPoints.drawers.getKey(),
+                mapCheckPoints.text2.getKey());
+        for (i = 0; i < MAP_CHECK_POINTS_MAX_COUNT; i++) {
+            MapPoint checkPoint = checkPoints.get(i);
+            maps[i] = checkPoint.getMap();
+            xs[i] = checkPoint.getX();
+            ys[i] = checkPoint.getY();
+        }
+        put(buffer, maps, 0, MAP_CHECK_POINTS_MAX_COUNT);
+        put(buffer, xs, 0, MAP_CHECK_POINTS_MAX_COUNT);
+        put(buffer, ys, 0, MAP_CHECK_POINTS_MAX_COUNT);
+
+        putPrgRom(buffer, 0x35CDD - 0x10, mapCheckPoints.entrance.getValue().getMap());
+        putPrgRom(buffer, 0x35CE1 - 0x10, mapCheckPoints.entrance.getValue().getCameraX());
+        putPrgRom(buffer, 0x35CE5 - 0x10, mapCheckPoints.entrance.getValue().getCameraY());
+
+        putPrgRom(buffer, 0x35D01 - 0x10, mapCheckPoints.reviveCapsule.getValue());
+
+        setPrgRomPosition(0x35D48 - 0x10);
+        for (int item : mapCheckPoints.drawers.getValue().stream()
+                .mapToInt(value -> value & 0xFF)
+                .limit(2)
+                .toArray()) {
+            put(buffer, item);
+        }
         return true;
     }
 
@@ -233,5 +304,12 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
             }
         }
         return false;
+    }
+
+    /**
+     * @return 地图的调查点
+     */
+    public MapCheckPoints getMapCheckPoints() {
+        return mapCheckPoints;
     }
 }

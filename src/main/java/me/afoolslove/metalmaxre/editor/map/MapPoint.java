@@ -106,6 +106,20 @@ public class MapPoint extends Point2B {
         super.setY(y);
     }
 
+    public void setCamera(@Range(from = 0x00, to = 0xFF) int map,
+                          @Range(from = 0x00, to = 0xFF) int x,
+                          @Range(from = 0x00, to = 0xFF) int y) {
+        setMap(map);
+        setCamera((byte) (x & 0xFF), (byte) (y & 0xFF));
+    }
+
+    public void setCamera(byte map,
+                          byte x,
+                          byte y) {
+        setMap(map);
+        setCamera(x, y);
+    }
+
     public void setCamera(@Range(from = 0x00, to = 0xFF) int x,
                           @Range(from = 0x00, to = 0xFF) int y) {
         setCamera((byte) (x & 0xFF), (byte) (y & 0xFF));
