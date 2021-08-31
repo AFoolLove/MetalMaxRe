@@ -1125,6 +1125,10 @@ public class TiledMap {
                         computerEditor.removeAll(computers);
 
                         for (MapObject computer : objectGroup.getObjects()) {
+                            if (computer.isVisible() != null && !computer.isVisible()) {
+                                // 排除被隐藏的计算机
+                                continue;
+                            }
                             // 通过名称设置计算机的功能
                             int type = Integer.parseInt(computer.getName().substring(0, 2), 16);
                             int x = (int) (computer.getX() / 0x10);
@@ -1142,6 +1146,10 @@ public class TiledMap {
                         entrances.clear();
 
                         for (MapObject entrance : objectGroup.getObjects()) {
+                            if (entrance.isVisible() != null && !entrance.isVisible()) {
+                                // 排除被隐藏的入口
+                                continue;
+                            }
                             // 入口X、Y
                             int inX = (int) (entrance.getX() / 0x10);
                             int inY = (int) (entrance.getY() / 0x10);
@@ -1163,6 +1171,10 @@ public class TiledMap {
                         treasureEditor.removeAll(treasures);
 
                         for (MapObject treasure : objectGroup.getObjects()) {
+                            if (treasure.isVisible() != null && !treasure.isVisible()) {
+                                // 不添加被隐藏的宝藏
+                                continue;
+                            }
                             // 通过名称获取宝藏
                             int item = Integer.parseInt(treasure.getName().substring(0, 2), 16);
                             int x = (int) (treasure.getX() / 0x10);
@@ -1203,6 +1215,10 @@ public class TiledMap {
                     eventTile.clear();
 
                     for (MapLayer mapLayer : group.getLayers()) {
+                        if (mapLayer.isVisible() != null && !mapLayer.isVisible()) {
+                            // 排除被隐藏的事件图块
+                            continue;
+                        }
                         if (mapLayer instanceof TileLayer eventLayer) {
                             // 通过名称获取事件数据
                             // 0x0441为实际内存地址起始
@@ -1382,6 +1398,10 @@ public class TiledMap {
 
                         // 读取所有宝藏
                         for (MapObject treasureObject : objectGroup.getObjects()) {
+                            if (treasureObject.isVisible() != null && !treasureObject.isVisible()) {
+                                // 不添加被隐藏的宝藏
+                                continue;
+                            }
                             // 添加宝藏
                             treasureEditor.add(new Treasure(0x00,
                                     (int) treasureObject.getX() / 0x10,
@@ -1396,6 +1416,11 @@ public class TiledMap {
 
                         // 读取所有出入口
                         for (MapObject entranceObject : objectGroup.getObjects()) {
+                            if (entranceObject.isVisible() != null && !entranceObject.isVisible()) {
+                                // 排除被隐藏的出入口
+                                continue;
+                            }
+
                             String[] split = entranceObject.getName().split(":");
                             if (split.length != 3) {
                                 // 忽略3个数据以外的数据
@@ -1517,6 +1542,10 @@ public class TiledMap {
                 worldEventTile.clear();
 
                 for (MapLayer groupLayer : group.getLayers()) {
+                    if (groupLayer.isVisible() != null && !groupLayer.isVisible()) {
+                        // 排除被隐藏的事件图块
+                        continue;
+                    }
                     if (groupLayer instanceof TileLayer eventTileLayer) {
                         // 得到事件
                         int event = Integer.parseInt(eventTileLayer.getName().substring(0, 4), 16) - 0x0441;
