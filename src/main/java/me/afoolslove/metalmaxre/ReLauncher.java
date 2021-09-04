@@ -3,7 +3,6 @@ package me.afoolslove.metalmaxre;
 import me.afoolslove.metalmaxre.gui.MainWindow;
 
 import javax.swing.*;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -48,22 +47,21 @@ public class ReLauncher {
         } else {
             try {
                 Object lock = new Object();
-                metalMaxRe.loadGame(true, new File("/"),
-                        new EditorWorker() {
-                            @Override
-                            protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
-                                for (Map.Entry<ProcessState, Object> chunk : chunks) {
-                                    System.out.println(chunk.getValue());
-                                }
-                            }
+                metalMaxRe.loadInitGame(new EditorWorker() {
+                    @Override
+                    protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
+                        for (Map.Entry<ProcessState, Object> chunk : chunks) {
+                            System.out.println(chunk.getValue());
+                        }
+                    }
 
-                            @Override
-                            protected void done() {
-                                synchronized (lock) {
-                                    lock.notify();
-                                }
-                            }
-                        });
+                    @Override
+                    protected void done() {
+                        synchronized (lock) {
+                            lock.notify();
+                        }
+                    }
+                });
 
                 synchronized (lock) {
                     lock.wait();

@@ -22,6 +22,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.bind.JAXBException;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -31,10 +32,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -194,6 +193,7 @@ public class MainWindow extends JFrame {
         fileMenuSaveAs.addActionListener(e -> {
             // 文件选择器
             JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("NES file", "nes"));
             // 选择保存的路径或替换的文件
             int state = fileChooser.showSaveDialog(this);
             // 只关心是否选中了导出的目标文件
@@ -219,6 +219,7 @@ public class MainWindow extends JFrame {
         JMenuItem fileMenuImportWorld = new JMenuItem("Import Tmx World");
         fileMenuImportWorld.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("TiledMap", "tmx"));
             int state = fileChooser.showOpenDialog(this);
             if (state == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
@@ -246,7 +247,68 @@ public class MainWindow extends JFrame {
             }
         });
 
+        JMenuItem fileMenuImportMap = new JMenuItem("Import Tmx Map");
+        fileMenuImportMap.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("TiledMap", "tmx"));
+            fileChooser.setMultiSelectionEnabled(true);
+            int state = fileChooser.showOpenDialog(this);
+            if (state == JFileChooser.APPROVE_OPTION) {
+                File[] selectedFiles = fileChooser.getSelectedFiles();
+                if (selectedFiles.length == 0) {
+                    return;
+                }
+
+                List<File> files = Arrays.stream(selectedFiles).filter(File::exists).collect(Collectors.toList());
+
+
+                var maps = files.parallelStream().map(value -> {
+                            // 移除后缀
+                            String name = value.getName();
+                            int lastIndexOf = name.lastIndexOf('.');
+
+                            // 将十六进制字符转换为数字
+                            int map;
+                            if (lastIndexOf == -1) {
+                                map = Integer.parseInt(name, 16);
+                            } else {
+                                map = Integer.parseInt(name.substring(0, lastIndexOf));
+                            }
+                            return Map.entry(map, value);
+                        })
+                        .distinct() // 去重
+                        .filter(entry -> entry.getKey() > 0x00 && entry.getKey() < MapEditor.MAP_MAX_COUNT) // 过滤大于最大地图ID的数据
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                int result = JOptionPane.showConfirmDialog(this, String.format("""
+                                这些地图的数据将会被覆盖
+                                %s
+                                """, Arrays.toString(maps.keySet().toArray(new Integer[0]))),
+                        "覆盖数据",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    // 已确认覆盖
+                    try {
+                        TMXMapReader tmxMapReader = new TMXMapReader();
+                        for (Map.Entry<Integer, File> entry : maps.entrySet()) {
+                            try {
+                                TiledMap.importMap(entry.getKey(), tmxMapReader.readMap(entry.getValue().getAbsolutePath()));
+                            } catch (Exception ex) {
+                                System.out.println("导入失败：" + entry.getKey());
+                                ex.printStackTrace();
+                            }
+                        }
+                    } catch (JAXBException ex) {
+                        ex.printStackTrace();
+                    }
+                    System.out.printf("Import %s maps OK.", Arrays.toString(maps.keySet().toArray()));
+                }
+            }
+        });
+
         fileMenuImport.add(fileMenuImportWorld);
+        fileMenuImport.add(fileMenuImportMap);
 
         JMenu fileMenuExport = new JMenu("Export");
 
@@ -344,6 +406,9 @@ public class MainWindow extends JFrame {
                         导出多个地图：1-2,5-6,9,12
                         地图ID范围： 1-239\
                         """, "导出地图", JOptionPane.QUESTION_MESSAGE);
+                if (maps == null) {
+                    return;
+                }
                 HashSet<Integer> mapIds = new HashSet<>();
                 for (String ids : maps.strip().split(",")) {
                     ids = ids.strip();
@@ -619,6 +684,10 @@ public class MainWindow extends JFrame {
     }
 
     private synchronized void loadGame(@NotNull File game, boolean init) {
-        MetalMaxRe.getInstance().loadGame(init, game, new WindowEditorWorker(this, game, init));
+        if (init) {
+            MetalMaxRe.getInstance().loadInitGame(new WindowEditorWorker(this, game, true));
+        } else {
+            MetalMaxRe.getInstance().loadGame(game, new WindowEditorWorker(this, game, false));
+        }
     }
 }

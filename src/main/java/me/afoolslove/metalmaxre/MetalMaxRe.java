@@ -215,9 +215,15 @@ public class MetalMaxRe {
     /**
      * 加载游戏文件
      */
-    public void loadGame(boolean isInitTarget, @NotNull File game, @NotNull EditorWorker editorWorker) {
+    public void loadGame(@NotNull File game, @NotNull EditorWorker editorWorker) {
         setTarget(game);
-        this.isInitTarget = isInitTarget;
+        this.isInitTarget = false;
+        editorWorker.execute();
+    }
+
+    public void loadInitGame(@NotNull EditorWorker editorWorker) {
+        setTarget(null);
+        this.isInitTarget = true;
         editorWorker.execute();
     }
 
@@ -333,51 +339,4 @@ public class MetalMaxRe {
     public ByteBuffer getBuffer() {
         return buffer;
     }
-
-
-    /**
-     * 获取 RPG ROM 的起始位置
-     *
-     * @return RPG ROM 的起始位置，占时固定为 0x10
-     */
-    public int getPROMOffset() {
-        return 0x10;
-    }
-
-
-    /**
-     * 获取 PRG ROM 的长度
-     *
-     * @return PRG ROM 的长度
-     */
-    public int getPROMLength() {
-        int position = getBuffer().position();
-        getBuffer().position(0x04);
-        byte b = getBuffer().get();
-        getBuffer().position(position);
-        return (b & 0xFF) * 0x4000;
-    }
-
-    /**
-     * 得到 CHR ROM的起始位置
-     *
-     * @return CHR ROM的起始位置
-     */
-    public int getVROMOffset() {
-        return getPROMOffset() + getPROMLength();
-    }
-
-    /**
-     * 得到 CHR ROM的长度
-     *
-     * @return CHR ROM的长度
-     */
-    public int getVROMLength() {
-        int position = getBuffer().position();
-        getBuffer().position(0x05);
-        byte b = getBuffer().get();
-        getBuffer().position(position);
-        return (b & 0xFF) * 0x2000;
-    }
-
 }
