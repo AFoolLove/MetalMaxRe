@@ -3,15 +3,11 @@ package me.afoolslove.metalmaxre.editor;
 import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 /**
  * 基本的编辑器功能
@@ -187,6 +183,22 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     }
 
     /**
+     * 跳过1个字节
+     */
+    public void skip() {
+        bufferPosition++;
+    }
+
+    /**
+     * 跳过指定长度的字节
+     *
+     * @param length 跳过的字节数量
+     */
+    public void skip(int length) {
+        bufferPosition += length;
+    }
+
+    /**
      * @return 获取程序主体实例
      */
     @NotNull
@@ -217,16 +229,6 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         }
         return Objects.equals(getBuffer(), editor.getBuffer())
                 && Objects.equals(getListeners(), editor.getListeners());
-    }
-
-    public static <T> void limit(@NotNull Iterator<T> iterator, @NotNull BooleanSupplier condition, @Nullable Consumer<T> removed) {
-        while (condition.getAsBoolean() && iterator.hasNext()) {
-            T remove = iterator.next();
-            iterator.remove();
-            if (removed != null) {
-                removed.accept(remove);
-            }
-        }
     }
 
     /**

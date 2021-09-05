@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -74,30 +73,26 @@ public class VendorEditor extends AbstractEditor<VendorEditor> {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        // 移除多余的商品组合
-        Iterator<VendorItemList> iterator = vendorItemLists.iterator();
-        limit(iterator, () -> vendorItemLists.size() > VENDOR_MAX_COUNT, remove -> {
-            System.out.printf("售货机编辑器：移除多余的售货机商品组 %s\n", remove);
-        });
-
+        // 优先储存后加入的
+        ArrayList<VendorItemList> vendorItemLists = new ArrayList<>(getVendorItemLists());
+        int fromIndex = Math.max(0, vendorItemLists.size() - VENDOR_MAX_COUNT);
         byte[] items = new byte[VENDOR_ITEM_COUNT];
         byte[] counts = new byte[VENDOR_ITEM_COUNT];
         setPrgRomPosition(VENDOR_START_OFFSET);
-        while (iterator.hasNext()) {
-            VendorItemList vendorItemList = iterator.next();
-
+        for (int index = fromIndex, size = vendorItemLists.size(); index < size; index++) {
+            VendorItemList vendorItemList = vendorItemLists.get(index);
             // 写入固定头
             put(buffer, 0x0D);
             // 写入商品和数量
             for (int i = 0; i < VENDOR_ITEM_COUNT; i++) {
                 VendorItem item = vendorItemList.get(i);
-                items[i] = item.item;
-                counts[i] = item.count;
+                items[i] = item.getItem();
+                counts[i] = item.getCount();
             }
             put(buffer, items);
             put(buffer, counts);
             // 写入奖品
-            put(buffer, vendorItemList.award);
+            put(buffer, vendorItemList.getAward());
         }
         return true;
     }

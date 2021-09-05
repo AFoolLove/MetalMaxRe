@@ -123,28 +123,18 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
         byte[] ys = new byte[TREASURE_MAX_COUNT];
         byte[] items = new byte[TREASURE_MAX_COUNT];
 
-        // 写入前修正宝藏数量
-
-        Iterator<Treasure> iterator = treasures.iterator();
-        // 移除多余的宝藏
-        limit(iterator, () -> treasures.size() > TREASURE_MAX_COUNT, removed -> {
-            System.out.println("移除多余的宝藏：" + removed);
-        });
-
-        int i = 0;
-        while (iterator.hasNext()) {
-            Treasure treasure = iterator.next();
-            if (i >= TREASURE_MAX_COUNT) {
-                break;
-            }
-
-            maps[i] = treasure.getMap();
-            xs[i] = treasure.getX();
-            ys[i] = treasure.getY();
-            items[i] = treasure.getItem();
-            i++;
+        // 优先储存后加入的
+        ArrayList<Treasure> treasures = new ArrayList<>(getTreasures());
+        int fromIndex = Math.max(0, treasures.size() - TREASURE_MAX_COUNT);
+        for (int index = fromIndex, size = treasures.size(); index < size; index++) {
+            Treasure treasure = treasures.get(index);
+            maps[index] = treasure.getMap();
+            xs[index] = treasure.getX();
+            ys[index] = treasure.getY();
+            items[index] = treasure.getItem();
         }
 
+        // 写入宝藏
         setPrgRomPosition(TREASURE_START_OFFSET);
         put(buffer, maps);
         put(buffer, xs);
@@ -160,11 +150,11 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
                 mapCheckPoints.urumi.getKey(),
                 mapCheckPoints.drawers.getKey(),
                 mapCheckPoints.text2.getKey());
-        for (i = 0; i < MAP_CHECK_POINTS_MAX_COUNT; i++) {
-            MapPoint checkPoint = checkPoints.get(i);
-            maps[i] = checkPoint.getMap();
-            xs[i] = checkPoint.getX();
-            ys[i] = checkPoint.getY();
+        for (int index = 0; index < MAP_CHECK_POINTS_MAX_COUNT; index++) {
+            MapPoint checkPoint = checkPoints.get(index);
+            maps[index] = checkPoint.getMap();
+            xs[index] = checkPoint.getX();
+            ys[index] = checkPoint.getY();
         }
         put(buffer, maps, 0, MAP_CHECK_POINTS_MAX_COUNT);
         put(buffer, xs, 0, MAP_CHECK_POINTS_MAX_COUNT);

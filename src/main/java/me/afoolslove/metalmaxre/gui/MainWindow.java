@@ -165,7 +165,11 @@ public class MainWindow extends JFrame {
 
             if (result == JOptionPane.OK_OPTION) {
                 // 已确认重新加载
-                loadGame(MetalMaxRe.getInstance().getTarget(), MetalMaxRe.getInstance().isIsInitTarget());
+                if (MetalMaxRe.getInstance().isIsInitTarget()) {
+                    loadInitGame();
+                } else {
+                    loadGame(MetalMaxRe.getInstance().getTarget(), MetalMaxRe.getInstance().isIsInitTarget());
+                }
             }
         });
 
@@ -681,6 +685,10 @@ public class MainWindow extends JFrame {
      */
     public void loadGame(@NotNull File game) {
         loadGame(game, false);
+    }
+
+    public void loadInitGame() {
+        loadGame(new File("MetalMax.nes"), true);
     }
 
     private synchronized void loadGame(@NotNull File game, boolean init) {

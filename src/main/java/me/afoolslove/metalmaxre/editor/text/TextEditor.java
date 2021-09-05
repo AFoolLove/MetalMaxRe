@@ -164,7 +164,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
      * @param town 城镇
      * @return 城镇的名称
      */
-    public String getTownName(@Range(from = 0x00, to = DogSystemEditor.DESTINATION_MAX_COUNT - 1) int town) {
+    public String getTownName(@Range(from = 0x00, to = DogSystemEditor.TOWN_MAX_COUNT - 1) int town) {
         return paragraphsMap.get(X_120E0).get(0x30 + town);
     }
 
@@ -201,7 +201,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
      * @param town 城镇
      * @param name 新的城镇名称
      */
-    public void setTownName(@Range(from = 0x00, to = DogSystemEditor.DESTINATION_MAX_COUNT - 1) int town, @NotNull String name) {
+    public void setTownName(@Range(from = 0x00, to = DogSystemEditor.TOWN_MAX_COUNT - 1) int town, @NotNull String name) {
         paragraphsMap.get(X_120E0).set(0x30 + town, name);
     }
 

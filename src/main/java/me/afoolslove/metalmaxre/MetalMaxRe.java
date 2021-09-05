@@ -35,6 +35,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+// 你好陌生人，我顶你个肺
+
 /**
  * 程序主体
  *

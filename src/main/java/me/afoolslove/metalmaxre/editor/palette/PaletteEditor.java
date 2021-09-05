@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -102,20 +101,15 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
+        // 优先储存后加入的
+        ArrayList<PaletteList> paletteLists = new ArrayList<>(this.paletteLists);
+        int fromIndex = Math.max(0, paletteLists.size() - PALETTE_LIST_MAX_COUNT);
         setPrgRomPosition(PALETTE_START_OFFSET);
-        // 写入所有调色板集
-        // 限制数据
-        Iterator<PaletteList> iterator = paletteLists.iterator();
-        limit(iterator, () -> paletteLists.size() >= PALETTE_LIST_MAX_COUNT, removed -> {
-            System.out.printf("调色板编辑器：移除多余的调色板集 %s\n", removed);
-        });
-
-        // 写入
-        while (iterator.hasNext()) {
-            PaletteList next = iterator.next();
+        for (int index = fromIndex, size = paletteLists.size(); index < size; index++) {
+            PaletteList palettes = paletteLists.get(index);
             // 3个调色板，1个调色板3byte
             for (int i = 0; i < 0x03; i++) {
-                put(buffer, next.get(i).colors, 1, 3);
+                put(buffer, palettes.get(i).getColors(), 1, 3);
             }
         }
 
@@ -129,13 +123,13 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
         // 写入精灵调色板
         setPrgRomPosition(PALETTE_LIST_SPRITE_START_OFFSET);
         for (int i = 0; i < 0x04; i++) {
-            put(buffer, spritePalette.get(i).colors);
+            put(buffer, getSpritePalette().get(i).getColors());
         }
 
         // 写入战斗时的精灵调色板
         setPrgRomPosition(PALETTE_LIST_BATTLE_SPRITE_START_OFFSET);
         for (int i = 0; i < 0x04; i++) {
-            byte[] palette = battleSpritePalette.get(i).colors;
+            byte[] palette = getBattleSpritePalette().get(i).getColors();
             // 只写入后三位
             put(buffer, palette, 1, 3);
         }

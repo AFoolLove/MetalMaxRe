@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editor.map;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.ReadBefore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -20,6 +21,7 @@ import java.util.Map;
  *
  * @author AFoolLove
  */
+@ReadBefore({MapPropertiesEditor.class})
 public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
     /**
      * 地图边界和出入口数据

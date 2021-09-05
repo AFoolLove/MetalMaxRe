@@ -146,7 +146,7 @@ java -jar metalmaxre.jar gui
 地图的比例为：1:1tile  
 世界地图图块的比例为：1:4*4tile
 
-事件图块需要在 ```MapPropertiesEditor``` 种启用，世界地图默认启用
+事件图块需要在 ```MapPropertiesEditor``` 中启用，世界地图强制启用
 
 * 通过某个事件将某个地图的某个位置的图块替换为某个图块（？）
 

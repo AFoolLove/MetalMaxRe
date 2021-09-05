@@ -5,7 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * 犬系统
@@ -28,11 +30,11 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
      * 使用犬系统传送城镇的目的地<p>
      * 只支持，X和Y坐标，地图为固定的世界地图
      */
-    public static final int DESTINATION_MAX_COUNT = 0x0C;
-    public static final int DESTINATION_POINT_START_OFFSET = 0x3272D - 0x10;
-    public static final int DESTINATION_POINT_END_OFFSET = 0x32738 - 0x10;
-    public static final int DESTINATION_START_OFFSET = 0x34707 - 0x10;
-    public static final int DESTINATION_END_OFFSET = 0x34712 - 0x10;
+    public static final int TOWN_MAX_COUNT = 0x0C;
+    public static final int TOWN_LOCATION_START_OFFSET = 0x3272D - 0x10;
+    public static final int TOWN_LOCATION_END_OFFSET = 0x32738 - 0x10;
+    public static final int TOWN_START_OFFSET = 0x34707 - 0x10;
+    public static final int TOWN_END_OFFSET = 0x34712 - 0x10;
 
     /**
      * 使用传送机器传送时的目的地<p>
@@ -46,12 +48,12 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
     /**
      * 犬系统一共就 3*4 个目的地，写死算求
      */
-    private final List<MapPoint> destinations = new ArrayList<>(DESTINATION_MAX_COUNT);
+    private final MapPoint[] townLocations = new MapPoint[TOWN_MAX_COUNT];
 
     /**
      * 将某个地图设置为城镇
      */
-    private final HashMap<Integer, Integer> towns = new HashMap<>(DESTINATION_MAX_COUNT);
+    private final byte[] towns = new byte[TOWN_MAX_COUNT];
 
     /**
      * 可以将一个地图设置为某一个城镇<p>
@@ -62,38 +64,39 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
     /**
      * 时空隧道的目的地
      */
-    private final HashMap<Integer, MapPoint> teleport = new HashMap<>(TELEPORT_MAP_MAX_MAP_COUNT);
+    private final MapPoint[] teleport = new MapPoint[TELEPORT_MAP_MAX_MAP_COUNT];
 
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 读取前清空数据
-        destinations.clear();
-        towns.clear();
+        for (int i = 0; i < townLocations.length; i++) {
+            townLocations[i] = new MapPoint();
+        }
+        Arrays.fill(towns, (byte) 0x00);
         townSeries.clear();
-        teleport.clear();
+        for (int i = 0; i < teleport.length; i++) {
+            teleport[i] = new MapPoint();
+        }
 
-        byte[] xs = new byte[DESTINATION_MAX_COUNT];
-        byte[] ys = new byte[DESTINATION_MAX_COUNT];
+        byte[] xs = new byte[TOWN_MAX_COUNT];
+        byte[] ys = new byte[TOWN_MAX_COUNT];
 
         // (0x30 & 0B1111_1000) >>> 3 // 0x0441的偏移量
         // (0x30 & 0x0000_0111) // 指向的bit位
         // 读取目的地坐标
-        setPrgRomPosition(DESTINATION_POINT_START_OFFSET);
+        setPrgRomPosition(TOWN_LOCATION_START_OFFSET);
         get(buffer, xs);
         get(buffer, ys);
 
         // 储存目的地坐标
-        for (int i = 0; i < DESTINATION_MAX_COUNT; i++) {
-            MapPoint destination = new MapPoint();
-            destination.setCamera(xs[i], ys[i]);
-            destinations.add(i, destination);
+        for (int i = 0; i < TOWN_MAX_COUNT; i++) {
+            townLocations[i].setCamera(xs[i], ys[i]);
         }
 
-        byte[] towns = new byte[DESTINATION_MAX_COUNT];
-        byte[] townValues = new byte[DESTINATION_MAX_COUNT];
+        byte[] townValues = new byte[TOWN_MAX_COUNT];
 
         // 读取城镇
-        setPrgRomPosition(DESTINATION_START_OFFSET);
+        setPrgRomPosition(TOWN_START_OFFSET);
         get(buffer, towns);
         // 读取城镇数据
         // 这个数据就厉害了
@@ -101,11 +104,6 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         // 有需求再修改
         setPosition(0x3471E);
         get(buffer, townValues);
-
-        // 添加城镇映射
-        for (int i = 0; i < DESTINATION_MAX_COUNT; i++) {
-            getTowns().put(i, towns[i] & 0xFF);
-        }
 
         // 城镇附属，最多2个，格式和城镇一样，就不重复注释了
         byte[] townSeries = new byte[0x02];
@@ -132,75 +130,43 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         setPrgRomPosition(TELEPORT_MAP_Y_START_OFFSET);
         get(buffer, ys);
         for (int i = 0; i < TELEPORT_MAP_MAX_MAP_COUNT; i++) {
-            teleport.put(i, new MapPoint(maps[i], xs[i], ys[i]));
+            teleport[i].set(maps[i], xs[i], ys[i]);
         }
         return true;
     }
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        byte[] xs = new byte[DESTINATION_MAX_COUNT];
-        byte[] ys = new byte[DESTINATION_MAX_COUNT];
+        byte[] xs = new byte[TOWN_MAX_COUNT];
+        byte[] ys = new byte[TOWN_MAX_COUNT];
 
-        // 分解目的地坐标
-
-        // 移除多余的目的地坐标
-        Iterator<MapPoint> iterator = destinations.iterator();
-        limit(iterator, () -> destinations.size() > DESTINATION_MAX_COUNT, removed -> {
-            System.out.printf("犬系统编辑器：移除多余的目的地 %s\n", removed);
-        });
-
-        int i = 0;
-        while (iterator.hasNext()) {
-            MapPoint destination = iterator.next();
-            xs[i] = destination.getCameraX();
-            ys[i] = destination.getCameraY();
-            i++;
-        }
-
-        if (i < DESTINATION_MAX_COUNT) {
-            System.out.printf("犬系统编辑器：警告！！！剩余%d个目的地可能传送到地图坐标 0,0 的位置\n", i);
+        // 目的地坐标
+        for (int index = 0; index < townLocations.length; index++) {
+            xs[index] = townLocations[index].getCameraX();
+            ys[index] = townLocations[index].getCameraY();
         }
 
         // 写入目的地
-        setPrgRomPosition(DESTINATION_POINT_START_OFFSET);
+        setPrgRomPosition(TOWN_LOCATION_START_OFFSET);
         put(buffer, xs);
         put(buffer, ys);
 
 
         // 写入城镇对应的地图
 
-        Iterator<Integer> townIterator = towns.values().iterator();
-        // 移除多余的城镇
-        limit(townIterator, () -> towns.size() > DESTINATION_MAX_COUNT, removed -> {
-            System.out.printf("犬系统编辑器：移除多余的城镇 %02X\n", removed);
-        });
-
         // 写入城镇
-        setPrgRomPosition(DESTINATION_START_OFFSET);
-        while (townIterator.hasNext()) {
-            Integer next = townIterator.next();
-            put(buffer, next.byteValue());
-        }
-
-        // 城镇附属
-        Iterator<Map.Entry<Integer, Integer>> townSeriesIterator = townSeries.entrySet().iterator();
-        // 移除多余的城镇附属
-        limit(townSeriesIterator, () -> townSeries.size() > 0x02, removed -> {
-            System.out.printf("犬系统编辑器：移除多余的城镇 %02X\n", removed.getKey());
-        });
+        setPrgRomPosition(TOWN_START_OFFSET);
+        put(buffer, towns);
 
         // 写入城镇附属
         byte[] townSeries = new byte[0x02];
         byte[] townSeriesValues = new byte[0x02];
+        var townSeriesEntry = new ArrayList<>(getTownSeries().entrySet());
+        townSeries[0x00] = (byte) (townSeriesEntry.get(0x00).getKey() & 0xFF);
+        townSeries[0x01] = (byte) (townSeriesEntry.get(0x01).getKey() & 0xFF);
+        townSeriesValues[0x00] = (byte) (townSeriesEntry.get(0x00).getValue() & 0xFF);
+        townSeriesValues[0x01] = (byte) (townSeriesEntry.get(0x01).getValue() & 0xFF);
 
-        int j = 0;
-        while (townSeriesIterator.hasNext()) {
-            Map.Entry<Integer, Integer> next = townSeriesIterator.next();
-            townSeries[j] = next.getKey().byteValue();
-            townSeriesValues[j] = next.getValue().byteValue();
-            j++;
-        }
         // 写入附属地图
         setPosition(0x3471B);
         put(buffer, townSeries);
@@ -212,11 +178,11 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         byte[] maps = new byte[TELEPORT_MAP_MAX_MAP_COUNT];
         xs = new byte[TELEPORT_MAP_MAX_MAP_COUNT];
         ys = new byte[TELEPORT_MAP_MAX_MAP_COUNT];
-        for (i = 0; i < TELEPORT_MAP_MAX_MAP_COUNT; i++) {
-            MapPoint point = teleport.get(i);
-            maps[i] = point.getMap();
-            xs[i] = point.getX();
-            ys[i] = point.getY();
+        for (int i = 0; i < TELEPORT_MAP_MAX_MAP_COUNT; i++) {
+            MapPoint teleport = getTeleport(i);
+            maps[i] = teleport.getMap();
+            xs[i] = teleport.getX();
+            ys[i] = teleport.getY();
         }
         // 写入时空隧道所有目的地地图
         setPrgRomPosition(TELEPORT_MAP_START_OFFSET);
@@ -233,29 +199,29 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
     /**
      * @return 获取所有目的地
      */
-    public List<MapPoint> getDestinations() {
-        return destinations;
+    public MapPoint[] getTownLocations() {
+        return townLocations;
     }
 
     /**
      * @return 获取指定目的地的坐标
      */
-    public MapPoint getDestination(int destination) {
-        return destinations.get(destination);
+    public MapPoint getTownLocation(@Range(from = 0x00, to = TOWN_MAX_COUNT) int town) {
+        return townLocations[town];
     }
 
     /**
      * @return 所有城镇和其对应地图
      */
-    public HashMap<Integer, Integer> getTowns() {
+    public byte[] getTowns() {
         return towns;
     }
 
     /**
      * @return 城镇对应的地图
      */
-    public Integer getTown(int index) {
-        return towns.get(index);
+    public byte getTown(@Range(from = 0x00, to = TOWN_MAX_COUNT) int index) {
+        return towns[index];
     }
 
     /**
@@ -275,7 +241,7 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
     /**
      * @return 所有时空隧道目的地
      */
-    public HashMap<Integer, MapPoint> getTeleport() {
+    public MapPoint[] getTeleport() {
         return teleport;
     }
 
@@ -283,6 +249,6 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
      * @return 通过城镇序号（不是地图id）获取传送目的地
      */
     public MapPoint getTeleport(@Range(from = 0x00, to = TELEPORT_MAP_MAX_MAP_COUNT - 1) int index) {
-        return teleport.get(index);
+        return teleport[index];
     }
 }

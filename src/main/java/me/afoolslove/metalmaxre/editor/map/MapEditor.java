@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editor.map;
 
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.ReadBefore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -30,6 +31,7 @@ import java.util.function.Predicate;
  *
  * @author AFoolLove
  */
+@ReadBefore({MapPropertiesEditor.class})
 public class MapEditor extends AbstractEditor<MapEditor> {
     public static final int MAP_MAX_COUNT = 0xF0;
     public static final int[] MAP_CONTAINERS = {0x0B6D4 - 0x00610, 0xBF010 - 0xBB010};

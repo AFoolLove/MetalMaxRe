@@ -4,6 +4,7 @@ import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.Point2B;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.ReadBefore;
 import me.afoolslove.metalmaxre.editor.map.MapEditor;
 import me.afoolslove.metalmaxre.editor.map.MapProperties;
 import me.afoolslove.metalmaxre.editor.map.MapPropertiesEditor;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
  *
  * @author AFoolLove
  */
+@ReadBefore({WorldMapEditor.class, MapPropertiesEditor.class})
 public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
     /**
      * 事件图块数据

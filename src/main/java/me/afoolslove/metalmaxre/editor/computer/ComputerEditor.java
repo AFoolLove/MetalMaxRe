@@ -60,43 +60,36 @@ public class ComputerEditor extends AbstractEditor<ComputerEditor> {
         for (int i = 0; i < COMPUTER_MAX_COUNT; i++) {
             computers.add(new Computer(maps[i], types[i], xs[i], ys[i]));
         }
-
         return true;
     }
 
     @Override
     public boolean onWrite(@NotNull ByteBuffer buffer) {
-        Iterator<Computer> iterator = computers.iterator();
-        // 移除多余的电脑
-        limit(iterator, () -> computers.size() > COMPUTER_MAX_COUNT, removed -> {
-            System.out.printf("计算机编辑器：移除多余的电脑 %s\n", removed);
-        });
-
         byte[] maps = new byte[COMPUTER_MAX_COUNT];
         byte[] types = new byte[COMPUTER_MAX_COUNT];
         byte[] xs = new byte[COMPUTER_MAX_COUNT];
         byte[] ys = new byte[COMPUTER_MAX_COUNT];
-        // 将电脑属性储存到数组
-        int i = 0;
-        while (iterator.hasNext()) {
-            Computer computer = iterator.next();
-            if (i >= COMPUTER_MAX_COUNT) {
-                break;
-            }
 
-            maps[i] = computer.getMap();
-            types[i] = computer.getType();
-            xs[i] = computer.getX();
-            ys[i] = computer.getY();
-            i++;
+        // 优先储存后加入的
+        ArrayList<Computer> computers = new ArrayList<>(getComputers());
+        int fromIndex = Math.max(0, computers.size() - COMPUTER_MAX_COUNT);
+        for (int index = fromIndex, size = computers.size(); index < size; index++) {
+            Computer computer = computers.get(index);
+            maps[index] = computer.getMap();
+            types[index] = computer.getType();
+            xs[index] = computer.getX();
+            ys[index] = computer.getY();
         }
+
         // 使用 0xFF 填充未使用的计算机空位
-        if (COMPUTER_MAX_COUNT - i > 0) {
-            Arrays.fill(maps, i, COMPUTER_MAX_COUNT, (byte) 0xFF);
-            Arrays.fill(types, i, COMPUTER_MAX_COUNT, (byte) 0xFF);
-            Arrays.fill(xs, i, COMPUTER_MAX_COUNT, (byte) 0xFF);
-            Arrays.fill(ys, i, COMPUTER_MAX_COUNT, (byte) 0xFF);
-            System.out.printf("计算机编辑器：%d个未使用的计算机\n", COMPUTER_MAX_COUNT - i);
+        int remain = COMPUTER_MAX_COUNT - computers.size();
+        if (remain > 0) {
+            int count = COMPUTER_MAX_COUNT - remain;
+            Arrays.fill(maps, count, COMPUTER_MAX_COUNT, (byte) 0xFF);
+//            Arrays.fill(types, count, COMPUTER_MAX_COUNT, (byte) 0xFF);
+//            Arrays.fill(xs, count, COMPUTER_MAX_COUNT, (byte) 0xFF);
+//            Arrays.fill(ys, count, COMPUTER_MAX_COUNT, (byte) 0xFF);
+            System.out.printf("计算机编辑器：%d个未使用的计算机\n", remain);
         }
 
         // 写入
