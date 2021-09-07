@@ -49,8 +49,8 @@ public class ReLauncher {
                 Object lock = new Object();
                 metalMaxRe.loadInitGame(new EditorWorker() {
                     @Override
-                    protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
-                        for (Map.Entry<ProcessState, Object> chunk : chunks) {
+                    protected void process(List<Map.Entry<EditorProcess, Object>> chunks) {
+                        for (Map.Entry<EditorProcess, Object> chunk : chunks) {
                             System.out.println(chunk.getValue());
                         }
                     }

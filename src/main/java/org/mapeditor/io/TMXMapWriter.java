@@ -95,6 +95,8 @@ public class TMXMapWriter {
         if (os instanceof GZIPOutputStream) {
             ((GZIPOutputStream) os).finish();
         }
+
+        os.close();
     }
 
     /**
@@ -114,6 +116,9 @@ public class TMXMapWriter {
         xmlWriter.endDocument();
 
         writer.flush();
+
+        writer.close();
+        os.close();
     }
 
     /**
