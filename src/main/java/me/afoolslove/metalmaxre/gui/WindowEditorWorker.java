@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.gui;
 
+import me.afoolslove.metalmaxre.EditorProcess;
 import me.afoolslove.metalmaxre.EditorWorker;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import org.jetbrains.annotations.NotNull;
@@ -39,12 +40,12 @@ public class WindowEditorWorker extends EditorWorker {
     }
 
     @Override
-    protected void process(List<Map.Entry<EditorWorker.ProcessState, Object>> chunks) {
-        for (Map.Entry<ProcessState, Object> chunk : chunks) {
-            if (chunk.getKey() == ProcessState.RESULT) {
+    protected void process(List<Map.Entry<EditorProcess, Object>> chunks) {
+        for (Map.Entry<EditorProcess, Object> chunk : chunks) {
+            if (chunk.getKey() == EditorProcess.RESULT) {
                 progressBar.setValue(progressBar.getValue() + 1);
             }
-            if (chunk.getKey() == ProcessState.MESSAGE) {
+            if (chunk.getKey() == EditorProcess.MESSAGE) {
                 System.out.println(chunk.getValue());
             }
         }

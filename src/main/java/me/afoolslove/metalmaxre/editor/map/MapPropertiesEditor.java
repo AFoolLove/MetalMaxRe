@@ -2,6 +2,9 @@ package me.afoolslove.metalmaxre.editor.map;
 
 import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
+import me.afoolslove.metalmaxre.editor.WriteBefore;
+import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
+import me.afoolslove.metalmaxre.editor.palette.PaletteEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -40,6 +43,7 @@ import java.util.Map;
  *
  * @author AFoolLove<p>
  */
+@WriteBefore({MapEditor.class, EventTilesEditor.class, MapEntranceEditor.class, PaletteEditor.class})
 public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
     /**
      * 地图属性索引上卷和下卷地址

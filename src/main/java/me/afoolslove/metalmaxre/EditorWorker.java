@@ -22,14 +22,13 @@ import java.util.stream.Collectors;
  *
  * @author AFoolLove
  */
-public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<EditorWorker.ProcessState, Object>> {
+public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<EditorProcess, Object>> {
 
     @Override
-    protected abstract void process(List<Map.Entry<ProcessState, Object>> chunks);
+    protected abstract void process(List<Map.Entry<EditorProcess, Object>> chunks);
 
     @Override
     protected Boolean doInBackground() throws Exception {
-        // 暂时不进行同时加载
         try {
             MetalMaxRe instance = MetalMaxRe.getInstance();
             byte[] bytes;
@@ -69,7 +68,7 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
             int[] result = {0, 0};
 
             if (!EditorManager.getEditors().isEmpty()) {
-                publish(Map.entry(ProcessState.MESSAGE, "开始加载编辑器"));
+                publish(Map.entry(EditorProcess.MESSAGE, "开始加载编辑器"));
 
                 List<Set<Class<? extends AbstractEditor<?>>>> editorLists = new ArrayList<>();
                 editorLists.add(new HashSet<>(EditorManager.getEditors().keySet()));
@@ -110,10 +109,13 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
 
                 final Method onReadBeforeMethod = AbstractEditor.Listener.class.getMethod("onReadBefore", AbstractEditor.class);
                 final Method onReadAfterMethod = AbstractEditor.Listener.class.getMethod("onReadAfter", AbstractEditor.class);
+                // 开始计时
                 totalTime[0x01] = System.currentTimeMillis();
                 for (Set<Class<? extends AbstractEditor<?>>> editorList : editorLists) {
+                    // 将class转换为编辑器实例
                     List<AbstractEditor<?>> collect = editorList.parallelStream()
                             .map(editorClazz -> EditorManager.getEditors().get(editorClazz))
+                            .filter(Objects::nonNull)
                             .collect(Collectors.toList());
 
                     collect.parallelStream().forEach(abstractEditor -> {
@@ -128,7 +130,7 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
                             // 真正的编辑器读取起始时间
                             start = System.currentTimeMillis();
                             state = abstractEditor.onRead(buffer);
-                            // 真正的编辑器读取起始时间
+                            // 真正的编辑器读取结束时间
                             end = System.currentTimeMillis();
                             for (AbstractEditor.Listener<?> listener : abstractEditor.getListeners()) {
                                 onReadAfterMethod.invoke(listener, abstractEditor);
@@ -145,19 +147,19 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
                         totalTime[0] += time;
                         if (state) {
                             result[0]++;
-                            EditorWorker.this.publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器：%s 成功！耗时：%dms", abstractEditor.getClass().getSimpleName(), time)));
-                            EditorWorker.this.publish(Map.entry(ProcessState.RESULT, true));
+                            publish(Map.entry(EditorProcess.MESSAGE, String.format("加载编辑器：%s 成功！耗时：%dms", abstractEditor.getClass().getSimpleName(), time)));
+                            publish(Map.entry(EditorProcess.RESULT, true));
                         } else {
                             result[1]++;
-                            EditorWorker.this.publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器：%s 失败！耗时：%dms", abstractEditor.getClass().getSimpleName(), time)));
-                            EditorWorker.this.publish(Map.entry(ProcessState.RESULT, false));
+                            publish(Map.entry(EditorProcess.MESSAGE, String.format("加载编辑器：%s 失败！耗时：%dms", abstractEditor.getClass().getSimpleName(), time)));
+                            publish(Map.entry(EditorProcess.RESULT, false));
                         }
                     });
                 }
                 totalTime[0x01] = System.currentTimeMillis() - totalTime[0x01];
                 // 所有编辑器读取完毕
-                EditorWorker.this.publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器结束，共%d个编辑器，成功%d个，失败%d个", result[0] + result[1], result[0], result[1])));
-                EditorWorker.this.publish(Map.entry(ProcessState.MESSAGE, String.format("加载编辑器共计耗时：%dms，实际耗时：%dms", totalTime[0], totalTime[1])));
+                publish(Map.entry(EditorProcess.MESSAGE, String.format("加载编辑器结束，共%d个编辑器，成功%d个，失败%d个", result[0] + result[1], result[0], result[1])));
+                publish(Map.entry(EditorProcess.MESSAGE, String.format("加载编辑器共计耗时：%dms，实际耗时：%dms", totalTime[0], totalTime[1])));
                 return result[0] != 0;
             } else {
                 System.out.println("没有可用的编辑器！");
@@ -169,18 +171,5 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
         return false;
     }
 
-    public enum ProcessState {
-        /**
-         * 消息，String
-         */
-        MESSAGE,
-        /**
-         * 编辑器的加载结果，Boolean
-         */
-        RESULT,
-        /**
-         * 其它
-         */
-        UNKNOWN;
-    }
+
 }
