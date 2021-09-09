@@ -1,6 +1,8 @@
 package me.afoolslove.metalmaxre.editor.map;
 
 import me.afoolslove.metalmaxre.NumberR;
+import me.afoolslove.metalmaxre.SingleMapEntry;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.util.Objects;
@@ -58,11 +60,26 @@ public class MapProperties {
     public byte dyTileSpeed, dyTile;
     /**
      * 事件图块索引
+     * <p>
      * 可能不存在
      */
     public char eventTilesIndex;
+
+    /**
+     * 根据key的数据，在进入该地图时，是否重定向为value地图
+     * <p>
+     * 注：目标坐标无法变更
+     * <p>
+     * K：map
+     * <p>
+     * V: data
+     */
+    @Nullable
+    public SingleMapEntry<Byte, Byte> redirect;
+
     /**
      * 怪物组合索引
+     * <p>
      * 地图ID 0x80及之后的地图才会拥有
      */
     public byte monsterGroupIndex;

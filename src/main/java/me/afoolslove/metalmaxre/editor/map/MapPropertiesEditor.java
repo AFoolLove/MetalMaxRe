@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre.editor.map;
 
 import me.afoolslove.metalmaxre.NumberR;
+import me.afoolslove.metalmaxre.SingleMapEntry;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.WriteBefore;
 import me.afoolslove.metalmaxre.editor.map.events.EventTilesEditor;
@@ -61,6 +62,13 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
      */
     public static final int MAP_PROPERTIES_START_OFFSET = MAP_PROPERTIES_OFFSET - 0x08500;
     public static final int MAP_PROPERTIES_END_OFFSET = 0x0FBBD - 0x08500 - 0x10;
+
+    /**
+     * 进入地图时根据条件是否重定向到其它地图，保留坐标
+     */
+    public static final int MAP_PROPERTIES_REDIRECT_MAX_COUNT = 0x03;
+    public static final int MAP_PROPERTIES_REDIRECT_START_OFFSET = 0x28707 - 0x10;
+    public static final int MAP_PROPERTIES_REDIRECT_END_OFFSET = 0x2870F - 0x10;
 
     /**
      * 地图怪物组合索引
@@ -137,6 +145,19 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
             }
             this.mapProperties.put(mapId, mapProperties);
         }
+
+        // 读取重定向的条件数据和地图
+        setPrgRomPosition(MAP_PROPERTIES_REDIRECT_START_OFFSET);
+        byte[] redirectFromMaps = new byte[MAP_PROPERTIES_REDIRECT_MAX_COUNT];
+        byte[] redirectData = new byte[MAP_PROPERTIES_REDIRECT_MAX_COUNT];
+        byte[] redirectToMaps = new byte[MAP_PROPERTIES_REDIRECT_MAX_COUNT];
+        get(buffer, redirectFromMaps);
+        get(buffer, redirectData);
+        get(buffer, redirectToMaps);
+        for (int index = 0; index < MAP_PROPERTIES_REDIRECT_MAX_COUNT; index++) {
+            MapProperties mapProperties = getMapProperties(redirectFromMaps[index]);
+            mapProperties.redirect = SingleMapEntry.create(redirectData[index], redirectToMaps[index]);
+        }
         return true;
     }
 
@@ -200,6 +221,30 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
             }
         }
 
+        // 写入重定向的条件数据和地图
+        byte[] redirectFromMaps = new byte[MAP_PROPERTIES_REDIRECT_MAX_COUNT];
+        byte[] redirectData = new byte[MAP_PROPERTIES_REDIRECT_MAX_COUNT];
+        byte[] redirectToMaps = new byte[MAP_PROPERTIES_REDIRECT_MAX_COUNT];
+        for (int count = 0; ; ) {
+            for (Map.Entry<Integer, MapProperties> entry : getMapProperties().entrySet()) {
+                if (count >= MAP_PROPERTIES_REDIRECT_MAX_COUNT) {
+                    break;
+                }
+                SingleMapEntry<Byte, Byte> redirect = entry.getValue().redirect;
+                if (redirect != null) {
+                    redirectFromMaps[count] = (byte) (entry.getKey() & 0xFF);
+                    redirectData[count] = redirect.getValue();
+                    redirectToMaps[count] = redirect.getKey();
+                    count++;
+                }
+            }
+            break;
+        }
+        setPrgRomPosition(MAP_PROPERTIES_REDIRECT_START_OFFSET);
+        put(buffer, redirectFromMaps);
+        put(buffer, redirectData);
+        put(buffer, redirectToMaps);
+
         // 写入地图怪物组合索引
         setPrgRomPosition(MAP_PROPERTIES_MONSTER_GROUP_INDEX_START_OFFSET);
         for (int mapId = 0x80; mapId < MapEditor.MAP_MAX_COUNT; mapId++) {
@@ -247,6 +292,13 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
      */
     public MapProperties getMapProperties(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) int map) {
         return mapProperties.get(map);
+    }
+
+    /**
+     * @return 指定地图的地图属性
+     */
+    public MapProperties getMapProperties(@Range(from = 0x00, to = MapEditor.MAP_MAX_COUNT - 1) byte map) {
+        return mapProperties.get(map & 0xFF);
     }
 
     /**

@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.SingleMapEntry;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
@@ -214,7 +215,8 @@ public class MainWindow extends JFrame {
                 }
                 if (result == JOptionPane.OK_OPTION) {
                     // 保存
-                    MetalMaxRe.getInstance().saveAs(selectedFile.getPath());
+                    new WindowWriteEditorWorker(this, selectedFile).execute();
+//                    MetalMaxRe.getInstance().saveAs(selectedFile.getPath());
                 }
             } // 其它皆为不不保存
         });
@@ -276,7 +278,7 @@ public class MainWindow extends JFrame {
                             if (lastIndexOf == -1) {
                                 map = Integer.parseInt(name, 16);
                             } else {
-                                map = Integer.parseInt(name.substring(0, lastIndexOf));
+                                map = Integer.parseInt(name.substring(0, lastIndexOf), 16);
                             }
                             return Map.entry(map, value);
                         })
