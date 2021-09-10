@@ -79,6 +79,7 @@ public abstract class WriteEditorWorker extends SwingWorker<Boolean, Map.Entry<E
                 List<AbstractEditor<?>> collect = editorList.parallelStream()
                         .map(editorClazz -> EditorManager.getEditors().get(editorClazz))
                         .filter(Objects::nonNull)
+                        .filter(AbstractEditor::isNotEnabled)
                         .collect(Collectors.toList());
 
                 collect.parallelStream().forEach(abstractEditor -> {

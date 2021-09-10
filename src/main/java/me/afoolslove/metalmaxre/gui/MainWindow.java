@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
-import me.afoolslove.metalmaxre.SingleMapEntry;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
@@ -308,7 +307,7 @@ public class MainWindow extends JFrame {
                     } catch (JAXBException ex) {
                         ex.printStackTrace();
                     }
-                    System.out.printf("Import %s maps OK.", Arrays.toString(maps.keySet().toArray()));
+                    System.out.printf("Import %s maps OK.\n", Arrays.toString(maps.keySet().toArray()));
                 }
             }
         });

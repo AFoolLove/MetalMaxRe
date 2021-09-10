@@ -19,6 +19,7 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     protected ByteBuffer buffer;
     protected final List<Listener<T>> listeners = new ArrayList<>();
     protected int bufferPosition;
+    protected boolean enabled = true;
 
 
     public AbstractEditor() {
@@ -37,6 +38,28 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
      * 使用 Buffer 前请先定位数据
      */
     public abstract boolean onWrite(@NotNull ByteBuffer buffer);
+
+    /**
+     * 启用/禁用 当前编辑器
+     *
+     * @param enabled 启用/禁用
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    /**
+     * @return 是否已启用当前当前编辑器
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+    /**
+     * @return 是否未启用当前当前编辑器
+     */
+    public boolean isNotEnabled() {
+        return enabled;
+    }
 
     /**
      * 设置为 PRG COM 的偏移量
