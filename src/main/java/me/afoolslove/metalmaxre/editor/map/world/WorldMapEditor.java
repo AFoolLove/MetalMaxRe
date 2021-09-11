@@ -62,17 +62,17 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
     public static final int WORLD_MAP_MINES_START_OFFSET = 0x35EC1 - 0x10;
 
     /**
-     * 航线起始
+     * 航线最大路径点
+     */
+    public static final int WORLD_MAP_LINE_MAX_POINT = 0x10;
+    /**
+     * 出航航线起始
      */
     public static final int WORLD_MAP_OUT_LINE_START_OFFSET = 0x258C6 - 0x10;
     /**
-     * 航线起始
+     * 归航航线起始
      */
     public static final int WORLD_MAP_BACK_LINE_START_OFFSET = 0x258EA - 0x10;
-    /**
-     * 航线最大点
-     */
-    public static final int WORLD_MAP_LINE_MAX_POINT = 0x10;
 
 
     /**

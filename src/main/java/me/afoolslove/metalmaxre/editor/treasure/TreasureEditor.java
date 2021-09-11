@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.treasure;
 
+import me.afoolslove.metalmaxre.SingleMapEntry;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.map.MapCheckPoints;
 import me.afoolslove.metalmaxre.editor.map.MapPoint;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
  * 0x39C50-0x39CAA  地图
  * 0x39CAB-0x39D05  X
  * 0x39D06-0x39D60  Y
- * 0x39D61-0x39DBB  物品
+ * 0x39D61-0x39DBB  宝藏
  * <p>
  * <p>
  * 2021年5月9日：已完成并通过测试基本编辑功能
@@ -38,6 +39,20 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
      * 宝藏最大数量
      */
     public static final int TREASURE_MAX_COUNT = 0x5B;
+
+    /**
+     * 随机宝藏的总数量
+     */
+    public static final int RANDOM_TREASURE_MAX_COUNT = 0x06;
+    /**
+     * 地图随机调查获取的宝藏
+     * <p>
+     * * 所有地图会得到调查的默认宝藏
+     * <p>
+     * * 世界地图会额外得到其它 {@link #RANDOM_TREASURE_MAX_COUNT} 个宝藏
+     */
+    public static final int RANDOM_TREASURE_START_OFFSET = 0x35AE4 - 0x10;
+    public static final int RANDOM_TREASURE_END_OFFSET = 0x35AE4 - 0x10;
 
     /**
      * 地图的调查点坐标
@@ -58,6 +73,23 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
     private final LinkedHashSet<Treasure> treasures = new LinkedHashSet<>(TREASURE_MAX_COUNT);
 
     /**
+     * 调查的随机宝藏
+     * <p>
+     * K：宝藏ID
+     * <p>
+     * V：宝藏概率
+     */
+    private final List<SingleMapEntry<Byte, Byte>> randomTreasures = new ArrayList<>(RANDOM_TREASURE_MAX_COUNT);
+    /**
+     * 默认调查的随机宝藏和获得其它随机宝藏的概率
+     * <p>
+     * K：默认宝藏ID
+     * <p>
+     * V：其它宝藏概率
+     */
+    private final SingleMapEntry<Byte, Byte> defaultRandomTreasure = new SingleMapEntry<>((byte) 0x00, (byte) 0x0C);
+
+    /**
      * 地图的调查点，算是"宝藏"吧
      */
     private final MapCheckPoints mapCheckPoints = new MapCheckPoints();
@@ -66,13 +98,14 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 读取前清空数据
         treasures.clear();
+        randomTreasures.clear();
 
         byte[] maps = new byte[TREASURE_MAX_COUNT];
         byte[] xs = new byte[TREASURE_MAX_COUNT];
         byte[] ys = new byte[TREASURE_MAX_COUNT];
         byte[] items = new byte[TREASURE_MAX_COUNT];
 
-        // 宝藏的数据按顺序存放（地图、X、Y、物品
+        // 宝藏的数据按顺序存放（地图、X、Y、宝藏
         setPrgRomPosition(TREASURE_START_OFFSET);
         get(buffer, maps);
         get(buffer, xs);
@@ -113,6 +146,21 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
                 getPrgRom(buffer, 0x35D48 - 0x10),
                 getPrgRom(buffer, 0x35D49 - 0x10)
         ));
+
+        // 读取随机宝藏相关数据
+
+        // 读取默认的随机宝藏和其它随机宝藏的概率
+        setPrgRomPosition(RANDOM_TREASURE_START_OFFSET);
+        defaultRandomTreasure.setKey(get(buffer)); // 0x35AE4 - 0x10
+        defaultRandomTreasure.setValue(getPrgRom(buffer, 0x35ACD - 0x10));
+        // 读取其它随机宝藏和概率
+        // 读取其它随机宝藏
+        get(buffer, items, 0x00, RANDOM_TREASURE_MAX_COUNT);
+        // * maps 作为概率使用
+        get(buffer, maps, 0x00, RANDOM_TREASURE_MAX_COUNT);
+        for (int index = 0; index < RANDOM_TREASURE_MAX_COUNT; index++) {
+            randomTreasures.add(SingleMapEntry.create(items[index], maps[index]));
+        }
         return true;
     }
 
@@ -173,6 +221,29 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
                 .toArray()) {
             put(buffer, item);
         }
+
+        // 写入随机宝藏相关数据
+
+        // 写入默认的随机宝藏和其它随机宝藏的概率
+        setPrgRomPosition(RANDOM_TREASURE_START_OFFSET);
+        put(buffer, defaultRandomTreasure.getKey()); // 0x35AE4 - 0x10
+        putPrgRom(buffer, 0x35ACD - 0x10, defaultRandomTreasure.getValue());
+        // 写入其它随机宝藏和概率
+        // 写入其它随机宝藏
+        Arrays.fill(items, 0x00, RANDOM_TREASURE_MAX_COUNT, (byte) 0x00);
+        // 优先储存后加入的
+        Arrays.fill(maps, 0x00, RANDOM_TREASURE_MAX_COUNT, (byte) 0x00);
+        fromIndex = Math.max(0, randomTreasures.size() - RANDOM_TREASURE_MAX_COUNT);
+        for (int index = fromIndex, size = randomTreasures.size(); index < size; index++) {
+            SingleMapEntry<Byte, Byte> randomTreasure = randomTreasures.get(index);
+            items[index] = randomTreasure.getKey();
+            // * maps 作为概率使用
+            maps[index] = randomTreasure.getValue();
+        }
+        // 写入宝藏
+        put(buffer, items, 0x00, RANDOM_TREASURE_MAX_COUNT);
+        // 写入概率
+        put(buffer, maps, 0x00, RANDOM_TREASURE_MAX_COUNT);
         return true;
     }
 
@@ -294,6 +365,30 @@ public class TreasureEditor extends AbstractEditor<TreasureEditor> {
             }
         }
         return false;
+    }
+
+    /**
+     * 随机进行调查获取的宝藏和宝藏的概率
+     * <p>
+     * * 仅世界地图
+     *
+     * @return 随机宝藏和概率
+     */
+    public List<SingleMapEntry<Byte, Byte>> getRandomTreasures() {
+        return randomTreasures;
+    }
+
+    /**
+     * 随机进行调查获取的默认宝藏和获取其它宝藏的概率（仅世界地图）
+     * <p>
+     * K：默认宝藏ID
+     * <p>
+     * V：其它宝藏的概率（仅世界地图）
+     *
+     * @return 默认和其它宝藏的概率
+     */
+    public SingleMapEntry<Byte, Byte> getDefaultRandomTreasure() {
+        return defaultRandomTreasure;
     }
 
     /**
