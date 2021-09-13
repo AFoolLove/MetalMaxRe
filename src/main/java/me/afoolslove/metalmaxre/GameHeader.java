@@ -122,7 +122,7 @@ public class GameHeader {
      * @return CHR ROM 数据的起始位置（含 header、trainer
      */
     public int getChrRomStart() {
-        return (getPrgRom() * 0x4000) + header.length;
+        return (getPrgRom() * 0x4000) + getPrgRomStart();
     }
 
     /**
