@@ -32,6 +32,7 @@ public class NumberR {
      * 将byte数组转换为int
      * <p>
      * e.g: toInt(false, 1,2,3) = 0x030201
+     * <p>
      * e.g: toInt(true, 1,2,3) = 0x010203
      *
      * @param reverse 倒序

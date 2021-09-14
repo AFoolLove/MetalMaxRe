@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.sprite;
 
+import me.afoolslove.metalmaxre.NumberR;
 import me.afoolslove.metalmaxre.Point2B;
 import org.jetbrains.annotations.Range;
 
@@ -119,6 +120,42 @@ public class Sprite extends Point2B {
     @Override
     public int intY() {
         return y & 0xFF;
+    }
+
+    public byte getType() {
+        return type;
+    }
+
+    public int intType() {
+        return getType() & 0xFF;
+    }
+
+    public int getTalk() {
+        return NumberR.toInt(true, talk1, talk2);
+    }
+
+    public byte getTalk1() {
+        return talk1;
+    }
+
+    public byte getTalk2() {
+        return talk2;
+    }
+
+    public byte getAction() {
+        return action;
+    }
+
+    public int intAction() {
+        return getAction() & 0xFF;
+    }
+
+    public void setType(byte type) {
+        this.type = type;
+    }
+
+    public void setType(@Range(from = 0x00, to = 0xFF) int type) {
+        this.type = (byte) (type & 0xFF);
     }
 
     public void setTalk(byte talk1, byte talk2) {

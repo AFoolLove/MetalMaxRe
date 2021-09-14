@@ -32,6 +32,13 @@ public class MapEntrance {
     }
 
     /**
+     * 默认创建一个返回放一个地图的边界
+     */
+    public MapEntrance() {
+        this.border = new MapBorder(MapBorderType.LAST);
+    }
+
+    /**
      * @return 地图内的出入口
      */
     public Map<MapPoint, MapPoint> getEntrances() {
@@ -45,4 +52,7 @@ public class MapEntrance {
         return border;
     }
 
+    public void setBorder(MapBorder border) {
+        this.border = border;
+    }
 }

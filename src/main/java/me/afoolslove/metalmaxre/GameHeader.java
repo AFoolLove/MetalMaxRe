@@ -24,7 +24,11 @@ public class GameHeader {
     }
 
     public GameHeader(byte[] header) {
-        this.header = Arrays.copyOf(header, header.length);
+        setHeader(header);
+    }
+
+    public void setHeader(byte[] header) {
+        this.header = Arrays.copyOf(header, Math.min(HEADER_LENGTH, header.length));
     }
 
     /**
@@ -108,7 +112,7 @@ public class GameHeader {
      * @return PRG ROM 数据的起始位置（含 header、trainer
      */
     public int getPrgRomStart() {
-        return header.length + (isTrained() ? 0x200 : 0x000);
+        return HEADER_LENGTH + (isTrained() ? 0x200 : 0x000);
     }
 
     /**

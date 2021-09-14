@@ -121,9 +121,9 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
                     // 更新所有使用此数据的地图
                     getMapEntrances().entrySet().parallelStream()
                             .filter(entry -> entry.getValue() == mapEntrance)
-                            .forEach(entry -> {
-                                mapPropertiesEditor.getMapProperties(entry.getKey()).entrance = newEntrance;
-                            });
+                            .forEach(entry ->
+                                mapPropertiesEditor.getMapProperties(entry.getKey()).entrance = newEntrance
+                            );
 
                     // 写入边界数据
                     put(buffer, mapEntrance.getBorder().toByteArray());

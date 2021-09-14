@@ -60,7 +60,7 @@ public class MapBuilder extends LinkedList<MapTile> {
             lBit = 8 - hBit;
 
             // 临时储存前bit值和后bit值
-            int temp = 0;
+            int temp;
 
             // 前bit值：通过位移移除后bit数量得到
             temp = data >>> lBit;
@@ -133,7 +133,6 @@ public class MapBuilder extends LinkedList<MapTile> {
                 // 合计不超过一个图块的最大数量 1 - 127
                 // 直接合并
                 last.count += count;
-                return true;
             } else {
                 // 整数256，添加
                 // range: 256+
@@ -152,9 +151,8 @@ public class MapBuilder extends LinkedList<MapTile> {
                 if (sum > 0x00) {
                     add(new MapTile(tile, sum));
                 }
-                return true;
             }
-
+            return true;
         }
         return add(new MapTile(tile, count));
     }

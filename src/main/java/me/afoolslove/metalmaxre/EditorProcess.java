@@ -12,5 +12,5 @@ public enum EditorProcess {
         /**
          * 其它
          */
-        UNKNOWN;
+        UNKNOWN
     }

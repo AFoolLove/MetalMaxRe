@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editor.monster;
 
+import java.util.Arrays;
+
 /**
  * 怪物组合
  * <p>
@@ -13,5 +15,13 @@ public class MonsterGroup {
 
     public MonsterGroup(byte[] monsters) {
         this.monsters = monsters;
+    }
+
+    public byte[] getMonsters() {
+        return Arrays.copyOf(monsters, 0x0A);
+    }
+
+    public byte[] getSpecialMonsterGroups() {
+        return Arrays.copyOf(monsters, 0x04);
     }
 }

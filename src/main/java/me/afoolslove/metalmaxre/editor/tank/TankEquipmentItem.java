@@ -2,7 +2,6 @@ package me.afoolslove.metalmaxre.editor.tank;
 
 import me.afoolslove.metalmaxre.DataValues;
 import me.afoolslove.metalmaxre.Item;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 /**

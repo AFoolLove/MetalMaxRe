@@ -175,9 +175,9 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
         var worldMapEditor = EditorManager.getEditor(WorldMapEditor.class);
 
         // 排除事件为 0x00 ！！！！
-        getEventTiles().values().forEach(each -> {
-            each.entrySet().removeIf(entry -> entry.getKey() == 0x00);
-        });
+        getEventTiles().values().forEach(each ->
+                each.entrySet().removeIf(entry -> entry.getKey() == 0x00)
+        );
 
         List<Map<Integer, List<EventTile>>> eventList = getEventTiles().values()
                 .parallelStream()

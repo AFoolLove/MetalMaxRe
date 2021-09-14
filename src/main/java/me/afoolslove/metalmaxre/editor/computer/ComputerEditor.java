@@ -86,9 +86,6 @@ public class ComputerEditor extends AbstractEditor<ComputerEditor> {
         if (remain > 0) {
             int count = COMPUTER_MAX_COUNT - remain;
             Arrays.fill(maps, count, COMPUTER_MAX_COUNT, (byte) 0xFF);
-//            Arrays.fill(types, count, COMPUTER_MAX_COUNT, (byte) 0xFF);
-//            Arrays.fill(xs, count, COMPUTER_MAX_COUNT, (byte) 0xFF);
-//            Arrays.fill(ys, count, COMPUTER_MAX_COUNT, (byte) 0xFF);
             System.out.printf("计算机编辑器：%d个未使用的计算机\n", remain);
         }
 

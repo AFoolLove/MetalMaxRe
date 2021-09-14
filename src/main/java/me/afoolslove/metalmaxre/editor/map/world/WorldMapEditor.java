@@ -281,9 +281,10 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         setPrgRomPosition(WORLD_MAP_BACK_LINE_START_OFFSET);
         linePoint = shippingLineBack.getKey();
         linePoint.clear();
+
         while (linePoint.size() < 0x10) {
             byte action = get(buffer);
-            if (action == (byte) 0x5E) {
+            if (action == 0x5E) {
                 // 读取到目的地数据，立即结束
                 break;
             }
