@@ -6,10 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,8 +33,8 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
      * 怪物的经验值和金钱值是否 *100<p>
      * 等其它未测试的数据
      */
-    public static final int MONSTER_ATTRIBUTE_START_OFFSET = 0x3886E - 0x10;
-    public static final int MONSTER_ATTRIBUTE_END_OFFSET = 0x388EF - 0x10;
+    public static final int MONSTER_ATTRIBUTES_START_OFFSET = 0x3886E - 0x10;
+    public static final int MONSTER_ATTRIBUTES_END_OFFSET = 0x388EF - 0x10;
 
     /**
      * 怪物的抗性<p>
@@ -45,12 +42,29 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
      */
     public static final int MONSTER_RESISTANCE_START_OFFSET = 0x388F1 - 0x10;
     public static final int MONSTER_RESISTANCE_END_OFFSET = 0x38973 - 0x10;
+
+    /**
+     * 怪物的护甲值数量
+     */
+    public static final int MONSTER_ARMOR_MAX_COUNT = 0x0F;
+    /**
+     * 怪物的护甲值
+     */
+    public static final int MONSTER_ARMORS_START_OFFSET = 0x389F9 - 0x10;
+    public static final int MONSTER_ARMORS_END_OFFSET = 0x38A07 - 0x10;
+
+    /**
+     * 有护甲的怪物
+     */
+    public static final int MONSTER_HAS_ARMORS_START_OFFSET = 0x38A08 - 0x10;
+    public static final int MONSTER_HAS_ARMORS_END_OFFSET = 0x38A16 - 0x10;
+
     /**
      * 怪物的生命值<p>
      * *生命值根据怪物类型不同而不同
      */
-    public static final int MONSTER_HEALTH_START_OFFSET = 0x38A17 - 0x10;
-    public static final int MONSTER_HEALTH_END_OFFSET = 0x38A99 - 0x10;
+    public static final int MONSTER_HEALTHS_START_OFFSET = 0x38A17 - 0x10;
+    public static final int MONSTER_HEALTHS_END_OFFSET = 0x38A99 - 0x10;
 
     /**
      * 怪物出手攻击的速度
@@ -149,6 +163,8 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
 
         byte[] attributes = new byte[MONSTER_COUNT];
         byte[] resistances = new byte[MONSTER_COUNT];
+        byte[] armors = new byte[MONSTER_ARMOR_MAX_COUNT];
+        byte[] hasArmorMonsters = new byte[MONSTER_ARMOR_MAX_COUNT];
         byte[] healths = new byte[MONSTER_COUNT];
         byte[] speeds = new byte[MONSTER_COUNT];
         byte[] hitRates = new byte[MONSTER_COUNT];
@@ -159,15 +175,22 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         byte[] dropsItems = new byte[MONSTER_COUNT - 0x18];
 
         // 读取怪物的属性
-        setPrgRomPosition(MONSTER_ATTRIBUTE_START_OFFSET);
+        setPrgRomPosition(MONSTER_ATTRIBUTES_START_OFFSET);
         get(buffer, attributes);
 
         // 读取怪物的抗性和自动恢复HP
         setPrgRomPosition(MONSTER_RESISTANCE_START_OFFSET);
         get(buffer, resistances);
 
+        // 读取怪物的护甲值
+        setPrgRomPosition(MONSTER_ARMORS_START_OFFSET);
+        get(buffer, armors);
+        // 读取拥有护甲的怪物
+//        setPrgRomPosition(MONSTER_HAS_ARMORS_START_OFFSET);
+        get(buffer, hasArmorMonsters);
+
         // 读取怪物的生命值
-        setPrgRomPosition(MONSTER_HEALTH_START_OFFSET);
+        setPrgRomPosition(MONSTER_HEALTHS_START_OFFSET);
         get(buffer, healths);
 
         // 读取怪物出手攻击速度
@@ -208,6 +231,13 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
             monster.setAttribute(attributes[monsterId]);
             // 设置抗性和自动恢复HP
             monster.setResistance(resistances[monsterId]);
+            // 设置护甲
+            for (int index = 0; index < hasArmorMonsters.length; index++) {
+                if (hasArmorMonsters[index] == monsterId) {
+                    monster.setArmor(armors[index]);
+                    break;
+                }
+            }
             // 设置生命值
             monster.setHealth(healths[monsterId]);
             // 设置速度
@@ -289,7 +319,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         }
 
         // 写入怪物的属性
-        setPrgRomPosition(MONSTER_ATTRIBUTE_START_OFFSET);
+        setPrgRomPosition(MONSTER_ATTRIBUTES_START_OFFSET);
         put(buffer, attributes);
 
         // 写入怪物的抗性和自动恢复HP
@@ -297,7 +327,7 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         put(buffer, resistances);
 
         // 写入怪物的生命值
-        setPrgRomPosition(MONSTER_HEALTH_START_OFFSET);
+        setPrgRomPosition(MONSTER_HEALTHS_START_OFFSET);
         put(buffer, healths);
 
         // 写入怪物出手攻击的速度

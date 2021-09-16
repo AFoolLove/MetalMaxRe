@@ -16,14 +16,12 @@ import java.util.Objects;
  * @author AFoolLove
  */
 public abstract class AbstractEditor<T extends AbstractEditor<T>> {
-    protected ByteBuffer buffer;
     protected final List<Listener<T>> listeners = new ArrayList<>();
     protected int bufferPosition;
     protected boolean enabled = true;
 
 
     public AbstractEditor() {
-        this.buffer = getMetalMaxRe().getBuffer();
     }
 
     /**
@@ -54,6 +52,7 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     public boolean isEnabled() {
         return enabled;
     }
+
     /**
      * @return 是否未启用当前当前编辑器
      */
@@ -84,22 +83,7 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     }
 
     public ByteBuffer getBuffer() {
-        return buffer;
-    }
-
-    public void setBuffer(ByteBuffer buffer) {
-        this.buffer = buffer;
-    }
-
-    public byte get(@NotNull ByteBuffer buffer) {
-        return buffer.get(bufferPosition++);
-    }
-
-    @SuppressWarnings("unchecked")
-    public T get(@NotNull ByteBuffer buffer, byte[] dst) {
-        buffer.get(bufferPosition, dst);
-        bufferPosition += dst.length;
-        return (T) this;
+        return getMetalMaxRe().getBuffer();
     }
 
     @SuppressWarnings("unchecked")
@@ -109,25 +93,82 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         return (T) this;
     }
 
-    public byte getChrRom(@NotNull ByteBuffer buffer, int offset) {
-        return buffer.get(getHeader().getChrRomStart(offset));
-    }
-
-    public byte getPrgRom(@NotNull ByteBuffer buffer, int offset) {
-        return buffer.get(getHeader().getPrgRomStart(offset));
-    }
-
     @SuppressWarnings("unchecked")
-    public T put(@NotNull ByteBuffer buffer, byte b) {
-        buffer.put(bufferPosition, b);
-        bufferPosition++;
+    public T get(@NotNull ByteBuffer buffer, byte[] dst, int offset) {
+        buffer.get(bufferPosition, dst, offset, dst.length - offset);
+        bufferPosition += dst.length;
         return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    public T put(@NotNull ByteBuffer buffer, int b) {
-        buffer.put(bufferPosition, (byte) (b & 0xFF));
-        bufferPosition++;
+    public T get(@NotNull ByteBuffer buffer, byte[] dst) {
+        buffer.get(bufferPosition, dst);
+        bufferPosition += dst.length;
+        return (T) this;
+    }
+
+    public byte get(@NotNull ByteBuffer buffer) {
+        return buffer.get(bufferPosition++);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T getPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset, int length) {
+        buffer.get(getHeader().getPrgRomStart(index), dst, offset, length);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T getPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset) {
+        buffer.get(getHeader().getPrgRomStart(index), dst, offset, dst.length - offset);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T getPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst) {
+        buffer.get(getHeader().getPrgRomStart(index), dst);
+        bufferPosition += dst.length;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public byte getPrgRom(@NotNull ByteBuffer buffer, int index) {
+        return buffer.get(getHeader().getPrgRomStart(index));
+    }
+
+    @SuppressWarnings("unchecked")
+    public T getChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset, int length) {
+        buffer.get(getHeader().getChrRomStart(index), dst, offset, length);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T getChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset) {
+        buffer.get(getHeader().getChrRomStart(index), dst, offset, dst.length - offset);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T getChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst) {
+        buffer.get(getHeader().getChrRomStart(index), dst);
+        return (T) this;
+    }
+
+    public byte getChrRom(@NotNull ByteBuffer buffer, int index) {
+        return buffer.get(getHeader().getChrRomStart(index));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public T put(@NotNull ByteBuffer buffer, byte[] dst, int offset, int length) {
+        buffer.put(bufferPosition, dst, offset, length);
+        bufferPosition += length;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T put(@NotNull ByteBuffer buffer, byte[] dst, int offset) {
+        buffer.put(bufferPosition, dst, offset, dst.length - offset);
+        bufferPosition += dst.length;
         return (T) this;
     }
 
@@ -139,21 +180,63 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     }
 
     @SuppressWarnings("unchecked")
-    public T put(@NotNull ByteBuffer buffer, byte[] dst, int offset, int length) {
-        buffer.put(bufferPosition, dst, offset, length);
-        bufferPosition += length;
+    public T put(@NotNull ByteBuffer buffer, int b) {
+        buffer.put(bufferPosition, (byte) (b & 0xFF));
+        bufferPosition++;
         return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    public T put(@NotNull ByteBuffer buffer, int index, byte b) {
-        buffer.put(index, b);
+    public T put(@NotNull ByteBuffer buffer, byte b) {
+        buffer.put(bufferPosition, b);
+        bufferPosition++;
+        return (T) this;
+    }
+
+    public T putPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset, int length) {
+        buffer.put(getHeader().getPrgRomStart(index), dst, offset, length);
+        bufferPosition += dst.length;
+        return (T) this;
+    }
+
+    public T putPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset) {
+        buffer.put(getHeader().getPrgRomStart(index), dst, offset, dst.length - offset);
+        bufferPosition += dst.length;
+        return (T) this;
+    }
+
+    public T putPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst) {
+        buffer.put(getHeader().getPrgRomStart(index), dst);
+        bufferPosition += dst.length;
         return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    public T put(@NotNull ByteBuffer buffer, int index, byte[] src) {
-        buffer.put(index, src);
+    public T putPrgRom(@NotNull ByteBuffer buffer, int offset, byte b) {
+        buffer.put(getHeader().getPrgRomStart(offset), b);
+        return (T) this;
+    }
+
+    public T putPrgRom(@NotNull ByteBuffer buffer, int offset, int b) {
+        return putPrgRom(buffer, offset, (byte) (b & 0xFF));
+    }
+
+
+    public T putChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset, int length) {
+        buffer.put(getHeader().getChrRomStart(index), dst, offset, length);
+        bufferPosition += dst.length;
+        return (T) this;
+    }
+
+    public T putChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset) {
+        buffer.put(getHeader().getChrRomStart(index), dst, offset, dst.length - offset);
+        bufferPosition += dst.length;
+        return (T) this;
+    }
+
+    public T putChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst) {
+        buffer.put(getHeader().getChrRomStart(index), dst);
+        bufferPosition += dst.length;
         return (T) this;
     }
 
@@ -167,15 +250,6 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         return putChrRom(buffer, offset, (byte) (b & 0xFF));
     }
 
-    @SuppressWarnings("unchecked")
-    public T putPrgRom(@NotNull ByteBuffer buffer, int offset, byte b) {
-        buffer.put(getHeader().getPrgRomStart(offset), b);
-        return (T) this;
-    }
-
-    public T putPrgRom(@NotNull ByteBuffer buffer, int offset, int b) {
-        return putPrgRom(buffer, offset, (byte) (b & 0xFF));
-    }
 
     @SuppressWarnings("unchecked")
     public T putChar(@NotNull ByteBuffer buffer, char value) {

@@ -72,11 +72,11 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
         for (int i = 0; i < (PALETTE_LIST_MAX_COUNT / 0x03); i++) {
             PaletteList palettes = new PaletteList();
             palettes.add(0x00, new Palette(buffer, bufferPosition));
-            bufferPosition += 3;
+            skip(3);
             palettes.add(0x01, new Palette(buffer, bufferPosition));
-            bufferPosition += 3;
+            skip(3);
             palettes.add(0x02, new Palette(buffer, bufferPosition));
-            bufferPosition += 3;
+            skip(3);
             // 固定颜色，改了也不会写入到游戏中
             palettes.add(0x03, new Palette(0x30, 0x10, 0x00));
             paletteLists.add(palettes);
@@ -85,16 +85,16 @@ public class PaletteEditor extends AbstractEditor<PaletteEditor> {
         // 读取精灵调色板，固定数值
         setPrgRomPosition(PALETTE_LIST_SPRITE_START_OFFSET);
         for (int i = 0; i < 0x04; i++) {
-            bufferPosition++; // 跳过 0x0F
+            skip();; // 跳过 0x0F
             spritePalette.add(new Palette(buffer, bufferPosition));
-            bufferPosition += 3;
+            skip(3);
         }
 
         // 读取战斗时的精灵调色板
         setPrgRomPosition(PALETTE_LIST_BATTLE_SPRITE_START_OFFSET);
         for (int i = 0; i < 0x04; i++) {
             battleSpritePalette.add(new Palette(buffer, bufferPosition));
-            bufferPosition += 3;
+            skip(3);
         }
         return true;
     }

@@ -69,7 +69,7 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
                 default -> {
                     mapBorder = new MapBorder(MapBorderType.DIRECTION);
                     // 回退1byte，该byte属于地图数据
-                    bufferPosition--;
+                    skip(-1);
                     // 读取4个目标地图位置
                     // 分别读取：上下左右，的目标地图位置
                     for (int i = 0; i < 0x04; i++) {
@@ -117,7 +117,7 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
                 .distinct() // 去重
                 .forEachOrdered(mapEntrance -> {
                     // 计算新的出入口索引
-                    char newEntrance = (char) (bufferPosition - (0x10 + 0x1E000 + 0x8000));
+                    char newEntrance = (char) (bufferPosition - (getHeader().isTrained() ? 0x200 : 0x000) - (0x10 + 0x1E000 + 0x8000));
                     // 更新所有使用此数据的地图
                     getMapEntrances().entrySet().parallelStream()
                             .filter(entry -> entry.getValue() == mapEntrance)

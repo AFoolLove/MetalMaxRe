@@ -261,14 +261,14 @@ public class MapPropertiesEditor extends AbstractEditor<MapPropertiesEditor> {
         // 写入世界地图属性
         MapProperties worldMapProperties = this.mapProperties.get(0x00);
         // 写入宽度、高度
-        buffer.put(0x28A87, worldMapProperties.width);
+        putPrgRom(buffer, 0x28A87 - 0x10, worldMapProperties.width);
         // 写入可移动区域偏移量，同上
-        buffer.put(0x28A8D, worldMapProperties.movableWidthOffset);
+        putPrgRom(buffer, 0x28A8D - 0x10, worldMapProperties.movableWidthOffset);
         // 写入可移动区域，同上
-        buffer.put(0x28A95, worldMapProperties.movableWidth);
+        putPrgRom(buffer, 0x28A95 - 0x10, worldMapProperties.movableWidth);
         // 写入事件图块索引
-        buffer.put(0x28AC3, NumberR.at(worldMapProperties.eventTilesIndex, 0));
-        buffer.put(0x28AC7, NumberR.at(worldMapProperties.eventTilesIndex, 1));
+        putPrgRom(buffer, 0x28AC3 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 0));
+        putPrgRom(buffer, 0x28AC7 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 1));
 
 
         int end = bufferPosition - 1;

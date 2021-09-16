@@ -50,13 +50,13 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
                 instance.getBuffer().clear(); // 怎么释放呢？
             }
 
+            // 读取头属性
+            GameHeader header = new GameHeader(bytes);
+            instance.setHeader(header);
             ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
             instance.setBuffer(buffer);
             // 写入到 ByteBuffer
             buffer.put(bytes);
-
-            // 读取头属性
-            instance.setHeader(new GameHeader(buffer));
 
             // 编辑器重新读取数据
 

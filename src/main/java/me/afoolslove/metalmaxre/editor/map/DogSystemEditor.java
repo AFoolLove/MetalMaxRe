@@ -102,16 +102,13 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         // 这个数据就厉害了
         // 可以修改0x0441-0x460的数据，但是只能 或(|)运算，无法移除
         // 有需求再修改
-        setPosition(0x3471E);
-        get(buffer, townValues);
+        getPrgRom(buffer, 0x3471E - 0x10, townValues);
 
         // 城镇附属，最多2个，格式和城镇一样，就不重复注释了
         byte[] townSeries = new byte[0x02];
         byte[] townSeriesValues = new byte[0x02];
-        setPosition(0x3471B);
-        get(buffer, townSeries);
-        setPosition(0x34732);
-        get(buffer, townSeriesValues);
+        getPrgRom(buffer, 0x3471B - 0x10, townSeries);
+        getPrgRom(buffer, 0x34732 - 0x10, townSeriesValues);
         for (int i = 0; i < 0x02; i++) {
             getTownSeries().put(townSeries[i] & 0xFF, townSeriesValues[i] & 0xFF);
         }
@@ -168,11 +165,9 @@ public class DogSystemEditor extends AbstractEditor<DogSystemEditor> {
         townSeriesValues[0x01] = (byte) (townSeriesEntry.get(0x01).getValue() & 0xFF);
 
         // 写入附属地图
-        setPosition(0x3471B);
-        put(buffer, townSeries);
+        putPrgRom(buffer, 0x3471B - 0x10, townSeries);
         // 写入附属地图的所属地图（也可以是其它数据
-        setPosition(0x34732);
-        put(buffer, townSeriesValues);
+        putPrgRom(buffer, 0x34732 - 0x10, townSeriesValues);
 
         // 写入时空隧道目的地和坐标
         byte[] maps = new byte[TELEPORT_MAP_MAX_MAP_COUNT];

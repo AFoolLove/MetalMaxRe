@@ -75,8 +75,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
             // 得到这段文本的数据长度
             byte[] bytes = new byte[point.getValue() - point.getKey() + 1];
             // 定位，读取
-            setPosition(point.getKey());
-            get(buffer, bytes);
+            getPrgRom(buffer, point.getKey() - 0x10, bytes);
             // 解析并通过换行分段
             String[] split = WordBank.toString(bytes).split("\n", -1);
             // 添加
@@ -96,7 +95,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
             // 获取长度
             int length = end - start + 1;
 
-            setPosition(start);
+            setPrgRomPosition(start - 0x10);
             // 转换为字节写入
 
             for (int i = 0, size = entry.getValue().size(); i < size; i++) {
@@ -138,7 +137,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
                 // [42] 概率高，会导致文本错误
                 // [ED 00] 概率低，要求高，如果填充在 [F6] 之后，会以文本的方式显示出来
 
-                bufferPosition--;
+                skip(-1);
                 for (int i = length / 2; i > 0; i--) {
                     put(buffer, 0xED);
                     put(buffer, 0x00);

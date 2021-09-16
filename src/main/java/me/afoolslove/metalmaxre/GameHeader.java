@@ -15,7 +15,7 @@ public class GameHeader {
     /**
      * 全部属性
      */
-    public byte[] header;
+    private byte[] header;
 
     public GameHeader(ByteBuffer buffer) {
         header = new byte[HEADER_LENGTH];
@@ -61,13 +61,39 @@ public class GameHeader {
      * 是否开启作弊
      */
     public void setTrainer(boolean trainer) {
-        if (trainer) {
-            // 开启
-            header[0x06] |= 0B0000_0100;
-        } else {
-            // 关闭
-            header[0x06] &= 0B1111_1011;
+        if (isTrained() != trainer) {
+            MetalMaxRe instance = MetalMaxRe.getInstance();
+            byte[] oldGameBytes = instance.getBuffer().array();
+            GameHeader oldHeader = new GameHeader(header);
+
+            ByteBuffer buffer;
+            if (trainer) {
+                // 开启
+                header[0x06] |= 0B0000_0100;
+                // getChrRomEnd() + 1 可以获取头数据所对应的文件的总大小（不是真实大小）
+                buffer = ByteBuffer.allocate(getChrRomEnd() + 1);
+                // 写入头数据
+                buffer.put(0x00000, header);
+                // 跳过trainer
+                buffer.position(HEADER_LENGTH + 0x200);
+            } else {
+                // 关闭
+                header[0x06] &= 0B1111_1011;
+                // getChrRomEnd() + 1 可以获取头数据所对应的文件的总大小（不是真实大小）
+                buffer = ByteBuffer.allocate(getChrRomEnd() + 1);
+                // 写入头数据
+                buffer.put(0x00000, header);
+            }
+
+            // 写入PRG ROM
+            buffer.put(oldGameBytes, oldHeader.getPrgRomStart(), oldHeader.getPrgRomLength());
+            // 写入CHR ROM
+            buffer.put(oldGameBytes, oldHeader.getChrRomStart(), oldHeader.getChrRomLength());
+
+            // 应用新的Buffer
+            instance.setBuffer(buffer);
         }
+
     }
 
     public byte[] getHeader() {
@@ -92,6 +118,15 @@ public class GameHeader {
     }
 
     /**
+     * 获取PRG ROM所占用的字节数量
+     *
+     * @return PRG ROM的字节数量
+     */
+    public int getPrgRomLength() {
+        return getPrgRom() * 0x4000;
+    }
+
+    /**
      * 获取CHR ROM的大小(KB)
      * 得到实际位置需要 *8KB(0x2000(8192)) + getPrgRom() * 16KB + 16(header)
      *
@@ -99,6 +134,16 @@ public class GameHeader {
      */
     public int getChrRom() {
         return header[0x05] & 0xFF;
+    }
+
+
+    /**
+     * 获取CHR ROM所占用的字节数量
+     *
+     * @return CHR ROM的字节数量
+     */
+    public int getChrRomLength() {
+        return getChrRom() * 0x2000;
     }
 
     /**
@@ -126,14 +171,14 @@ public class GameHeader {
      * @return CHR ROM 数据的起始位置（含 header、trainer
      */
     public int getChrRomStart() {
-        return (getPrgRom() * 0x4000) + getPrgRomStart();
+        return getPrgRomLength() + getPrgRomStart();
     }
 
     /**
      * @return CHR ROM 数据的结束位置（含 header、trainer
      */
     public int getChrRomEnd() {
-        return getChrRomStart() + (getChrRom() * 0x2000) - 1;
+        return getChrRomStart() + getChrRomLength() - 1;
     }
 
     /**

@@ -270,7 +270,7 @@ public class EventTilesEditor extends AbstractEditor<EventTilesEditor> {
         setPrgRomPosition(EVENT_TILES_START_OFFSET);
         eventList.forEach(events -> {
             // 计算新的事件图块索引，太长了！简称：索引
-            char newEventTilesIndex = (char) (bufferPosition - 0x10 - 0x1C000 + 0x8000);
+            char newEventTilesIndex = (char) (bufferPosition - (getHeader().isTrained() ? 0x200 : 0x000) - 0x10 - 0x1C000 + 0x8000);
             // 将旧的索引替换为新的索引
             getEventTiles().entrySet()
                     .parallelStream()

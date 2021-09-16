@@ -227,7 +227,7 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
         for (int i = 0; i < TankItems.TANK_WEAPON_MAX_COUNT; i++) {
             put(buffer, tankItems.weapons.get(i).getCanEquipped());
         }
-        bufferPosition++; // 0x222F9 不知道干嘛的
+        skip(); // 0x222F9 不知道干嘛的
         // 写入人类武器攻击动画
         for (int i = 0; i < PlayerItems.PLAYER_WEAPON_MAX_COUNT; i++) {
             put(buffer, playerItems.weapons.get(i).getAttackAnim());
@@ -248,7 +248,7 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
         for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
             put(buffer, tankItems.engines.get(i).getWeight());
         }
-        bufferPosition++; // 0x2239C 未知
+        skip(); // 0x2239C 未知
         // 写入人类防具防御力
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             put(buffer, playerItems.armors.get(i).getDefense());
@@ -273,7 +273,7 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
         for (int i = 0; i < TankItems.TANK_ENGINE_MAX_COUNT; i++) {
             put(buffer, tankItems.engines.get(i).getDefense());
         }
-        bufferPosition++; // 0x22461 未知
+        skip(); // 0x22461 未知
         // 写入人类防具的价格
         for (int i = 0; i < PlayerItems.PLAYER_ARMOR_MAX_COUNT; i++) {
             put(buffer, playerItems.armors.get(i).getPrice());

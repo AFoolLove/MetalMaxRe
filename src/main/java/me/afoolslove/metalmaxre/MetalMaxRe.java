@@ -126,8 +126,6 @@ public class MetalMaxRe {
 
     public void setBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
-        // 更新编辑器的 buffer
-        EditorManager.getEditors().values().forEach(abstractEditor -> abstractEditor.setBuffer(buffer));
     }
 
     /**
@@ -273,6 +271,8 @@ public class MetalMaxRe {
 
 
     /**
+     * 请不要长时间持有该对象！！！
+     *
      * @return 数据
      */
     public ByteBuffer getBuffer() {

@@ -23,6 +23,8 @@ public class Monster {
     public char defense;
     /**
      * 护甲
+     * <p>
+     * 可能没有
      */
     public byte armor;
     /**
@@ -88,6 +90,19 @@ public class Monster {
 
     public void setHealth(@Range(from = 0x00, to = 0xFF) int health) {
         this.health = (byte) (health & 0xFF);
+    }
+
+    /**
+     * 设置怪物的护甲
+     *
+     * @param armor 护甲值
+     */
+    public void setArmor(byte armor) {
+        this.armor = armor;
+    }
+
+    public void setArmor(@Range(from = 0x00, to = 0xFF) int armor) {
+        this.armor = (byte) (armor & 0xFF);
     }
 
     /**
@@ -236,6 +251,17 @@ public class Monster {
 
     public int intHealth() {
         return getHealth() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的护甲值
+     */
+    public byte getArmor() {
+        return armor;
+    }
+
+    public int intArmor() {
+        return getArmor() & 0xFF;
     }
 
     /**

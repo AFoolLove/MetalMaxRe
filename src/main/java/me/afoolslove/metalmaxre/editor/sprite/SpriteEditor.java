@@ -118,7 +118,7 @@ public class SpriteEditor extends AbstractEditor<SpriteEditor> {
             // 排除已写入的精灵
             if (spritesIndexes[map] == null) {
                 // 获取新的精灵数据索引
-                char newSpritesIndex = (char) (bufferPosition - 0x24000 + 0x8000 - 0x10);
+                char newSpritesIndex = (char) (bufferPosition - (getHeader().isTrained() ? 0x200 : 0x000) - 0x24000 + 0x8000 - 0x10);
                 // 将其它使用与此精灵数据一样的地图一起设置
                 for (int nextMap = map; nextMap < 0xF0 + 0x0A; nextMap++) {
                     if (getSprites(nextMap) == spriteList) {
