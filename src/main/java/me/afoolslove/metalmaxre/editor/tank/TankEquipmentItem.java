@@ -25,7 +25,7 @@ public class TankEquipmentItem extends Item {
     public byte weight;
 
     /**
-     * 重量
+     * 防御力
      * 1:0.1t
      */
     public byte defense;

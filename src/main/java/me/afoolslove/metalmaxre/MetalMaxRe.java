@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editor.EditorManager;
+import me.afoolslove.metalmaxre.editor.PatchEditor;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
 import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
@@ -70,58 +71,45 @@ public class MetalMaxRe {
         }
 
         TreasureEditor treasureEditor = new TreasureEditor();
-        EditorManager.register(treasureEditor);
-
         ComputerEditor computerEditor = new ComputerEditor();
-        EditorManager.register(computerEditor);
-
         MapPropertiesEditor mapPropertiesEditor = new MapPropertiesEditor();
-        EditorManager.register(mapPropertiesEditor);
-
         MapEditor mapEditor = new MapEditor();
-        EditorManager.register(mapEditor);
-
         DogSystemEditor dogSystemEditor = new DogSystemEditor();
-        EditorManager.register(dogSystemEditor);
-
         VendorEditor vendorEditor = new VendorEditor();
-        EditorManager.register(vendorEditor);
-
         WorldMapEditor worldMapEditor = new WorldMapEditor();
-        EditorManager.register(worldMapEditor);
-
         EventTilesEditor eventTilesEditor = new EventTilesEditor();
-        EditorManager.register(eventTilesEditor);
-
         SpriteEditor spriteEditor = new SpriteEditor();
-        EditorManager.register(spriteEditor);
-
         MapEntranceEditor mapEntranceEditor = new MapEntranceEditor();
-        EditorManager.register(mapEntranceEditor);
-
         PlayerEditor playerEditor = new PlayerEditor();
-        EditorManager.register(playerEditor);
-
         TankEditor tankEditor = new TankEditor();
-        EditorManager.register(tankEditor);
-
         PlayerExperienceEditor playerExperienceEditor = new PlayerExperienceEditor();
-        EditorManager.register(playerExperienceEditor);
-
         PaletteEditor paletteEditor = new PaletteEditor();
-        EditorManager.register(paletteEditor);
-
         ItemsEditor itemsEditor = new ItemsEditor();
-        EditorManager.register(itemsEditor);
-
         TextEditor textEditor = new TextEditor();
-        EditorManager.register(textEditor);
-
         TileSetEditor tileSetEditor = new TileSetEditor();
-        EditorManager.register(tileSetEditor);
-
         MonsterEditor monsterEditor = new MonsterEditor();
+        PatchEditor patchEditor = new PatchEditor();
+
+
+        EditorManager.register(treasureEditor);
+        EditorManager.register(computerEditor);
+        EditorManager.register(mapPropertiesEditor);
+        EditorManager.register(mapEditor);
+        EditorManager.register(dogSystemEditor);
+        EditorManager.register(vendorEditor);
+        EditorManager.register(worldMapEditor);
+        EditorManager.register(eventTilesEditor);
+        EditorManager.register(spriteEditor);
+        EditorManager.register(mapEntranceEditor);
+        EditorManager.register(playerEditor);
+        EditorManager.register(tankEditor);
+        EditorManager.register(playerExperienceEditor);
+        EditorManager.register(paletteEditor);
+        EditorManager.register(itemsEditor);
+        EditorManager.register(textEditor);
+        EditorManager.register(tileSetEditor);
         EditorManager.register(monsterEditor);
+        EditorManager.register(patchEditor);
     }
 
     public void setBuffer(ByteBuffer buffer) {

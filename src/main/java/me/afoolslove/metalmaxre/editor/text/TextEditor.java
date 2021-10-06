@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Range;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -40,7 +41,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
     /**
      * 已知的文本段
      */
-    public static final Map<Integer, Integer> POINTS = new HashMap<>();
+    public static final Map<Integer, Integer> POINTS = new LinkedHashMap<>();
 
     /**
      * 解析为文本的已知文本段
@@ -164,7 +165,8 @@ public class TextEditor extends AbstractEditor<TextEditor> {
      * @return 城镇的名称
      */
     public String getTownName(@Range(from = 0x00, to = DogSystemEditor.TOWN_MAX_COUNT - 1) int town) {
-        return paragraphsMap.get(X_120E0).get(0x30 + town);
+        TextParagraphs textParagraphs = paragraphsMap.get(X_120E0);
+        return textParagraphs.size() > (0x30 + town) ? textParagraphs.get(0x30 + town) : null;
     }
 
     /**
@@ -174,7 +176,8 @@ public class TextEditor extends AbstractEditor<TextEditor> {
         if (item >= Item.ITEMS_MAX_COUNT) {
             return null;
         }
-        return paragraphsMap.get(X_11A20).get(item);
+        TextParagraphs textParagraphs = paragraphsMap.get(X_11A20);
+        return textParagraphs.size() > item ? textParagraphs.get(item) : null;
     }
 
     /**
@@ -191,7 +194,8 @@ public class TextEditor extends AbstractEditor<TextEditor> {
         if (monsterId >= MonsterEditor.MONSTER_COUNT) {
             return null;
         }
-        return paragraphsMap.get(X_21AF6).get(monsterId);
+        TextParagraphs textParagraphs = paragraphsMap.get(X_21AF6);
+        return textParagraphs.size() > monsterId ? textParagraphs.get(monsterId) : null;
     }
 
     /**
@@ -241,7 +245,7 @@ public class TextEditor extends AbstractEditor<TextEditor> {
      * @param monsterId 怪物的ID
      * @param name      怪物新名称
      */
-    public void getMonsterName(@Range(from = 0x00, to = 0xFF) int monsterId, @NotNull String name) {
+    public void setMonsterName(@Range(from = 0x00, to = 0xFF) int monsterId, @NotNull String name) {
         if (monsterId >= MonsterEditor.MONSTER_COUNT) {
             return;
         }

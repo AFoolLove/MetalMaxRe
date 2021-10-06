@@ -11,7 +11,6 @@ import java.util.Objects;
 
 /**
  * 基本的编辑器功能
- * 所有操作不计算NES头0x10数据（并没有
  *
  * @author AFoolLove
  */
@@ -84,6 +83,30 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
 
     public ByteBuffer getBuffer() {
         return getMetalMaxRe().getBuffer();
+    }
+
+    @SuppressWarnings("unchecked")
+    public T get(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset, int length) {
+        buffer.get(index, dst, offset, length);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T get(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset) {
+        buffer.get(index, dst, offset,dst.length);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T get(@NotNull ByteBuffer buffer, int index, byte[] dst) {
+        buffer.get(index, dst);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T get(@NotNull ByteBuffer buffer, int index) {
+        buffer.get(index);
+        return (T) this;
     }
 
     @SuppressWarnings("unchecked")
@@ -193,18 +216,21 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
     public T putPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset, int length) {
         buffer.put(getHeader().getPrgRomStart(index), dst, offset, length);
         bufferPosition += dst.length;
         return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
     public T putPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset) {
         buffer.put(getHeader().getPrgRomStart(index), dst, offset, dst.length - offset);
         bufferPosition += dst.length;
         return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
     public T putPrgRom(@NotNull ByteBuffer buffer, int index, byte[] dst) {
         buffer.put(getHeader().getPrgRomStart(index), dst);
         bufferPosition += dst.length;
@@ -222,18 +248,21 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     }
 
 
+    @SuppressWarnings("unchecked")
     public T putChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset, int length) {
         buffer.put(getHeader().getChrRomStart(index), dst, offset, length);
         bufferPosition += dst.length;
         return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
     public T putChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset) {
         buffer.put(getHeader().getChrRomStart(index), dst, offset, dst.length - offset);
         bufferPosition += dst.length;
         return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
     public T putChrRom(@NotNull ByteBuffer buffer, int index, byte[] dst) {
         buffer.put(getHeader().getChrRomStart(index), dst);
         bufferPosition += dst.length;

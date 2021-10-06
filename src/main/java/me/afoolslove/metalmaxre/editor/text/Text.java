@@ -35,7 +35,7 @@ public class Text {
          * @param wait 等待的时间，大多数为 0x3C
          * @return Builder
          */
-        public abstract T wait(byte wait);
+        public abstract T sleep(byte wait);
 
         /**
          * 让玩家进行选择，只能添加到在文本段的末尾
@@ -77,6 +77,8 @@ public class Text {
          * 控制被对话的精灵的朝向为上
          * <p>
          * 对话结束后恢复
+         * <p>
+         * * 必须与目标精灵对话，否则会死机
          *
          * @return Builder
          */
@@ -86,6 +88,8 @@ public class Text {
          * 控制被对话的精灵的朝向为下
          * <p>
          * 对话结束后恢复
+         * <p>
+         * * 必须与目标精灵对话，否则会死机
          *
          * @return Builder
          */
@@ -95,6 +99,8 @@ public class Text {
          * 控制被对话的精灵的朝向为左
          * <p>
          * 对话结束后恢复
+         * <p>
+         * * 必须与目标精灵对话，否则会死机
          *
          * @return Builder
          */
@@ -104,6 +110,8 @@ public class Text {
          * 控制被对话的精灵的朝向为右
          * <p>
          * 对话结束后恢复
+         * <p>
+         * * 必须与目标精灵对话，否则会死机
          *
          * @return Builder
          */
@@ -113,6 +121,8 @@ public class Text {
          * 控制被对话的精灵向上走一步
          * <p>
          * 对话结束后依然保持位置
+         * <p>
+         * * 必须与目标精灵对话，否则会死机
          *
          * @return Builder
          */
@@ -122,6 +132,8 @@ public class Text {
          * 控制被对话的精灵向下走一步
          * <p>
          * 对话结束后依然保持位置
+         * <p>
+         * * 必须与目标精灵对话，否则会死机
          *
          * @return Builder
          */
@@ -131,6 +143,8 @@ public class Text {
          * 控制被对话的精灵向左走一步
          * <p>
          * 对话结束后依然保持位置
+         * <p>
+         * * 必须与目标精灵对话，否则会死机
          *
          * @return Builder
          */
@@ -140,6 +154,8 @@ public class Text {
          * 控制被对话的精灵向右走一步
          * <p>
          * 对话结束后依然保持位置
+         * <p>
+         * * 必须与目标精灵对话，否则会死机
          *
          * @return Builder
          */
@@ -258,7 +274,7 @@ public class Text {
          * {@inheritDoc}
          */
         @Override
-        public ByteBuilder wait(byte wait) {
+        public ByteBuilder sleep(byte wait) {
             byteArray.write(0xF1);
             byteArray.write(wait);
             return this;
