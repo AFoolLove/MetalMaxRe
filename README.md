@@ -47,7 +47,7 @@ class Main {
         // 加载游戏ROM
         instance.loadGame(true, gamePath, new EditorWorker() {
             @Override
-            protected void process(List<Map.Entry<ProcessState, Object>> chunks) {
+            protected void process(List<Map.Entry<EditorProcess, Object>> chunks) {
                 // 编辑器输出的信息
             }
 

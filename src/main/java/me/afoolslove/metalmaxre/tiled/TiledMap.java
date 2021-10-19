@@ -1193,17 +1193,36 @@ public class TiledMap {
                         Rectangle mapBounds = tiledMap.getBounds();
                         for (int y = 0; y < mapBounds.height; y++) {
                             for (int x = 0; x < mapBounds.width; x++) {
-                                mapBuilder.add(tileLayer.getTileAt(x, y).getId());
+                                Tile tileAt = tileLayer.getTileAt(x, y);
+                                if (tileAt != null) {
+                                    mapBuilder.add(tileAt.getId());
+                                } else {
+                                    mapBuilder.add(0);
+                                }
                             }
                         }
                         mapEditor.getMaps().put(map, mapBuilder);
                     }
                     case "hideTile" ->
                             // 通过hideTile层的 (0,0) 图块作为隐藏图块
-                            mapProperties.hideTile = (byte) (((TileLayer) layer).getTileAt(0, 0).getId() & 0x7F);
+                            {
+                                Tile tileAt = ((TileLayer) layer).getTileAt(0, 0);
+                                if (tileAt != null) {
+                                    mapProperties.hideTile = (byte) (tileAt.getId() & 0x7F);
+                                } else {
+                                    mapProperties.hideTile = 0x00;
+                                }
+                            }
                     case "fillTile" ->
                             // 通过fillTile层的 (0,0) 图块作为填充图块（地图外填充的图块
-                            mapProperties.fillTile = (byte) (((TileLayer) layer).getTileAt(0, 0).getId() & 0x7F);
+                            {
+                                Tile tileAt = ((TileLayer) layer).getTileAt(0, 0);
+                                if (tileAt != null) {
+                                    mapProperties.fillTile = (byte) (tileAt.getId() & 0x7F);
+                                } else {
+                                    mapProperties.fillTile = 0x00;
+                                }
+                            }
                 }
 
             } else if (layer instanceof Group group) {
@@ -1284,7 +1303,12 @@ public class TiledMap {
                     // 导入世界地图
                     for (int y = 0; y < 0x100; y++) {
                         for (int x = 0; x < 0x100; x++) {
-                            byte tileId = tileLayer.getTileAt(x, y).getId().byteValue();
+                            Tile tileAt = tileLayer.getTileAt(x, y);
+                            byte tileId = 0x00;
+                            if (tileAt != null) {
+                                tileId = tileAt.getId().byteValue();
+                            }
+
                             if (tileId == 0x03 || tileId == 0x0A || tileId == 0x0B) {
                                 // 0x03 山脉
                                 // 0x0A 山脉起始
@@ -1570,7 +1594,12 @@ public class TiledMap {
                                 byte[] tiles = new byte[0x10];
                                 for (int offsetY = 0; offsetY < 0x04; offsetY++) {
                                     for (int offsetX = 0; offsetX < 0x04; offsetX++) {
-                                        tiles[(offsetY * 0x04) + offsetX] = eventTileLayer.getTileAt((x * 4) + offsetX, (y * 4) + offsetY).getId().byteValue();
+                                        Tile tileAt1 = eventTileLayer.getTileAt((x * 4) + offsetX, (y * 4) + offsetY);
+                                        if (tileAt1 != null) {
+                                            tiles[(offsetY * 0x04) + offsetX] = tileAt1.getId().byteValue();
+                                        } else {
+                                            tiles[(offsetY * 0x04) + offsetX] = 0x00;
+                                        }
                                     }
                                 }
                                 events.add(new WorldEventTile(x, y, 0, tiles));
