@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.text;
 
+import me.afoolslove.metalmaxre.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -169,7 +170,7 @@ public class WordBank {
         // FE      = 对话时按键确认后带名称换行
 
         // 读取字库
-        InputStream resourceAsStream = WordBank.class.getClassLoader().getResourceAsStream("fonts.txt");
+        InputStream resourceAsStream = ResourceManager.getAsStream("/fonts.txt");
         if (resourceAsStream != null) {
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
                 bufferedReader.readLine(); // 忽略第一行

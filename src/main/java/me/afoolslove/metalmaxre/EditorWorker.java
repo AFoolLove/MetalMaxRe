@@ -35,9 +35,10 @@ public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<Editor
             if (instance.isIsInitTarget()) {
                 // 直接获取流
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("MetalMax.nes");
+                InputStream resourceAsStream = ResourceManager.getAsStream("/MetalMax.nes");
                 if (resourceAsStream == null) {
                     // 读取失败可还行
+                    System.out.println("读取失败");
                     return false;
                 }
                 resourceAsStream.transferTo(byteArrayOutputStream);

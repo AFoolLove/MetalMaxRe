@@ -93,23 +93,26 @@ public class MetalMaxRe {
 
         EditorManager.register(treasureEditor);
         EditorManager.register(computerEditor);
-        EditorManager.register(mapPropertiesEditor);
-        EditorManager.register(mapEditor);
         EditorManager.register(dogSystemEditor);
         EditorManager.register(vendorEditor);
-        EditorManager.register(worldMapEditor);
-        EditorManager.register(eventTilesEditor);
         EditorManager.register(spriteEditor);
-        EditorManager.register(mapEntranceEditor);
         EditorManager.register(playerEditor);
         EditorManager.register(tankEditor);
-        EditorManager.register(playerExperienceEditor);
         EditorManager.register(paletteEditor);
+        EditorManager.register(playerExperienceEditor);
         EditorManager.register(itemsEditor);
         EditorManager.register(textEditor);
         EditorManager.register(tileSetEditor);
         EditorManager.register(monsterEditor);
         EditorManager.register(patchEditor);
+
+        EditorManager.register(mapEditor);
+        EditorManager.register(mapEntranceEditor);
+        EditorManager.register(mapPropertiesEditor);
+
+        EditorManager.register(eventTilesEditor);
+        EditorManager.register(worldMapEditor);
+
     }
 
     public void setBuffer(ByteBuffer buffer) {

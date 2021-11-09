@@ -1191,6 +1191,8 @@ public class TiledMap {
                         // 构建地图
                         MapBuilder mapBuilder = new MapBuilder();
                         Rectangle mapBounds = tiledMap.getBounds();
+                        mapProperties.height = (byte) (mapBounds.height & 0xFF);
+                        mapProperties.width = (byte) (mapBounds.width & 0xFF);
                         for (int y = 0; y < mapBounds.height; y++) {
                             for (int x = 0; x < mapBounds.width; x++) {
                                 Tile tileAt = tileLayer.getTileAt(x, y);

@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.ResourceManager;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
@@ -53,7 +54,6 @@ public class MainWindow extends JFrame {
     private JComboBox<String> comboBox7;
     private JComboBox<String> comboBox8;
     private JComboBox<String> comboBox9;
-    private JComboBox<String> maps;
     private JTable treasures;
     private JTextField treasureMap;
     private JTextField treasureX;
@@ -65,8 +65,7 @@ public class MainWindow extends JFrame {
     private JLabel treasureMessage;
 
     public MainWindow() {
-        URL url = getClass().getResource("");
-        if (url != null && "jar".equalsIgnoreCase(url.getProtocol())) {
+        if (ResourceManager.isJar()) {
             int result = JOptionPane.showConfirmDialog(this,
                     "没有经过修改版的作者同意，禁止使用本程序将修改内容发布到任何地方",
                     "MetalMaxRe",
@@ -74,15 +73,16 @@ public class MainWindow extends JFrame {
                     JOptionPane.WARNING_MESSAGE);
             if (result != JOptionPane.OK_OPTION) {
                 System.exit(0);
+                return;
             }
         }
 
         setTitle("MetalMaxRe");
 
-        URL resource = getClass().getClassLoader().getResource("MetalMax.nes");
+        URL resource = ResourceManager.get("/MetalMax.nes");
         if (resource == null) {
-            // 不会真的会读取失败吧？
-            JOptionPane.showConfirmDialog(this, "读取初始文件失败！", "加载错误", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE);
+            // 获取初始文件路径
+            JOptionPane.showConfirmDialog(this, "初始文件获取失败！", "错误", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -550,19 +550,6 @@ public class MainWindow extends JFrame {
      * 创建布局
      */
     private void createLayout() {
-        maps.setModel(new DefaultComboBoxModel<>() {
-            {
-                for (int i = 0; i < MapEditor.MAP_MAX_COUNT; i++) {
-                    addElement(String.format("%02X", i));
-                }
-            }
-
-            @Override
-            public int getSize() {
-                return MapEditor.MAP_MAX_COUNT;
-            }
-        });
-
         JComboBox<String>[] comboBoxes = new JComboBox[]{
                 comboBox1, comboBox2, comboBox3,
                 comboBox4, comboBox5, comboBox6,

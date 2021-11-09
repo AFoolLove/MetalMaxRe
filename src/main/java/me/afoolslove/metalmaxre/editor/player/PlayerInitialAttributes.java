@@ -105,6 +105,14 @@ public class PlayerInitialAttributes {
     }
 
     /**
+     * 设置当前生命值和最大生命值
+     */
+    public void setHealth(@Range(from = 0x00, to = 0xFFFF) int health, @Range(from = 0x00, to = 0xFFFF) int maxHealth) {
+        setHealth(health);
+        setMaxHealth(maxHealth);
+    }
+
+    /**
      * 设置攻击力
      * 攻击力包含已装备的武器
      * ？！不能去观测，否则会恢复！？
