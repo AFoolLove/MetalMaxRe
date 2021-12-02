@@ -89,7 +89,8 @@ public class MainWindow extends JFrame {
         createMenuBar();
         createLayout();
 
-        EditorManager.getEditor(DogSystemEditor.class).getListeners().add(new AbstractEditor.Listener<>() {
+
+        EditorManager.addListener(DogSystemEditor.class, new AbstractEditor.Listener<>() {
             @Override
             public void onReadAfter(@NotNull DogSystemEditor editor) {
                 JComboBox<String>[] comboBoxes = new JComboBox[]{
@@ -103,7 +104,7 @@ public class MainWindow extends JFrame {
             }
         });
 
-        EditorManager.getEditor(TreasureEditor.class).getListeners().add(new AbstractEditor.Listener<>() {
+        EditorManager.addListener(TreasureEditor.class, new AbstractEditor.Listener<>() {
             @Override
             public void onReadAfter(@NotNull TreasureEditor editor) {
                 treasures.removeAll();
@@ -681,9 +682,9 @@ public class MainWindow extends JFrame {
 
     private synchronized void loadGame(@NotNull File game, boolean init) {
         if (init) {
-            MetalMaxRe.getInstance().loadInitGame(new WindowEditorWorker(this, game, true));
+            MetalMaxRe.getInstance().loadInitGame();
         } else {
-            MetalMaxRe.getInstance().loadGame(game, new WindowEditorWorker(this, game, false));
+            MetalMaxRe.getInstance().loadGame(game);
         }
     }
 }

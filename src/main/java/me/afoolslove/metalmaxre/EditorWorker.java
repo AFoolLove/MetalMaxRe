@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
  *
  * @author AFoolLove
  */
+@Deprecated
 public abstract class EditorWorker extends SwingWorker<Boolean, Map.Entry<EditorProcess, Object>> {
 
     @Override

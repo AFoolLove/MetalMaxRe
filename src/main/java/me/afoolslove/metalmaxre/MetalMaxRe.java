@@ -70,49 +70,27 @@ public class MetalMaxRe {
             loadConfig(config);
         }
 
-        TreasureEditor treasureEditor = new TreasureEditor();
-        ComputerEditor computerEditor = new ComputerEditor();
-        MapPropertiesEditor mapPropertiesEditor = new MapPropertiesEditor();
-        MapEditor mapEditor = new MapEditor();
-        DogSystemEditor dogSystemEditor = new DogSystemEditor();
-        VendorEditor vendorEditor = new VendorEditor();
-        WorldMapEditor worldMapEditor = new WorldMapEditor();
-        EventTilesEditor eventTilesEditor = new EventTilesEditor();
-        SpriteEditor spriteEditor = new SpriteEditor();
-        MapEntranceEditor mapEntranceEditor = new MapEntranceEditor();
-        PlayerEditor playerEditor = new PlayerEditor();
-        TankEditor tankEditor = new TankEditor();
-        PlayerExperienceEditor playerExperienceEditor = new PlayerExperienceEditor();
-        PaletteEditor paletteEditor = new PaletteEditor();
-        ItemsEditor itemsEditor = new ItemsEditor();
-        TextEditor textEditor = new TextEditor();
-        TileSetEditor tileSetEditor = new TileSetEditor();
-        MonsterEditor monsterEditor = new MonsterEditor();
-        PatchEditor patchEditor = new PatchEditor();
+        EditorManager.register(TreasureEditor.class);
+        EditorManager.register(ComputerEditor.class);
+        EditorManager.register(DogSystemEditor.class);
+        EditorManager.register(VendorEditor.class);
+        EditorManager.register(SpriteEditor.class);
+        EditorManager.register(PlayerEditor.class);
+        EditorManager.register(TankEditor.class);
+        EditorManager.register(PaletteEditor.class);
+        EditorManager.register(PlayerExperienceEditor.class);
+        EditorManager.register(ItemsEditor.class);
+        EditorManager.register(TextEditor.class);
+        EditorManager.register(TileSetEditor.class);
+        EditorManager.register(MonsterEditor.class);
+        EditorManager.register(PatchEditor.class);
 
+        EditorManager.register(MapEditor.class);
+        EditorManager.register(MapEntranceEditor.class);
+        EditorManager.register(MapPropertiesEditor.class);
 
-        EditorManager.register(treasureEditor);
-        EditorManager.register(computerEditor);
-        EditorManager.register(dogSystemEditor);
-        EditorManager.register(vendorEditor);
-        EditorManager.register(spriteEditor);
-        EditorManager.register(playerEditor);
-        EditorManager.register(tankEditor);
-        EditorManager.register(paletteEditor);
-        EditorManager.register(playerExperienceEditor);
-        EditorManager.register(itemsEditor);
-        EditorManager.register(textEditor);
-        EditorManager.register(tileSetEditor);
-        EditorManager.register(monsterEditor);
-        EditorManager.register(patchEditor);
-
-        EditorManager.register(mapEditor);
-        EditorManager.register(mapEntranceEditor);
-        EditorManager.register(mapPropertiesEditor);
-
-        EditorManager.register(eventTilesEditor);
-        EditorManager.register(worldMapEditor);
-
+        EditorManager.register(EventTilesEditor.class);
+        EditorManager.register(WorldMapEditor.class);
     }
 
     public void setBuffer(ByteBuffer buffer) {
@@ -203,16 +181,36 @@ public class MetalMaxRe {
     /**
      * 加载游戏文件
      */
+    @Deprecated
     public void loadGame(@NotNull File game, @NotNull EditorWorker editorWorker) {
         setTarget(game);
         this.isInitTarget = false;
         editorWorker.execute();
     }
 
+    @Deprecated
     public void loadInitGame(@NotNull EditorWorker editorWorker) {
         setTarget(null);
         this.isInitTarget = true;
         editorWorker.execute();
+    }
+
+    /**
+     * 加载游戏文件
+     */
+    public void loadGame(@NotNull File game) {
+        setTarget(game);
+        this.isInitTarget = false;
+        EditorManager.loadEditors(true);
+    }
+
+    /**
+     * 加载默认游戏文件
+     */
+    public void loadInitGame() {
+        setTarget(null);
+        this.isInitTarget = true;
+        EditorManager.loadEditors(true);
     }
 
     public boolean saveAs(@NotNull String path) {
