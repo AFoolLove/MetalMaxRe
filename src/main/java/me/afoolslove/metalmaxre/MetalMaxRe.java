@@ -28,9 +28,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 // 你好陌生人，我顶你个肺
@@ -218,25 +215,26 @@ public class MetalMaxRe {
             System.out.printf("保存修改到：%s\n", path);
             // 写入头属性
             buffer.put(0x00000, header.getHeader());
-            new WriteEditorWorker() {
-                @Override
-                protected void process(List<Map.Entry<EditorProcess, Object>> chunks) {
-                    for (Map.Entry<EditorProcess, Object> chunk : chunks) {
-                        if (chunk.getKey() == EditorProcess.MESSAGE) {
-                            System.out.println(chunk.getValue());
-                        }
-                    }
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }.execute();
+            EditorManager.applyEditors();
+//            new WriteEditorWorker() {
+//                @Override
+//                protected void process(List<Map.Entry<EditorProcess, Object>> chunks) {
+//                    for (Map.Entry<EditorProcess, Object> chunk : chunks) {
+//                        if (chunk.getKey() == EditorProcess.MESSAGE) {
+//                            System.out.println(chunk.getValue());
+//                        }
+//                    }
+//                }
+//
+//                @Override
+//                protected void done() {
+//                    try {
+//                        Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }.execute();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -257,7 +255,6 @@ public class MetalMaxRe {
     public String getDefaultConfig() {
         return defaultConfig;
     }
-
 
     /**
      * 请不要长时间持有该对象！！！

@@ -215,7 +215,8 @@ public class MainWindow extends JFrame {
                 }
                 if (result == JOptionPane.OK_OPTION) {
                     // 保存
-                    new WindowWriteEditorWorker(this, selectedFile).execute();
+                    EditorManager.applyEditors();
+//                    new WindowWriteEditorWorker(this, selectedFile).execute();
 //                    MetalMaxRe.getInstance().saveAs(selectedFile.getPath());
                 }
             } // 其它皆为不不保存
