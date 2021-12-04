@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -119,15 +121,73 @@ public class MainWindow extends JFrame {
                 }
             }
         });
-
-        loadGame(new File(resource.getFile()), true);
-
         setContentPane(contentPane);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // 窗口默认大小
         setSize(854, 480);
 //        pack();
         setVisible(true);
+
+        MetalMaxRe instance = MetalMaxRe.getInstance();
+        instance.setInitTarget(true);
+        // 显示正在加载的窗口
+        showLoadingDialog(false);
+    }
+
+    private synchronized void showLoadingDialog(boolean reload) {
+        JProgressBar progressBar = new JProgressBar(0, EditorManager.getEditors().size());
+        JOptionPane jOptionPane = new JOptionPane(progressBar, JOptionPane.INFORMATION_MESSAGE);
+        JDialog dialog = jOptionPane.createDialog(this, "正在加载游戏文件");
+
+        EditorManager.loadEditors(reload, new EditorManager.LoadListener() {
+            @Override
+            public void onLoadBefore() {
+                // 显示正在加载
+                SwingUtilities.invokeLater(() -> {
+                    dialog.setVisible(true);
+                });
+            }
+
+            @Override
+            public void onLoadAfter() {
+                // 加载完毕，关闭窗口
+                SwingUtilities.invokeLater(() -> {
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                });
+
+                // 设置标题为打开的文件路径
+                MetalMaxRe instance = MetalMaxRe.getInstance();
+                if (!instance.isIsInitTarget()) {
+                    Path path = Paths.get(instance.getTarget());
+                    setTitle(String.format("MetalMaxRe [%s] - %s", path.getName(path.getNameCount() - 1), path));
+                } else {
+                    setTitle("MetalMaxRe [MetalMax]");
+                }
+                JPopupMenu fileMenu = getJMenuBar().getMenu(0x00).getPopupMenu();
+                for (Component component : fileMenu.getComponents()) {
+                    if (component instanceof JMenuItem) {
+                        if (Objects.equals(((JMenuItem) component).getText(), "Save")) {
+                            // 对菜单 File->Save 按钮启用或禁用
+                            component.setEnabled(!instance.isIsInitTarget());
+                            break;
+                        }
+                    }
+                }
+
+                // TODO: 显示加载失败的编辑器
+            }
+
+            @Override
+            public <E extends AbstractEditor<E>> void onLoadFailed(@NotNull Class<E> editor) {
+                progressBar.setValue(progressBar.getValue() + 1);
+            }
+
+            @Override
+            public <E extends AbstractEditor<E>> void onLoadSucceed(@NotNull E editor) {
+                progressBar.setValue(progressBar.getValue() + 1);
+            }
+        });
     }
 
     /**
@@ -151,7 +211,10 @@ public class MainWindow extends JFrame {
             int state = fileChooser.showOpenDialog(this);
             if (state == JFileChooser.APPROVE_OPTION) {
                 // 获取选择的NES文件
-                loadGame(fileChooser.getSelectedFile());
+                MetalMaxRe instance = MetalMaxRe.getInstance();
+                instance.setInitTarget(false);
+                instance.setTarget(fileChooser.getSelectedFile().toURI());
+                showLoadingDialog(true);
             } // 其它皆为不打开文件
         });
 
@@ -165,12 +228,8 @@ public class MainWindow extends JFrame {
                     , JOptionPane.WARNING_MESSAGE);
 
             if (result == JOptionPane.OK_OPTION) {
-                // 已确认重新加载
-                if (MetalMaxRe.getInstance().isIsInitTarget()) {
-                    loadInitGame();
-                } else {
-                    loadGame(MetalMaxRe.getInstance().getTarget(), MetalMaxRe.getInstance().isIsInitTarget());
-                }
+                // 已确认需要重新加载
+                showLoadingDialog(true);
             }
         });
 
@@ -216,9 +275,9 @@ public class MainWindow extends JFrame {
                 if (result == JOptionPane.OK_OPTION) {
                     // 保存
                     EditorManager.applyEditors();
-//                    new WindowWriteEditorWorker(this, selectedFile).execute();
-//                    MetalMaxRe.getInstance().saveAs(selectedFile.getPath());
+                    MetalMaxRe.getInstance().saveAs(selectedFile.getPath());
                 }
+
             } // 其它皆为不不保存
         });
 
@@ -483,8 +542,8 @@ public class MainWindow extends JFrame {
             System.exit(0);
         });
 
-//        fileMenu.add(fileMenuOpen);
-//        fileMenu.addSeparator();
+        fileMenu.add(fileMenuOpen);
+        fileMenu.addSeparator();
         fileMenu.add(fileMenuReload);
         fileMenu.addSeparator();
         fileMenu.add(fileMenuSave);
@@ -668,24 +727,5 @@ public class MainWindow extends JFrame {
             }
 
         });
-    }
-
-    /**
-     * 加载游戏文件
-     */
-    public void loadGame(@NotNull File game) {
-        loadGame(game, false);
-    }
-
-    public void loadInitGame() {
-        loadGame(new File("MetalMax.nes"), true);
-    }
-
-    private synchronized void loadGame(@NotNull File game, boolean init) {
-        if (init) {
-            MetalMaxRe.getInstance().loadInitGame();
-        } else {
-            MetalMaxRe.getInstance().loadGame(game);
-        }
     }
 }

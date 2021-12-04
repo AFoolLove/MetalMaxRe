@@ -5,11 +5,15 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.ResourceManager;
 import me.afoolslove.metalmaxre.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -160,7 +164,30 @@ public final class EditorManager {
      * @return 现在加载的所有编辑器（根据reload确定是否包含调用该方法之前的编辑器
      */
     public static <E extends AbstractEditor<E>> List<SingleMapEntry<Class<E>, E>> loadEditors(boolean reload) {
+        return loadEditors(reload, null);
+    }
+
+    /**
+     * 加载还未加载的编辑器
+     *
+     * @param loadListener 监听器
+     * @return 现在加载的所有编辑器（根据reload确定是否包含调用该方法之前的编辑器
+     */
+    public static <E extends AbstractEditor<E>> List<SingleMapEntry<Class<E>, E>> loadEditors(@Nullable LoadListener loadListener) {
+        return loadEditors(false, loadListener);
+    }
+
+    /**
+     * 加载还未加载的编辑器
+     *
+     * @param reload       所有编辑器是否全部重新加载
+     * @param loadListener 监听器
+     * @return 现在加载的所有编辑器（根据reload确定是否包含调用该方法之前的编辑器
+     */
+    public static <E extends AbstractEditor<E>> List<SingleMapEntry<Class<E>, E>> loadEditors(boolean reload, @Nullable LoadListener loadListener) {
         try {
+            LOCK.lock();
+
             MetalMaxRe instance = MetalMaxRe.getInstance();
             byte[] bytes;
             if (instance.isIsInitTarget()) {
@@ -176,10 +203,19 @@ public final class EditorManager {
                 bytes = byteArrayOutputStream.toByteArray();
             } else {
                 // 外部路径
-                bytes = Files.readAllBytes(instance.getTarget().toPath());
+                if (instance.getTarget() == null) {
+                    System.out.println("未指定ROM文件");
+                    return Collections.emptyList();
+                }
+                Path path = Paths.get(instance.getTarget());
+                try {
+                    bytes = Files.readAllBytes(path);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // 读取失败
+                    return Collections.emptyList();
+                }
             }
-
-            LOCK.lock();
 
             if (instance.getBuffer() != null) {
                 instance.getBuffer().clear(); // 怎么释放呢？
@@ -214,6 +250,7 @@ public final class EditorManager {
                 editorLists.add(
                         EDITORS.entrySet().parallelStream()
                                 .map(entry -> entry.getValue() == null ? (Class<E>) entry.getKey() : null)
+                                .filter(Objects::nonNull)
                                 .collect(Collectors.toSet())
                 );
             }
@@ -262,15 +299,25 @@ public final class EditorManager {
             // 倒序，优先加载前置
             Collections.reverse(editorLists);
 
+            if (loadListener != null) {
+                loadListener.onLoadBefore();
+            }
             // 开始计时
             totalTime[0x01] = System.currentTimeMillis();
 
             var editors = editorLists.stream().map(editorList ->
                             editorList.parallelStream().map(editor -> {
                                 try {
-                                    return new SingleMapEntry<>(editor, loadEditor(editor, reload).get());
+                                    E e = loadEditor(editor, reload).get();
+                                    if (loadListener != null) {
+                                        loadListener.onLoadSucceed(e);
+                                    }
+                                    return new SingleMapEntry<>(editor, e);
                                 } catch (InterruptedException | ExecutionException e) {
                                     e.printStackTrace();
+                                }
+                                if (loadListener != null) {
+                                    loadListener.onLoadFailed(editor);
                                 }
                                 return new SingleMapEntry<>(editor, (E) null);
                             }).toList())
@@ -278,8 +325,11 @@ public final class EditorManager {
                     .toList();
 
             totalTime[0x01] = System.currentTimeMillis() - totalTime[0x01];
-
             // 所有编辑器读取完毕
+            if (loadListener != null) {
+                loadListener.onLoadAfter();
+            }
+
             // 计算读取成功的编辑器数量
             result[0] = editors.parallelStream().mapToInt(value -> value.getValue() == null ? 0 : 1).sum();
             // 计算读取失败的编辑器数量
@@ -379,7 +429,26 @@ public final class EditorManager {
      *
      * @param load 如果有违背加载的编辑器，是否加载并应用
      */
-    public static <E extends AbstractEditor<E>> void applyEditors(boolean load) {
+    public static void applyEditors(boolean load) {
+        applyEditors(load, null);
+    }
+
+    /**
+     * 应用所有编辑器
+     *
+     * @param applyListener 监听器
+     */
+    public static void applyEditors(@Nullable ApplyListener applyListener) {
+        applyEditors(false, applyListener);
+    }
+
+    /**
+     * 应用所有编辑器
+     *
+     * @param applyListener 监听器
+     * @param load          如果有违背加载的编辑器，是否加载并应用
+     */
+    public static <E extends AbstractEditor<E>> void applyEditors(boolean load, @Nullable ApplyListener applyListener) {
         // index 0 = totalTime
         // index 1 = realTime
         long[] totalTime = {0, 0};
@@ -434,14 +503,24 @@ public final class EditorManager {
             // 倒序，优先写入前置
             Collections.reverse(editorLists);
 
+            if (applyListener != null) {
+                applyListener.onApplyBefore();
+            }
             // 开始计时
             totalTime[0x01] = System.currentTimeMillis();
             var editors = editorLists.stream().map(editorList ->
                             editorList.parallelStream().map(editor -> {
                                 try {
-                                    return new SingleMapEntry<>(editor, applyEditor(editor, load).get());
+                                    E e = applyEditor(editor, load).get();
+                                    if (applyListener != null) {
+                                        applyListener.onApplySucceed(e);
+                                    }
+                                    return new SingleMapEntry<>(editor, e);
                                 } catch (InterruptedException | ExecutionException e) {
                                     e.printStackTrace();
+                                }
+                                if (applyListener != null) {
+                                    applyListener.onApplyFailed(editor);
                                 }
                                 return new SingleMapEntry<>(editor, (E) null);
                             }).toList())
@@ -449,6 +528,9 @@ public final class EditorManager {
                     .toList();
             totalTime[0x01] = System.currentTimeMillis() - totalTime[0x01];
             // 所有编辑器写入完毕
+            if (applyListener != null) {
+                applyListener.onApplyAfter();
+            }
 
             // 计算读取成功的编辑器数量
             result[0] = editors.parallelStream().mapToInt(value -> value.getValue() == null ? 0 : 1).sum();
@@ -520,4 +602,63 @@ public final class EditorManager {
         });
     }
 
+    public interface LoadListener {
+        /**
+         * 编辑器准备开始加载
+         */
+        default void onLoadBefore() {
+        }
+
+        /**
+         * 编辑器加载完毕，无论是否加载成功
+         */
+        default void onLoadAfter() {
+        }
+
+        /**
+         * 编辑器加载失败
+         *
+         * @param editor 加载失败的编辑器类
+         */
+        default <E extends AbstractEditor<E>> void onLoadFailed(@NotNull Class<E> editor) {
+        }
+
+        /**
+         * 编辑器加载成功
+         *
+         * @param editor 加载成功的编辑器
+         */
+        default <E extends AbstractEditor<E>> void onLoadSucceed(@NotNull E editor) {
+        }
+    }
+
+    public interface ApplyListener {
+        /**
+         * 准备应用编辑器数据
+         */
+        default void onApplyBefore() {
+        }
+
+        /**
+         * 应用编辑器完毕，无论是否应用成功
+         */
+        default void onApplyAfter() {
+        }
+
+        /**
+         * 编辑器应用失败
+         *
+         * @param editor 应用失败的编辑器
+         */
+        default <E extends AbstractEditor<E>> void onApplyFailed(@NotNull Class<E> editor) {
+        }
+
+        /**
+         * 编辑器应用成功
+         *
+         * @param editor 应用成功的编辑器
+         */
+        default <E extends AbstractEditor<E>> void onApplySucceed(@NotNull E editor) {
+        }
+    }
 }

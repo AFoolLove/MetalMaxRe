@@ -23,10 +23,11 @@ import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
@@ -45,11 +46,11 @@ public class MetalMaxRe {
     /**
      * 当前加载的游戏文件
      */
-    private File target;
+    private URI target;
     /**
      * 是否为初始文件
      */
-    private boolean isInitTarget;
+    private boolean isInitTarget = true;
 
     private final String defaultConfig;
     private String config;
@@ -116,7 +117,7 @@ public class MetalMaxRe {
     /**
      * @return 当前打开的游戏文件，可能为null
      */
-    public File getTarget() {
+    public URI getTarget() {
         return target;
     }
 
@@ -127,10 +128,20 @@ public class MetalMaxRe {
         this.header = header;
     }
 
-    public void setTarget(File target) {
+    public void setTarget(URI target) {
         this.target = target;
     }
 
+    /**
+     * 设置是否使用默认ROM
+     */
+    public void setInitTarget(boolean initTarget) {
+        isInitTarget = initTarget;
+    }
+
+    /**
+     * @return 是否使用默认ROM
+     */
     public boolean isIsInitTarget() {
         return isInitTarget;
     }
@@ -175,27 +186,11 @@ public class MetalMaxRe {
         }
     }
 
-    /**
-     * 加载游戏文件
-     */
-    @Deprecated
-    public void loadGame(@NotNull File game, @NotNull EditorWorker editorWorker) {
-        setTarget(game);
-        this.isInitTarget = false;
-        editorWorker.execute();
-    }
-
-    @Deprecated
-    public void loadInitGame(@NotNull EditorWorker editorWorker) {
-        setTarget(null);
-        this.isInitTarget = true;
-        editorWorker.execute();
-    }
 
     /**
      * 加载游戏文件
      */
-    public void loadGame(@NotNull File game) {
+    public void loadGame(@NotNull URI game) {
         setTarget(game);
         this.isInitTarget = false;
         EditorManager.loadEditors(true);
@@ -208,6 +203,29 @@ public class MetalMaxRe {
         setTarget(null);
         this.isInitTarget = true;
         EditorManager.loadEditors(true);
+    }
+
+    /**
+     * 重新加载ROM文件
+     *
+     * @return 是否成功重新加载
+     */
+    public boolean reloadGame() {
+        if (isIsInitTarget()) {
+            loadInitGame();
+        } else {
+            if (getTarget() == null) {
+                // 不存在的目标文件，但也不是初始文件
+                return false;
+            }
+            Path path = Paths.get(getTarget());
+            if (Files.notExists(path)) {
+                // 目标文件不存在
+                return false;
+            }
+            loadGame(getTarget());
+        }
+        return true;
     }
 
     public boolean saveAs(@NotNull String path) {
