@@ -189,24 +189,51 @@ public class MetalMaxRe {
 
     /**
      * 加载游戏文件
+     *
+     * @param game ROM
      */
     public void loadGame(@NotNull URI game) {
+        loadGame(game, null);
+    }
+
+    /**
+     * 加载游戏文件
+     *
+     * @param game         ROM
+     * @param loadListener 加载编辑器
+     */
+    public void loadGame(@NotNull URI game, @Nullable EditorManager.LoadListener loadListener) {
         setTarget(game);
         this.isInitTarget = false;
-        EditorManager.loadEditors(true);
+        EditorManager.loadEditors(true, loadListener);
     }
 
     /**
      * 加载默认游戏文件
+     * <p>
+     * * 该方法会等待加载完毕
      */
     public void loadInitGame() {
+        loadInitGame(null);
+    }
+
+    /**
+     * 加载默认游戏文件
+     * <p>
+     * * 该方法会等待加载完毕
+     *
+     * @param loadListener 加载监听器
+     */
+    public void loadInitGame(@Nullable EditorManager.LoadListener loadListener) {
         setTarget(null);
         this.isInitTarget = true;
-        EditorManager.loadEditors(true);
+        EditorManager.loadEditors(true, loadListener);
     }
 
     /**
      * 重新加载ROM文件
+     * <p>
+     * * 该方法会等待加载完毕
      *
      * @return 是否成功重新加载
      */

@@ -166,10 +166,16 @@ public class MainWindow extends JFrame {
                 }
                 JPopupMenu fileMenu = getJMenuBar().getMenu(0x00).getPopupMenu();
                 for (Component component : fileMenu.getComponents()) {
-                    if (component instanceof JMenuItem) {
-                        if (Objects.equals(((JMenuItem) component).getText(), "Save")) {
+                    if (component instanceof JMenuItem jMenuItem) {
+                        if (Objects.equals(jMenuItem.getText(), "Save")) {
                             // 对菜单 File->Save 按钮启用或禁用
-                            component.setEnabled(!instance.isIsInitTarget());
+                            if (instance.isIsInitTarget()) {
+                                jMenuItem.setEnabled(false);
+                                jMenuItem.setToolTipText("打开ROM后才能储存");
+                            } else {
+                                jMenuItem.setEnabled(true);
+                                jMenuItem.setToolTipText(null);
+                            }
                             break;
                         }
                     }

@@ -35,41 +35,47 @@
 **由于没有制作控制台和交互相关的程序，目前只能使用代码调用API来编辑**
 
 * 使用前请确保已经安装了`java 16`或以上的版本
-* 初始化和加载游戏ROM：
+* *加载ROM的所有方法均会等待加载完毕才执行接下来的代码
+* 加载监听器 [EditorManager](src/main/java/me/afoolslove/metalmaxre/editor/EditorManager.java) `LoadListener`
+* 加载内置ROM文件
 
 ~~~java
 class Main {
-    public static void main(String[] args) throws InterruptedException {
-        final Object lock = new Object();
-
-        // 初始化
+    public static void main(String[] args) {
+        // 得到实例
         MetalMaxRe instance = MetalMaxRe.getInstance();
-        // 加载游戏ROM
-        instance.loadGame(true, gamePath, new EditorWorker() {
-            @Override
-            protected void process(List<Map.Entry<EditorProcess, Object>> chunks) {
-                // 编辑器输出的信息
-            }
+        // 加载内置ROM文件
+        instance.loadInitGame();
 
-            @Override
-            protected void done() {
-                // 所有编辑器读取完毕后将执行此方法
-                // code
-
-                synchronized (lock) {
-                    lock.notify();
-                }
-            }
+        // 如果需要增加监听器
+        // loadInitGame(@Nullable EditorManager.LoadListener)
+        instance.loadInitGame(new EditorManager.LoadListener() {
         });
-
-        synchronized (lock) {
-            lock.wait();
-        }
     }
 }
 ~~~
 
-* 程序不会等待编辑器读取完毕，所以这里添加了一个同步锁防止直接执行结束。。。
+* 加载外部ROM文件
+
+~~~java
+import java.io.File;
+
+class Main {
+    public static void main(String[] args) {
+        // 得到实例
+        MetalMaxRe instance = MetalMaxRe.getInstance();
+        // 加载外部ROM
+        // loadGame(@NotNull URI)
+        instance.loadGame(new File("xxxx.nes"));
+
+        // 如果需要增加监听器
+        // loadGame(@NotNull URI, @Nullable EditorManager.LoadListener)
+        instance.loadGame(new File("xxxx.nes"), new EditorManager.LoadListener() {
+        });
+    }
+}
+~~~
+
 * 保存到文件
 
 ~~~
