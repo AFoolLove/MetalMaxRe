@@ -544,8 +544,14 @@ public class MainWindow extends JFrame {
 
         JMenuItem fileMenuExit = new JMenuItem("Exit");
         fileMenuExit.addActionListener(e -> {
-            // 退出
-            System.exit(0);
+            int confirmDialog = JOptionPane.showConfirmDialog(this,
+                    "退出后将丢失已修改的数据", "退出",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+            if (confirmDialog == JOptionPane.OK_OPTION) {
+                // 确认退出
+                System.exit(0);
+            }
         });
 
         fileMenu.add(fileMenuOpen);

@@ -35,7 +35,6 @@
 **由于没有制作控制台和交互相关的程序，目前只能使用代码调用API来编辑**
 
 * 使用前请确保已经安装了`java 16`或以上的版本
-* *加载ROM的所有方法均会等待加载完毕才执行接下来的代码
 * 加载监听器 [EditorManager](src/main/java/me/afoolslove/metalmaxre/editor/EditorManager.java) `LoadListener`
 * 加载内置ROM文件
 

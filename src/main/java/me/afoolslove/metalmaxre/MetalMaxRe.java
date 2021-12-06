@@ -210,8 +210,6 @@ public class MetalMaxRe {
 
     /**
      * 加载默认游戏文件
-     * <p>
-     * * 该方法会等待加载完毕
      */
     public void loadInitGame() {
         loadInitGame(null);
@@ -219,8 +217,6 @@ public class MetalMaxRe {
 
     /**
      * 加载默认游戏文件
-     * <p>
-     * * 该方法会等待加载完毕
      *
      * @param loadListener 加载监听器
      */
@@ -232,8 +228,6 @@ public class MetalMaxRe {
 
     /**
      * 重新加载ROM文件
-     * <p>
-     * * 该方法会等待加载完毕
      *
      * @return 是否成功重新加载
      */

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
  */
 public final class EditorManager {
     private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private static final ExecutorService LOAD_OR_APPLY_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final ReentrantLock LOCK = new ReentrantLock();
 
     /**
@@ -153,7 +154,7 @@ public final class EditorManager {
      *
      * @return 现在加载的所有编辑器（不包含调用该方法之前的编辑器
      */
-    public static <E extends AbstractEditor<E>> List<SingleMapEntry<Class<E>, E>> loadEditors() {
+    public static <E extends AbstractEditor<E>> Future<List<SingleMapEntry<Class<E>, E>>> loadEditors() {
         return loadEditors(false);
     }
 
@@ -163,7 +164,7 @@ public final class EditorManager {
      * @param reload 所有编辑器是否全部重新加载
      * @return 现在加载的所有编辑器（根据reload确定是否包含调用该方法之前的编辑器
      */
-    public static <E extends AbstractEditor<E>> List<SingleMapEntry<Class<E>, E>> loadEditors(boolean reload) {
+    public static <E extends AbstractEditor<E>> Future<List<SingleMapEntry<Class<E>, E>>> loadEditors(boolean reload) {
         return loadEditors(reload, null);
     }
 
@@ -173,7 +174,7 @@ public final class EditorManager {
      * @param loadListener 监听器
      * @return 现在加载的所有编辑器（根据reload确定是否包含调用该方法之前的编辑器
      */
-    public static <E extends AbstractEditor<E>> List<SingleMapEntry<Class<E>, E>> loadEditors(@Nullable LoadListener loadListener) {
+    public static <E extends AbstractEditor<E>> Future<List<SingleMapEntry<Class<E>, E>>> loadEditors(@Nullable LoadListener loadListener) {
         return loadEditors(false, loadListener);
     }
 
@@ -184,10 +185,8 @@ public final class EditorManager {
      * @param loadListener 监听器
      * @return 现在加载的所有编辑器（根据reload确定是否包含调用该方法之前的编辑器
      */
-    public static <E extends AbstractEditor<E>> List<SingleMapEntry<Class<E>, E>> loadEditors(boolean reload, @Nullable LoadListener loadListener) {
-        try {
-            LOCK.lock();
-
+    public static <E extends AbstractEditor<E>> Future<List<SingleMapEntry<Class<E>, E>>> loadEditors(boolean reload, @Nullable LoadListener loadListener) {
+        return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
             MetalMaxRe instance = MetalMaxRe.getInstance();
             byte[] bytes;
             if (instance.isIsInitTarget()) {
@@ -337,12 +336,7 @@ public final class EditorManager {
             System.out.println(String.format("加载编辑器结束，共%d个编辑器，成功%d个，失败%d个", editors.size(), result[0x00], result[0x01]));
             System.out.println(String.format("加载编辑器耗时：%dms", totalTime[0x01]));
             return editors;
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            LOCK.unlock();
-        }
-        return null;
+        });
     }
 
     /**
@@ -448,99 +442,102 @@ public final class EditorManager {
      * @param applyListener 监听器
      * @param load          如果有违背加载的编辑器，是否加载并应用
      */
-    public static <E extends AbstractEditor<E>> void applyEditors(boolean load, @Nullable ApplyListener applyListener) {
-        // index 0 = totalTime
-        // index 1 = realTime
-        long[] totalTime = {0, 0};
-        // index 0 = successful
-        // index 1 = failed
-        int[] result = {0, 0};
+    public static <E extends AbstractEditor<E>> Future<Void> applyEditors(boolean load, @Nullable ApplyListener applyListener) {
+        return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
+            // index 0 = totalTime
+            // index 1 = realTime
+            long[] totalTime = {0, 0};
+            // index 0 = successful
+            // index 1 = failed
+            int[] result = {0, 0};
 
-        if (!EditorManager.getEditors().isEmpty()) {
-            System.out.println("开始写入编辑器的数据");
+            if (!EditorManager.getEditors().isEmpty()) {
+                System.out.println("开始写入编辑器的数据");
 
-            List<Set<Class<E>>> editorLists = new ArrayList<>();
-            HashSet<Class<E>> hashSet = new HashSet<>();
-            for (Class<AbstractEditor<?>> editorClass : EDITORS.keySet()) {
-                hashSet.add((Class<E>) editorClass);
-            }
-            editorLists.add(hashSet);
+                List<Set<Class<E>>> editorLists = new ArrayList<>();
+                HashSet<Class<E>> hashSet = new HashSet<>();
+                for (Class<AbstractEditor<?>> editorClass : EDITORS.keySet()) {
+                    hashSet.add((Class<E>) editorClass);
+                }
+                editorLists.add(hashSet);
 
-            do {
-                Set<Class<E>> editors = new HashSet<>();
-                Set<Class<E>> classes = editorLists.get(editorLists.size() - 1);
+                do {
+                    Set<Class<E>> editors = new HashSet<>();
+                    Set<Class<E>> classes = editorLists.get(editorLists.size() - 1);
 
 
-                // 过滤无序的编辑器
-                for (Class<E> clazz : classes) {
-                    WriteBefore annotation = clazz.getAnnotation(WriteBefore.class);
-                    if (annotation == null || annotation.value().length == 0) {
-                        continue;
+                    // 过滤无序的编辑器
+                    for (Class<E> clazz : classes) {
+                        WriteBefore annotation = clazz.getAnnotation(WriteBefore.class);
+                        if (annotation == null || annotation.value().length == 0) {
+                            continue;
+                        }
+                        for (Class<? extends AbstractEditor<?>> aClass : annotation.value()) {
+                            editors.add((Class<E>) aClass);
+                        }
                     }
-                    for (Class<? extends AbstractEditor<?>> aClass : annotation.value()) {
-                        editors.add((Class<E>) aClass);
+
+                    if (editors.isEmpty()) {
+                        break;
+                    }
+                    editorLists.add(editors);
+                } while (true);
+
+                // 将排序的编辑器去重
+                // 越前面的编辑器在后面出现的话以后面为准
+                for (Set<Class<E>> editorList : editorLists) {
+                    List<Set<Class<E>>> sets = new ArrayList<>(editorLists);
+                    sets.remove(editorList);
+                    Collections.reverse(sets);
+
+                    for (Set<Class<E>> set : sets) {
+                        set.forEach(editorList::remove);
                     }
                 }
 
-                if (editors.isEmpty()) {
-                    break;
+                // 倒序，优先写入前置
+                Collections.reverse(editorLists);
+
+                if (applyListener != null) {
+                    applyListener.onApplyBefore();
                 }
-                editorLists.add(editors);
-            } while (true);
-
-            // 将排序的编辑器去重
-            // 越前面的编辑器在后面出现的话以后面为准
-            for (Set<Class<E>> editorList : editorLists) {
-                List<Set<Class<E>>> sets = new ArrayList<>(editorLists);
-                sets.remove(editorList);
-                Collections.reverse(sets);
-
-                for (Set<Class<E>> set : sets) {
-                    set.forEach(editorList::remove);
-                }
-            }
-
-            // 倒序，优先写入前置
-            Collections.reverse(editorLists);
-
-            if (applyListener != null) {
-                applyListener.onApplyBefore();
-            }
-            // 开始计时
-            totalTime[0x01] = System.currentTimeMillis();
-            var editors = editorLists.stream().map(editorList ->
-                            editorList.parallelStream().map(editor -> {
-                                try {
-                                    E e = applyEditor(editor, load).get();
-                                    if (applyListener != null) {
-                                        applyListener.onApplySucceed(e);
+                // 开始计时
+                totalTime[0x01] = System.currentTimeMillis();
+                var editors = editorLists.stream().map(editorList ->
+                                editorList.parallelStream().map(editor -> {
+                                    try {
+                                        E e = applyEditor(editor, load).get();
+                                        if (applyListener != null) {
+                                            applyListener.onApplySucceed(e);
+                                        }
+                                        return new SingleMapEntry<>(editor, e);
+                                    } catch (InterruptedException | ExecutionException e) {
+                                        e.printStackTrace();
                                     }
-                                    return new SingleMapEntry<>(editor, e);
-                                } catch (InterruptedException | ExecutionException e) {
-                                    e.printStackTrace();
-                                }
-                                if (applyListener != null) {
-                                    applyListener.onApplyFailed(editor);
-                                }
-                                return new SingleMapEntry<>(editor, (E) null);
-                            }).toList())
-                    .flatMap(Collection::stream)
-                    .toList();
-            totalTime[0x01] = System.currentTimeMillis() - totalTime[0x01];
-            // 所有编辑器写入完毕
-            if (applyListener != null) {
-                applyListener.onApplyAfter();
-            }
+                                    if (applyListener != null) {
+                                        applyListener.onApplyFailed(editor);
+                                    }
+                                    return new SingleMapEntry<>(editor, (E) null);
+                                }).toList())
+                        .flatMap(Collection::stream)
+                        .toList();
+                totalTime[0x01] = System.currentTimeMillis() - totalTime[0x01];
+                // 所有编辑器写入完毕
+                if (applyListener != null) {
+                    applyListener.onApplyAfter();
+                }
 
-            // 计算读取成功的编辑器数量
-            result[0] = editors.parallelStream().mapToInt(value -> value.getValue() == null ? 0 : 1).sum();
-            // 计算读取失败的编辑器数量
-            result[1] = editors.size() - result[0];
-            System.out.println(String.format("应用编辑器数据结束，共%d个编辑器，成功%d个，失败%d个", editors.size(), result[0], result[1]));
-            System.out.println(String.format("应用编辑器数据耗时：%dms", totalTime[1]));
-        } else {
-            System.out.println("没有可用的编辑器！");
-        }
+                // 计算读取成功的编辑器数量
+                result[0] = editors.parallelStream().mapToInt(value -> value.getValue() == null ? 0 : 1).sum();
+                // 计算读取失败的编辑器数量
+                result[1] = editors.size() - result[0];
+                System.out.println(String.format("应用编辑器数据结束，共%d个编辑器，成功%d个，失败%d个", editors.size(), result[0], result[1]));
+                System.out.println(String.format("应用编辑器数据耗时：%dms", totalTime[1]));
+            } else {
+                System.out.println("没有可用的编辑器！");
+            }
+            return null;
+        });
     }
 
     /**
