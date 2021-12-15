@@ -4,27 +4,27 @@
 
 ### 编辑器完成度
 
-|类名|名称|状态|
-|----|----|----|
-|TreasureEditor          | 宝藏编辑器 | √
-|MapBuilder              | 地图构建器 | √
-|MapEditor               | 地图编辑器 | × 半成品
-|MapPropertiesEditor     | 地图属性编辑器 | √
-|ComputerEditor          | 计算机编辑器 | √
-|DogSystemEditor         | 犬系统 | √
-|VendorEditor            | 售货机编辑器 | √ 后续考虑添加功能
-|EventTilesEditor        | 事件图块编辑器 | √
-|SpriteEditor            | 精灵编辑器 | √
-|MapEntranceEditor       | 地图边界和出入口编辑器 | √
-|PlayerEditor            | 玩家编辑器 | √ 后续考虑添加功能
-|TankEditor              | 坦克编辑器 | √ 后续考虑添加功能
-|PlayerExperienceEditor  | 玩家升级所需经验值编辑器 | √
-|PaletteEditor           | 调色板编辑器 | √
-|ItemsEditor             | 物品编辑器 | √ 后续考虑添加功能
-|TextEditor              | 文本编辑器 | √ 文本源后续继续添加测试
-|TileSetEditor           | 图块编辑器 | √ 后续考虑添加功能
-|WorldMapEditor          | 世界地图编辑器 | √ 后续考虑优化
-|MonsterEditor           | 怪物编辑器 | ... 卡关了。。。
+| 类名                     | 名称           | 状态            |
+|------------------------|--------------|---------------|
+| TreasureEditor         | 宝藏编辑器        | √             |
+| MapBuilder             | 地图构建器        | √             |
+| MapEditor              | 地图编辑器        | × 半成品         |
+| MapPropertiesEditor    | 地图属性编辑器      | √             |
+| ComputerEditor         | 计算机编辑器       | √             |
+| DogSystemEditor        | 犬系统          | √             |
+| VendorEditor           | 售货机编辑器       | √ 后续考虑添加功能    |
+| EventTilesEditor       | 事件图块编辑器      | √             |
+| SpriteEditor           | 精灵编辑器        | √             |
+| MapEntranceEditor      | 地图边界和出入口编辑器  | √             |
+| PlayerEditor           | 玩家编辑器        | √ 后续考虑添加功能    |
+| TankEditor             | 坦克编辑器        | √ 后续考虑添加功能    |
+| PlayerExperienceEditor | 玩家升级所需经验值编辑器 | √             |
+| PaletteEditor          | 调色板编辑器       | √             |
+| ItemsEditor            | 物品编辑器        | √ 后续考虑添加功能    |
+| TextEditor             | 文本编辑器        | √ 文本源后续继续添加测试 |
+| TileSetEditor          | 图块编辑器        | √ 后续考虑添加功能    |
+| WorldMapEditor         | 世界地图编辑器      | √ 后续考虑优化      |
+| MonsterEditor          | 怪物编辑器        | ... 卡关了。。。    |
 
 ## 注意
 

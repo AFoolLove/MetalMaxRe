@@ -14,6 +14,7 @@ import me.afoolslove.metalmaxre.editor.treasure.Treasure;
 import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import me.afoolslove.metalmaxre.tiled.TiledMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mapeditor.core.TileSet;
 import org.mapeditor.io.TMXMapReader;
 import org.mapeditor.io.TMXMapWriter;
@@ -128,20 +129,20 @@ public class MainWindow extends JFrame {
 //        pack();
         setVisible(true);
 
-        MetalMaxRe instance = MetalMaxRe.getInstance();
-        instance.setInitTarget(true);
         // 显示正在加载的窗口
-        showLoadingDialog(false);
+        showLoadingDialog();
     }
 
-    private synchronized void showLoadingDialog(boolean reload) {
+    private synchronized void showLoadingDialog() {
         JProgressBar progressBar = new JProgressBar(0, EditorManager.getEditors().size());
         JOptionPane jOptionPane = new JOptionPane(progressBar, JOptionPane.INFORMATION_MESSAGE);
         JDialog dialog = jOptionPane.createDialog(this, "正在加载游戏文件");
 
-        EditorManager.loadEditors(reload, new EditorManager.LoadListener() {
+        MetalMaxRe instance = MetalMaxRe.getInstance();
+        EditorManager.LoadListener loadListener = new EditorManager.LoadListener() {
+
             @Override
-            public void onLoadBefore() {
+            public void onStart() {
                 // 显示正在加载
                 SwingUtilities.invokeLater(() -> {
                     dialog.setVisible(true);
@@ -149,7 +150,7 @@ public class MainWindow extends JFrame {
             }
 
             @Override
-            public void onLoadAfter() {
+            public void onEnd() {
                 // 加载完毕，关闭窗口
                 SwingUtilities.invokeLater(() -> {
                     dialog.setVisible(false);
@@ -185,15 +186,17 @@ public class MainWindow extends JFrame {
             }
 
             @Override
-            public <E extends AbstractEditor<E>> void onLoadFailed(@NotNull Class<E> editor) {
+            public <E extends AbstractEditor<E>> void onLoadBefore(@NotNull Class<E> editor) {
                 progressBar.setValue(progressBar.getValue() + 1);
             }
 
             @Override
-            public <E extends AbstractEditor<E>> void onLoadSucceed(@NotNull E editor) {
+            public <E extends AbstractEditor<E>> void onLoadAfter(@NotNull Class<E> clazz, @Nullable E editor, boolean result) {
                 progressBar.setValue(progressBar.getValue() + 1);
             }
-        });
+        };
+
+        instance.reloadGame(loadListener);
     }
 
     /**
@@ -206,6 +209,7 @@ public class MainWindow extends JFrame {
         fileMenu.setMnemonic(KeyEvent.VK_F);
 
         JMenuItem fileMenuOpen = new JMenuItem("Open...");
+        JMenuItem fileMenuOpenInit = new JMenuItem("Open Init ROM");
         // 快捷键：Ctrl + O
         fileMenuOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
         fileMenuOpen.addActionListener(e -> {
@@ -220,22 +224,38 @@ public class MainWindow extends JFrame {
                 MetalMaxRe instance = MetalMaxRe.getInstance();
                 instance.setInitTarget(false);
                 instance.setTarget(fileChooser.getSelectedFile().toURI());
-                showLoadingDialog(true);
+                showLoadingDialog();
+                fileMenuOpenInit.setEnabled(true);
             } // 其它皆为不打开文件
         });
+
+        fileMenuOpenInit.setEnabled(false);
+        fileMenuOpenInit.addActionListener(e -> {
+            // 加载初始ROM
+            var confirmDialog = JOptionPane.showConfirmDialog(this,
+                    "加载初始ROM会导致当前已修改的数据丢失！", "加载初始ROM"
+                    , JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirmDialog == JOptionPane.OK_OPTION) {
+                // 确认加载初始ROM
+                var instance = MetalMaxRe.getInstance();
+                instance.setTarget(null);
+                instance.setInitTarget(true);
+                showLoadingDialog();
+                fileMenuOpenInit.setEnabled(false);
+            }
+        });
+
 
         JMenuItem fileMenuReload = new JMenuItem("Reload");
         fileMenuReload.addActionListener(e -> {
             // 重新加载前提示放弃已修改的数据
             int result = JOptionPane.showConfirmDialog(this,
-                    "重新加载将会丢失已修改的数据！"
-                    , "重新加载"
-                    , JOptionPane.OK_CANCEL_OPTION
-                    , JOptionPane.WARNING_MESSAGE);
+                    "重新加载将会丢失已修改的数据！", "重新加载"
+                    , JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (result == JOptionPane.OK_OPTION) {
                 // 已确认需要重新加载
-                showLoadingDialog(true);
+                showLoadingDialog();
             }
         });
 
@@ -546,25 +566,25 @@ public class MainWindow extends JFrame {
         fileMenuExit.addActionListener(e -> {
             int confirmDialog = JOptionPane.showConfirmDialog(this,
                     "退出后将丢失已修改的数据", "退出",
-                    JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
             if (confirmDialog == JOptionPane.OK_OPTION) {
                 // 确认退出
                 System.exit(0);
             }
         });
 
-        fileMenu.add(fileMenuOpen);
-        fileMenu.addSeparator();
-        fileMenu.add(fileMenuReload);
-        fileMenu.addSeparator();
-        fileMenu.add(fileMenuSave);
-        fileMenu.add(fileMenuSaveAs);
-        fileMenu.addSeparator();
-        fileMenu.add(fileMenuImport);
-        fileMenu.add(fileMenuExport);
-        fileMenu.addSeparator();
-        fileMenu.add(fileMenuExit);
+        fileMenu.add(fileMenuOpen);         // Open...
+        fileMenu.add(fileMenuOpenInit);     // Open Init ROM
+        fileMenu.addSeparator();            // ----------------
+        fileMenu.add(fileMenuReload);       // Reload
+        fileMenu.addSeparator();            // ----------------
+        fileMenu.add(fileMenuSave);         // Save
+        fileMenu.add(fileMenuSaveAs);       // Save As...
+        fileMenu.addSeparator();            // ----------------
+        fileMenu.add(fileMenuImport);       // Import       >
+        fileMenu.add(fileMenuExport);       // Export       >
+        fileMenu.addSeparator();            // ----------------
+        fileMenu.add(fileMenuExit);         // Exit
 
         JMenu toolsMenu = new JMenu("Tools");
 

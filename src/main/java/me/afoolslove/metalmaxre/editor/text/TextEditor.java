@@ -8,10 +8,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 文本编辑器
@@ -37,6 +40,8 @@ public class TextEditor extends AbstractEditor<TextEditor> {
     public static final int X_1F99A = 0x1F99A;
     public static final int X_21AF6 = 0x21AF6;
     public static final int X_36010 = 0x36010;
+
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     /**
      * 已知的文本段
@@ -71,19 +76,155 @@ public class TextEditor extends AbstractEditor<TextEditor> {
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 读取前初始化数据
         paragraphsMap.clear();
+        POINTS.forEach((key, value) -> {
+            try {
+                EXECUTOR.submit(() -> {
+                    TextParagraphs textParagraphs = new TextParagraphs();
 
-        for (Map.Entry<Integer, Integer> point : POINTS.entrySet()) {
-            // 得到这段文本的数据长度
-            byte[] bytes = new byte[point.getValue() - point.getKey() + 1];
-            // 定位，读取
-            getPrgRom(buffer, point.getKey() - 0x10, bytes);
-            // 解析并通过换行分段
-            String[] split = WordBank.toString(bytes).split("\n", -1);
-            // 添加
-            TextParagraphs textParagraphs = new TextParagraphs();
-            textParagraphs.addAll(Arrays.asList(split));
-            paragraphsMap.put(point.getKey(), textParagraphs);
-        }
+                    // 得到这段文本的数据长度
+                    byte[] bytes = new byte[value - key + 1];
+                    // 定位，读取
+                    getPrgRom(buffer, key - 0x10, bytes);
+
+                    StringBuilder builder = new StringBuilder();
+
+                    // 最大缓存4字节
+                    byte[] temp = new byte[4];
+                    // 文本起始
+                    data:
+                    for (int position = key; position <= value; ) {
+                        final int tempLength = Math.min(temp.length, value - position + 1);
+                        get(buffer, position, temp, 0, tempLength);
+
+                        // 在字库中查找对应的字符文本
+                        allFonts:
+                        for (Map.Entry<Character, ?> entry : WordBank.ALL_FONTS) {
+                            if (entry.getValue() instanceof byte[] bs) {
+                                for (int i = 0; i < bs.length; i++) {
+                                    if (temp[i] != bs[i]) {
+                                        continue allFonts;
+                                    }
+                                }
+                                builder.append(entry.getKey());
+                                position += bs.length;
+                                continue data;
+                            } else {
+                                if (Objects.equals(entry.getValue(), temp[0])) {
+                                    if (temp[0] == (byte) 0x9F) {
+                                        // 断句
+                                        // 保存当前文本，并清空缓存文本
+                                        textParagraphs.add(builder.toString());
+                                        builder.setLength(0);
+                                    } else {
+                                        // 单byte对应的字符
+                                        builder.append(entry.getKey());
+                                    }
+                                    position++;
+                                    continue data;
+                                }
+                            }
+                        }
+
+
+                        builder.append(String.format("[%02X", temp[0]));
+                        // 单字节的操作码
+                        var opcode = WordBank.OPCODES.get(temp[0]);
+                        if (opcode == null) {
+                            builder.append(']');
+                            position++;
+                            continue data;
+                        }
+
+                        switch (temp[0] & 0xFF) {
+                            case 0xF6:  // 读取到 0x9F 或 0x63 后结束
+                                // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
+                                // 0x63             (结束)
+                                // 0x8C + 2byte     (填充数量，填充字符)
+                                // 0x43 ???
+                                whileF6:
+                                while (true) {
+                                    if (++position >= value + 1) {
+                                        // 读取数据完毕
+                                        builder.append(']');
+                                        break data;
+                                    }
+
+                                    switch (get(buffer, position) & 0xFF) {
+                                        case 0x9E: // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
+                                            // 写入 9E
+                                            builder.append(" 9E");
+                                            // 空格填充
+                                            if (++position >= value + 1) {
+                                                // 读取完毕
+                                                // 没有数量，直接结束
+                                                builder.append(']');
+                                                break data;
+                                            }
+                                            // 填充数量
+                                            builder.append(String.format("%02X ", get(buffer, position)));
+                                            break;
+                                        case 0x63: // 0x63             (结束)
+                                            // 0xF6 的结束符
+                                            builder.append(" 63]");
+                                            continue data;
+                                        case 0x8C: // 0x8C + 2byte     (填充数量，填充字符)
+                                            builder.append(" 8C");
+                                            // 使用指定字符填充指定数量
+                                            if (++position >= value + 1) {
+                                                // 读取完毕
+                                                // 没有字符，也没有数量，直接结束
+                                                builder.append(']');
+                                                break data;
+                                            }
+                                            // 填充数量
+                                            builder.append(String.format("%02X", get(buffer, position)));
+                                            if (++position >= value + 1) {
+                                                // 读取完毕
+                                                // 没有字符，直接结束
+                                                builder.append(']');
+                                                break data;
+                                            }
+                                            // 填充字符
+                                            builder.append(String.format("%02X ", get(buffer, position)));
+                                            break;
+                                        case 0x9F:
+                                            // 文本段结束，另一个的开始
+                                            builder.append("]");
+
+                                            // 断句
+                                            // 保存当前文本，并清空缓存文本
+                                            textParagraphs.add(builder.toString());
+                                            builder.setLength(0);
+
+                                            // emm？要不要结束？
+                                            break whileF6;
+                                        default:
+                                            // 写入不认识的字节
+                                            builder.append(String.format("%02X", get(buffer, position)));
+                                            break;
+                                    }
+                                }
+                                break;
+                            default:
+                                // 其余的直接读取相应的字节数量
+                                int len = Math.min(tempLength, opcode);
+                                for (int j = 0; j < len; j++) {
+                                    builder.append(String.format("%02X", temp[j]));
+                                }
+                                // 至少 +1 opcode
+                                position += Math.max(1, len);
+                                // 读取结束
+                                builder.append(']');
+                                break;
+                        }
+                    }
+                    paragraphsMap.put(key, textParagraphs);
+                    return null;
+                }).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
         return true;
     }
 

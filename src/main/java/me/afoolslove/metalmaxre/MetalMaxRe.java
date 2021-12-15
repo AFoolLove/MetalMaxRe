@@ -23,7 +23,9 @@ import me.afoolslove.metalmaxre.editor.treasure.TreasureEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -203,9 +205,26 @@ public class MetalMaxRe {
      * @param loadListener 加载编辑器
      */
     public void loadGame(@NotNull URI game, @Nullable EditorManager.LoadListener loadListener) {
-        setTarget(game);
         this.isInitTarget = false;
-        EditorManager.loadEditors(true, loadListener);
+        setTarget(game);
+
+        MetalMaxRe instance = MetalMaxRe.getInstance();
+        byte[] bytes;
+        // 外部路径
+        if (instance.getTarget() == null) {
+            System.out.println("未指定ROM文件");
+            return;
+        }
+        Path path = Paths.get(instance.getTarget());
+        try {
+            bytes = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("读取目标ROM失败");
+            return;
+        }
+
+        loadInit0(bytes, loadListener);
     }
 
     /**
@@ -221,8 +240,44 @@ public class MetalMaxRe {
      * @param loadListener 加载监听器
      */
     public void loadInitGame(@Nullable EditorManager.LoadListener loadListener) {
-        setTarget(null);
         this.isInitTarget = true;
+        setTarget(null);
+
+        byte[] bytes;
+
+        // 直接获取流
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             InputStream resourceAsStream = ResourceManager.getAsStream("/MetalMax.nes")) {
+            if (resourceAsStream == null) {
+                // 读取失败可还行
+                System.out.println("初始ROM不存在");
+                return;
+            }
+            resourceAsStream.transferTo(byteArrayOutputStream);
+            bytes = byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("读取初始ROM失败");
+            return;
+        }
+
+        loadInit0(bytes, loadListener);
+    }
+
+    private void loadInit0(byte[] bytes, @Nullable EditorManager.LoadListener loadListener) {
+        MetalMaxRe instance = MetalMaxRe.getInstance();
+
+        if (instance.getBuffer() != null) {
+            instance.getBuffer().clear(); // 怎么释放呢？
+        }
+
+        // 读取头属性
+        instance.setHeader(new GameHeader(bytes));
+        ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+        instance.setBuffer(buffer);
+        // 写入到 ByteBuffer
+        buffer.put(bytes);
+
         EditorManager.loadEditors(true, loadListener);
     }
 
@@ -249,31 +304,35 @@ public class MetalMaxRe {
         return true;
     }
 
+    /**
+     * 重新加载ROM文件
+     *
+     * @return 是否成功重新加载
+     */
+    public boolean reloadGame(@Nullable EditorManager.LoadListener loadListener) {
+        if (isIsInitTarget()) {
+            loadInitGame(loadListener);
+        } else {
+            if (getTarget() == null) {
+                // 不存在的目标文件，但也不是初始文件
+                return false;
+            }
+            Path path = Paths.get(getTarget());
+            if (Files.notExists(path)) {
+                // 目标文件不存在
+                return false;
+            }
+            loadGame(getTarget(), loadListener);
+        }
+        return true;
+    }
+
     public boolean saveAs(@NotNull String path) {
         try {
             System.out.printf("保存修改到：%s\n", path);
             // 写入头属性
             buffer.put(0x00000, header.getHeader());
             EditorManager.applyEditors();
-//            new WriteEditorWorker() {
-//                @Override
-//                protected void process(List<Map.Entry<EditorProcess, Object>> chunks) {
-//                    for (Map.Entry<EditorProcess, Object> chunk : chunks) {
-//                        if (chunk.getKey() == EditorProcess.MESSAGE) {
-//                            System.out.println(chunk.getValue());
-//                        }
-//                    }
-//                }
-//
-//                @Override
-//                protected void done() {
-//                    try {
-//                        Files.write(Paths.get(path), buffer.array(), StandardOpenOption.CREATE);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }.execute();
             return true;
         } catch (Exception e) {
             e.printStackTrace();

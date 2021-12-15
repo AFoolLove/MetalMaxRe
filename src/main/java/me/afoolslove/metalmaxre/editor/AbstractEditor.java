@@ -5,8 +5,6 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -15,7 +13,6 @@ import java.util.Objects;
  * @author AFoolLove
  */
 public abstract class AbstractEditor<T extends AbstractEditor<T>> {
-    protected final List<Listener<T>> listeners = new ArrayList<>();
     protected int bufferPosition;
     protected boolean enabled = true;
 
@@ -56,7 +53,7 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
      * @return 是否未启用当前当前编辑器
      */
     public boolean isNotEnabled() {
-        return enabled;
+        return !isEnabled();
     }
 
     /**
@@ -77,10 +74,6 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         bufferPosition = position;
     }
 
-    public List<Listener<T>> getListeners() {
-        return listeners;
-    }
-
     public ByteBuffer getBuffer() {
         return getMetalMaxRe().getBuffer();
     }
@@ -93,7 +86,7 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
 
     @SuppressWarnings("unchecked")
     public T get(@NotNull ByteBuffer buffer, int index, byte[] dst, int offset) {
-        buffer.get(index, dst, offset,dst.length);
+        buffer.get(index, dst, offset, dst.length);
         return (T) this;
     }
 
@@ -103,10 +96,8 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         return (T) this;
     }
 
-    @SuppressWarnings("unchecked")
-    public T get(@NotNull ByteBuffer buffer, int index) {
-        buffer.get(index);
-        return (T) this;
+    public byte get(@NotNull ByteBuffer buffer, int index) {
+        return buffer.get(index);
     }
 
     @SuppressWarnings("unchecked")
@@ -342,7 +333,7 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getBuffer(), getListeners());
+        return Objects.hash(getBuffer());
     }
 
     @Override
@@ -353,8 +344,7 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
         if (!(o instanceof AbstractEditor<?> editor)) {
             return false;
         }
-        return Objects.equals(getBuffer(), editor.getBuffer())
-                && Objects.equals(getListeners(), editor.getListeners());
+        return Objects.equals(getBuffer(), editor.getBuffer());
     }
 
     /**

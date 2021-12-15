@@ -45,7 +45,7 @@ public class WordBank {
      * 对话中可以执行的操作
      * 不可更改！
      */
-    private static final Map<Byte, Integer> OPCODES = new HashMap<>();
+    public static final Map<Byte, Integer> OPCODES = new HashMap<>();
 
     static {
 
@@ -384,8 +384,8 @@ public class WordBank {
             }
             text.append(String.format("%02X", copy[i]));
             if (opcodeValue != null) {
-                switch (copy[i]) {
-                    case (byte) 0xF6: // 读取到 0x9F 或 0x63 后结束
+                switch (copy[i] & 0xFF) {
+                    case 0xF6: // 读取到 0x9F 或 0x63 后结束
                         // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
                         // 0x63             (结束)
                         // 0x8C + 2byte     (填充数量，填充字符)
@@ -398,8 +398,8 @@ public class WordBank {
                                 return text.toString();
                             }
 
-                            switch (copy[i]) {
-                                case (byte) 0x9E: // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
+                            switch (copy[i] & 0xFF) {
+                                case 0x9E: // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
                                     // 写入 9E
                                     text.append(" 9E");
                                     // 空格填充
@@ -412,11 +412,11 @@ public class WordBank {
                                     // 填充数量
                                     text.append(String.format("%02X ", copy[i]));
                                     break;
-                                case (byte) 0x63: // 0x63             (结束)
+                                case 0x63: // 0x63             (结束)
                                     // 0xF6 的结束符
                                     text.append(" 63]");
                                     continue maps;
-                                case (byte) 0x8C: // 0x8C + 2byte     (填充数量，填充字符)
+                                case 0x8C: // 0x8C + 2byte     (填充数量，填充字符)
                                     text.append(" 8C");
                                     // 使用指定字符填充指定数量
                                     if (++i >= copy.length) {
@@ -436,7 +436,7 @@ public class WordBank {
                                     // 填充字符
                                     text.append(String.format("%02X ", copy[i]));
                                     break;
-                                case (byte) 0x9F:
+                                case 0x9F:
                                     // 文本段结束，另一个的开始
                                     text.append("]\n");
                                     // emm？要不要结束？
