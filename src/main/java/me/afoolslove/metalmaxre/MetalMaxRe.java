@@ -26,11 +26,13 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 
 // 你好陌生人，我顶你个肺
@@ -327,17 +329,60 @@ public class MetalMaxRe {
         return true;
     }
 
-    public boolean saveAs(@NotNull String path) {
-        try {
-            System.out.printf("保存修改到：%s\n", path);
-            // 写入头属性
-            buffer.put(0x00000, header.getHeader());
-            EditorManager.applyEditors();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
+    /**
+     * 写入到输出流中
+     * <p>
+     * 注意：请手动flush和close
+     *
+     * @param outputStream  输出流
+     * @param applyListener 监听器
+     */
+    public void saveAs(@NotNull OutputStream outputStream, @Nullable EditorManager.ApplyListener applyListener) {
+        // 写入头属性
+        buffer.put(0x00000, header.getHeader());
+
+        EditorManager.applyEditors(new EditorManager.ApplyListenerWrapper(applyListener) {
+            @Override
+            public void onEnd() {
+                try {
+                    outputStream.write(getBuffer().array());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("保存到流失败");
+                }
+                super.onEnd();
+            }
+        });
+    }
+
+    /**
+     * 保存到文件中
+     * <p>
+     * 注意：是覆盖写入
+     *
+     * @param path          保存的路径
+     * @param applyListener 监听器
+     */
+    public void saveAs(@NotNull Path path, @Nullable EditorManager.ApplyListener applyListener) {
+        System.out.printf("保存修改到：%s\n", path);
+        // 写入头属性
+        buffer.put(0x00000, header.getHeader());
+
+        EditorManager.applyEditors(new EditorManager.ApplyListenerWrapper(applyListener) {
+            @Override
+            public void onEnd() {
+                try {
+                    var outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW);
+                    outputStream.write(getBuffer().array());
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.printf("保存修改到：%s 失败\n", path);
+                }
+                super.onEnd();
+            }
+        });
     }
 
     /**

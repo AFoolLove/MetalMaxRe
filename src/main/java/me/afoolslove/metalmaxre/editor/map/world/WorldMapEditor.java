@@ -735,7 +735,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         } else if (canOut) {
             setPrgRomPosition(WORLD_MAP_INDEX_A_START_OFFSET + (offset * 0x10));
             byte[] bytes = new byte[0x10];
-            getBuffer().get(bytes);
+            get(getBuffer(), bytes);
             return bytes;
         }
         return null;

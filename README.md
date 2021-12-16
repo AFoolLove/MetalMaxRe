@@ -4,27 +4,29 @@
 
 ### 编辑器完成度
 
-| 类名                     | 名称           | 状态            |
-|------------------------|--------------|---------------|
-| TreasureEditor         | 宝藏编辑器        | √             |
-| MapBuilder             | 地图构建器        | √             |
-| MapEditor              | 地图编辑器        | × 半成品         |
-| MapPropertiesEditor    | 地图属性编辑器      | √             |
-| ComputerEditor         | 计算机编辑器       | √             |
-| DogSystemEditor        | 犬系统          | √             |
-| VendorEditor           | 售货机编辑器       | √ 后续考虑添加功能    |
-| EventTilesEditor       | 事件图块编辑器      | √             |
-| SpriteEditor           | 精灵编辑器        | √             |
-| MapEntranceEditor      | 地图边界和出入口编辑器  | √             |
-| PlayerEditor           | 玩家编辑器        | √ 后续考虑添加功能    |
-| TankEditor             | 坦克编辑器        | √ 后续考虑添加功能    |
-| PlayerExperienceEditor | 玩家升级所需经验值编辑器 | √             |
-| PaletteEditor          | 调色板编辑器       | √             |
-| ItemsEditor            | 物品编辑器        | √ 后续考虑添加功能    |
-| TextEditor             | 文本编辑器        | √ 文本源后续继续添加测试 |
-| TileSetEditor          | 图块编辑器        | √ 后续考虑添加功能    |
-| WorldMapEditor         | 世界地图编辑器      | √ 后续考虑优化      |
-| MonsterEditor          | 怪物编辑器        | ... 卡关了。。。    |
+| 类名                                                                                                         | 名称           | 状态            |
+|------------------------------------------------------------------------------------------------------------|--------------|---------------|
+| [TreasureEditor](src/main/java/me/afoolslove/metalmaxre/editor/treasure/TreasureEditor.java)               | 宝藏编辑器        | √             |
+| [MapBuilder]((src/main/java/me/afoolslove/metalmaxre/editor/map/MapBuilder.java))                          | 地图构建器        | √             |
+| [MapEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/MapEditor.java)                              | 地图编辑器        | × 半成品         |
+| [MapPropertiesEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/MapPropertiesEditor.java)          | 地图属性编辑器      | √             |
+| [ComputerEditor](src/main/java/me/afoolslove/metalmaxre/editor/computer/ComputerEditor.java)               | 计算机编辑器       | √             |
+| [DogSystemEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/DogSystemEditor.java)                  | 犬系统编辑器       | √             |
+| [VendorEditor](src/main/java/me/afoolslove/metalmaxre/editor/computer/vendor/VendorEditor.java)            | 售货机编辑器       | √ 后续考虑添加功能    |
+| [EventTilesEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/events/EventTilesEditor.java)         | 事件图块编辑器      | √             |
+| [SpriteEditor](src/main/java/me/afoolslove/metalmaxre/editor/sprite/SpriteEditor.java)                     | 精灵编辑器        | √             |
+| [MapEntranceEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/MapEntranceEditor.java)              | 地图边界和出入口编辑器  | √             |
+| [PlayerEditor](src/main/java/me/afoolslove/metalmaxre/editor/player/PlayerEditor.java)                     | 玩家编辑器        | √ 后续考虑添加功能    |
+| [TankEditor](src/main/java/me/afoolslove/metalmaxre/editor/tank/TankEditor.java)                           | 坦克编辑器        | √ 后续考虑添加功能    |
+| [PlayerExperienceEditor](src/main/java/me/afoolslove/metalmaxre/editor/player/PlayerExperienceEditor.java) | 玩家升级所需经验值编辑器 | √             |
+| [PaletteEditor](src/main/java/me/afoolslove/metalmaxre/editor/palette/PaletteEditor.java)                  | 调色板编辑器       | √             |
+| [ItemsEditor](src/main/java/me/afoolslove/metalmaxre/editor/items/ItemsEditor.java)                        | 物品编辑器        | √ 后续考虑添加功能    |
+| [TextEditor](src/main/java/me/afoolslove/metalmaxre/editor/text/TextEditor.java)                           | 文本编辑器        | √ 文本源后续继续添加测试 |
+| [TileSetEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/tileset/TileSetEditor.java)              | 图块编辑器        | √ 后续考虑添加功能    |
+| [WorldMapEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/world/WorldMapEditor.java)              | 世界地图编辑器      | √ 后续考虑优化      |
+| [MonsterEditor](src/main/java/me/afoolslove/metalmaxre/editor/monster/MonsterEditor.java)                  | 怪物编辑器        | ... 卡关了。。。    |
+
+### [Format Peak]()
 
 ## 注意
 
@@ -36,40 +38,28 @@
 
 * 使用前请确保已经安装了`java 16`或以上的版本
 * 加载监听器 [EditorManager](src/main/java/me/afoolslove/metalmaxre/editor/EditorManager.java) `LoadListener`
-* 加载内置ROM文件
+* 加载内置ROM文件、加载外部ROM文件
 
 ~~~java
 class Main {
     public static void main(String[] args) {
         // 得到实例
         MetalMaxRe instance = MetalMaxRe.getInstance();
+
         // 加载内置ROM文件
         instance.loadInitGame();
-
         // 如果需要增加监听器
         // loadInitGame(@Nullable EditorManager.LoadListener)
         instance.loadInitGame(new EditorManager.LoadListener() {
         });
-    }
-}
-~~~
 
-* 加载外部ROM文件
-
-~~~java
-import java.io.File;
-
-class Main {
-    public static void main(String[] args) {
-        // 得到实例
-        MetalMaxRe instance = MetalMaxRe.getInstance();
-        // 加载外部ROM
+        // ----------------
+        // 加载外部ROM文件
         // loadGame(@NotNull URI)
-        instance.loadGame(new File("xxxx.nes"));
-
+        instance.loadGame(new File("xxxx.nes").toURI());
         // 如果需要增加监听器
         // loadGame(@NotNull URI, @Nullable EditorManager.LoadListener)
-        instance.loadGame(new File("xxxx.nes"), new EditorManager.LoadListener() {
+        instance.loadGame(new File("xxxx.nes").toURI(), new EditorManager.LoadListener() {
         });
     }
 }
@@ -109,15 +99,15 @@ java -jar metalmaxre.jar gui
 
 ### [MapEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/MapEditor.java)（地图编辑器）
 
-不支持世界地图，世界地图请使用 ```WorldMapEditor```
+不支持世界地图，世界地图请使用 [`WorldMapEditor`](src/main/java/me/afoolslove/metalmaxre/editor/map/world/WorldMapEditor.java)
 
-* 通过 ```MapBuilder``` 可以构建或编辑所有地图
+* 通过 [`MapBuilder`](src/main/java/me/afoolslove/metalmaxre/editor/map/MapBuilder.java) 可以构建或编辑所有地图
 
 注：暂时未解决如何在有限的空间里提搞空间利用率
 
 ### [MapPropertiesEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/MapPropertiesEditor.java)（地图属性编辑器）
 
-支持编辑世界地图的部分属性 ```WorldMapProperties```
+支持编辑世界地图的部分属性 [`WorldMapProperties`](src/main/java/me/afoolslove/metalmaxre/editor/map/WorldMapProperties.java)
 
 * 地图的宽高、玩家可移动区域、玩家可移动区域偏移量
 * 精灵调色板、精灵图像
@@ -144,7 +134,7 @@ java -jar metalmaxre.jar gui
 
 不支持世界地图，世界地图也不支持使用售货机
 
-* 售货机的商品、商品数量和所在地图，修改商品价格请使用 ```ItemsEditor```
+* 售货机的商品、商品数量和所在地图，修改商品价格请使用 [`ItemsEditor`](src/main/java/me/afoolslove/metalmaxre/editor/items/ItemsEditor.java)
 
 ### [EventTilesEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/events/EventTilesEditor.java)（事件图块编辑器）
 
@@ -152,7 +142,8 @@ java -jar metalmaxre.jar gui
 地图的比例为：1:1tile  
 世界地图图块的比例为：1:4*4tile
 
-事件图块需要在 ```MapPropertiesEditor``` 中启用，世界地图强制启用
+事件图块需要在 [`MapPropertiesEditor`](src/main/java/me/afoolslove/metalmaxre/editor/map/MapPropertiesEditor.java)
+中启用，世界地图强制启用
 
 * 通过某个事件将某个地图的某个位置的图块替换为某个图块（？）
 
@@ -194,15 +185,18 @@ java -jar metalmaxre.jar gui
 
 包含战斗时的精灵调色板
 
-注：编辑配色请使用 ```ColorTool```
+注：编辑配色请使用 [`ColorTool`](src/main/java/me/afoolslove/metalmaxre/ColorTool.java)
 
 ### [ItemsEditor](src/main/java/me/afoolslove/metalmaxre/editor/items/ItemsEditor.java)（物品编辑器）
 
 * 物品的价格
-* 玩家的防具属性 ```PlayerArmor```
-* 玩家的武器属性 ```PlayerWeapon```
-* 坦克的装备属性 ```TankEquipmentItem``` ```TankEngine```
-* 坦克的武器属性 ```TankWeapon```
+* 玩家的防具属性 [`PlayerArmor`](src/main/java/me/afoolslove/metalmaxre/editor/player/PlayerArmor.java)
+* 玩家的武器属性 [`PlayerWeapon`](src/main/java/me/afoolslove/metalmaxre/editor/player/PlayerWeapon.java)
+*
+
+坦克的装备属性 [`TankEquipmentItem`](src/main/java/me/afoolslove/metalmaxre/editor/tank/TankEquipmentItem.java) [`TankEngine`](src/main/java/me/afoolslove/metalmaxre/editor/tank/TankEngine.java)
+
+* 坦克的武器属性 [`TankWeapon`](src/main/java/me/afoolslove/metalmaxre/editor/tank/TankWeapon.java)
 
 ### [TextEditor](src/main/java/me/afoolslove/metalmaxre/editor/text/TextEditor.java)（文本编辑器）
 

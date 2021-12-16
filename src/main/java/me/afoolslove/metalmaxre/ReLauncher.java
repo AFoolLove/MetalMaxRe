@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class ReLauncher {
 
@@ -15,7 +14,7 @@ public class ReLauncher {
         String config = null;
 
         boolean showGui = false;
-        for (String[] strings : Arrays.stream(args).map(s -> s.split("=", 2)).collect(Collectors.toList())) {
+        for (String[] strings : Arrays.stream(args).map(s -> s.split("=", 2)).toList()) {
             String key = strings[0].toUpperCase(Locale.ROOT);
             String value = strings.length == 1 ? null : strings[1];
             switch (key) {

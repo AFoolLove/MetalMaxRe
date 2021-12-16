@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public final class EditorManager {
-    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
     private static final ExecutorService LOAD_OR_APPLY_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final ReentrantLock LOCK = new ReentrantLock();
 
@@ -627,6 +627,42 @@ public final class EditorManager {
          * 所有编辑器应用完毕后会执行该方法
          */
         default void onEnd() {
+        }
+    }
+
+    public static class ApplyListenerWrapper implements ApplyListener {
+        private final ApplyListener applyListener;
+
+        public ApplyListenerWrapper(@Nullable ApplyListener applyListener) {
+            this.applyListener = applyListener;
+        }
+
+        @Override
+        public <E extends AbstractEditor<E>> void onApplyBefore(@NotNull Class<E> editor) {
+            if (applyListener != null) {
+                applyListener.onApplyBefore(editor);
+            }
+        }
+
+        @Override
+        public <E extends AbstractEditor<E>> void onApplyAfter(@NotNull Class<E> clazz, @Nullable E editor, boolean result) {
+            if (applyListener != null) {
+                applyListener.onApplyAfter(clazz, editor, result);
+            }
+        }
+
+        @Override
+        public void onStart() {
+            if (applyListener != null) {
+                applyListener.onStart();
+            }
+        }
+
+        @Override
+        public void onEnd() {
+            if (applyListener != null) {
+                applyListener.onEnd();
+            }
         }
     }
 }

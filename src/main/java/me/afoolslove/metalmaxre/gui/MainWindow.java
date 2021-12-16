@@ -266,14 +266,8 @@ public class MainWindow extends JFrame {
             // 目标文件有效才能保存
             if (!MetalMaxRe.getInstance().isIsInitTarget()) {
                 // 保存修改
-                String path = MetalMaxRe.getInstance().getTarget().getPath();
-                boolean saveAs = MetalMaxRe.getInstance().saveAs(path);
-                if (!saveAs) {
-                    // 保存失败
-                    JOptionPane.showMessageDialog(this,
-                            String.format("保存到：%s\n失败！", path), "保存失败",
-                            JOptionPane.ERROR_MESSAGE);
-                }
+                Path path = Paths.get(MetalMaxRe.getInstance().getTarget());
+                MetalMaxRe.getInstance().saveAs(path, null);
             }
         });
 
@@ -300,8 +294,7 @@ public class MainWindow extends JFrame {
                 }
                 if (result == JOptionPane.OK_OPTION) {
                     // 保存
-                    EditorManager.applyEditors();
-                    MetalMaxRe.getInstance().saveAs(selectedFile.getPath());
+                    MetalMaxRe.getInstance().saveAs(selectedFile.toPath(), null);
                 }
 
             } // 其它皆为不不保存
