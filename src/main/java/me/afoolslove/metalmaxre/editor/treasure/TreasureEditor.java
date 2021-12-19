@@ -32,6 +32,10 @@ import java.util.stream.Collectors;
  * <p>
  * 2021年5月9日：已完成并通过测试基本编辑功能
  *
+ * <p>
+ * <p>
+ * *兼容SuperHack版本
+ *
  * @author AFoolLove
  */
 public class TreasureEditor extends AbstractEditor<TreasureEditor> {

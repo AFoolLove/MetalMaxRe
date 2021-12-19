@@ -18,6 +18,9 @@ import java.util.List;
  * 0x07 - 0x0C  商品数量
  * 0x0D 中奖物品
  * 数量byte D7的值为1时，商品为无货
+ * <p>
+ * <p>
+ * *兼容SuperHack版本
  *
  * @author AFoolLove
  */

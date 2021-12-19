@@ -19,6 +19,10 @@ import java.util.Map;
  * 修改地图的边界类型和地图的出入口<p>
  * 2021年5月31日：已完成并通过测试基本编辑功能
  *
+ * <p>
+ * <p>
+ * *兼容SuperHack版本的部分数据，只兼容世界地图的数据
+ *
  * @author AFoolLove
  */
 @ReadBefore({MapPropertiesEditor.class})
@@ -122,7 +126,7 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
                     getMapEntrances().entrySet().parallelStream()
                             .filter(entry -> entry.getValue() == mapEntrance)
                             .forEach(entry ->
-                                mapPropertiesEditor.getMapProperties(entry.getKey()).entrance = newEntrance
+                                    mapPropertiesEditor.getMapProperties(entry.getKey()).entrance = newEntrance
                             );
 
                     // 写入边界数据

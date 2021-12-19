@@ -19,6 +19,10 @@ import java.util.Arrays;
  * <p>
  * 2021年6月26日：已完成并通过测试基本编辑功能
  *
+ * <p>
+ * <p>
+ * *不兼容SuperHack版本，相关编辑器会得到错误的数据导致错误的结果
+ *
  * @author AFoolLove
  */
 public class TileSetEditor extends AbstractEditor<TileSetEditor> {

@@ -20,12 +20,6 @@ import java.util.Objects;
 public class MapPoint extends Point2B {
     public byte map;
 
-    public static void main(String[] args) {
-        MapPoint point = new MapPoint();
-        point.setCamera(0xF8, 0xF9);
-        System.out.printf("%02X,%02X|%02X,%02X\n", point.getX(), point.getY(), point.getCameraX(), point.getCameraY());
-    }
-
     public MapPoint() {
         super(0, 0);
     }

@@ -630,8 +630,53 @@ public final class EditorManager {
         }
     }
 
+    public static class LoadListenerWrapper implements LoadListener {
+        private LoadListener loadListener;
+
+        public LoadListenerWrapper(@Nullable LoadListener loadListener) {
+            this.loadListener = loadListener;
+        }
+
+        @Override
+        public <E extends AbstractEditor<E>> void onLoadBefore(@NotNull Class<E> editor) {
+            if (loadListener != null) {
+                loadListener.onLoadBefore(editor);
+            }
+        }
+
+        @Override
+        public <E extends AbstractEditor<E>> void onLoadAfter(@NotNull Class<E> clazz, @Nullable E editor, boolean result) {
+            if (loadListener != null) {
+                loadListener.onLoadAfter(clazz, editor, result);
+            }
+        }
+
+        @Override
+        public void onStart() {
+            if (loadListener != null) {
+                loadListener.onStart();
+            }
+        }
+
+        @Override
+        public void onEnd() {
+            if (loadListener != null) {
+                loadListener.onEnd();
+            }
+        }
+
+        public void setLoadListener(@Nullable LoadListener loadListener) {
+            this.loadListener = loadListener;
+        }
+
+        @Nullable
+        public LoadListener getLoadListener() {
+            return loadListener;
+        }
+    }
+
     public static class ApplyListenerWrapper implements ApplyListener {
-        private final ApplyListener applyListener;
+        private ApplyListener applyListener;
 
         public ApplyListenerWrapper(@Nullable ApplyListener applyListener) {
             this.applyListener = applyListener;
@@ -663,6 +708,15 @@ public final class EditorManager {
             if (applyListener != null) {
                 applyListener.onEnd();
             }
+        }
+
+        public void setApplyListener(@Nullable ApplyListener applyListener) {
+            this.applyListener = applyListener;
+        }
+
+        @Nullable
+        public ApplyListener getApplyListener() {
+            return applyListener;
         }
     }
 }

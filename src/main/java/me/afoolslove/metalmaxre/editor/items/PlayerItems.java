@@ -12,6 +12,10 @@ import java.util.List;
 /**
  * 玩家的武器、装备、道具
  *
+ * <p>
+ * <p>
+ * *不兼容SuperHack版本？
+ *
  * @author AFoolLove
  */
 public class PlayerItems {

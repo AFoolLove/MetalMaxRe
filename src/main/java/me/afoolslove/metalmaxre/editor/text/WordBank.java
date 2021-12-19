@@ -466,12 +466,4 @@ public class WordBank {
         }
         return text.toString();
     }
-
-    public static void main(String[] args) {
-        byte[] bytes = toBytes("就是 ！[01 02 9f 9f 05 06 07 08] 吗？");
-        String[] x = toString(bytes, 0, bytes.length).split("\n");
-        for (String s : x) {
-            System.out.println(s);
-        }
-    }
 }

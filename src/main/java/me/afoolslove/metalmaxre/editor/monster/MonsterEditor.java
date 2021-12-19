@@ -197,13 +197,16 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         setPrgRomPosition(MONSTER_SPEEDS_START_OFFSET);
         get(buffer, speeds);
         // 读取怪物命中率
-//        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
+//        setPrgRomPosition(MONSTER_HIT_RATES_START_OFFSET);
         get(buffer, hitRates);
-//        setPrgRomPosition(MONSTER_BATTLE_LEVEL_OFFSET);
+        // 读取怪物的战斗等级
+//        setPrgRomPosition(MONSTER_BATTLE_LEVEL_START_OFFSET);
         get(buffer, battleLevels);
-//        setPrgRomPosition(MONSTER_BATTLE_EXPERIENCE_OFFSET);
+        // 读取击败怪物后获得的经验值
+//        setPrgRomPosition(MONSTER_BATTLE_EXPERIENCE_START_OFFSET);
         get(buffer, experiences);
-//        setPrgRomPosition(MONSTER_BATTLE_GOLD_OFFSET);
+        // 读取击败怪物后获得的金钱
+//        setPrgRomPosition(MONSTER_BATTLE_GOLD_START_OFFSET);
         get(buffer, golds);
 
         // 读取怪物掉落物
@@ -334,16 +337,16 @@ public class MonsterEditor extends AbstractEditor<MonsterEditor> {
         setPrgRomPosition(MONSTER_SPEEDS_START_OFFSET);
         put(buffer, speeds);
         // 写入怪物的命中率
-//        setPrgRomPosition(MONSTER_HIT_RATES_OFFSET);
+//        setPrgRomPosition(MONSTER_HIT_RATES_START_OFFSET);
         put(buffer, hitRates);
         // 写入怪物的战斗等级
-//        setPrgRomPosition(MONSTER_BATTLE_LEVEL_OFFSET);
+//        setPrgRomPosition(MONSTER_BATTLE_LEVEL_START_OFFSET);
         put(buffer, battleLevels);
         // 写入怪物被击败后玩家获取的经验
-//        setPrgRomPosition(MONSTER_BATTLE_EXPERIENCE_OFFSET);
+//        setPrgRomPosition(MONSTER_BATTLE_EXPERIENCE_START_OFFSET);
         put(buffer, experiences);
         // 写入怪物被击败后玩家获取的金钱
-//        setPrgRomPosition(MONSTER_BATTLE_GOLD_OFFSET);
+//        setPrgRomPosition(MONSTER_BATTLE_GOLD_START_OFFSET);
         put(buffer, golds);
 
         // 写入怪物的掉落物

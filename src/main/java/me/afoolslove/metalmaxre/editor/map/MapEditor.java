@@ -39,18 +39,6 @@ public class MapEditor extends AbstractEditor<MapEditor> {
 
     private final HashMap<Integer, MapBuilder> maps = new HashMap<>();
 
-    public static void main(String[] args) {
-        MapBuilder mapBuilder = new MapBuilder();
-        mapBuilder.add(12, 80);
-        mapBuilder.add(12, 0);
-        mapBuilder.add(11, 80);
-        mapBuilder.add(12, 80);
-
-        for (byte b : mapBuilder.build()) {
-            System.out.printf("%02X ", b);
-        }
-    }
-
     @Override
     public boolean onRead(@NotNull ByteBuffer buffer) {
         // 读取前清空数据

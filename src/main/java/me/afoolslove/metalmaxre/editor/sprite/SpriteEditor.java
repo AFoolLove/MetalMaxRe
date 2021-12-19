@@ -23,6 +23,10 @@ import java.util.*;
  * <p>
  * 2021年5月30日：已完成并通过测试基本编辑功能
  *
+ * <p>
+ * <p>
+ * *兼容SuperHack版本
+ *
  * @author AFoolLove
  */
 public class SpriteEditor extends AbstractEditor<SpriteEditor> {

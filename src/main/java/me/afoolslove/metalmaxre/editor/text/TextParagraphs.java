@@ -221,7 +221,7 @@ public class TextParagraphs extends ArrayList<String> {
 
                         // 因为是不知道结束点的文本，所以取了个较大的值（希望不要太大和太小）
                         // 应该消耗很大吧。。。
-                        byte[] temp = new byte[inx + (inx * 0x80)]; // 0x1000 应该不会超过这个数量吧
+                        byte[] temp = new byte[0x2000 - ((point - 0x10) % 0x2000)]; // 0x2000 应该不会超过这个数量吧
                         mainBuffer.get(point, temp);
                         String s = WordBank.toString(temp).split("\n", -1)[inx];
                         if (s != null) {

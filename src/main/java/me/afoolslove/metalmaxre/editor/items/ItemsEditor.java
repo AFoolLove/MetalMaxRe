@@ -55,7 +55,7 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
     );
 
     /**
-     * 玩家的物品（武器、装备、道具）
+     * 玩家的物品（武器、装备）
      */
     private final PlayerItems playerItems = new PlayerItems();
     /**
@@ -328,6 +328,21 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
     }
 
     /**
+     * @return 所有物品
+     */
+    public List<Item> getAllItems() {
+        List<Item> list = new ArrayList<>(getAllItemsCount());
+        list.addAll(playerItems.armors);
+        list.addAll(playerItems.weapons);
+        list.addAll(tankItems.weapons);
+        list.addAll(tankItems.cUnits);
+        list.addAll(tankItems.engines);
+        list.addAll(tankItems.chassis);
+        list.addAll(items); // player items + tank items
+        return list;
+    }
+
+    /**
      * 获取某个物品
      *
      * @param item 物品id
@@ -379,5 +394,19 @@ public class ItemsEditor extends AbstractEditor<ItemsEditor> {
             }
         }
         return null;
+    }
+
+    /**
+     * @return 所有物品的总数量
+     */
+    public int getAllItemsCount() {
+        return PlayerItems.PLAYER_ARMOR_MAX_COUNT +
+                PlayerItems.PLAYER_WEAPON_MAX_COUNT +
+                TankItems.TANK_WEAPON_MAX_COUNT +
+                TankItems.TANK_C_UNIT_MAX_COUNT +
+                TankItems.TANK_ENGINE_MAX_COUNT +
+                TankItems.TANK_CHASSIS_MAX_COUNT +
+                PlayerItems.PLAYER_ITEMS_MAX_COUNT +
+                TankItems.TANK_ITEMS_MAX_COUNT;
     }
 }

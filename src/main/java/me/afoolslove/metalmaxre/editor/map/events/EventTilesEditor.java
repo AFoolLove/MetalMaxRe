@@ -36,6 +36,10 @@ import java.util.stream.Collectors;
  * <p>
  * 2021年5月26日：已完成并通过测试基本编辑功能
  *
+ * <p>
+ * <p>
+ * *兼容SuperHack版本
+ *
  * @author AFoolLove
  */
 @ReadBefore({WorldMapEditor.class, MapPropertiesEditor.class})

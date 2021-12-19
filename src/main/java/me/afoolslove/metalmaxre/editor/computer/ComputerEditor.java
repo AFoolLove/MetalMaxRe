@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
  * 总共 123(0x7B) 个宝藏
  * <p>
  * 2021年5月10日：已完成并通过测试基本编辑功能
+ * <p>
+ * <p>
+ * *兼容SuperHack版本
  *
  * @author AFoolLove
  */
