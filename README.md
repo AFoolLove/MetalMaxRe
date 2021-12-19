@@ -1,6 +1,7 @@
 # MetalMax Re
 
     这是一个FC游戏 MetalMax 的编辑器
+    没有对SuperHack版本的ROM进行兼容，只有部分数据正常
 
 ### 编辑器完成度
 
@@ -26,8 +27,6 @@
 | [WorldMapEditor](src/main/java/me/afoolslove/metalmaxre/editor/map/world/WorldMapEditor.java)              | 世界地图编辑器      | √ 后续考虑优化      |
 | [MonsterEditor](src/main/java/me/afoolslove/metalmaxre/editor/monster/MonsterEditor.java)                  | 怪物编辑器        | ... 卡关了。。。    |
 
-### [Format Peak]()
-
 ## 注意
 
 > 没有经过修改版的作者同意，禁止使用本程序将修改内容发布到任何地方
@@ -38,7 +37,7 @@
 
 * 使用前请确保已经安装了`java 16`或以上的版本
 * 加载监听器 [EditorManager](src/main/java/me/afoolslove/metalmaxre/editor/EditorManager.java) `LoadListener`
-* 加载内置ROM文件、加载外部ROM文件
+* 加载内置ROM文件、加载外部ROM文件、保存到输出流、保存到文件
 
 ~~~java
 class Main {
@@ -61,14 +60,20 @@ class Main {
         // loadGame(@NotNull URI, @Nullable EditorManager.LoadListener)
         instance.loadGame(new File("xxxx.nes").toURI(), new EditorManager.LoadListener() {
         });
+
+        // ----------------
+        // 保存数据
+        // ----------------
+        // 保存到输出流，请手动flush和close
+        //saveAs(@NotNull OutputStream, @Nullable EditorManager.ApplyListener)
+        instance.saveAs(new ByteArrayOutputStream(), new EditorManager.ApplyListener() {
+        });
+        // 保存到文件
+        // saveAs(@NotNull Path, @Nullable EditorManager.ApplyListener)
+        instance.saveAs(Path.of("xxxx.nes"), new EditorManager.ApplyListener() {
+        });
     }
 }
-~~~
-
-* 保存到文件
-
-~~~
-MetalMaxRe.saveAs(outputPath);
 ~~~
 
 如果需要可视化界面（未完成），可以添加 `gui` 参数，如下：
