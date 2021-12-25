@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.gui;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.ResourceManager;
+import me.afoolslove.metalmaxre.Version;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
@@ -579,6 +580,17 @@ public class MainWindow extends JFrame {
         fileMenu.addSeparator();            // ----------------
         fileMenu.add(fileMenuExit);         // Exit
 
+        JMenu versionMenu = new JMenu("Version");
+
+        ButtonGroup versionButtonGroup = new ButtonGroup();
+        for (Version version : Version.values()) {
+            var menuItem = new JRadioButtonMenuItem(version.name());
+            versionButtonGroup.add(menuItem);
+            versionMenu.add(menuItem);
+            menuItem.addActionListener(e -> MetalMaxRe.getInstance().setVersion(version));
+        }
+
+
         JMenu toolsMenu = new JMenu("Tools");
 
         JMenuItem toolsMenuPalette = new JMenuItem("Palette");
@@ -627,6 +639,7 @@ public class MainWindow extends JFrame {
 
         menuBar.add(fileMenu);
         menuBar.add(toolsMenu);
+        menuBar.add(versionMenu);
         menuBar.add(helpMenu);
         // 设置菜单栏
         setJMenuBar(menuBar);

@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editor;
 
 import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.Version;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -329,6 +330,10 @@ public abstract class AbstractEditor<T extends AbstractEditor<T>> {
     @NotNull
     public static GameHeader getHeader() {
         return MetalMaxRe.getInstance().getHeader();
+    }
+
+    public static Version getVersion() {
+        return MetalMaxRe.getInstance().getVersion();
     }
 
     @Override

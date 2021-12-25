@@ -50,7 +50,7 @@ public class MetalMaxRe {
     /**
      * 暂时没有区分版本的方法
      */
-    private Version version = Version.SUPER_HACK_GENERAL;
+    private Version version = Version.CHINESE;
 
     /**
      * 当前加载的游戏文件
@@ -142,6 +142,10 @@ public class MetalMaxRe {
      */
     public void setHeader(GameHeader header) {
         this.header = header;
+    }
+
+    public void setVersion(Version version) {
+        this.version = version;
     }
 
     public void setTarget(URI target) {

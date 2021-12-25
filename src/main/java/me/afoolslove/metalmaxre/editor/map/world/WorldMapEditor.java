@@ -48,6 +48,10 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
      */
     public static final int WORLD_MAP_INDEX_B_START_OFFSET = 0x2A010 - 0x10;
     public static final int WORLD_MAP_INDEX_B_END_OFFSET = 0x2E00F - 0x10;
+    /**
+     * 图块组B，一组16（byte）个图块
+     */
+    public static final int WORLD_MAP_INDEX_C_START_OFFSET = 0x50510 - 0x10;
 
     /**
      * 相对图块索引<p>
@@ -105,6 +109,7 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
      */
     public byte[][] indexA = new byte[0x250][0x10]; // WORLD_MAP_INDEX_A_END - WORLD_MAP_INDEX_A_START + 1
     public byte[][] indexB = new byte[0x400][0x10]; // WORLD_MAP_INDEX_B_END - WORLD_MAP_INDEX_B_START + 1
+    public byte[][] indexC = new byte[0x400][0x10]; // WORLD_MAP_INDEX_C_END - WORLD_MAP_INDEX_C_START + 1
     public byte[] index = new byte[0x1000]; // WORLD_MAP_INDEX_END - WORLD_MAP_INDEX_START + 1
 
     /**
@@ -152,6 +157,13 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
                 Arrays.fill(indexB[i], (byte) 0x00);
             }
         }
+        for (int i = 0; i < indexC.length; i++) {
+            if (indexC[i] == null) {
+                indexC[i] = new byte[0x10];
+            } else {
+                Arrays.fill(indexC[i], (byte) 0x00);
+            }
+        }
         Arrays.fill(index, (byte) 0x00);
         mines.clear();
 
@@ -169,6 +181,11 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
         // 读取图块组B
         setPrgRomPosition(WORLD_MAP_INDEX_B_START_OFFSET);
         for (byte[] index : indexB) {
+            get(buffer, index);
+        }
+        // 读取图块组C
+        setPrgRomPosition(WORLD_MAP_INDEX_C_START_OFFSET);
+        for (byte[] index : indexC) {
             get(buffer, index);
         }
         // 读取图块索引
@@ -216,14 +233,13 @@ public class WorldMapEditor extends AbstractEditor<WorldMapEditor> {
             if (offset >= tempIndex.length) {
                 // 超出安全可编辑的数据
                 if (tempIndex == indexA) {
-                    setPrgRomPosition(WORLD_MAP_INDEX_A_START_OFFSET + (offset * 0x10));
+                    tiles = indexC[offset - tempIndex.length];
                 } else {
                     setPrgRomPosition(WORLD_MAP_INDEX_B_START_OFFSET + (offset * 0x10));
+                    tiles = new byte[0x10];
+                    get(buffer, tiles);
+                    System.out.println("世界地图编辑器：警告！使用了安全编辑范围外的地图数据 " + Arrays.toString(tiles));
                 }
-
-                tiles = new byte[0x10];
-                get(buffer, tiles);
-                System.out.println("世界地图编辑器：警告！使用了安全编辑范围外的地图数据 " + Arrays.toString(tiles));
             } else {
                 tiles = tempIndex[offset];
             }
