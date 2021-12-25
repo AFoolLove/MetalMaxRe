@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.map;
 
+import me.afoolslove.metalmaxre.Version;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.EditorManager;
 import me.afoolslove.metalmaxre.editor.ReadBefore;
@@ -10,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 地图边界和出入口编辑器<p>
@@ -21,7 +23,7 @@ import java.util.Map;
  *
  * <p>
  * <p>
- * *兼容SuperHack版本的部分数据，只兼容世界地图的数据
+ * TODO: 多版本读取正常，多版本写入未测试
  *
  * @author AFoolLove
  */
@@ -32,6 +34,24 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
      */
     public static final int MAP_ENTRANCE_START_OFFSET = 0x1E990 - 0x10;
     public static final int MAP_ENTRANCE_END_OFFSET = 0x1F990 - 0x10;
+
+    /**
+     * SuperHack版本
+     * <p>
+     * 世界地图数据无修改，地图数据从该地址
+     */
+    public static final int SH_MAP_ENTRANCE_START_OFFSET = 0x7E7B0 - 0x10;
+//    未知
+//    public static final int SH_MAP_ENTRANCE_END_OFFSET = 0x7F7B0 - 0x10;
+
+    /**
+     * SuperHack通用版本
+     * <p>
+     * 世界地图数据无修改，地图数据从该地址
+     */
+    public static final int SHG_MAP_ENTRANCE_START_OFFSET = 0x527B0 - 0x10;
+//    未知
+//    public static final int SHG_MAP_ENTRANCE_END_OFFSET = 0x537B0 - 0x10;
 
     /**
      * K：map
@@ -55,7 +75,14 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
 
 
             // 索引到数据
-            setPrgRomPosition(0x1E000 + mapProperties.entrance - 0x8000);
+            if (map != 0 && getVersion() == Version.SUPER_HACK) {
+                setPrgRomPosition(0x7E000 + mapProperties.entrance - 0x8000);
+            } else if (map != 0 && getVersion() == Version.SUPER_HACK_GENERAL) {
+                setPrgRomPosition(0x52000 + mapProperties.entrance - 0x8000);
+            } else {
+                setPrgRomPosition(0x1E000 + mapProperties.entrance - 0x8000);
+            }
+
             int temp = getToInt(buffer);
 
             MapBorder mapBorder;
@@ -116,43 +143,58 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
     public boolean onWrite(@NotNull ByteBuffer buffer) {
         MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 
-        setPrgRomPosition(MAP_ENTRANCE_START_OFFSET);
-        getMapEntrances().values().parallelStream()
+        Consumer<MapEntrance> consumer = mapEntrance -> {
+            // 计算新的出入口索引
+            char newEntrance = (char) (bufferPosition - (getHeader().isTrained() ? 0x200 : 0x000) - (0x10 + 0x1E000 + 0x8000));
+            // 更新所有使用此数据的地图
+            getMapEntrances().entrySet().parallelStream()
+                    .filter(entry -> entry.getValue() == mapEntrance)
+                    .forEach(entry ->
+                            mapPropertiesEditor.getMapProperties(entry.getKey()).entrance = newEntrance
+                    );
+
+            // 写入边界数据
+            put(buffer, mapEntrance.getBorder().toByteArray());
+
+            // 写入地图出入口数量
+            put(buffer, mapEntrance.getEntrances().size());
+
+            if (!mapEntrance.getEntrances().isEmpty()) {
+                // 写入地图出入口数据
+
+                // 重新排序，需要顺序写入
+                LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(mapEntrance.getEntrances());
+                // 写入入口 X、Y
+                for (MapPoint mapPoint : linkedEntrances.keySet()) {
+                    put(buffer, mapPoint.getX());
+                    put(buffer, mapPoint.getY());
+                }
+                // 写入出口 Map、X、Y
+                for (MapPoint mapPoint : linkedEntrances.values()) {
+                    put(buffer, mapPoint.getMap());
+                    put(buffer, mapPoint.getX());
+                    put(buffer, mapPoint.getY());
+                }
+            }
+        };
+
+        var mapEntrances = getMapEntrances();
+        // 优先解析世界地图
+        var worldMapEntrances = mapEntrances.remove(0);
+        if (worldMapEntrances != null) {
+            setPrgRomPosition(MAP_ENTRANCE_START_OFFSET);
+            consumer.accept(worldMapEntrances);
+        }
+
+        if (getVersion() == Version.SUPER_HACK) {
+            setPrgRomPosition(SH_MAP_ENTRANCE_START_OFFSET);
+        } else if (getVersion() == Version.SUPER_HACK_GENERAL) {
+            setPrgRomPosition(SHG_MAP_ENTRANCE_START_OFFSET);
+        }
+        // 地图
+        mapEntrances.values().parallelStream()
                 .distinct() // 去重
-                .forEachOrdered(mapEntrance -> {
-                    // 计算新的出入口索引
-                    char newEntrance = (char) (bufferPosition - (getHeader().isTrained() ? 0x200 : 0x000) - (0x10 + 0x1E000 + 0x8000));
-                    // 更新所有使用此数据的地图
-                    getMapEntrances().entrySet().parallelStream()
-                            .filter(entry -> entry.getValue() == mapEntrance)
-                            .forEach(entry ->
-                                    mapPropertiesEditor.getMapProperties(entry.getKey()).entrance = newEntrance
-                            );
-
-                    // 写入边界数据
-                    put(buffer, mapEntrance.getBorder().toByteArray());
-
-                    // 写入地图出入口数量
-                    put(buffer, mapEntrance.getEntrances().size());
-
-                    if (!mapEntrance.getEntrances().isEmpty()) {
-                        // 写入地图出入口数据
-
-                        // 重新排序，需要顺序写入
-                        LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(mapEntrance.getEntrances());
-                        // 写入入口 X、Y
-                        for (MapPoint mapPoint : linkedEntrances.keySet()) {
-                            put(buffer, mapPoint.getX());
-                            put(buffer, mapPoint.getY());
-                        }
-                        // 写入出口 Map、X、Y
-                        for (MapPoint mapPoint : linkedEntrances.values()) {
-                            put(buffer, mapPoint.getMap());
-                            put(buffer, mapPoint.getX());
-                            put(buffer, mapPoint.getY());
-                        }
-                    }
-                });
+                .forEachOrdered(consumer);
         int end = bufferPosition - 1;
         if (end <= 0x1F999) {
             System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", 0x1F999 - end);

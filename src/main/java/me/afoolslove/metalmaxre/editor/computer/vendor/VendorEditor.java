@@ -20,7 +20,7 @@ import java.util.List;
  * 数量byte D7的值为1时，商品为无货
  * <p>
  * <p>
- * *兼容SuperHack版本
+ * *兼容多版本
  *
  * @author AFoolLove
  */

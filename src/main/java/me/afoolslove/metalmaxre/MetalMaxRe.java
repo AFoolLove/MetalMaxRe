@@ -48,6 +48,11 @@ public class MetalMaxRe {
     private GameHeader header;
 
     /**
+     * 暂时没有区分版本的方法
+     */
+    private Version version = Version.SUPER_HACK_GENERAL;
+
+    /**
      * 当前加载的游戏文件
      */
     private URI target;
@@ -116,6 +121,13 @@ public class MetalMaxRe {
      */
     public GameHeader getHeader() {
         return header;
+    }
+
+    /**
+     * @return 游戏ROM的版本
+     */
+    public Version getVersion() {
+        return version;
     }
 
     /**
