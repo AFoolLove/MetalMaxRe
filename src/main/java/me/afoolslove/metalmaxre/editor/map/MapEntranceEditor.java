@@ -145,7 +145,16 @@ public class MapEntranceEditor extends AbstractEditor<MapEntranceEditor> {
 
         Consumer<MapEntrance> consumer = mapEntrance -> {
             // 计算新的出入口索引
-            char newEntrance = (char) (bufferPosition - (getHeader().isTrained() ? 0x200 : 0x000) - (0x10 + 0x1E000 + 0x8000));
+            char diff; // 计算版本差异
+            var version = getVersion();
+            if (version == Version.SUPER_HACK) {
+                diff = (char) 0x7E000;
+            } else if (version == Version.SUPER_HACK_GENERAL) {
+                diff = (char) 0x52000;
+            } else {
+                diff = (char) 0x1E000;
+            }
+            char newEntrance = (char) (bufferPosition - (getHeader().isTrained() ? 0x200 : 0x000) - (0x10 + diff + 0x8000));
             // 更新所有使用此数据的地图
             getMapEntrances().entrySet().parallelStream()
                     .filter(entry -> entry.getValue() == mapEntrance)

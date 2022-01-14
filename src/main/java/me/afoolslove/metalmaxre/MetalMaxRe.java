@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editor.EditorManager;
-import me.afoolslove.metalmaxre.editor.PatchEditor;
 import me.afoolslove.metalmaxre.editor.computer.ComputerEditor;
 import me.afoolslove.metalmaxre.editor.computer.vendor.VendorEditor;
 import me.afoolslove.metalmaxre.editor.items.ItemsEditor;
@@ -90,7 +89,6 @@ public class MetalMaxRe {
         EditorManager.register(TextEditor.class);
         EditorManager.register(TileSetEditor.class);
         EditorManager.register(MonsterEditor.class);
-        EditorManager.register(PatchEditor.class);
 
         EditorManager.register(MapEditor.class);
         EditorManager.register(MapEntranceEditor.class);
@@ -388,7 +386,7 @@ public class MetalMaxRe {
             @Override
             public void onEnd() {
                 try {
-                    var outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW);
+                    var outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE);
                     outputStream.write(getBuffer().array());
                     outputStream.flush();
                     outputStream.close();
