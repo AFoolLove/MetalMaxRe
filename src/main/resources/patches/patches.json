@@ -1,0 +1,15 @@
+{
+  "main_patch": {
+    "name": "main_patch",
+    "path": "./patches/main_patch.asm",
+    "version": 1
+  },
+  "patches": [
+    {
+      "name": "test",
+      "path": "./patches/test.asm",
+      "enabled": true,
+      "version": 1
+    }
+  ]
+}

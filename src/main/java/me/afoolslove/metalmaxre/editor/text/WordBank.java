@@ -227,16 +227,19 @@ public class WordBank {
     private WordBank() {
     }
 
-    /**
-     * @return 字符串转换为游戏中的文本
-     */
     public static byte[] toBytes(@Nullable String text) {
         if (text == null || text.isEmpty()) {
             // 空字符直接返回
             return new byte[0];
         }
+        return toBytes(text.toCharArray());  // 转换为字符集
+    }
+
+    /**
+     * @return 字符串转换为游戏中的文本
+     */
+    public static byte[] toBytes(@Nullable char[] chars) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        char[] chars = text.toCharArray(); // 转换为字符集
 
         // 通过字符获取游戏文本字节
         charsLoop:

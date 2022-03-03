@@ -6,10 +6,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 
-public class Text {
+public class Text2 {
     public String text;
 
-    public Text(String text) {
+    public Text2(String text) {
         this.text = text;
     }
 

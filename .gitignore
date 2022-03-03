@@ -4,3 +4,5 @@
 /build/
 /out/
 /out/production/classes/
+/example/
+/tiled/script/node_modules

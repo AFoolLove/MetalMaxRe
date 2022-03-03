@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editor.text;
 
+import me.afoolslove.metalmaxre.GameHeader;
 import me.afoolslove.metalmaxre.Item;
 import me.afoolslove.metalmaxre.editor.AbstractEditor;
 import me.afoolslove.metalmaxre.editor.map.DogSystemEditor;
@@ -8,10 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,6 +50,9 @@ public class TextEditor extends AbstractEditor<TextEditor> {
      * 解析为文本的已知文本段
      */
     private final Map<Integer, TextParagraphs> paragraphsMap = new HashMap<>();
+
+
+    private final Map<Integer, List<TextBuilder>> textBuilders = new HashMap<>();
 
     static {
         // K: startPosition
@@ -224,6 +225,24 @@ public class TextEditor extends AbstractEditor<TextEditor> {
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
+        });
+
+        POINTS.forEach((key, value) -> {
+            List<TextBuilder> textBuilders = new ArrayList<>();
+            int position = key - GameHeader.HEADER_LENGTH;
+
+            StringBuilder tempText = new StringBuilder(); // 储存临时纯文本
+            byte[] bytes = new byte[value - position]; // value - key - GameHeader.HEADER_LENGTH
+            getPrgRom(buffer, position, bytes);
+
+            for (int i = 0; i < bytes.length;) {
+                for (Map.Entry<Character, ?> allFont : WordBank.ALL_FONTS) {
+//                    if (allFont.getValue() instanceof byte[] v && Arrays.equals(v, )) {
+//
+//                    }
+                }
+            }
+            TextEditor.this.textBuilders.put(key, textBuilders);
         });
         return true;
     }
