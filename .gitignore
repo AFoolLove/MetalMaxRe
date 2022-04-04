@@ -1,8 +1,8 @@
-# Project exclude paths
-/.gradle/
 /.idea/
 /build/
-/out/
-/out/production/classes/
-/example/
-/tiled/script/node_modules
+
+/core/.gradle
+/core/build
+
+/desktop/.gradle
+/desktop/build
