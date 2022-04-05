@@ -3,6 +3,8 @@
     这是一个FC游戏 MetalMax 的编辑器
     没有对SuperHack版本的ROM进行兼容，只有部分数据正常
 
+# 该分支停止维护，在 [restructure](https://github.com/AFoolLove/MetalMaxRe/tree/restructure) 分支重构完成后将其替换
+
 ### 编辑器完成度
 
 | 类名                                                                                                         | 名称           | 状态            |
