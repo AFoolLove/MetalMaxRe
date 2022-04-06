@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class AbstractEditor<E extends IRomEditor, L extends IEditorListener> implements IRomEditor {
+public abstract class AbstractEditor<L extends IEditorListener> implements IRomEditor {
     private final MetalMaxRe metalMaxRe;
     private int position = 0;
     private final List<L> listeners = new LinkedList<>();

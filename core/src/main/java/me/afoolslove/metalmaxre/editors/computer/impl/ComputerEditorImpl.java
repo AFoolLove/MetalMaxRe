@@ -31,7 +31,7 @@ import java.util.Set;
  * <p>
  * 以上数据为：(12)(00)(12)(12)<p>
  */
-public class ComputerEditorImpl extends AbstractEditor<IComputerEditor<Computer>, IComputerListener> implements IComputerEditor<Computer> {
+public class ComputerEditorImpl extends AbstractEditor<IComputerListener> implements IComputerEditor<Computer> {
     protected final DataAddress computerDataAddress;
     protected int maxCount = 0x7B;
 

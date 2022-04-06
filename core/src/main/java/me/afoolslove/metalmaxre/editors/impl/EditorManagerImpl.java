@@ -21,6 +21,9 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ *
+ */
 public class EditorManagerImpl implements IEditorManager {
     private final MetalMaxRe metalMaxRe;
 
