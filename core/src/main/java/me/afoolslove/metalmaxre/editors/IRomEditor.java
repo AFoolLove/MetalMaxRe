@@ -24,7 +24,7 @@ public interface IRomEditor {
      * @return 监听器
      */
     @NotNull
-    List<? extends IEditorListener> getListeners();
+    List<IEditorListener> getListeners();
 
     /**
      * 获取当前编辑器的数据指针位置

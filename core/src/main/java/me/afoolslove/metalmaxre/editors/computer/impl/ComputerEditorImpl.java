@@ -31,11 +31,17 @@ import java.util.Set;
  * <p>
  * 以上数据为：(12)(00)(12)(12)<p>
  */
-public class ComputerEditorImpl extends AbstractEditor<IComputerListener> implements IComputerEditor<Computer> {
+public class ComputerEditorImpl extends AbstractEditor implements IComputerEditor<Computer> {
     protected final DataAddress computerDataAddress;
     protected int maxCount = 0x7B;
 
     private final Set<Computer> computers = new LinkedHashSet<>(getMaxCount());
+
+    public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+        super(metalMaxRe);
+        // 通用地址，兼容已知的版本
+        this.computerDataAddress = DataAddress.from(0x39DD2 - 0x10, 0x39FB0 - 0x10);
+    }
 
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress dataAddress) {
         super(metalMaxRe);
@@ -127,15 +133,5 @@ public class ComputerEditorImpl extends AbstractEditor<IComputerListener> implem
         }
         return false;
 
-    }
-
-    /**
-     * 通用地址
-     */
-    public static class JapaneseComputerEditor extends ComputerEditorImpl {
-
-        public JapaneseComputerEditor(@NotNull MetalMaxRe metalMaxRe) {
-            super(metalMaxRe, DataAddress.from(0x39DD2 - 0x10, 0x39FB0 - 0x10));
-        }
     }
 }

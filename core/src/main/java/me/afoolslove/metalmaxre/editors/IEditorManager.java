@@ -17,12 +17,24 @@ public interface IEditorManager {
     <E extends IRomEditor> void register(@NotNull Class<E> editorType, @NotNull Function<MetalMaxRe, E> builder);
 
     /**
+     * 注销一个编辑器
+     *
+     * @param editorType 编辑器类类型
+     */
+    <E extends IRomEditor> IRomEditor unregister(@NotNull Class<E> editorType);
+
+    /**
      * 加载所有编辑器
      */
     <R> R loadEditors();
 
     /**
-     * 程序加载所有编辑器
+     * 应用所有编辑器的修改
+     */
+    <R> R applyEditors();
+
+    /**
+     * 重新加载所有编辑器
      */
     <R> R reloadEditors();
 
@@ -31,21 +43,21 @@ public interface IEditorManager {
      *
      * @param type 被加载的编辑器类型
      */
-    <R> R loadEditor(Class<? extends IRomEditor> type);
+    Object loadEditor(@NotNull Class<? extends IRomEditor> type);
 
     /**
      * 重新加载指定编辑器
      *
      * @param type 被重新加载的编辑器
      */
-    <R> R reloadEditor(Class<? extends IRomEditor> type);
+    Object reloadEditor(@NotNull Class<? extends IRomEditor> type);
 
     /**
      * 应用指定编辑器
      *
      * @param type 被应用的编辑器类型
      */
-    <R> R applyEditor(Class<? extends IRomEditor> type);
+    Object applyEditor(@NotNull Class<? extends IRomEditor> type);
 
     /**
      * 获取编辑器实例

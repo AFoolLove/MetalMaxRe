@@ -5,20 +5,17 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.IEditorListener;
 import me.afoolslove.metalmaxre.editors.IEditorManager;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
-import me.afoolslove.metalmaxre.editors.computer.impl.ComputerEditorImpl;
-import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
-import javax.crypto.CipherSpi;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.time.Duration;
-import java.time.LocalTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 /**
@@ -31,13 +28,20 @@ public class EditorManagerImpl implements IEditorManager {
 
     private final Map<Class<? extends IRomEditor>, Function<MetalMaxRe, ? extends IRomEditor>> editorBuilders = new HashMap<>();
 
-    private final Map<Class<? extends IRomEditor>, SingleMapEntry<String, Class<? extends IRomEditor>[]>> loadMethods = new HashMap<>();
-    private final Map<Class<? extends IRomEditor>, SingleMapEntry<String, Class<? extends IRomEditor>[]>> applyMethods = new HashMap<>();
+    private final Map<Class<? extends IRomEditor>, String> loadMethodNames = new HashMap<>();
+    private final Map<Class<? extends IRomEditor>, String> applyMethodNames = new HashMap<>();
+
+    /**
+     * 加载或应用编辑器数据
+     */
+    private final ExecutorService EDITOR_EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
+    /**
+     * 调用加载或应用编辑器数据，同时只能进行一个，所以单线程
+     */
+    private final ExecutorService LOAD_OR_APPLY_EXECUTOR = Executors.newSingleThreadExecutor();
 
     public EditorManagerImpl(@NotNull MetalMaxRe metalMaxRe) {
         this.metalMaxRe = metalMaxRe;
-
-        editorBuilders.put(IComputerEditor.class, ComputerEditorImpl.JapaneseComputerEditor::new);
     }
 
     @Override
@@ -52,24 +56,32 @@ public class EditorManagerImpl implements IEditorManager {
         }
         editorBuilders.put(editorType, builder);
 
+        // 创建并储存编辑器实例
+        var editor = builder.apply(getMetalMaxRe());
+        editors.put(editorType, editor);
+
+
         // 寻找加载和应用方法
         Method loadMethod = null, applyMethod = null;
-        for (Method method : editorType.getDeclaredMethods()) {
+        for (Method method : editor.getClass().getDeclaredMethods()) {
+            if (loadMethod != null && applyMethod != null) {
+                // 加载和应用方法都已经找到
+                break;
+            }
             if (loadMethod == null) {
                 // 加载方法
                 Annotation annotation = method.getAnnotation(Editor.Load.class);
                 if (annotation != null) {
                     loadMethod = method;
+                    continue;
                 }
-            } else if (applyMethod == null) {
+            }
+            if (applyMethod == null) {
                 // 应用方法
                 Annotation annotation = method.getAnnotation(Editor.Apply.class);
                 if (annotation != null) {
                     applyMethod = method;
                 }
-            } else {
-                // 加载和应用方法都已经找到
-                break;
             }
         }
         if (loadMethod == null || applyMethod == null) {
@@ -77,38 +89,40 @@ public class EditorManagerImpl implements IEditorManager {
             return;
         }
 
-        @SuppressWarnings("unchecked")
-        final Class<E>[] loadPars = (Class<E>[]) Array.newInstance(editorType, loadMethod.getParameterCount());
-        if (loadPars.length > 0) {
-            var parameters = loadMethod.getParameters();
-            for (int i = 0; i < parameters.length; i++) {
-                if (IRomEditor.class.isAssignableFrom(parameters[i].getType())) {
-                    loadPars[i] = (Class<E>) parameters[i].getType();
-                }
-            }
-        }
-        loadMethods.put(editorType, SingleMapEntry.create(loadMethod.getName(), loadPars));
+        loadMethodNames.put(editorType, loadMethod.getName());
+        applyMethodNames.put(editorType, applyMethod.getName());
+    }
 
-        @SuppressWarnings("unchecked")
-        final Class<E>[] applyPars = (Class<E>[]) Array.newInstance(editorType, applyMethod.getParameterCount());
-        if (applyPars.length > 0) {
-            var parameters = applyMethod.getParameters();
-            for (int i = 0; i < parameters.length; i++) {
-                if (IRomEditor.class.isAssignableFrom(parameters[i].getType())) {
-                    applyPars[i] = (Class<E>) parameters[i].getType();
-                }
-            }
-        }
-
-        applyMethods.put(editorType, SingleMapEntry.create(applyMethod.getName(), applyPars));
+    @Override
+    public synchronized <E extends IRomEditor> IRomEditor unregister(@NotNull Class<E> editorType) {
+        editorBuilders.remove(editorType);
+        loadMethodNames.remove(editorType);
+        applyMethodNames.remove(editorType);
+        return editors.remove(editorType);
     }
 
     @Override
     public <R> R loadEditors() {
-        for (var builder : editorBuilders.entrySet()) {
-            if (!editors.containsKey(builder.getKey())) {
-                loadEditor(builder.getKey());
+        try {
+            // 多线程，强行单线程
+            for (var entry : editors.keySet()) {
+                loadEditor(entry).get();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public <R> R applyEditors() {
+        try {
+            // 多线程，强行单线程
+            for (var entry : editors.keySet()) {
+                applyEditor(entry).get();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -118,25 +132,42 @@ public class EditorManagerImpl implements IEditorManager {
         return null;
     }
 
+    @NotNull
     @Override
-    public <R> R loadEditor(Class<? extends IRomEditor> type) {
-        var e = getEditor(type);
-        if (e != null) {
-            // 已经加载
-            return null;
-        }
+    public Future<IRomEditor> loadEditor(@NotNull Class<? extends IRomEditor> type) {
+        return EDITOR_EXECUTOR.submit(() -> {
+            var editor = getEditor(type);
+            if (editor == null) {
+                // 没有这个类型的编辑器
+                return null;
+            }
 
-        var builder = editorBuilders.get(type);
-        if (builder != null) {
-            IRomEditor editor = builder.apply(getMetalMaxRe());
-            var loadMethod = loadMethods.get(type);
+            var loadMethodName = loadMethodNames.get(type);
 
-            Object[] pars = new Object[loadMethod.getValue().length];
+            Method loadMethod = null;
 
-            if (pars.length != 0) {
-                for (int i = 0, len = loadMethod.getValue().length; i < len; i++) {
-                    pars[i] = getEditor(loadMethod.getValue()[i]);
+            for (Method declaredMethod : editor.getClass().getDeclaredMethods()) {
+                if (Objects.equals(declaredMethod.getName(), loadMethodName)) {
+                    Annotation annotation = declaredMethod.getAnnotation(Editor.Load.class);
+                    if (annotation != null) {
+                        loadMethod = declaredMethod;
+                        break;
+                    }
                 }
+            }
+            if (loadMethod == null) {
+                // 获取方法失败。。。？
+                return null;
+            }
+
+            Object[] pars = new Object[loadMethod.getParameterCount()];
+            var parameters = loadMethod.getParameters();
+            for (int i = 0; i < parameters.length; i++) {
+                if (!IRomEditor.class.isAssignableFrom(parameters[i].getType())) {
+                    // 错误的参数，参数只能是编辑器
+                    continue;
+                }
+                pars[i] = getEditor((Class<? extends IRomEditor>) parameters[i].getType());
             }
 
             try {
@@ -145,8 +176,9 @@ public class EditorManagerImpl implements IEditorManager {
                     listener.onPreLoad(editor);
                 }
 
+                // 开始加载并计时
                 final long start = System.currentTimeMillis();
-                type.getMethod(loadMethod.getKey(), loadMethod.getValue()).invoke(editor, pars); // 开始加载
+                loadMethod.invoke(editor, pars);
                 final long end = System.currentTimeMillis() - start;
 
                 // 加载完毕
@@ -161,53 +193,78 @@ public class EditorManagerImpl implements IEditorManager {
                     listener.onPostLoad(editor, -1);
                 }
             }
-            editors.put(type, editor);
-        }
-        return null;
+            return editor;
+        });
+    }
+
+    @NotNull
+    @Override
+    public Future<IRomEditor> applyEditor(@NotNull Class<? extends IRomEditor> type) {
+        return EDITOR_EXECUTOR.submit(() -> {
+            var editor = getEditor(type);
+            if (editor != null) {
+                var applyMethodName = applyMethodNames.get(type);
+
+                Method applyMethod = null;
+
+                for (Method declaredMethod : editor.getClass().getDeclaredMethods()) {
+                    if (Objects.equals(declaredMethod.getName(), applyMethodName)) {
+                        Annotation annotation = declaredMethod.getAnnotation(Editor.Load.class);
+                        if (annotation != null) {
+                            applyMethod = declaredMethod;
+                            break;
+                        }
+                    }
+                }
+                if (applyMethod == null) {
+                    // 获取方法失败。。。？
+                    return null;
+                }
+
+                Object[] pars = new Object[applyMethod.getParameterCount()];
+                var parameters = applyMethod.getParameters();
+                for (int i = 0; i < parameters.length; i++) {
+                    var parameter = parameters[i];
+                    if (!IRomEditor.class.isAssignableFrom(parameter.getType())) {
+                        // 错误的参数，参数只能是编辑器
+                        continue;
+                    }
+//                var quoteOnly = parameter.getAnnotation(Editor.QuoteOnly.class);
+//                if (quoteOnly == null) {
+//
+//                }
+                    pars[i] = getEditor((Class<? extends IRomEditor>) parameter.getType());
+                }
+
+                try {
+                    // 准备应用数据
+                    for (IEditorListener listener : editor.getListeners()) {
+                        listener.onPreApply(editor);
+                    }
+                    // 开始应用数据并计时
+                    final long start = System.currentTimeMillis();
+                    applyMethod.invoke(editor, pars);
+                    final long end = System.currentTimeMillis() - start;
+
+                    // 应用数据完成
+                    for (IEditorListener listener : editor.getListeners()) {
+                        listener.onPostApply(editor, end);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                    // 应用数据失败
+                    for (IEditorListener listener : editor.getListeners()) {
+                        listener.onPostLoad(editor, -1);
+                    }
+                }
+            }
+            return editor;
+        });
     }
 
     @Override
-    public <R> R applyEditor(Class<? extends IRomEditor> type) {
-        var editor = getEditor(type);
-        if (editor != null) {
-            var applyMethod = applyMethods.get(type);
-
-            Object[] pars = new Object[applyMethod.getValue().length];
-
-            if (pars.length != 0) {
-                for (int i = 0, len = applyMethod.getValue().length; i < len; i++) {
-                    pars[i] = getEditor(applyMethod.getValue()[i]);
-                }
-            }
-
-            try {
-                // 准备应用数据
-                for (IEditorListener listener : editor.getListeners()) {
-                    listener.onPreApply(editor);
-                }
-
-                final long start = System.currentTimeMillis();
-                type.getMethod(applyMethod.getKey(), applyMethod.getValue()).invoke(editor, pars); // 开始应用数据
-                final long end = System.currentTimeMillis() - start;
-
-                // 应用数据完成
-                for (IEditorListener listener : editor.getListeners()) {
-                    listener.onPostApply(editor, end);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-
-                // 应用数据失败
-                for (IEditorListener listener : editor.getListeners()) {
-                    listener.onPostLoad(editor, -1);
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public <R> R reloadEditor(Class<? extends IRomEditor> type) {
+    public Future<IRomEditor> reloadEditor(@NotNull Class<? extends IRomEditor> type) {
         return null;
     }
 

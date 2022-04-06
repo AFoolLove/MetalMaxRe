@@ -6,10 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class AbstractEditor<L extends IEditorListener> implements IRomEditor {
+public abstract class AbstractEditor implements IRomEditor {
     private final MetalMaxRe metalMaxRe;
     private int position = 0;
-    private final List<L> listeners = new LinkedList<>();
+    private final List<IEditorListener> listeners = new LinkedList<>();
 
     protected AbstractEditor(@NotNull MetalMaxRe metalMaxRe) {
         this.metalMaxRe = metalMaxRe;
@@ -23,9 +23,10 @@ public abstract class AbstractEditor<L extends IEditorListener> implements IRomE
 
     @NotNull
     @Override
-    public List<L> getListeners() {
+    public List<IEditorListener> getListeners() {
         return listeners;
     }
+
 
     @Override
     public int position() {

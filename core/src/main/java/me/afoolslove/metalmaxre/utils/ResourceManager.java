@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.utils;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -13,19 +14,23 @@ import java.nio.file.Paths;
 public class ResourceManager {
     /**
      * 获取资源文件为URL
+     *
      * @param name 资源路径
      * @return 资源文件的URL
      */
-    public static URL get(String name) {
+    @Nullable
+    public static URL get(@NotNull String name) {
         return ResourceManager.class.getResource(name);
     }
 
     /**
      * 获取资源文件为输入流
+     *
      * @param name 资源路径
      * @return 资源文件的输入流
      */
-    public static InputStream getAsStream(String name) {
+    @Nullable
+    public static InputStream getAsStream(@NotNull String name) {
         return ResourceManager.class.getResourceAsStream(name);
     }
 
@@ -36,11 +41,13 @@ public class ResourceManager {
      * @return 资源文件的字节数组
      */
     @Nullable
-    public static byte[] getAsBytes(String name) {
-        try (var asStream = getAsStream(name);
-             var byteArrayOutputStream = new ByteArrayOutputStream(asStream.available())) {
-            asStream.transferTo(byteArrayOutputStream);
-            return byteArrayOutputStream.toByteArray();
+    public static byte[] getAsBytes(@NotNull String name) {
+        try (var asStream = getAsStream(name)) {
+            if (asStream != null) {
+                var byteArrayOutputStream = new ByteArrayOutputStream(asStream.available());
+                asStream.transferTo(byteArrayOutputStream);
+                return byteArrayOutputStream.toByteArray();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

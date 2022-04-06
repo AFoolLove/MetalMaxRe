@@ -27,6 +27,8 @@ public @interface Editor {
 
     /**
      * 不会对编辑器进行任何操作，只是引用编辑器实例
+     * <p>
+     * 只有注释Apply的方法内的参数有效
      */
     @Target(ElementType.PARAMETER)
     @Retention(RetentionPolicy.RUNTIME)
