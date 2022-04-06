@@ -1,5 +1,8 @@
 /.idea/
 /build/
+/.gradle/
+/out/
+/tiled/
 
 /core/.gradle
 /core/build
