@@ -1,5 +1,10 @@
 package me.afoolslove.metalmaxre.palette;
 
+/**
+ * 基本颜色
+ *
+ * @author AFoolLove
+ */
 public class Color {
     private final int argb;
 

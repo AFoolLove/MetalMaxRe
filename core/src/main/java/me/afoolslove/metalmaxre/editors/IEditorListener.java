@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * 基础编辑器监听器接口
+ *
+ * @author AFoolLove
  */
 public interface IEditorListener {
     default void onPreLoad(@NotNull IRomEditor editor) {

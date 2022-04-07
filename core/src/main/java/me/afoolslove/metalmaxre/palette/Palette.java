@@ -9,6 +9,8 @@ import java.nio.file.Path;
 
 /**
  * 调色板
+ *
+ * @author AFoolLove
  */
 public class Palette {
     public static final int PALETTE_LENGTH = 8 * 8;

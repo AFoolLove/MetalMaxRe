@@ -4,6 +4,9 @@ import me.afoolslove.metalmaxre.editors.IEditorManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * @author AFoolLove
+ */
 public class MetalMaxRe {
     private RomBuffer romBuffer;
     private IEditorManager editorManager;

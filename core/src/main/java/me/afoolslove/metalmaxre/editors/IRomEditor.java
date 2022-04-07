@@ -3,11 +3,14 @@ package me.afoolslove.metalmaxre.editors;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.util.List;
 
 /**
  * 提供了编辑器部分所需的方法
+ *
+ * @author AFoolLove
  */
 public interface IRomEditor {
     /**
@@ -51,9 +54,7 @@ public interface IRomEditor {
         if (position() == offset) {
             return offset;
         }
-        synchronized (this) {
-            return position(position() + offset);
-        }
+        return position(position() + offset);
     }
 
     @NotNull

@@ -5,7 +5,6 @@ import me.afoolslove.metalmaxre.editors.AbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
-import me.afoolslove.metalmaxre.editors.computer.listener.IComputerListener;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +29,8 @@ import java.util.Set;
  * 物品N......<p>
  * <p>
  * 以上数据为：(12)(00)(12)(12)<p>
+ *
+ * @author AFoolLove
  */
 public class ComputerEditorImpl extends AbstractEditor implements IComputerEditor<Computer> {
     protected final DataAddress computerDataAddress;

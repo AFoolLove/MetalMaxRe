@@ -4,8 +4,7 @@ import me.afoolslove.metalmaxre.editors.IEditorListener;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.computer.impl.ComputerEditorImpl;
-import me.afoolslove.metalmaxre.editors.impl.EditorManagerImpl;
-import me.afoolslove.metalmaxre.utils.ResourceManager;
+import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

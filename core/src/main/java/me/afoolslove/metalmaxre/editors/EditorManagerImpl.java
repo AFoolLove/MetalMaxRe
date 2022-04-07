@@ -1,4 +1,4 @@
-package me.afoolslove.metalmaxre.editors.impl;
+package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editors.Editor;
@@ -19,7 +19,7 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 /**
- *
+ * @author AFoolLove
  */
 public class EditorManagerImpl implements IEditorManager {
     private final MetalMaxRe metalMaxRe;

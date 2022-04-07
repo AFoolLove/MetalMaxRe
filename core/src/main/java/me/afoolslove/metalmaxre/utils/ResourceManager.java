@@ -11,6 +11,11 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * 资源管理器
+ *
+ * @author AFoolLove
+ */
 public class ResourceManager {
     /**
      * 获取资源文件为URL

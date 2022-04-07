@@ -1,8 +1,10 @@
 package me.afoolslove.metalmaxre.editors.computer.listener;
 
 import me.afoolslove.metalmaxre.editors.IEditorListener;
-import me.afoolslove.metalmaxre.editors.IRomEditor;
 
+/**
+ * @author AFoolLove
+ */
 public interface IComputerListener extends IEditorListener {
 
 }

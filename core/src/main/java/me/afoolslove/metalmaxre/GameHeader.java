@@ -95,7 +95,7 @@ public class GameHeader {
     }
 
     /**
-     * 是否开启作弊
+     * 是否开启Trainer
      */
     public void setTrainer(boolean trainer) {
         var oldValue = isTrained();
@@ -163,7 +163,7 @@ public class GameHeader {
     }
 
     /**
-     * @return 是否已开启作弊
+     * @return 是否已开启Trainer
      */
     public boolean isTrained() {
         return (header[0x06] & 0B0000_0100) != 0x00;
@@ -255,7 +255,6 @@ public class GameHeader {
         if (listener == null) {
             return;
         }
-
         getPrgRomChangeListeners().add(listener);
     }
 
@@ -337,7 +336,6 @@ public class GameHeader {
         getTrainerChangeListeners().remove(listener);
     }
 
-
     @Override
     public String toString() {
         return String.format("header={mapper=%d,trainer=%b,prgRom=%02X,chrRom=%02X}", getMapper(), isTrained(), getPrgRom(), getChrRom());
@@ -357,7 +355,6 @@ public class GameHeader {
      */
     @FunctionalInterface
     interface PrgRomChangeListener {
-
         void onPrgRomChange(@NotNull GameHeader header, byte oldValue, byte newValue);
     }
 
@@ -366,7 +363,6 @@ public class GameHeader {
      */
     @FunctionalInterface
     interface ChrRomChangeListener {
-
         void onChrRomChange(@NotNull GameHeader header, byte oldValue, byte newValue);
     }
 

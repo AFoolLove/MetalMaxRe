@@ -12,6 +12,8 @@ import java.util.Objects;
  * <p>
  * *需要地图属性支持才会生效<br/>
  * *不支持世界地图
+ *
+ * @author AFoolLove
  */
 public class Computer extends Point2B {
     private byte map;

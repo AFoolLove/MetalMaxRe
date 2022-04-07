@@ -5,37 +5,58 @@ import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public class RomBuffer implements AutoCloseable {
+/**
+ * 提供了基本的ROM结构
+ *
+ * @author AFoolLove
+ */
+public class RomBuffer implements AutoCloseable, Closeable {
 
     /**
      * NES头属性
      */
-    private GameHeader header;
+    @NotNull
+    private final GameHeader header;
 
     /**
-     * 作弊内容
+     * Trainer
      */
+    @Nullable
     private Trainer trainer;
 
     /**
      * 程序ROM
      */
+    @NotNull
     private ByteBuffer prgRom;
     /**
      * 图像ROM
      */
+    @NotNull
     private ByteBuffer chrRom;
 
-    private RomVersion version;
-    private Path path;
+    /**
+     * ROM版本
+     */
+    @NotNull
+    private final RomVersion version;
 
+    /**
+     * ROM所在的路径，如果为null则使用的内部ROM
+     */
+    @Nullable
+    private final Path path;
 
+    /**
+     * PRG ROM大小变更监听器
+     */
     private final GameHeader.PrgRomChangeListener prgRomChangeListener = (header, oldValue, newValue) -> {
         if (oldValue != newValue) {
             var oldPrgRom = prgRom;
@@ -47,6 +68,9 @@ public class RomBuffer implements AutoCloseable {
             }
         }
     };
+    /**
+     * CHR ROM大小变更监听器
+     */
     private final GameHeader.ChrRomChangeListener chrRomChangeListener = (header, oldValue, newValue) -> {
         if (oldValue != newValue) {
             var oldChrRom = chrRom;
@@ -97,8 +121,14 @@ public class RomBuffer implements AutoCloseable {
      *
      * @return ROM版本
      */
+    @NotNull
     public RomVersion getVersion() {
         return version;
+    }
+
+    @Nullable
+    public Path getPath() {
+        return path;
     }
 
     /**
@@ -106,6 +136,7 @@ public class RomBuffer implements AutoCloseable {
      *
      * @return ROM头数据
      */
+    @NotNull
     public GameHeader getHeader() {
         return header;
     }
@@ -115,6 +146,7 @@ public class RomBuffer implements AutoCloseable {
      *
      * @return ROM的Trainer
      */
+    @Nullable
     public Trainer getTrainer() {
         return trainer;
     }
@@ -124,6 +156,7 @@ public class RomBuffer implements AutoCloseable {
      *
      * @return PRG ROM的数据
      */
+    @NotNull
     public ByteBuffer getPrgRom() {
         return prgRom;
     }
@@ -133,6 +166,7 @@ public class RomBuffer implements AutoCloseable {
      *
      * @return CHR ROM的数据
      */
+    @NotNull
     public ByteBuffer getChrRom() {
         return chrRom;
     }

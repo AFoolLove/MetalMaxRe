@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 游戏ROM的版本
+ *
+ * @author AFoolLove
  */
 public class RomVersion {
     public static final Map<String, RomVersion> VERSIONS = new ConcurrentHashMap<>();

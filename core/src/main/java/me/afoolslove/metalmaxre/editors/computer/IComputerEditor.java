@@ -13,6 +13,7 @@ import java.util.Set;
  * *需要地图属性支持，并且支持动态图块
  *
  * @param <C> 计算机的属性
+ * @author AFoolLove
  */
 public interface IComputerEditor<C extends Computer> extends IRomEditor {
 

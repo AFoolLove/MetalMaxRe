@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * 数据地址
+ *
+ * @author AFoolLove
  */
 public class DataAddress extends SingleMapEntry<Integer, Integer> {
     public enum Type {

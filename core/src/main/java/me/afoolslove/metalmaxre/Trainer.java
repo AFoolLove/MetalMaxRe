@@ -2,6 +2,13 @@ package me.afoolslove.metalmaxre;
 
 import java.nio.ByteBuffer;
 
+/**
+ * 在ROM中有0x200字节的额外内容
+ * <p>
+ * 游戏启动后会自动映射到内存地址 $7000-$81FF
+ *
+ * @author AFoolLove
+ */
 public class Trainer {
     public static final int TRAINER_LENGTH = 0x00200;
 

@@ -4,6 +4,11 @@ import org.jetbrains.annotations.Range;
 
 import java.util.Objects;
 
+/**
+ * 提供byte类型的x,y坐标
+ *
+ * @author AFoolLove
+ */
 public class Point2B {
     private byte x;
     private byte y;

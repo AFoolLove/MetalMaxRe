@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 单例Entry
+ * 单个Entry
+ *
+ * @author AFoolLove
  */
 public class SingleMapEntry<K, V> implements Map.Entry<K, V> {
     private K key;

@@ -5,6 +5,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
+/**
+ * 编辑器管理器
+ *
+ * @author AFoolLove
+ */
 public interface IEditorManager {
     MetalMaxRe getMetalMaxRe();
 
