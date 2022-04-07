@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.utils;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.util.Objects;
@@ -24,6 +25,10 @@ public class Point2B {
     public Point2B(@Range(from = 0x00, to = 0xFF) int x,
                    @Range(from = 0x00, to = 0xFF) int y) {
         set(x, y);
+    }
+
+    public Point2B(@NotNull Point2B point2B) {
+        set(point2B.getX(), point2B.getY());
     }
 
     public byte getX() {
@@ -88,7 +93,6 @@ public class Point2B {
         this.y += y;
         return this;
     }
-
 
     @Override
     public boolean equals(Object o) {

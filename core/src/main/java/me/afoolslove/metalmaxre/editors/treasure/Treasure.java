@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editors.treasure;
 
+import me.afoolslove.metalmaxre.editors.map.MapPoint;
 import me.afoolslove.metalmaxre.utils.Point2B;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -11,19 +12,18 @@ import java.util.Objects;
  *
  * @author AFoolLove
  */
-public class Treasure extends Point2B {
-    /**
-     * 宝藏所在的地图
-     */
-    public byte map;
+public class Treasure extends MapPoint {
     /**
      * 宝藏的内容
      */
-    public byte item;
+    private byte item;
+
+    public Treasure() {
+        super();
+    }
 
     public Treasure(byte map, byte x, byte y, byte item) {
-        super(x, y);
-        setMap(map);
+        super(map, x, y);
         setItem(item);
     }
 
@@ -31,8 +31,21 @@ public class Treasure extends Point2B {
                     @Range(from = 0x00, to = 0xFF) int x,
                     @Range(from = 0x00, to = 0xFF) int y,
                     @Range(from = 0x00, to = 0xFF) int item) {
-        super(x, y);
-        set(map, x, y, item);
+        super(map, x, y);
+        setItem(item);
+    }
+
+    public Treasure(@NotNull Point2B point2B) {
+        super(point2B);
+    }
+
+    public Treasure(@NotNull MapPoint mapPoint) {
+        super(mapPoint);
+    }
+
+    public Treasure(@NotNull Treasure treasure) {
+        super(treasure);
+        setItem(treasure.getItem());
     }
 
     /**
@@ -51,24 +64,6 @@ public class Treasure extends Point2B {
     }
 
     /**
-     * 设置宝藏所在的地图
-     *
-     * @param map 地图
-     */
-    public void setMap(@Range(from = 0x00, to = 0xFF) int map) {
-        this.map = (byte) (map & 0xFF);
-    }
-
-    /**
-     * 设置宝藏所在的地图
-     *
-     * @param map 地图
-     */
-    public void setMap(byte map) {
-        this.map = map;
-    }
-
-    /**
      * 设置宝藏内容
      *
      * @param item 宝藏
@@ -84,17 +79,6 @@ public class Treasure extends Point2B {
      */
     public void setItem(byte item) {
         this.item = item;
-    }
-
-    /**
-     * @return 这个宝藏所在的地图
-     */
-    public byte getMap() {
-        return map;
-    }
-
-    public int intMap() {
-        return getMap() & 0xFF;
     }
 
     /**
@@ -122,18 +106,9 @@ public class Treasure extends Point2B {
         return (getItem() & getX() & getY() & getX()) == (byte) 0xFF;
     }
 
-    /**
-     * @return 创建一个与当前宝藏一样的宝藏
-     */
-    @NotNull
-    public Treasure copy() {
-        return new Treasure(getMap(), getX(), getY(), getItem());
-    }
-
-
     @Override
     public String toString() {
-        return String.format("Treasure{map=%02X, x=%02X, y=%02X, item=%02X}", getMap(), getX(), getY(), getItem());
+        return String.format("map=%02X, x=%02X, y=%02X, item=%02X", getMap(), getX(), getY(), getItem());
     }
 
     @Override
