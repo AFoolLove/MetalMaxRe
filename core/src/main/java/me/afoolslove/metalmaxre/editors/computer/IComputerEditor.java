@@ -22,7 +22,7 @@ public interface IComputerEditor<C extends Computer> extends IRomEditor {
      *
      * @return 计算机数据的起始地址
      */
-    DataAddress getComputerDataAddress();
+    DataAddress getComputerAddress();
 
     /**
      * 获取计算机的最大数量

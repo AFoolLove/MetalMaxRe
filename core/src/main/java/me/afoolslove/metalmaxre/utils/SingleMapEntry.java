@@ -42,6 +42,11 @@ public class SingleMapEntry<K, V> implements Map.Entry<K, V> {
         return oldValue;
     }
 
+    public void set(K key, V value) {
+        setKey(key);
+        setValue(value);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -60,5 +65,9 @@ public class SingleMapEntry<K, V> implements Map.Entry<K, V> {
 
     public static <K, V> SingleMapEntry<K, V> create(@Nullable K key, @Nullable V value) {
         return new SingleMapEntry<>(key, value);
+    }
+
+    public static <K, V> SingleMapEntry<K, V> createEmpty() {
+        return new SingleMapEntry<>(null, null);
     }
 }

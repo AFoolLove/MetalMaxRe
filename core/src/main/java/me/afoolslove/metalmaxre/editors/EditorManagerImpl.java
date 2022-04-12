@@ -1,10 +1,10 @@
 package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
-import me.afoolslove.metalmaxre.editors.Editor;
-import me.afoolslove.metalmaxre.editors.IEditorListener;
-import me.afoolslove.metalmaxre.editors.IEditorManager;
-import me.afoolslove.metalmaxre.editors.IRomEditor;
+import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
+import me.afoolslove.metalmaxre.editors.computer.impl.ComputerEditorImpl;
+import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
+import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -26,10 +27,10 @@ public class EditorManagerImpl implements IEditorManager {
 
     private final Map<Class<? extends IRomEditor>, IRomEditor> editors = new LinkedHashMap<>();
 
-    private final Map<Class<? extends IRomEditor>, Function<MetalMaxRe, ? extends IRomEditor>> editorBuilders = new HashMap<>();
+    private final Map<Class<? extends IRomEditor>, Function<MetalMaxRe, ? extends IRomEditor>> editorBuilders = new ConcurrentHashMap<>();
 
-    private final Map<Class<? extends IRomEditor>, String> loadMethodNames = new HashMap<>();
-    private final Map<Class<? extends IRomEditor>, String> applyMethodNames = new HashMap<>();
+    private final Map<Class<? extends IRomEditor>, Method> loadMethods = new ConcurrentHashMap<>();
+    private final Map<Class<? extends IRomEditor>, Method> applyMethods = new ConcurrentHashMap<>();
 
     /**
      * 加载或应用编辑器数据
@@ -47,6 +48,11 @@ public class EditorManagerImpl implements IEditorManager {
     @Override
     public MetalMaxRe getMetalMaxRe() {
         return metalMaxRe;
+    }
+
+    public void registerDefaultEditors(){
+        register(IComputerEditor.class, ComputerEditorImpl::new);
+        register(IDogSystemEditor.class, DogSystemEditorImpl::new);
     }
 
     @Override
@@ -89,15 +95,15 @@ public class EditorManagerImpl implements IEditorManager {
             return;
         }
 
-        loadMethodNames.put(editorType, loadMethod.getName());
-        applyMethodNames.put(editorType, applyMethod.getName());
+        loadMethods.put(editorType, loadMethod);
+        applyMethods.put(editorType, applyMethod);
     }
 
     @Override
     public synchronized <E extends IRomEditor> IRomEditor unregister(@NotNull Class<E> editorType) {
         editorBuilders.remove(editorType);
-        loadMethodNames.remove(editorType);
-        applyMethodNames.remove(editorType);
+        loadMethods.remove(editorType);
+        applyMethods.remove(editorType);
         return editors.remove(editorType);
     }
 
@@ -142,19 +148,8 @@ public class EditorManagerImpl implements IEditorManager {
                 return null;
             }
 
-            var loadMethodName = loadMethodNames.get(type);
+            Method loadMethod = loadMethods.get(type);
 
-            Method loadMethod = null;
-
-            for (Method declaredMethod : editor.getClass().getDeclaredMethods()) {
-                if (Objects.equals(declaredMethod.getName(), loadMethodName)) {
-                    Annotation annotation = declaredMethod.getAnnotation(Editor.Load.class);
-                    if (annotation != null) {
-                        loadMethod = declaredMethod;
-                        break;
-                    }
-                }
-            }
             if (loadMethod == null) {
                 // 获取方法失败。。。？
                 return null;
@@ -203,19 +198,8 @@ public class EditorManagerImpl implements IEditorManager {
         return EDITOR_EXECUTOR.submit(() -> {
             var editor = getEditor(type);
             if (editor != null) {
-                var applyMethodName = applyMethodNames.get(type);
+                Method applyMethod = applyMethods.get(type);
 
-                Method applyMethod = null;
-
-                for (Method declaredMethod : editor.getClass().getDeclaredMethods()) {
-                    if (Objects.equals(declaredMethod.getName(), applyMethodName)) {
-                        Annotation annotation = declaredMethod.getAnnotation(Editor.Load.class);
-                        if (annotation != null) {
-                            applyMethod = declaredMethod;
-                            break;
-                        }
-                    }
-                }
                 if (applyMethod == null) {
                     // 获取方法失败。。。？
                     return null;

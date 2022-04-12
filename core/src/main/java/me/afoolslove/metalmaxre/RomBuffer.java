@@ -287,6 +287,28 @@ public class RomBuffer implements AutoCloseable, Closeable {
         }
     }
 
+    public void get(@NotNull DataAddress address, byte[] bytes, int offset, int length) {
+        switch (address.getType()) {
+            case PRG -> getPrg(address.getStartAddress(), bytes, offset, length);
+            case CHR -> getChr(address.getStartAddress(), bytes, offset, length);
+        }
+    }
+
+    public void get(@NotNull DataAddress address, byte[] bytes) {
+        get(address, bytes, 0x00000, bytes.length);
+    }
+
+    public byte get(@NotNull DataAddress address, int offset) {
+        return switch (address.getType()) {
+            case PRG -> getPrg(address.getStartAddress() + offset);
+            case CHR -> getChr(address.getStartAddress() + offset);
+        };
+    }
+
+    public byte get(@NotNull DataAddress address) {
+        return get(address, 0);
+    }
+
     public int getToInt(int index) {
         if (index > getPrgRom().capacity()) {
             index -= getPrgRom().capacity();

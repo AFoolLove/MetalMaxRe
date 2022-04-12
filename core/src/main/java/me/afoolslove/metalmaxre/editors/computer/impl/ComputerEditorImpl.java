@@ -33,7 +33,7 @@ import java.util.Set;
  * @author AFoolLove
  */
 public class ComputerEditorImpl extends AbstractEditor implements IComputerEditor<Computer> {
-    protected final DataAddress computerDataAddress;
+    protected final DataAddress computerAddress;
     protected int maxCount = 0x7B;
 
     private final Set<Computer> computers = new LinkedHashSet<>(getMaxCount());
@@ -41,12 +41,12 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         super(metalMaxRe);
         // 通用地址，兼容已知的版本
-        this.computerDataAddress = DataAddress.from(0x39DD2 - 0x10, 0x39FB0 - 0x10);
+        this.computerAddress = DataAddress.from(0x39DD2 - 0x10, 0x39FB0 - 0x10);
     }
 
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress dataAddress) {
         super(metalMaxRe);
-        this.computerDataAddress = dataAddress;
+        this.computerAddress = dataAddress;
     }
 
     @Editor.Load
@@ -59,7 +59,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         // data[2] = x
         // data[3] = y
         byte[][] data = new byte[4][getMaxCount()];
-        getBuffer().getAABytes(getComputerDataAddress().getStartAddress(), 0, getMaxCount(), data);
+        getBuffer().getAABytes(getComputerAddress().getStartAddress(), 0, getMaxCount(), data);
 
         for (int i = 0; i < getMaxCount(); i++) {
             getComputers().add(new Computer(data[0][i], data[1][i], data[2][i], data[3][i]));
@@ -92,12 +92,12 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
             Arrays.fill(data[0], count, getMaxCount(), (byte) 0xFF);
         }
 
-        getBuffer().put(getComputerDataAddress(), data);
+        getBuffer().put(getComputerAddress(), data);
     }
 
     @Override
-    public DataAddress getComputerDataAddress() {
-        return computerDataAddress;
+    public DataAddress getComputerAddress() {
+        return computerAddress;
     }
 
     @Override
