@@ -146,7 +146,7 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
     }
 
     public static DataAddress from(@NotNull Type type, int start, int end) {
-        if (end > start) {
+        if (end < start) {
             return new DataAddress(type, end, start);
         }
         return new DataAddress(type, start, end);
@@ -154,6 +154,17 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
 
     public static DataAddress from(@NotNull Type type, int start) {
         return new DataAddress(type, start, null);
+    }
+
+    public static DataAddress fromPRG(int start, int end) {
+        if (end < start) {
+            return new DataAddress(Type.PRG, end, start);
+        }
+        return new DataAddress(Type.PRG, start, end);
+    }
+
+    public static DataAddress fromCHR(int start) {
+        return new DataAddress(Type.CHR, start, null);
     }
 
     public static DataAddress from(int start, int end) {

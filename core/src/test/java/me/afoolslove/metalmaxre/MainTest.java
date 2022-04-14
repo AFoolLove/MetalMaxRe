@@ -3,12 +3,15 @@ package me.afoolslove.metalmaxre;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.IEditorListener;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
+import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
+import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,5 +52,28 @@ public class MainTest {
             list.put(entry.getKey(), metalMaxRe);
         }
         System.out.println();
+    }
+
+    @Test
+    void romTest() throws IOException {
+        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_Chinese.nes");
+        var romBuffer = new RomBuffer(RomVersion.getChinese(), rom);
+        var metalMaxRe = new MetalMaxRe(romBuffer);
+
+        var editorManager = new EditorManagerImpl(metalMaxRe);
+        metalMaxRe.setEditorManager(editorManager);
+        editorManager.registerDefaultEditors();
+
+        editorManager.loadEditors();
+
+        IDogSystemEditor dogSystemEditor = editorManager.getEditor(IDogSystemEditor.class);
+        for (CameraMapPoint townLocation : dogSystemEditor.getTownLocations()) {
+            townLocation.offset(1, 1);
+        }
+
+        editorManager.applyEditors();
+
+        romBuffer.save(rom.resolveSibling("E:/emulator/fceux/roms/MetalMax_ChineseC.nes"));
+
     }
 }

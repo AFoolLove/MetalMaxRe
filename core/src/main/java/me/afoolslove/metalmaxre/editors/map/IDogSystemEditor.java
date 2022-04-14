@@ -94,12 +94,27 @@ public interface IDogSystemEditor extends IRomEditor {
     @NotNull
     List<SingleMapEntry<Byte, Byte>> getTownSeries();
 
+    /**
+     * 获取城镇对应的地图地址
+     *
+     * @return 城镇对应的地图地址
+     */
     @NotNull
     DataAddress getTownsAddress();
 
+    /**
+     * 获取使用犬系统传送的目的地址
+     *
+     * @return 犬系统传送的目的地址
+     */
     @NotNull
     DataAddress getTownLocationsAddress();
 
+    /**
+     * 获取使用时空隧道机器传送的目的地地址
+     *
+     * @return 时空隧道机器目的地地址
+     */
     @NotNull
     DataAddress getTeleportLocationAddress();
 }

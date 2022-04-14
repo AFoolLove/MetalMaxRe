@@ -12,6 +12,12 @@ import java.util.List;
 
 /**
  * 犬系统编辑器
+ * <p>
+ * 修改时空隧道机器目的地和犬系统传送的目的地
+ * <p>
+ * 时空隧道机器一共有基础的12个目的地+1个故障目的地
+ * <p>
+ * 犬系统目的地一共有基础的12个目的地
  *
  * @author AFoolLove
  */
@@ -96,10 +102,10 @@ public class DogSystemEditorImpl extends AbstractEditor implements IDogSystemEdi
 
 
         // 读取时空隧道机器目的地
-        // map，不包含多余的三个数据
+        // map，不包含多余的三个未知数据
         final byte[] teleportMaps = new byte[getTeleportMaxCount() - 0x03];
         getBuffer().get(getTeleportLocationAddress(), teleportMaps);
-        // x、y，包含多余三个数据
+        // x、y，包含多余的三个未知数据
         final byte[][] teleportPoints = new byte[2][getTeleportMaxCount()];
         getBuffer().getAABytes(getTeleportLocationAddress().getEndAddress() + 1, 0, getTeleportMaxCount(), teleportPoints);
         for (int i = 0; i < getTeleportMaxCount(); i++) {

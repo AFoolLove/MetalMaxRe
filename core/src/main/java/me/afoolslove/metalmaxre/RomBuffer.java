@@ -5,12 +5,15 @@ import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+
+import static java.nio.file.StandardOpenOption.CREATE;
 
 /**
  * 提供了基本的ROM结构
@@ -102,8 +105,8 @@ public class RomBuffer implements AutoCloseable, Closeable {
         this.prgRom = ByteBuffer.allocate(getHeader().getPrgRomLength());
         this.chrRom = ByteBuffer.allocate(getHeader().getChrRomLength());
 
-        prgRom.put(0x00000, Arrays.copyOfRange(bytes, getHeader().getPrgRomStart(), getHeader().getPrgRomEnd()));
-        chrRom.put(0x00000, Arrays.copyOfRange(bytes, getHeader().getChrRomStart(), getHeader().getChrRomEnd()));
+        prgRom.put(0x00000, Arrays.copyOfRange(bytes, getHeader().getPrgRomStart(), getHeader().getPrgRomEnd() + 1));
+        chrRom.put(0x00000, Arrays.copyOfRange(bytes, getHeader().getChrRomStart(), getHeader().getChrRomEnd() + 1));
 
         // 监听PrgRom和ChrRom变更
         getHeader().addPrgRomChangeListener(prgRomChangeListener);
@@ -432,5 +435,32 @@ public class RomBuffer implements AutoCloseable, Closeable {
         for (int i = 0; i < aaBytes.length; i++) {
             put(index + (i * length), aaBytes[i], offset, length);
         }
+    }
+
+
+    /**
+     * 保存到文件
+     *
+     * @param path 路径
+     */
+    public void save(@NotNull Path path) throws IOException {
+        if (Files.notExists(path.getParent())) {
+            Files.createDirectories(path);
+        }
+
+        var byteArrayOutputStream = new ByteArrayOutputStream(
+                GameHeader.HEADER_LENGTH
+                + (trainer == null ? 0 : Trainer.TRAINER_LENGTH)
+                + header.getPrgRomLength()
+                + header.getChrRomLength());
+
+        byteArrayOutputStream.writeBytes(header.getHeader());
+        if (trainer != null) {
+            byteArrayOutputStream.writeBytes(trainer.getTrainer());
+        }
+        byteArrayOutputStream.writeBytes(getPrgRom().array());
+        byteArrayOutputStream.writeBytes(getChrRom().array());
+
+        Files.write(path, byteArrayOutputStream.toByteArray(), CREATE);
     }
 }

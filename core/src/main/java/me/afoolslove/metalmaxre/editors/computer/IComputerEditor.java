@@ -16,14 +16,6 @@ import java.util.Set;
  * @author AFoolLove
  */
 public interface IComputerEditor<C extends Computer> extends IRomEditor {
-
-    /**
-     * 获取计算机数据的起始地址
-     *
-     * @return 计算机数据的起始地址
-     */
-    DataAddress getComputerAddress();
-
     /**
      * 获取计算机的最大数量
      *
@@ -59,5 +51,12 @@ public interface IComputerEditor<C extends Computer> extends IRomEditor {
      * @param replace 替换后的计算机
      * @return 是否替换成功
      */
-    boolean replaceComputer(@Nullable Computer source, @NotNull Computer replace);
+    boolean replaceComputer(@NotNull Computer source, @NotNull Computer replace);
+
+    /**
+     * 获取计算机数据的起始地址
+     *
+     * @return 计算机数据的起始地址
+     */
+    DataAddress getComputerAddress();
 }

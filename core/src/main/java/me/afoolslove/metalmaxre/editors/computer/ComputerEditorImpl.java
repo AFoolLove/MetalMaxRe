@@ -1,10 +1,12 @@
-package me.afoolslove.metalmaxre.editors.computer.impl;
+package me.afoolslove.metalmaxre.editors.computer;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editors.AbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.editors.IEditorListener;
 import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
+import me.afoolslove.metalmaxre.editors.computer.listener.IComputerListener;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +43,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         super(metalMaxRe);
         // 通用地址，兼容已知的版本
-        this.computerAddress = DataAddress.from(0x39DD2 - 0x10, 0x39FB0 - 0x10);
+        this.computerAddress = DataAddress.fromPRG(0x39DD2 - 0x10, 0x39FB0 - 0x10);
     }
 
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress dataAddress) {
@@ -113,24 +115,39 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
     @Override
     public void addComputer(@NotNull Computer computer) {
         computers.add(computer);
+        for (IEditorListener editorListener : getListeners()) {
+            if (editorListener instanceof IComputerListener computerListener) {
+                computerListener.onAddComputer(this, computer);
+            }
+        }
     }
 
     @Override
     public void removeComputer(@NotNull Computer computer) {
         computers.remove(computer);
+        for (IEditorListener editorListener : getListeners()) {
+            if (editorListener instanceof IComputerListener computerListener) {
+                computerListener.onRemoveComputer(this, computer);
+            }
+        }
     }
 
     @Override
-    public boolean replaceComputer(@Nullable Computer source, @NotNull Computer replace) {
+    public boolean replaceComputer(@NotNull Computer source, @NotNull Computer replace) {
         if (computers.contains(replace)) {
             return true;
         }
-        if (source == null) {
-            return false;
-        }
         if (computers.remove(source)) {
             // 移除旧计算机成功，添加新的计算机
-            return computers.add(replace);
+            try {
+                return computers.add(replace);
+            } finally {
+                for (IEditorListener editorListener : getListeners()) {
+                    if (editorListener instanceof IComputerListener computerListener) {
+                        computerListener.onReplaceComputer(this, source, replace);
+                    }
+                }
+            }
         }
         return false;
 
