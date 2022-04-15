@@ -63,6 +63,10 @@ public class SingleMapEntry<K, V> implements Map.Entry<K, V> {
         return Objects.hash(getKey(), getValue());
     }
 
+    public static <K, V> SingleMapEntry<K, V> create(Map.Entry<K, V> entry) {
+        return new SingleMapEntry<>(entry.getKey(), entry.getValue());
+    }
+
     public static <K, V> SingleMapEntry<K, V> create(@Nullable K key, @Nullable V value) {
         return new SingleMapEntry<>(key, value);
     }

@@ -1,16 +1,16 @@
 package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
-import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
+import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,7 +48,7 @@ public class EditorManagerImpl implements IEditorManager {
         return metalMaxRe;
     }
 
-    public void registerDefaultEditors(){
+    public void registerDefaultEditors() {
         register(IComputerEditor.class, ComputerEditorImpl::new);
         register(IDogSystemEditor.class, DogSystemEditorImpl::new);
     }
@@ -115,6 +115,58 @@ public class EditorManagerImpl implements IEditorManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
+        editors.addFirst(new HashSet<>());
+
+        for (var entry : loadMethods.entrySet()) {
+            editors.getFirst().add(SingleMapEntry.create(entry));
+        }
+
+        do {
+            var nextEditors = new HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>>();
+            // 过滤前置编辑器
+            var tmpList = new LinkedList<>(editors.getLast());
+            while (!tmpList.isEmpty()) {
+                var first = tmpList.removeFirst();
+                if (first == null || tmpList.isEmpty()) {
+                    break;
+                }
+
+                // 将参数中的编辑器作为前置编辑器
+                for (Class<?> parameterType : first.getValue().getParameterTypes()) {
+                    var iterator = tmpList.iterator();
+                    while (iterator.hasNext()) {
+                        var next = iterator.next();
+                        if (next.getKey() == parameterType) {
+                            iterator.remove();
+                            nextEditors.add(next);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (nextEditors.isEmpty()) {
+                break;
+            }
+            // 移除前置编辑器
+            editors.getLast().removeAll(nextEditors);
+            // 添加前置编辑器
+            editors.add(nextEditors);
+        } while (true);
+
+        // 倒序，优先写入前置
+        Collections.reverse(editors);
+
+        // 加载无序编辑器
+        editors.removeFirst().parallelStream().forEach(editor -> loadEditor(editor.getKey()));
+        // 加载有序编辑器
+        editors.forEach(editorList ->
+                editorList.parallelStream().forEach(editor ->
+                        loadEditor(editor.getKey())
+                )
+        );
         return null;
     }
 
