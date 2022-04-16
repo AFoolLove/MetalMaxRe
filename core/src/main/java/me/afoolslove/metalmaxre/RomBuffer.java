@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -439,6 +440,39 @@ public class RomBuffer implements AutoCloseable, Closeable {
 
 
     /**
+     * 保存到输出流
+     *
+     * @param outputStream 输出流
+     */
+    public void save(@NotNull OutputStream outputStream) throws IOException {
+        outputStream.write(header.getHeader());
+        if (trainer != null) {
+            outputStream.write(trainer.getTrainer());
+        }
+        outputStream.write(getPrgRom().array());
+        outputStream.write(getChrRom().array());
+        outputStream.flush();
+    }
+
+    /**
+     * 将ROM数据转换为字节数组
+     * @return 转换为字节数组的ROM
+     */
+    public byte[] toByteArray() {
+        var byteArrayOutputStream = new ByteArrayOutputStream(
+                GameHeader.HEADER_LENGTH
+                + (trainer == null ? 0 : Trainer.TRAINER_LENGTH)
+                + header.getPrgRomLength()
+                + header.getChrRomLength());
+        try {
+            save(byteArrayOutputStream);
+        } catch (IOException ignored) {
+            // ?
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    /**
      * 保存到文件
      *
      * @param path 路径
@@ -448,19 +482,6 @@ public class RomBuffer implements AutoCloseable, Closeable {
             Files.createDirectories(path);
         }
 
-        var byteArrayOutputStream = new ByteArrayOutputStream(
-                GameHeader.HEADER_LENGTH
-                + (trainer == null ? 0 : Trainer.TRAINER_LENGTH)
-                + header.getPrgRomLength()
-                + header.getChrRomLength());
-
-        byteArrayOutputStream.writeBytes(header.getHeader());
-        if (trainer != null) {
-            byteArrayOutputStream.writeBytes(trainer.getTrainer());
-        }
-        byteArrayOutputStream.writeBytes(getPrgRom().array());
-        byteArrayOutputStream.writeBytes(getChrRom().array());
-
-        Files.write(path, byteArrayOutputStream.toByteArray(), CREATE);
+        Files.write(path, toByteArray(), CREATE);
     }
 }

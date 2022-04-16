@@ -3,8 +3,7 @@ package me.afoolslove.metalmaxre.editors.computer;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editors.AbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
-import me.afoolslove.metalmaxre.editors.IEditorListener;
-import me.afoolslove.metalmaxre.editors.computer.listener.IComputerListener;
+import me.afoolslove.metalmaxre.event.editors.computer.EditorComputerEvent;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +33,6 @@ import java.util.Set;
 public class ComputerEditorImpl extends AbstractEditor implements IComputerEditor<Computer> {
     protected final DataAddress computerAddress;
     protected int maxCount = 0x7B;
-
     private final Set<Computer> computers = new LinkedHashSet<>(getMaxCount());
 
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
@@ -112,21 +110,12 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
     @Override
     public void addComputer(@NotNull Computer computer) {
         computers.add(computer);
-        for (IEditorListener editorListener : getListeners()) {
-            if (editorListener instanceof IComputerListener computerListener) {
-                computerListener.onAddComputer(this, computer);
-            }
-        }
     }
 
     @Override
     public void removeComputer(@NotNull Computer computer) {
         computers.remove(computer);
-        for (IEditorListener editorListener : getListeners()) {
-            if (editorListener instanceof IComputerListener computerListener) {
-                computerListener.onRemoveComputer(this, computer);
-            }
-        }
+        getMetalMaxRe().getEventHandler().callEvent(new EditorComputerEvent.RemoveComputer(getMetalMaxRe(), this, computer));
     }
 
     @Override
@@ -139,11 +128,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
             try {
                 return computers.add(replace);
             } finally {
-                for (IEditorListener editorListener : getListeners()) {
-                    if (editorListener instanceof IComputerListener computerListener) {
-                        computerListener.onReplaceComputer(this, source, replace);
-                    }
-                }
+                getMetalMaxRe().getEventHandler().callEvent(new EditorComputerEvent.ReplaceComputer(getMetalMaxRe(), this, source, replace));
             }
         }
         return false;

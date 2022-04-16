@@ -22,14 +22,6 @@ public interface IRomEditor {
     MetalMaxRe getMetalMaxRe();
 
     /**
-     * 获取监听器
-     *
-     * @return 监听器
-     */
-    @NotNull
-    List<IEditorListener> getListeners();
-
-    /**
      * 获取当前编辑器的数据指针位置
      *
      * @return 指针位置

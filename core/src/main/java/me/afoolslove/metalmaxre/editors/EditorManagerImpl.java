@@ -5,6 +5,8 @@ import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
@@ -107,15 +109,6 @@ public class EditorManagerImpl implements IEditorManager {
 
     @Override
     public <R> R loadEditors() {
-        try {
-            // 多线程，强行单线程
-            for (var entry : editors.keySet()) {
-                loadEditor(entry).get();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
         editors.addFirst(new HashSet<>());
 
@@ -128,6 +121,7 @@ public class EditorManagerImpl implements IEditorManager {
             // 过滤前置编辑器
             var tmpList = new LinkedList<>(editors.getLast());
             while (!tmpList.isEmpty()) {
+                // 每次移除第一个，并将被移除所需要的编辑器添加到当前set的前置中
                 var first = tmpList.removeFirst();
                 if (first == null || tmpList.isEmpty()) {
                     break;
@@ -217,9 +211,7 @@ public class EditorManagerImpl implements IEditorManager {
 
             try {
                 // 准备加载
-                for (IEditorListener listener : editor.getListeners()) {
-                    listener.onPreLoad(editor);
-                }
+                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Pre(metalMaxRe, editor));
 
                 // 开始加载并计时
                 final long start = System.currentTimeMillis();
@@ -227,16 +219,12 @@ public class EditorManagerImpl implements IEditorManager {
                 final long end = System.currentTimeMillis() - start;
 
                 // 加载完毕
-                for (IEditorListener listener : editor.getListeners()) {
-                    listener.onPostLoad(editor, end);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor));
+            } catch (Exception exception) {
+                exception.printStackTrace();
 
                 // 加载失败
-                for (IEditorListener listener : editor.getListeners()) {
-                    listener.onPostLoad(editor, -1);
-                }
+                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, exception));
             }
             return editor;
         });
@@ -272,25 +260,20 @@ public class EditorManagerImpl implements IEditorManager {
 
                 try {
                     // 准备应用数据
-                    for (IEditorListener listener : editor.getListeners()) {
-                        listener.onPreApply(editor);
-                    }
+                    getMetalMaxRe().getEventHandler().callEvent(new EditorApplyEvent.Pre(getMetalMaxRe(), editor));
+
                     // 开始应用数据并计时
                     final long start = System.currentTimeMillis();
                     applyMethod.invoke(editor, pars);
                     final long end = System.currentTimeMillis() - start;
 
                     // 应用数据完成
-                    for (IEditorListener listener : editor.getListeners()) {
-                        listener.onPostApply(editor, end);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    getMetalMaxRe().getEventHandler().callEvent(new EditorApplyEvent.Post(getMetalMaxRe(), editor));
+                } catch (Exception exception) {
+                    exception.printStackTrace();
 
                     // 应用数据失败
-                    for (IEditorListener listener : editor.getListeners()) {
-                        listener.onPostLoad(editor, -1);
-                    }
+                    getMetalMaxRe().getEventHandler().callEvent(new EditorApplyEvent.Post(getMetalMaxRe(), editor, exception));
                 }
             }
             return editor;
