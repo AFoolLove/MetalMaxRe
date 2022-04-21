@@ -13,10 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 /**
@@ -108,73 +105,170 @@ public class EditorManagerImpl implements IEditorManager {
     }
 
     @Override
-    public <R> R loadEditors() {
-        var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
-        editors.addFirst(new HashSet<>());
+    public synchronized Future<?> loadEditors() {
+        return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
+            var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
+            editors.addFirst(new HashSet<>());
 
-        for (var entry : loadMethods.entrySet()) {
-            editors.getFirst().add(SingleMapEntry.create(entry));
-        }
+            for (var entry : loadMethods.entrySet()) {
+                editors.getFirst().add(SingleMapEntry.create(entry));
+            }
 
-        do {
-            var nextEditors = new HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>>();
-            // 过滤前置编辑器
-            var tmpList = new LinkedList<>(editors.getLast());
-            while (!tmpList.isEmpty()) {
-                // 每次移除第一个，并将被移除所需要的编辑器添加到当前set的前置中
-                var first = tmpList.removeFirst();
-                if (first == null || tmpList.isEmpty()) {
-                    break;
-                }
+            do {
+                var nextEditors = new HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>>();
+                // 过滤前置编辑器
+                var tmpList = new LinkedList<>(editors.getLast());
+                while (!tmpList.isEmpty()) {
+                    // 每次移除第一个，并将被移除所需要的编辑器添加到当前set的前置中
+                    var first = tmpList.removeFirst();
+                    if (first == null || tmpList.isEmpty()) {
+                        break;
+                    }
 
-                // 将参数中的编辑器作为前置编辑器
-                for (Class<?> parameterType : first.getValue().getParameterTypes()) {
-                    var iterator = tmpList.iterator();
-                    while (iterator.hasNext()) {
-                        var next = iterator.next();
-                        if (next.getKey() == parameterType) {
-                            iterator.remove();
-                            nextEditors.add(next);
-                            break;
+                    // 将参数中的编辑器作为前置编辑器
+                    for (Class<?> parameterType : first.getValue().getParameterTypes()) {
+                        var iterator = tmpList.iterator();
+                        while (iterator.hasNext()) {
+                            var next = iterator.next();
+                            if (next.getKey() == parameterType) {
+                                iterator.remove();
+                                nextEditors.add(next);
+                                break;
+                            }
                         }
                     }
                 }
+
+                if (nextEditors.isEmpty()) {
+                    break;
+                }
+                // 移除前置编辑器
+                editors.getLast().removeAll(nextEditors);
+                // 添加前置编辑器
+                editors.add(nextEditors);
+            } while (true);
+
+            // 倒序，优先加载前置
+            Collections.reverse(editors);
+
+            CountDownLatch latch = new CountDownLatch(editors.stream().mapToInt(Set::size).sum());
+            // 加载无序编辑器
+            editors.removeFirst().parallelStream().forEach(editor -> {
+                try {
+                    loadEditor(editor.getKey()).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            });
+            // 加载有序编辑器
+            editors.parallelStream().forEach(editorList ->
+                    editorList.parallelStream().forEach(editor -> {
+                                try {
+                                    loadEditor(editor.getKey()).get();
+                                } catch (InterruptedException | ExecutionException e) {
+                                    e.printStackTrace();
+                                } finally {
+                                    latch.countDown();
+                                }
+                            }
+                    )
+            );
+
+            try {
+                // 等待加载完毕
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-
-            if (nextEditors.isEmpty()) {
-                break;
-            }
-            // 移除前置编辑器
-            editors.getLast().removeAll(nextEditors);
-            // 添加前置编辑器
-            editors.add(nextEditors);
-        } while (true);
-
-        // 倒序，优先写入前置
-        Collections.reverse(editors);
-
-        // 加载无序编辑器
-        editors.removeFirst().parallelStream().forEach(editor -> loadEditor(editor.getKey()));
-        // 加载有序编辑器
-        editors.forEach(editorList ->
-                editorList.parallelStream().forEach(editor ->
-                        loadEditor(editor.getKey())
-                )
-        );
-        return null;
+        });
     }
 
     @Override
-    public <R> R applyEditors() {
-        try {
-            // 多线程，强行单线程
-            for (var entry : editors.keySet()) {
-                applyEditor(entry).get();
+    public synchronized Future<?> applyEditors() {
+        return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
+            var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
+            editors.addFirst(new HashSet<>());
+
+            for (var entry : applyMethods.entrySet()) {
+                editors.getFirst().add(SingleMapEntry.create(entry));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+
+            do {
+                var nextEditors = new HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>>();
+                // 过滤前置编辑器
+                var tmpList = new LinkedList<>(editors.getLast());
+                while (!tmpList.isEmpty()) {
+                    // 每次移除第一个，并将被移除所需要的编辑器添加到当前set的前置中
+                    var first = tmpList.removeFirst();
+                    if (first == null || tmpList.isEmpty()) {
+                        break;
+                    }
+
+                    // 将参数中的编辑器作为前置编辑器
+                    for (Class<?> parameterType : first.getValue().getParameterTypes()) {
+                        var quoteOnly = parameterType.getAnnotation(Editor.QuoteOnly.class);
+                        if (quoteOnly != null) {
+                            // 作为引用，不作为前置
+                            continue;
+                        }
+                        var iterator = tmpList.iterator();
+                        while (iterator.hasNext()) {
+                            var next = iterator.next();
+                            if (next.getKey() == parameterType) {
+                                iterator.remove();
+                                nextEditors.add(next);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (nextEditors.isEmpty()) {
+                    break;
+                }
+                // 移除前置编辑器
+                editors.getLast().removeAll(nextEditors);
+                // 添加前置编辑器
+                editors.add(nextEditors);
+            } while (true);
+
+            // 倒序，优先应用前置
+            Collections.reverse(editors);
+
+            CountDownLatch latch = new CountDownLatch(editors.stream().mapToInt(Set::size).sum());
+            // 应用无序编辑器
+            editors.removeFirst().parallelStream().forEach(editor -> {
+                try {
+                    applyEditor(editor.getKey()).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            });
+            // 应用有序编辑器
+            editors.parallelStream().forEach(editorList ->
+                    editorList.parallelStream().forEach(editor -> {
+                                try {
+                                    applyEditor(editor.getKey()).get();
+                                } catch (InterruptedException | ExecutionException e) {
+                                    e.printStackTrace();
+                                } finally {
+                                    latch.countDown();
+                                }
+                            }
+                    )
+            );
+
+            try {
+                // 等待应用完毕
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
@@ -251,10 +345,6 @@ public class EditorManagerImpl implements IEditorManager {
                         // 错误的参数，参数只能是编辑器
                         continue;
                     }
-//                var quoteOnly = parameter.getAnnotation(Editor.QuoteOnly.class);
-//                if (quoteOnly == null) {
-//
-//                }
                     pars[i] = getEditor((Class<? extends IRomEditor>) parameter.getType());
                 }
 

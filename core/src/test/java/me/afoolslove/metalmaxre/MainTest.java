@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +12,7 @@ import java.nio.file.Path;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class MainTest {
 
@@ -35,7 +37,7 @@ public class MainTest {
     }
 
     @Test
-    void romTest() throws IOException {
+    void romTest() throws Exception {
         class TestEventListener implements EventListener {
             public void test(EditorLoadEvent.Pre event) {
                 System.out.println(String.format("准备加载编辑器[%s]", event.getEditor().getClass().getSimpleName()));
@@ -43,6 +45,14 @@ public class MainTest {
 
             public void test(EditorLoadEvent.Post event) {
                 System.out.println(String.format("加载编辑器[%s]完毕", event.getEditor().getClass().getSimpleName()));
+            }
+
+            public void test(EditorApplyEvent.Pre event) {
+                System.out.println(String.format("准备应用编辑器[%s]", event.getEditor().getClass().getSimpleName()));
+            }
+
+            public void test(EditorApplyEvent.Post event) {
+                System.out.println(String.format("应用编辑器[%s]完毕", event.getEditor().getClass().getSimpleName()));
             }
         }
         TestEventListener eventListener = new TestEventListener();
@@ -58,14 +68,14 @@ public class MainTest {
 
         metalMaxRe.getEventHandler().register(eventListener);
 
-        editorManager.loadEditors();
+        editorManager.loadEditors().get();
 
         IDogSystemEditor dogSystemEditor = editorManager.getEditor(IDogSystemEditor.class);
-        for (CameraMapPoint townLocation : dogSystemEditor.getTownLocations()) {
-            townLocation.offset(1, 1);
+        for (CameraMapPoint point : dogSystemEditor.getTownLocations()) {
+            point.offset(1, 1);
         }
 
-        editorManager.applyEditors();
+        editorManager.applyEditors().get();
 
         romBuffer.save(rom.resolveSibling("E:/emulator/fceux/roms/MetalMax_ChineseC.nes"));
 

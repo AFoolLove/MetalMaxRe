@@ -31,6 +31,7 @@ EditorManagerImpl editorManager = metalMaxRe.getEditorManager();
 editorManager.registerDefaultEditors();
 // ---------------- 加载所有编辑器
 editorManager.loadEditors();
+// editorManager.loadEditors().get(); // 等待加载完毕
 
 ~~~
 
@@ -51,10 +52,12 @@ EditorManagerImpl editorManager = metalMaxRe.getEditorManager();
 editorManager.registerDefaultEditors();
 // ---------------- 加载所有编辑器
 editorManager.loadEditors();
+// editorManager.loadEditors().get(); // 等待加载完毕
 // ---------------- 编辑
 // code... 对编辑器的所有操作
 // ---------------- 应用编辑器的修改和保存
 editorManager.applyEditors();
+// editorManager.applyEditors().get(); // 等待应用完毕
 editorManager.save(Path);
 
 ~~~

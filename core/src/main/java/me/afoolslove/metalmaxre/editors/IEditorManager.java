@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editors;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 /**
@@ -31,12 +32,12 @@ public interface IEditorManager {
     /**
      * 加载所有编辑器
      */
-    <R> R loadEditors();
+    Future<?> loadEditors();
 
     /**
      * 应用所有编辑器的修改
      */
-    <R> R applyEditors();
+    Future<?> applyEditors();
 
     /**
      * 重新加载所有编辑器

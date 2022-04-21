@@ -38,7 +38,7 @@ public class DogSystemEditorImpl extends AbstractEditor implements IDogSystemEdi
         this(metalMaxRe,
                 DataAddress.from(0x34707 - 0x10, 0x34712 - 0x10),
                 DataAddress.from(0x3272D - 0x10, 0x32738 - 0x10),
-                DataAddress.from(0x34707 - 0x10, 0x34712 - 0x10)
+                DataAddress.from(0x3538C - 0x10, 0x353B8 - 0x10)
         );
     }
 
