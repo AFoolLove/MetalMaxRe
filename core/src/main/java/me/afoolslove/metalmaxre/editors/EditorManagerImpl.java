@@ -272,56 +272,14 @@ public class EditorManagerImpl implements IEditorManager {
     }
 
     @Override
-    public <R> R reloadEditors() {
-        return null;
+    public Future<?> reloadEditors() {
+        return loadEditors();
     }
 
     @NotNull
     @Override
     public Future<IRomEditor> loadEditor(@NotNull Class<? extends IRomEditor> type) {
-        return EDITOR_EXECUTOR.submit(() -> {
-            var editor = getEditor(type);
-            if (editor == null) {
-                // 没有这个类型的编辑器
-                return null;
-            }
-
-            Method loadMethod = loadMethods.get(type);
-
-            if (loadMethod == null) {
-                // 获取方法失败。。。？
-                return null;
-            }
-
-            Object[] pars = new Object[loadMethod.getParameterCount()];
-            var parameters = loadMethod.getParameters();
-            for (int i = 0; i < parameters.length; i++) {
-                if (!IRomEditor.class.isAssignableFrom(parameters[i].getType())) {
-                    // 错误的参数，参数只能是编辑器
-                    continue;
-                }
-                pars[i] = getEditor((Class<? extends IRomEditor>) parameters[i].getType());
-            }
-
-            try {
-                // 准备加载
-                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Pre(metalMaxRe, editor));
-
-                // 开始加载并计时
-                final long start = System.currentTimeMillis();
-                loadMethod.invoke(editor, pars);
-                final long end = System.currentTimeMillis() - start;
-
-                // 加载完毕
-                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor));
-            } catch (Exception exception) {
-                exception.printStackTrace();
-
-                // 加载失败
-                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, exception));
-            }
-            return editor;
-        });
+        return loadEditor(type, false);
     }
 
     @NotNull
@@ -372,7 +330,54 @@ public class EditorManagerImpl implements IEditorManager {
 
     @Override
     public Future<IRomEditor> reloadEditor(@NotNull Class<? extends IRomEditor> type) {
-        return null;
+        return loadEditor(type, true);
+    }
+
+    @NotNull
+    private Future<IRomEditor> loadEditor(@NotNull Class<? extends IRomEditor> type, boolean reload) {
+        return EDITOR_EXECUTOR.submit(() -> {
+            var editor = getEditor(type);
+            if (editor == null) {
+                // 没有这个类型的编辑器
+                return null;
+            }
+
+            Method loadMethod = loadMethods.get(type);
+
+            if (loadMethod == null) {
+                // 获取方法失败。。。？
+                return null;
+            }
+
+            Object[] pars = new Object[loadMethod.getParameterCount()];
+            var parameters = loadMethod.getParameters();
+            for (int i = 0; i < parameters.length; i++) {
+                if (!IRomEditor.class.isAssignableFrom(parameters[i].getType())) {
+                    // 错误的参数，参数只能是编辑器
+                    continue;
+                }
+                pars[i] = getEditor((Class<? extends IRomEditor>) parameters[i].getType());
+            }
+
+            try {
+                // 准备加载
+                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Pre(metalMaxRe, editor, reload));
+
+                // 开始加载并计时
+                final long start = System.currentTimeMillis();
+                loadMethod.invoke(editor, pars);
+                final long end = System.currentTimeMillis() - start;
+
+                // 加载完毕
+                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, reload));
+            } catch (Exception exception) {
+                exception.printStackTrace();
+
+                // 加载失败
+                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, exception, reload));
+            }
+            return editor;
+        });
     }
 
     @SuppressWarnings("unchecked")

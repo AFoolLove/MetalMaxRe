@@ -42,7 +42,7 @@ public interface IEditorManager {
     /**
      * 重新加载所有编辑器
      */
-    <R> R reloadEditors();
+    Future<?> reloadEditors();
 
     /**
      * 加载指定编辑器

@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre;
 
+import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
@@ -12,7 +13,6 @@ import java.nio.file.Path;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class MainTest {
 
@@ -53,6 +53,10 @@ public class MainTest {
 
             public void test(EditorApplyEvent.Post event) {
                 System.out.println(String.format("应用编辑器[%s]完毕", event.getEditor().getClass().getSimpleName()));
+            }
+
+            public void test(@Editor.TargetEditor({IDogSystemEditor.class}) EditorApplyEvent event) {
+                System.out.println(String.format("target dogSystemEditor %s %s", event.getEditor().getClass().getSimpleName(), event.getClass().getCanonicalName()));
             }
         }
         TestEventListener eventListener = new TestEventListener();
