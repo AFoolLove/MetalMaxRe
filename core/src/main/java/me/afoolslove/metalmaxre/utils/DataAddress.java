@@ -139,10 +139,17 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
 
     @Override
     public String toString() {
-        if (isLimited()){
+        if (isLimited()) {
             return String.format("%05X-%05X", getStartAddress(), getEndAddress());
         }
         return String.format("%05X-.....", getStartAddress());
+    }
+
+    public static DataAddress fromEnd(@NotNull DataAddress start, int end) {
+        if (end < start.getEndAddress() + 1) {
+            return new DataAddress(start.getType(), end, start.getEndAddress() + 1);
+        }
+        return new DataAddress(start.getType(), start.getEndAddress() + 1, end);
     }
 
     public static DataAddress from(@NotNull Type type, int start, int end) {

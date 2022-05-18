@@ -5,6 +5,11 @@ import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
+import me.afoolslove.metalmaxre.editors.sprite.Sprite;
+import me.afoolslove.metalmaxre.editors.sprite.SpriteEditorImpl;
+import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
+import me.afoolslove.metalmaxre.editors.treasure.TreasureEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
@@ -50,6 +55,8 @@ public class EditorManagerImpl implements IEditorManager {
     public void registerDefaultEditors() {
         register(IComputerEditor.class, ComputerEditorImpl::new);
         register(IDogSystemEditor.class, DogSystemEditorImpl::new);
+        register(ITreasureEditor.class, TreasureEditorImpl::new);
+        register(ISpriteEditor.class, SpriteEditorImpl::new);
     }
 
     @Override

@@ -11,11 +11,6 @@ import org.jetbrains.annotations.Range;
  */
 public class Item {
     /**
-     * 所有物品共计 0xDD 个
-     */
-    public static final int ITEMS_MAX_COUNT = 0xDD;
-
-    /**
      * 物品的价格数据
      */
     public byte price;

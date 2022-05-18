@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,6 +11,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -86,6 +88,14 @@ public class RomBuffer implements AutoCloseable, Closeable {
             }
         }
     };
+
+    protected RomBuffer(@NotNull RomBuffer romBuffer) {
+        this.header = romBuffer.getHeader();
+        this.version = romBuffer.getVersion();
+        this.path = romBuffer.getPath();
+        this.prgRom = romBuffer.prgRom;
+        this.chrRom = romBuffer.chrRom;
+    }
 
     public RomBuffer(@NotNull RomVersion version, @Nullable Path path) throws IOException {
         this.version = version;
@@ -271,9 +281,10 @@ public class RomBuffer implements AutoCloseable, Closeable {
 
     public void get(int index, byte[] bytes, int offset, int length) {
         if (index > getPrgRom().capacity()) {
-            index -= getPrgRom().capacity();
+            index -= getHeader().getChrRomStart();
             getChr(index, bytes, offset, length);
         } else {
+            index -= getHeader().getPrgRomStart();
             getPrg(index, bytes, offset, length);
         }
     }
@@ -284,9 +295,10 @@ public class RomBuffer implements AutoCloseable, Closeable {
 
     public byte get(int index) {
         if (index > getPrgRom().capacity()) {
-            index -= getPrgRom().capacity();
+            index -= getHeader().getChrRomStart();
             return getChrRom().get(index);
         } else {
+            index -= getHeader().getPrgRomStart();
             return getPrgRom().get(index);
         }
     }
@@ -315,9 +327,10 @@ public class RomBuffer implements AutoCloseable, Closeable {
 
     public int getToInt(int index) {
         if (index > getPrgRom().capacity()) {
-            index -= getPrgRom().capacity();
+            index -= getHeader().getChrRomStart();
             return getChrRom().get(index) & 0xFF;
         } else {
+            index -= getHeader().getPrgRomStart();
             return getPrgRom().get(index) & 0xFF;
         }
     }
@@ -326,11 +339,33 @@ public class RomBuffer implements AutoCloseable, Closeable {
         return (char) getToInt(index);
     }
 
+    public char getChar(int index) {
+        int tmp;
+        if (index > getPrgRom().capacity()) {
+            index -= getHeader().getChrRomStart();
+            tmp = getChrRom().getChar(index);
+        } else {
+            index -= getHeader().getPrgRomStart();
+            tmp = getPrgRom().getChar(index);
+        }
+
+        if (getChrRom().order() == ByteOrder.BIG_ENDIAN) {
+            // 字节倒序
+            tmp += tmp << 16;
+            //FF32
+            //    FF32
+            //FF32FF32
+            tmp >>>= 8; //00FF32FF
+        }
+        return (char) (tmp & 0xFFFF);
+    }
+
     public void put(int index, byte[] bytes, int offset, int length) {
         if (index > getPrgRom().capacity()) {
-            index -= getPrgRom().capacity();
+            index -= getHeader().getChrRomStart();
             getChrRom().put(index, bytes, offset, length);
         } else {
+            index -= getHeader().getPrgRomStart();
             getPrgRom().put(index, bytes, offset, length);
         }
     }
@@ -347,27 +382,30 @@ public class RomBuffer implements AutoCloseable, Closeable {
 
     public void put(int index, byte b) {
         if (index > getPrgRom().capacity()) {
-            index -= getPrgRom().capacity();
+            index -= getHeader().getChrRomStart();
             getChrRom().put(index, b);
         } else {
+            index -= getHeader().getPrgRomStart();
             getPrgRom().put(index, b);
         }
     }
 
     public void putInt(int index, int n) {
         if (index > getPrgRom().capacity()) {
-            index -= getPrgRom().capacity();
+            index -= getHeader().getChrRomStart();
             getChrRom().putInt(index, n);
         } else {
+            index -= getHeader().getPrgRomStart();
             getPrgRom().putInt(index, n);
         }
     }
 
     public void putChar(int index, char c) {
         if (index > getPrgRom().capacity()) {
-            index -= getPrgRom().capacity();
+            index -= getHeader().getChrRomStart();
             getChrRom().putChar(index, c);
         } else {
+            index -= getHeader().getPrgRomStart();
             getPrgRom().putChar(index, c);
         }
     }
@@ -456,6 +494,7 @@ public class RomBuffer implements AutoCloseable, Closeable {
 
     /**
      * 将ROM数据转换为字节数组
+     *
      * @return 转换为字节数组的ROM
      */
     public byte[] toByteArray() {

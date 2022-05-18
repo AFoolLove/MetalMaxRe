@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class ItemEditor extends AbstractEditor {
 
-    protected ItemEditor(@NotNull MetalMaxRe metalMaxRe) {
+    public ItemEditor(@NotNull MetalMaxRe metalMaxRe) {
         super(metalMaxRe);
     }
 

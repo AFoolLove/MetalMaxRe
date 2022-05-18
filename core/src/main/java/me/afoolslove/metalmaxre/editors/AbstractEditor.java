@@ -29,7 +29,22 @@ public abstract class AbstractEditor implements IRomEditor {
 
     @Override
     public synchronized int position(int position) {
+        if (this.position == position) {
+            return position;
+        }
         this.position = position;
+        return position;
+    }
+
+    @Override
+    public synchronized int chrPosition(int chrPosition) {
+        this.position = getBuffer().getHeader().getChrRomStart(chrPosition);
+        return position;
+    }
+
+    @Override
+    public synchronized int prgPosition(int prgPosition) {
+        this.position = getBuffer().getHeader().getPrgRomStart(prgPosition);
         return position;
     }
 

@@ -4,20 +4,21 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
+import me.afoolslove.metalmaxre.io.BitOutputStream;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class MainTest {
 
     @Test
-    void test() throws IOException {
+    void test() throws Exception {
         var list = new HashMap<String, MetalMaxRe>();
 
         // 创建所有预设版本的实例
@@ -29,10 +30,15 @@ public class MainTest {
 
             editorManager.registerDefaultEditors();
 
-            editorManager.loadEditors();
+            editorManager.loadEditors().get();
 
             list.put(entry.getKey(), metalMaxRe);
         }
+        System.out.println();
+
+        var spritesEditors = list.entrySet().parallelStream()
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().getEditorManager().getEditor(ISpriteEditor.class)))
+                .toList();
         System.out.println();
     }
 
@@ -81,7 +87,25 @@ public class MainTest {
 
         editorManager.applyEditors().get();
 
-        romBuffer.save(rom.resolveSibling("E:/emulator/fceux/roms/MetalMax_ChineseC.nes"));
+        romBuffer.save(rom.resolveSibling("MetalMax_ChineseC.nes"));
 
+    }
+
+    @Test
+    void bitStream() {
+        var bitOutputStream = new BitOutputStream();
+        bitOutputStream.writeBit((byte) 0B1110_1001);
+        bitOutputStream.writeBit(true);
+        bitOutputStream.writeBit(true);
+        bitOutputStream.writeBit(true);
+        bitOutputStream.writeBit(true);
+        bitOutputStream.writeBit(false);
+        bitOutputStream.writeBit(false);
+        bitOutputStream.writeBit(false);
+        bitOutputStream.writeBit(false);
+        for (byte b : bitOutputStream.toByteArray()) {
+            System.out.print((b & 0xFF) + ",");
+        }
+        System.out.println();
     }
 }
