@@ -2,9 +2,12 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
+import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
+import me.afoolslove.metalmaxre.editors.sprite.Sprite;
+import me.afoolslove.metalmaxre.editors.sprite.SpriteEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.io.BitOutputStream;
@@ -80,9 +83,9 @@ public class MainTest {
 
         editorManager.loadEditors().get();
 
-        IDogSystemEditor dogSystemEditor = editorManager.getEditor(IDogSystemEditor.class);
-        for (CameraMapPoint point : dogSystemEditor.getTownLocations()) {
-            point.offset(1, 1);
+        ISpriteEditor spriteEditor = editorManager.getEditor(ISpriteEditor.class);
+        for (Sprite sprite : spriteEditor.getSprites().get(0x01)) {
+            sprite.offsetY(1);
         }
 
         editorManager.applyEditors().get();

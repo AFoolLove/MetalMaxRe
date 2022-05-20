@@ -137,8 +137,8 @@ public class DogSystemEditorImpl extends AbstractEditor implements IDogSystemEdi
             if (i < teleportMaps.length) {
                 teleportMaps[i] = teleportLocation.getMap();
             }
-            teleportPoints[0][i] = teleportLocation.getCameraX();
-            teleportPoints[1][i] = teleportLocation.getCameraY();
+            teleportPoints[0][i] = teleportLocation.getX();
+            teleportPoints[1][i] = teleportLocation.getY();
             getTeleportLocation(i).set(teleportPoints[0][i], teleportPoints[1][i]);
         }
         // 写入时空隧道机器的目的地
