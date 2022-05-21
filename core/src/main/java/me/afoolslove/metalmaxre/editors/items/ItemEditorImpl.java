@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author AFoolLove
  */
-public class ItemEditor extends AbstractEditor {
+public class ItemEditorImpl extends AbstractEditor implements IItemEditor {
 
-    public ItemEditor(@NotNull MetalMaxRe metalMaxRe) {
+    public ItemEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         super(metalMaxRe);
     }
 

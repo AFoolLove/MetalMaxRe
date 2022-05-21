@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.RomBuffer;
 import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
@@ -17,6 +18,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -306,6 +309,10 @@ public class EditorManagerImpl implements IEditorManager {
                 var parameters = applyMethod.getParameters();
                 for (int i = 0; i < parameters.length; i++) {
                     var parameter = parameters[i];
+                    if (RomBuffer.class.isAssignableFrom(parameter.getType())) {
+                        pars[i] = editor.getBuffer();
+                        continue;
+                    }
                     if (!IRomEditor.class.isAssignableFrom(parameter.getType())) {
                         // 错误的参数，参数只能是编辑器
                         continue;
@@ -359,11 +366,16 @@ public class EditorManagerImpl implements IEditorManager {
             Object[] pars = new Object[loadMethod.getParameterCount()];
             var parameters = loadMethod.getParameters();
             for (int i = 0; i < parameters.length; i++) {
-                if (!IRomEditor.class.isAssignableFrom(parameters[i].getType())) {
+                var parameter = parameters[i];
+                if (RomBuffer.class.isAssignableFrom(parameter.getType())) {
+                    pars[i] = editor.getBuffer();
+                    continue;
+                }
+                if (!IRomEditor.class.isAssignableFrom(parameter.getType())) {
                     // 错误的参数，参数只能是编辑器
                     continue;
                 }
-                pars[i] = getEditor((Class<? extends IRomEditor>) parameters[i].getType());
+                pars[i] = getEditor((Class<? extends IRomEditor>) parameter.getType());
             }
 
             try {
