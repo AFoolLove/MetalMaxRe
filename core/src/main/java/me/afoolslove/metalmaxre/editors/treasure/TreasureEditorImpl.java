@@ -3,6 +3,8 @@ package me.afoolslove.metalmaxre.editors.treasure;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.editors.map.MapCheckPoints;
+import me.afoolslove.metalmaxre.editors.map.MapPoint;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +39,10 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
      */
     private final SingleMapEntry<Byte, Byte> defaultRandomTreasure = new SingleMapEntry<>((byte) 0x00, (byte) 0x0C);
 
+    /**
+     * 地图的调查点，算是"宝藏"吧
+     */
+    private final MapCheckPoints mapCheckPoints = new MapCheckPoints();
 
     public TreasureEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -79,28 +85,30 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
 
         // 读取地图的调查点
-//        setPrgRomPosition(MAP_CHECK_POINTS_START_OFFSET);
-//        get(buffer, maps, 0, MAP_CHECK_POINTS_MAX_COUNT);
-//        get(buffer, xs, 0, MAP_CHECK_POINTS_MAX_COUNT);
-//        get(buffer, ys, 0, MAP_CHECK_POINTS_MAX_COUNT);
-//        mapCheckPoints.entrance.getKey().set(maps[0x00], xs[0x00], ys[0x00]);
-//        mapCheckPoints.text.getKey().set(maps[0x01], xs[0x01], ys[0x01]);
-//        mapCheckPoints.reviveCapsule.getKey().set(maps[0x02], xs[0x02], ys[0x02]);
-//        mapCheckPoints.urumi.getKey().set(maps[0x03], xs[0x03], ys[0x03]);
-//        mapCheckPoints.drawers.getKey().set(maps[0x04], xs[0x04], ys[0x04]);
-//        mapCheckPoints.text2.getKey().set(maps[0x05], xs[0x05], ys[0x05]);
-//
-//        mapCheckPoints.entrance.getValue().setCamera(
-//                getPrgRom(buffer, 0x35CDD - 0x10),
-//                getPrgRom(buffer, 0x35CE1 - 0x10),
-//                getPrgRom(buffer, 0x35CE5 - 0x10)
-//        );
-//        mapCheckPoints.reviveCapsule.setValue(getPrgRom(buffer, 0x35D01 - 0x10));
-//        mapCheckPoints.drawers.getValue().clear();
-//        mapCheckPoints.drawers.getValue().addAll(Arrays.asList(
-//                getPrgRom(buffer, 0x35D48 - 0x10),
-//                getPrgRom(buffer, 0x35D49 - 0x10)
-//        ));
+        // data[0] = map
+        // data[1] = x
+        // data[2] = y
+        position(getCheckPointsAddress());
+        getBuffer().getAABytes(getCheckPointsAddress().getStartAddress(), getCheckPointMaxCount(), data[0], data[1], data[2]);
+
+        mapCheckPoints.entrance.getKey().set(data[0][0x00], data[1][0x00], data[2][0x00]);
+        mapCheckPoints.text.getKey().set(data[0][0x01], data[1][0x01], data[2][0x01]);
+        mapCheckPoints.reviveCapsule.getKey().set(data[0][0x02], data[1][0x02], data[2][0x02]);
+        mapCheckPoints.urumi.getKey().set(data[0][0x03], data[1][0x03], data[2][0x03]);
+        mapCheckPoints.drawers.getKey().set(data[0][0x04], data[1][0x04], data[2][0x04]);
+        mapCheckPoints.text2.getKey().set(data[0][0x05], data[1][0x05], data[2][0x05]);
+
+        mapCheckPoints.entrance.getValue().setCamera(
+                getBuffer().getPrg(0x35CDD - 0x10),
+                getBuffer().getPrg(0x35CE1 - 0x10),
+                getBuffer().getPrg(0x35CE5 - 0x10)
+        );
+        mapCheckPoints.reviveCapsule.setValue(getBuffer().getPrg(0x35D01 - 0x10));
+        mapCheckPoints.drawers.getValue().clear();
+        mapCheckPoints.drawers.getValue().addAll(Arrays.asList(
+                getBuffer().getPrg(0x35D48 - 0x10),
+                getBuffer().getPrg(0x35D49 - 0x10)
+        ));
 
         // 读取随机宝藏相关数据
 
@@ -143,36 +151,38 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
 
 
         // 写入地图的调查点
-//        setPrgRomPosition(MAP_CHECK_POINTS_START_OFFSET);
-//        List<MapPoint> checkPoints = Arrays.asList(mapCheckPoints.entrance.getKey(),
-//                mapCheckPoints.text.getKey(),
-//                mapCheckPoints.reviveCapsule.getKey(),
-//                mapCheckPoints.urumi.getKey(),
-//                mapCheckPoints.drawers.getKey(),
-//                mapCheckPoints.text2.getKey());
-//        for (int index = 0; index < MAP_CHECK_POINTS_MAX_COUNT; index++) {
-//            MapPoint checkPoint = checkPoints.get(index);
-//            maps[index] = checkPoint.getMap();
-//            xs[index] = checkPoint.getX();
-//            ys[index] = checkPoint.getY();
-//        }
-//        put(buffer, maps, 0, MAP_CHECK_POINTS_MAX_COUNT);
-//        put(buffer, xs, 0, MAP_CHECK_POINTS_MAX_COUNT);
-//        put(buffer, ys, 0, MAP_CHECK_POINTS_MAX_COUNT);
-//
-//        putPrgRom(buffer, 0x35CDD - 0x10, mapCheckPoints.entrance.getValue().getMap());
-//        putPrgRom(buffer, 0x35CE1 - 0x10, mapCheckPoints.entrance.getValue().getCameraX());
-//        putPrgRom(buffer, 0x35CE5 - 0x10, mapCheckPoints.entrance.getValue().getCameraY());
-//
-//        putPrgRom(buffer, 0x35D01 - 0x10, mapCheckPoints.reviveCapsule.getValue());
-//
-//        setPrgRomPosition(0x35D48 - 0x10);
-//        for (int item : mapCheckPoints.drawers.getValue().stream()
-//                .mapToInt(value -> value & 0xFF)
-//                .limit(2)
-//                .toArray()) {
-//            put(buffer, item);
-//        }
+        position(getCheckPointsAddress());
+        List<MapPoint> checkPoints = Arrays.asList(mapCheckPoints.entrance.getKey(),
+                mapCheckPoints.text.getKey(),
+                mapCheckPoints.reviveCapsule.getKey(),
+                mapCheckPoints.urumi.getKey(),
+                mapCheckPoints.drawers.getKey(),
+                mapCheckPoints.text2.getKey());
+
+        // data[0] = map
+        // data[1] = x
+        // data[2] = y
+        for (int index = 0; index < getCheckPointMaxCount(); index++) {
+            MapPoint checkPoint = checkPoints.get(index);
+            data[0][index] = checkPoint.getMap();
+            data[1][index] = checkPoint.getX();
+            data[2][index] = checkPoint.getY();
+        }
+        getBuffer().putAABytes(getCheckPointsAddress().getStartAddress(), getCheckPointMaxCount(), data[0], data[1], data[2]);
+
+        getBuffer().putPrg(0x35CDD - 0x10, mapCheckPoints.entrance.getValue().getMap());
+        getBuffer().putPrg(0x35CE1 - 0x10, mapCheckPoints.entrance.getValue().getCameraX());
+        getBuffer().putPrg(0x35CE5 - 0x10, mapCheckPoints.entrance.getValue().getCameraY());
+
+        getBuffer().putPrg(0x35D01 - 0x10, mapCheckPoints.reviveCapsule.getValue());
+
+        prgPosition(0x35D48 - 0x10);
+        for (int randomItem : mapCheckPoints.drawers.getValue().stream()
+                .mapToInt(value -> value & 0xFF)
+                .limit(2)
+                .toArray()) {
+            getBuffer().put(randomItem);
+        }
 
         // 写入随机宝藏相关数据
 

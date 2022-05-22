@@ -8,6 +8,7 @@ import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.Sprite;
 import me.afoolslove.metalmaxre.editors.sprite.SpriteEditorImpl;
+import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.io.BitOutputStream;
@@ -83,10 +84,8 @@ public class MainTest {
 
         editorManager.loadEditors().get();
 
-        ISpriteEditor spriteEditor = editorManager.getEditor(ISpriteEditor.class);
-        for (Sprite sprite : spriteEditor.getSprites().get(0x01)) {
-            sprite.offsetY(1);
-        }
+        ITreasureEditor treasureEditor = editorManager.getEditor(ITreasureEditor.class);
+
 
         editorManager.applyEditors().get();
 

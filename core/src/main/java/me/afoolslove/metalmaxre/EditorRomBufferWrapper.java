@@ -82,6 +82,11 @@ public class EditorRomBufferWrapper extends RomBufferWrapper {
         editor.offsetPosition(1);
     }
 
+    public synchronized void put(int b) {
+        put(editor.position(), (byte) (b & 0xFF));
+        editor.offsetPosition(1);
+    }
+
     public synchronized void putInt(int n) {
         putInt(editor.position(), n);
         editor.offsetPosition(4); // int占4字节
