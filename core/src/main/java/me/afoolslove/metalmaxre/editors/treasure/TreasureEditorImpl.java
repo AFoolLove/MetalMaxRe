@@ -89,7 +89,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         // data[1] = x
         // data[2] = y
         position(getCheckPointsAddress());
-        getBuffer().getAABytes(getCheckPointsAddress().getStartAddress(), getCheckPointMaxCount(), data[0], data[1], data[2]);
+        getBuffer().getAABytes(getCheckPointsAddress().getStartAddress(), 0, getCheckPointMaxCount(), data[0], data[1], data[2]);
 
         mapCheckPoints.entrance.getKey().set(data[0][0x00], data[1][0x00], data[2][0x00]);
         mapCheckPoints.text.getKey().set(data[0][0x01], data[1][0x01], data[2][0x01]);
@@ -168,7 +168,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
             data[1][index] = checkPoint.getX();
             data[2][index] = checkPoint.getY();
         }
-        getBuffer().putAABytes(getCheckPointsAddress().getStartAddress(), getCheckPointMaxCount(), data[0], data[1], data[2]);
+        getBuffer().putAABytes(getCheckPointsAddress().getStartAddress(), 0, getCheckPointMaxCount(), data[0], data[1], data[2]);
 
         getBuffer().putPrg(0x35CDD - 0x10, mapCheckPoints.entrance.getValue().getMap());
         getBuffer().putPrg(0x35CE1 - 0x10, mapCheckPoints.entrance.getValue().getCameraX());
