@@ -2,22 +2,19 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
-import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
-import me.afoolslove.metalmaxre.editors.sprite.Sprite;
-import me.afoolslove.metalmaxre.editors.sprite.SpriteEditorImpl;
-import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.io.BitOutputStream;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.AbstractMap;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainTest {
 
@@ -84,8 +81,8 @@ public class MainTest {
 
         editorManager.loadEditors().get();
 
-        ITreasureEditor treasureEditor = editorManager.getEditor(ITreasureEditor.class);
-
+        IPlayerEditor editor = editorManager.getEditor(IPlayerEditor.class);
+        editor.setMoney(9999);
 
         editorManager.applyEditors().get();
 

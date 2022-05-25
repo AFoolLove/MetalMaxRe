@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Range;
 /**
  * 所有物品
  * <p>
- * 包含人类和战车的工具、装备等
+ * 包含人类和坦克的工具、装备等
  *
  * @author AFoolLove
  */

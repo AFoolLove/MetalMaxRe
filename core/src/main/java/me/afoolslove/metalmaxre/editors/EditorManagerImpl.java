@@ -4,11 +4,18 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
 import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
+import me.afoolslove.metalmaxre.editors.items.IItemEditor;
+import me.afoolslove.metalmaxre.editors.items.ItemEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
+import me.afoolslove.metalmaxre.editors.player.IPlayerExpEditor;
+import me.afoolslove.metalmaxre.editors.player.PlayerEditorImpl;
+import me.afoolslove.metalmaxre.editors.player.PlayerExpEditorImpl;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
-import me.afoolslove.metalmaxre.editors.sprite.Sprite;
 import me.afoolslove.metalmaxre.editors.sprite.SpriteEditorImpl;
+import me.afoolslove.metalmaxre.editors.tank.ITankEditor;
+import me.afoolslove.metalmaxre.editors.tank.TankEditorImpl;
 import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.editors.treasure.TreasureEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
@@ -18,8 +25,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -60,6 +65,10 @@ public class EditorManagerImpl implements IEditorManager {
         register(IDogSystemEditor.class, DogSystemEditorImpl::new);
         register(ITreasureEditor.class, TreasureEditorImpl::new);
         register(ISpriteEditor.class, SpriteEditorImpl::new);
+        register(IItemEditor.class, ItemEditorImpl::new);
+        register(IPlayerEditor.class, PlayerEditorImpl::new);
+        register(IPlayerExpEditor.class, PlayerExpEditorImpl::new);
+        register(ITankEditor.class, TankEditorImpl::new);
     }
 
     @Override
