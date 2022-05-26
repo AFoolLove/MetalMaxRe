@@ -60,7 +60,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     }
 
     @Editor.Load
-    public boolean onLoad(@NotNull ByteBuffer buffer) {
+    public void onLoad(@NotNull ByteBuffer buffer) {
         // 读取前清空数据
         getTankInitAttributes().clear();
 
@@ -129,11 +129,10 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                 tankInitialAttributes[tank].set(xs[tank], ys[tank]);
             }
         }
-        return true;
     }
 
     @Editor.Apply
-    public boolean onApply(@NotNull ByteBuffer buffer) {
+    public void onApply(@NotNull ByteBuffer buffer) {
         // 写入初始属性
 
         TankInitialAttribute[] tankInitialAttributes = new TankInitialAttribute[Tank.values().length];
@@ -198,7 +197,6 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         getBuffer().put(maps);
         getBuffer().put(xs);
         getBuffer().put(ys);
-        return true;
     }
 
     @Override

@@ -20,6 +20,8 @@ import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.editors.treasure.TreasureEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
+import me.afoolslove.metalmaxre.palette.IPaletteEditor;
+import me.afoolslove.metalmaxre.palette.PaletteEditorImpl;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,6 +71,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(IPlayerEditor.class, PlayerEditorImpl::new);
         register(IPlayerExpEditor.class, PlayerExpEditorImpl::new);
         register(ITankEditor.class, TankEditorImpl::new);
+        register(IPaletteEditor.class, PaletteEditorImpl::new);
     }
 
     @Override

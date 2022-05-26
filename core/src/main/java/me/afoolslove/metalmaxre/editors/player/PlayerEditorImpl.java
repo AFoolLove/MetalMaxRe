@@ -43,7 +43,7 @@ public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements 
     }
 
     @Editor.Load
-    public boolean onLoad(@NotNull ByteBuffer buffer) {
+    public void onLoad(@NotNull ByteBuffer buffer) {
         // 读取前清空数据
         initialAttributes.clear();
 
@@ -134,11 +134,10 @@ public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements 
         for (int i = 0; i < 0x03; i++) {
             playerInitialAttributes[i].setExperience(NumberR.toInt(getBuffer().get(), getBuffer().get(), getBuffer().get()));
         }
-        return true;
     }
 
     @Editor.Apply
-    public boolean onApply() {
+    public void onApply() {
         // 写入初始属性
 
         // 转换为数组
@@ -222,7 +221,6 @@ public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements 
         for (int i = 0; i < 0x03; i++) {
             getBuffer().put(playerInitialAttributes[i].getBytesExperience());
         }
-        return true;
     }
 
     @Override

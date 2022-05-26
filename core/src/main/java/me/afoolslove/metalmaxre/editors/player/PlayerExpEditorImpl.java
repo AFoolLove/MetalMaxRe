@@ -38,7 +38,7 @@ public class PlayerExpEditorImpl extends RomBufferWrapperAbstractEditor implemen
     }
 
     @Editor.Load
-    public boolean onLoad(IPlayerEditor playerEditor) {
+    public void onLoad(IPlayerEditor playerEditor) {
         // 读取前清空数据
         experiences.clear();
 
@@ -49,11 +49,10 @@ public class PlayerExpEditorImpl extends RomBufferWrapperAbstractEditor implemen
         for (int i = 0, maxLevel = playerEditor.getMaxLevel() - 2; i <= maxLevel; i++) {
             experiences.put(i + 2, NumberR.toInt(levelExps[i * 3], levelExps[(i * 3) + 1], levelExps[(i * 3) + 2]));
         }
-        return true;
     }
 
     @Editor.Apply
-    public boolean onApply() {
+    public void onApply() {
         // 写入升级到2-99级的所需经验
         // 使用experiences的大小来确认有效的等级数量
         // 一个等级经验值用3个字节表示
@@ -65,7 +64,6 @@ public class PlayerExpEditorImpl extends RomBufferWrapperAbstractEditor implemen
             System.arraycopy(levelExp, 0, levelExps, index, 3);
         }
         getBuffer().put(getPlayerLevelExpAddress(), levelExps);
-        return true;
     }
 
     /**

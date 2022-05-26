@@ -8,11 +8,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * 调色板
+ * 显示的颜色的调色板，在导出图片等可视化中使用
+ * <p>
+ * *不是游戏中的颜色，如果模拟器支持自定义调色板，可以导出为文件后加载
  *
  * @author AFoolLove
  */
-public class Palette {
+public class SystemPalette {
     public static final int PALETTE_LENGTH = 8 * 8;
     public static final int PALETTE_BYTE_LENGTH = PALETTE_LENGTH * 3;
     private final Color[] colors = new Color[PALETTE_LENGTH];
@@ -22,7 +24,7 @@ public class Palette {
     }
 
     /**
-     * 将调色板转换为字节数组，数组大小固定为 {@link Palette#PALETTE_LENGTH}
+     * 将调色板转换为字节数组，数组大小固定为 {@link SystemPalette#PALETTE_LENGTH}
      *
      * @return 调色板字节数组
      */
@@ -55,7 +57,7 @@ public class Palette {
      * @param path 文件路径
      * @return 调色板
      */
-    public static Palette fromFile(@NotNull Path path) throws IOException {
+    public static SystemPalette fromFile(@NotNull Path path) throws IOException {
         return fromBytes(Files.readAllBytes(path));
     }
 
@@ -66,14 +68,14 @@ public class Palette {
      * @param offset       数组偏移量
      * @return 调色板
      */
-    public static Palette fromBytes(byte[] paletteBytes, int offset) {
+    public static SystemPalette fromBytes(byte[] paletteBytes, int offset) {
         if ((paletteBytes.length - offset) != ((8 * 8) * 3)) {
             var bytes = new byte[8 * 8];
             System.arraycopy(paletteBytes, offset, bytes, 0, Math.min(paletteBytes.length, 8 * 8));
             paletteBytes = bytes;
         }
 
-        var palette = new Palette();
+        var palette = new SystemPalette();
         for (int i = 0; i < paletteBytes.length; i += 3) {
             palette.getColors()[i / 3] = new Color(0x00, paletteBytes[i], paletteBytes[i + 1], paletteBytes[i + 2]);
         }
@@ -86,7 +88,7 @@ public class Palette {
      * @param paletteBytes 字节数组
      * @return 调色板
      */
-    public static Palette fromBytes(byte[] paletteBytes) {
+    public static SystemPalette fromBytes(byte[] paletteBytes) {
         return fromBytes(paletteBytes, 0);
     }
 }

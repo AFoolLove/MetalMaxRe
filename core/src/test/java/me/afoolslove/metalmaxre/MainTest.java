@@ -8,6 +8,8 @@ import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.io.BitOutputStream;
+import me.afoolslove.metalmaxre.palette.IPaletteEditor;
+import me.afoolslove.metalmaxre.palette.PaletteRow;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -81,8 +83,10 @@ public class MainTest {
 
         editorManager.loadEditors().get();
 
-        IPlayerEditor editor = editorManager.getEditor(IPlayerEditor.class);
-        editor.setMoney(9999);
+        IPaletteEditor paletteEditor = editorManager.getEditor(IPaletteEditor.class);
+        for (PaletteRow paletteRow : paletteEditor.getSpritePalette()) {
+            paletteRow.getPaletteRow()[1] = 0x19;
+        }
 
         editorManager.applyEditors().get();
 
