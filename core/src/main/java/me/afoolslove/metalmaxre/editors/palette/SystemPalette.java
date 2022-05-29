@@ -1,4 +1,4 @@
-package me.afoolslove.metalmaxre.palette;
+package me.afoolslove.metalmaxre.editors.palette;
 
 
 import org.jetbrains.annotations.NotNull;

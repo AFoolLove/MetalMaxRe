@@ -6,8 +6,11 @@ import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.items.ItemEditorImpl;
-import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
-import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.editors.map.*;
+import me.afoolslove.metalmaxre.editors.map.events.EventTilesEditorImpl;
+import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
+import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
+import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
 import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
 import me.afoolslove.metalmaxre.editors.player.IPlayerExpEditor;
 import me.afoolslove.metalmaxre.editors.player.PlayerEditorImpl;
@@ -20,8 +23,8 @@ import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.editors.treasure.TreasureEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
-import me.afoolslove.metalmaxre.palette.IPaletteEditor;
-import me.afoolslove.metalmaxre.palette.PaletteEditorImpl;
+import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
+import me.afoolslove.metalmaxre.editors.palette.PaletteEditorImpl;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
@@ -72,6 +75,12 @@ public class EditorManagerImpl implements IEditorManager {
         register(IPlayerExpEditor.class, PlayerExpEditorImpl::new);
         register(ITankEditor.class, TankEditorImpl::new);
         register(IPaletteEditor.class, PaletteEditorImpl::new);
+
+        register(IMapEditor.class, MapEditorImpl::new);
+        register(IMapPropertiesEditor.class, MapPropertiesEditorImpl::new);
+        register(IEventTilesEditor.class, EventTilesEditorImpl::new);
+        register(IWorldMapEditor.class, WorldMapEditorImpl::new);
+        register(IMapEntranceEditor.class, MapEntranceEditorImpl::new);
     }
 
     @Override

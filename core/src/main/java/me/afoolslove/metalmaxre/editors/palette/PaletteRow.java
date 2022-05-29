@@ -1,4 +1,4 @@
-package me.afoolslove.metalmaxre.palette;
+package me.afoolslove.metalmaxre.editors.palette;
 
 import me.afoolslove.metalmaxre.RomBuffer;
 import org.jetbrains.annotations.NotNull;

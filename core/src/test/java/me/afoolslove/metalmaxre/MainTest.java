@@ -3,13 +3,12 @@ package me.afoolslove.metalmaxre;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
-import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.io.BitOutputStream;
-import me.afoolslove.metalmaxre.palette.IPaletteEditor;
-import me.afoolslove.metalmaxre.palette.PaletteRow;
+import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
+import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;

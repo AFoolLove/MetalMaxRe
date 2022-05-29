@@ -1,4 +1,4 @@
-package me.afoolslove.metalmaxre.palette;
+package me.afoolslove.metalmaxre.editors.palette;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;

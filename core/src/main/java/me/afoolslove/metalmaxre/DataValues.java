@@ -17,6 +17,7 @@ public class DataValues {
     public static final Map<Number, Integer> VALUES = new HashMap<>();
 
     static {
+        // 1byte
         VALUES.put(0x00, 0x000005);
         VALUES.put(0x01, 0x000008);
         VALUES.put(0x02, 0x00000A);
@@ -88,6 +89,7 @@ public class DataValues {
         VALUES.put(0x44, 0x0000CD);
         VALUES.put(0x45, 0x0000F5);
         VALUES.put(0x46, 0x000004);
+        // 2byte
         VALUES.put(0x47, 0x000104);
         VALUES.put(0x48, 0x000000);
         VALUES.put(0x49, 0x000000);
@@ -189,6 +191,7 @@ public class DataValues {
         VALUES.put(0xA9, 0x001388);
         VALUES.put(0xAA, 0x001B58);
         VALUES.put(0xAB, 0x001EBE);
+        // ？？？
         VALUES.put(0xAC, 0x002710);
         VALUES.put(0xAD, 0x002EE0);
         VALUES.put(0xAE, 0x0030D4);
@@ -225,6 +228,7 @@ public class DataValues {
         VALUES.put(0xCD, 0x005078);
         VALUES.put(0xCE, 0x0059D8);
         VALUES.put(0xCF, 0x00A410);
+        // 3byte
         VALUES.put(0xD0, 0x013E5C);
         VALUES.put(0xD1, 0x014C08);
         VALUES.put(0xD2, 0x0157C0);
