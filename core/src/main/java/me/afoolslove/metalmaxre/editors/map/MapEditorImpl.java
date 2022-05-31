@@ -38,7 +38,7 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
     }
 
     @Editor.Load
-    public boolean onLoad(IMapPropertiesEditor mapPropertiesEditor) {
+    public void onLoad(IMapPropertiesEditor mapPropertiesEditor) {
         // 读取前清空数据
         getMaps().clear();
 
@@ -91,11 +91,10 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
             // 按序添加地图
             getMaps().put(getMaps().size() + 1, mapBuilder);
         }
-        return true;
     }
 
     @Editor.Apply
-    public boolean onApply(@Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
+    public void onApply(@Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
 
         // 创建一个临时的map，排除相同的地图
         // K:mapIndex
@@ -161,7 +160,6 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
 //            buffer.put(mapTiles.build());
         }
 //        System.out.println("more byte:" + more);
-        return true;
     }
 
     @Override

@@ -75,7 +75,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
     }
 
     @Editor.Load
-    public boolean onLoad(@NotNull ByteBuffer buffer) {
+    public void onLoad() {
         // 读取前清空数据
         getMapProperties().clear();
 
@@ -154,14 +154,13 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             MapProperties mapProperties = getMapProperties(redirectData[0][index]);
             mapProperties.redirect = SingleMapEntry.create(redirectData[1][index], redirectData[2][index]);
         }
-        return true;
     }
 
     @Editor.Apply
-    public boolean onApply(IMapEditor mapEditor,
-                           IPaletteEditor paletteEditor,
-                           @Editor.QuoteOnly IEventTilesEditor eventTilesEditor,
-                           @Editor.QuoteOnly MapEntranceEditorImpl mapEntranceEditor) {
+    public void onApply(IMapEditor mapEditor,
+                        IPaletteEditor paletteEditor,
+                        @Editor.QuoteOnly IEventTilesEditor eventTilesEditor,
+                        @Editor.QuoteOnly MapEntranceEditorImpl mapEntranceEditor) {
         // 写入地图属性索引，上卷 0x40、下卷 0xB0
         // 地图属性索引不建议被编辑！！所以不提供修改功能！！
 
@@ -275,7 +274,6 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         } else {
             System.out.printf("地图属性编辑器：错误！超出了数据上限%d字节\n", end - 0x0FBBD);
         }
-        return true;
     }
 
 

@@ -124,7 +124,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Editor.Load
-    public boolean onLoad(@NotNull ByteBuffer buffer) {
+    public void onLoad(@NotNull ByteBuffer buffer) {
         // 读取前清除数据
         for (byte[] bytes : map) {
             Arrays.fill(bytes, (byte) 0x00);
@@ -244,13 +244,13 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         getBuffer().get(mineXs);
         getBuffer().get(mineYs);
         for (int i = 0; i < 0x04; i++) {
-            mines.add(new MapPoint(0x00, mineXs[i], mineYs[i]));
+            getMines().add(new MapPoint(0x00, mineXs[i], mineYs[i]));
         }
 
         // 读取出航航线
         position(getWorldMapOutLineAddress());
         // 坐标是相对路径，进入世界地图的坐标开始算起
-        List<MapPoint> linePoint = shippingLineOut.getKey();
+        List<MapPoint> linePoint = getShippingLineOut().getKey();
         linePoint.clear();
 
         while (linePoint.size() < 0x10) {
@@ -279,11 +279,11 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             getBuffer().get(); // 所有路径点全部使用，跳过 0xE5
         }
         // 读取出航目的地
-        shippingLineOut.getValue().set(getBuffer().get(), getBuffer().get(), getBuffer().get());
+        getShippingLineOut().getValue().set(getBuffer().get(), getBuffer().get(), getBuffer().get());
 
         // 读取归航航线
         position(getWorldMapBackLineAddress());
-        linePoint = shippingLineBack.getKey();
+        linePoint = getShippingLineBack().getKey();
         linePoint.clear();
 
         while (linePoint.size() < 0x10) {
@@ -312,12 +312,11 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             getBuffer().get(); // 所有路径点全部使用，跳过 0xE5
         }
         // 读取归航目的地
-        shippingLineBack.getValue().set(getBuffer().get(), getBuffer().get(), getBuffer().get());
-        return true;
+        getShippingLineBack().getValue().set(getBuffer().get(), getBuffer().get(), getBuffer().get());
     }
 
     @Editor.Apply
-    public boolean onApply(@Editor.QuoteOnly IEventTilesEditor eventTilesEditor) {
+    public void onApply(@Editor.QuoteOnly IEventTilesEditor eventTilesEditor) {
         // 读取世界地图，使用set记录需要保留数据
         // 通过set设置未使用的数据为null
 
@@ -658,8 +657,8 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
 
         // 写入出航路径点和目的地
         position(getWorldMapOutLineAddress());
-        for (int i = 0, size = Math.min(0x10, shippingLineOut.getKey().size()); i < size; i++) {
-            MapPoint linePoint = shippingLineOut.getKey().get(i);
+        for (int i = 0, size = Math.min(0x10, getShippingLineOut().getKey().size()); i < size; i++) {
+            MapPoint linePoint = getShippingLineOut().getKey().get(i);
             // X或Y等于0，就是另一个的方向
             if (linePoint.getX() == 0x00) {
                 // 上或下移动
@@ -685,14 +684,14 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
         // 写入出航目的地
         getBuffer().put(0x5E);
-        getBuffer().put(shippingLineOut.getValue().getMap());
-        getBuffer().put(shippingLineOut.getValue().getX());
-        getBuffer().put(shippingLineOut.getValue().getY());
+        getBuffer().put(getShippingLineOut().getValue().getMap());
+        getBuffer().put(getShippingLineOut().getValue().getX());
+        getBuffer().put(getShippingLineOut().getValue().getY());
 
         // 写入归航路径点和目的地
         position(getWorldMapBackLineAddress());
-        for (int i = 0, size = Math.min(0x10, shippingLineBack.getKey().size()); i < size; i++) {
-            MapPoint linePoint = shippingLineBack.getKey().get(i);
+        for (int i = 0, size = Math.min(0x10, getShippingLineBack().getKey().size()); i < size; i++) {
+            MapPoint linePoint = getShippingLineBack().getKey().get(i);
             // X或Y等于0，就是另一个的方向
             if (linePoint.getX() == 0x00) {
                 // 上或下移动
@@ -718,10 +717,9 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
         // 写入归航目的地
         getBuffer().put(0x5E);
-        getBuffer().put(shippingLineBack.getValue().getMap());
-        getBuffer().put(shippingLineBack.getValue().getX());
-        getBuffer().put(shippingLineBack.getValue().getY());
-        return true;
+        getBuffer().put(getShippingLineBack().getValue().getMap());
+        getBuffer().put(getShippingLineBack().getValue().getX());
+        getBuffer().put(getShippingLineBack().getValue().getY());
     }
 
     @Override

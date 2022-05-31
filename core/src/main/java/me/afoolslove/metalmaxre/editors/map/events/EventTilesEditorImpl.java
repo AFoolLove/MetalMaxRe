@@ -55,7 +55,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
     }
 
     @Editor.Load
-    public boolean onLoad(IWorldMapEditor worldMapEditor,
+    public void onLoad(IWorldMapEditor worldMapEditor,
                           IMapPropertiesEditor mapPropertiesEditor,
                           IMapEditor mapEditor) {
         // 读取前清空数据
@@ -156,11 +156,10 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
         worldMapInteractiveEvent.setCameraY(getBuffer().get());
         prgPosition(0x28172);
         worldMapInteractiveEvent.setDirection(getBuffer().get());
-        return true;
     }
 
     @Editor.Apply
-    public boolean onApply(IWorldMapEditor worldMapEditor,
+    public void onApply(IWorldMapEditor worldMapEditor,
                            @Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
         // 排除事件为 0x00 ！！！！
         getEventTiles().values().forEach(each ->
@@ -289,7 +288,6 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
 //        } else {
 //            System.out.printf("事件图块编辑器：错误！超出了数据上限%d字节\n", end - 0x1DEAF);
 //        }
-        return true;
     }
 
     @Override

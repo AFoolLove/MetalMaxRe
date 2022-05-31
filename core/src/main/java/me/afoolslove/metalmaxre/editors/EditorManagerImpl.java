@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
+import me.afoolslove.metalmaxre.RomVersion;
 import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
@@ -9,6 +10,8 @@ import me.afoolslove.metalmaxre.editors.items.ItemEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.*;
 import me.afoolslove.metalmaxre.editors.map.events.EventTilesEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
+import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
+import me.afoolslove.metalmaxre.editors.map.tileset.TileSetEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
 import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
@@ -80,7 +83,17 @@ public class EditorManagerImpl implements IEditorManager {
         register(IMapPropertiesEditor.class, MapPropertiesEditorImpl::new);
         register(IEventTilesEditor.class, EventTilesEditorImpl::new);
         register(IWorldMapEditor.class, WorldMapEditorImpl::new);
-        register(IMapEntranceEditor.class, MapEntranceEditorImpl::new);
+        register(IMapEntranceEditor.class, metalMaxRe -> {
+            var version = metalMaxRe.getBuffer().getVersion();
+            if (version == RomVersion.getSuperHack()) {
+                return new MapEntranceEditorImpl.SHMapEntranceEditorImpl(metalMaxRe);
+            } else if (version == RomVersion.getSuperHackGeneral()) {
+                return new MapEntranceEditorImpl.SHGMapEntranceEditorImpl(metalMaxRe);
+            } else {
+                return new MapEntranceEditorImpl(metalMaxRe);
+            }
+        });
+        register(ITileSetEditor.class, TileSetEditorImpl::new);
     }
 
     @Override

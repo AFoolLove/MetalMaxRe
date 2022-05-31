@@ -5,22 +5,17 @@ import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Range;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * 地图边界和出入口编辑器<p>
- * 包含世界地图<p>
- * 起始：0x1E990<p>
- * 结束：0x1F999<p>
- * 修改地图的边界类型和地图的出入口<p>
- *
+ * 地图边界和出入口编辑器
+ * 包含世界地图
  * <p>
+ * 修改地图的边界类型和地图的出入口
  * <p>
  * TODO: 多版本读取正常，多版本写入未测试
  *
@@ -28,7 +23,6 @@ import java.util.function.Consumer;
  */
 public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implements IMapEntranceEditor {
     private final DataAddress mapEntranceAddress;
-
 
     public MapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -47,7 +41,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
     private final Map<Integer, MapEntrance> mapEntrances = new HashMap<>();
 
     @Editor.Load
-    public boolean onLoad(IMapPropertiesEditor mapPropertiesEditor) {
+    public void onLoad(IMapPropertiesEditor mapPropertiesEditor) {
         // 读取前清空数据
         getMapEntrances().clear();
 
@@ -63,7 +57,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
             // 索引到数据
             // 兼容SH和SHG，只用0xFF000中的FF，后三个无用
-            position(getMapEntranceAddress(), (getMapEntranceAddress().getStartAddress() & 0xFF000) + mapProperties.entrance - 0x8000);
+            prgPosition((getMapEntranceAddress().getStartAddress() & 0xFF000) + mapProperties.entrance - 0x8000);
 
             int temp = getBuffer().getToInt();
 
@@ -118,11 +112,10 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                         getMapEntrances().put(entry.getKey(), mapEntrance);
                     });
         }
-        return true;
     }
 
     @Editor.Apply
-    public boolean onApply(@Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
+    public void onApply(@Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
         Consumer<MapEntrance> consumer = mapEntrance -> {
             // 计算新的出入口索引
             // 计算版本差异
@@ -162,12 +155,11 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
         var mapEntrances = getMapEntrances();
         // 优先解析世界地图
-        var worldMapEntrances = mapEntrances.remove(0);
+        var worldMapEntrances = mapEntrances.get(0);
         if (worldMapEntrances != null) {
             position(getMapEntranceAddress());
             consumer.accept(worldMapEntrances);
         }
-        position(getMapEntranceAddress());
 
 //        if (getVersion() == Version.SUPER_HACK) {
 //            setPrgRomPosition(SH_MAP_ENTRANCE_START_OFFSET);
@@ -184,7 +176,6 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 //        } else {
 //            System.out.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", end - 0x1F999);
 //        }
-        return true;
     }
 
     @Override
