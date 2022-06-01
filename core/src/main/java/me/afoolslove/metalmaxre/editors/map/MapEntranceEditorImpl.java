@@ -137,7 +137,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             if (!mapEntrance.getEntrances().isEmpty()) {
                 // 写入地图出入口数据
 
-                // 重新排序，需要顺序写入
+                // 重新排序，需要顺序写入 出入口的坐标
                 LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(mapEntrance.getEntrances());
                 // 写入入口 X、Y
                 for (MapPoint mapPoint : linkedEntrances.keySet()) {
@@ -155,19 +155,22 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
         var mapEntrances = getMapEntrances();
         // 优先解析世界地图
-        var worldMapEntrances = mapEntrances.get(0);
-        if (worldMapEntrances != null) {
-            position(getMapEntranceAddress());
-            consumer.accept(worldMapEntrances);
-        }
+//        var worldMapEntrances = mapEntrances.get(0);
+//        if (worldMapEntrances != null) {
+//            position(getMapEntranceAddress());
+//            consumer.accept(worldMapEntrances);
+//        }
 
 //        if (getVersion() == Version.SUPER_HACK) {
 //            setPrgRomPosition(SH_MAP_ENTRANCE_START_OFFSET);
 //        } else if (getVersion() == Version.SUPER_HACK_GENERAL) {
 //            setPrgRomPosition(SHG_MAP_ENTRANCE_START_OFFSET);
 //        }
+        position(getMapEntranceAddress());
         // 地图
         mapEntrances.values().parallelStream()
+//                .filter(entry -> entry.getKey() == 0) // 排除已经应用的世界地图
+//                .map(Map.Entry::getValue)
                 .distinct() // 去重
                 .forEachOrdered(consumer);
 //        int end = position() - 1;
@@ -195,6 +198,18 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         public SHMapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, DataAddress.fromPRG(0x7E7B0 - 0x10));
         }
+
+        @Override
+        @Editor.Load
+        public void onLoad(IMapPropertiesEditor mapPropertiesEditor) {
+            super.onLoad(mapPropertiesEditor);
+        }
+
+        @Override
+        @Editor.Apply
+        public void onApply(IMapPropertiesEditor mapPropertiesEditor) {
+            super.onApply(mapPropertiesEditor);
+        }
     }
 
     /**
@@ -203,6 +218,18 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
     public static class SHGMapEntranceEditorImpl extends MapEntranceEditorImpl {
         public SHGMapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, DataAddress.fromPRG(0x527B0 - 0x10));
+        }
+
+        @Override
+        @Editor.Load
+        public void onLoad(IMapPropertiesEditor mapPropertiesEditor) {
+            super.onLoad(mapPropertiesEditor);
+        }
+
+        @Override
+        @Editor.Apply
+        public void onApply(IMapPropertiesEditor mapPropertiesEditor) {
+            super.onApply(mapPropertiesEditor);
         }
     }
 }
