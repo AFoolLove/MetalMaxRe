@@ -1,6 +1,5 @@
 package me.afoolslove.metalmaxre.editors.player;
 
-import me.afoolslove.metalmaxre.DataValues;
 import me.afoolslove.metalmaxre.editors.items.Item;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -15,7 +14,7 @@ public class PlayerEquipmentItem extends Item {
     /**
      * 值
      *
-     * @see DataValues#get2ByteValue()
+     * @see IDataValues#get2ByteValue()
      */
     public byte value;
 

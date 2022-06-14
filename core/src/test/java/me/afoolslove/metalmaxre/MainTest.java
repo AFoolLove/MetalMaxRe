@@ -2,8 +2,8 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
+import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
-import me.afoolslove.metalmaxre.editors.map.IMapEntranceEditor;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
@@ -81,8 +81,8 @@ public class MainTest {
 
         editorManager.loadEditors().get();
 
-        IMapEntranceEditor mapEntranceEditor = editorManager.getEditor(IMapEntranceEditor.class);
-        mapEntranceEditor.getMapEntrance(1).getBorder().get(0).offsetX(1);
+        IDataValueEditor iDataValueEditor = editorManager.getEditor(IDataValueEditor.class);
+        iDataValueEditor.getValues().put(0, 6);
 
         editorManager.applyEditors().get();
 

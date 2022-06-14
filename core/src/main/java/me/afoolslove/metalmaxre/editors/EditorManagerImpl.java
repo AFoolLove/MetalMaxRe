@@ -7,6 +7,8 @@ import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.computer.vendor.IVendorEditor;
 import me.afoolslove.metalmaxre.editors.computer.vendor.VendorEditorImpl;
+import me.afoolslove.metalmaxre.editors.data.DataValueEditorImpl;
+import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.items.ItemEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.*;
@@ -97,6 +99,7 @@ public class EditorManagerImpl implements IEditorManager {
             }
         });
         register(ITileSetEditor.class, TileSetEditorImpl::new);
+        register(IDataValueEditor.class, DataValueEditorImpl::new);
     }
 
     @Override

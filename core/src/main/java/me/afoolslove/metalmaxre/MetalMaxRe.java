@@ -4,7 +4,6 @@ import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.IEditorManager;
 import me.afoolslove.metalmaxre.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * @author AFoolLove

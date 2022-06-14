@@ -1,7 +1,7 @@
 package me.afoolslove.metalmaxre.editors.tank;
 
 import me.afoolslove.metalmaxre.AttackRange;
-import me.afoolslove.metalmaxre.DataValues;
+import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -32,7 +32,7 @@ public class TankWeapon extends TankEquipmentItem {
     /**
      * 设置攻击力
      *
-     * @see DataValues#get2ByteValue()
+     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
      */
     public void setAttack(@Range(from = 0x00, to = 0xFF) int attack) {
         value = (byte) (attack & 0xFF);
@@ -126,7 +126,7 @@ public class TankWeapon extends TankEquipmentItem {
 
     /**
      * @return 攻击力
-     * @see DataValues#get2ByteValue()
+     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
      */
     public byte getAttack() {
         return value;
@@ -134,10 +134,10 @@ public class TankWeapon extends TankEquipmentItem {
 
     /**
      * @return 指向的真实攻击力值
-     * @see DataValues#get2ByteValue()
+     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
      */
-    public int getAttackValue() {
-        return DataValues.VALUES.get(value & 0xFF);
+    public int getAttackValue(@NotNull IDataValueEditor dataValues) {
+        return dataValues.getValues().get(value & 0xFF).intValue();
     }
 
     /**
