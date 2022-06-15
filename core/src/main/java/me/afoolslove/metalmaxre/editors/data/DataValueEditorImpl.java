@@ -15,10 +15,11 @@ import java.util.Map;
  * <p>
  * 0x47 - 0xAB为2byte数据
  * <p>
- * 0xAC - ???为3byte数据，3byte数据经过多个计算后得出，暂时没有追溯
+ * 0xAC - 0xD0为3byte数据，但视作为2byte数据操作
  * <p>
+ * 0xD1 - 0xE8为3byte数据，经过((x08*A)+(x09*0x100*A))计算后得出
  * <p>
- * 目前只能修改1byte和2byte的数据值，3byte只能读取不能修改
+ * *超过范围(0x00-0xE8)后不能保证数据准确性
  * <p>
  * *0x47和0x46有交集，0x46作为0x47的低位byte
  *
@@ -67,8 +68,15 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
         getBuffer().get(get3ByteAddress(), x3Bytes);
 
         for (int i = 0; i < get3ByteMaxCount(); i++) {
-            byte[] data = EE41((byte) getValues().size(), x3Bytes);
-            getValues().put(getValues().size(), NumberR.toInt(data[0], data[1], data[2]));
+            if (i < 0x24) {
+                // 前0x24个数据值虽然属于3byte，但会被当作2byte使用，实际上也是2byte
+                getValues().put(getValues().size(), NumberR.toInt(x3Bytes[i * 2], x3Bytes[(i * 2) + 1]));
+            } else {
+                final int A = 0x0A; // 程序中写死的值
+                int x08 = x3Bytes[i * 2] & 0xFF;
+                int x09 = x3Bytes[(i * 2) + 1] & 0xFF;
+                getValues().put(getValues().size(), (x08 * A) + (x09 * 0x100 * A));
+            }
         }
     }
 
@@ -86,124 +94,29 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
             x2Bytes[((entry.getKey() - get1ByteMaxCount()) * 2) + 1] = data[1];
         }
 
-//        byte[] x3Bytes = new byte[get3ByteMaxCount() * 2];
+        byte[] x3Bytes = new byte[get3ByteMaxCount() * 2];
+        for (Map.Entry<Integer, Number> entry : get3ByteValues().entrySet()) {
+            int index = entry.getKey() - (get1ByteMaxCount() + get2ByteMaxCount());
+            if (index < 0x24) {
+                // 前0x24个数据值虽然属于3byte，但会被当作2byte使用，实际上也是2byte
+                var value = NumberR.toByteArray(entry.getValue().intValue(), 2, false);
+                x3Bytes[index * 2] = value[0];
+                x3Bytes[(index * 2) + 1] = value[1];
+                continue;
+            }
+
+            final int A = 0x0A;  // 程序中写死的值
+            var value = entry.getValue().intValue();
+            int x09 = value / (0x100 * A); // 得到 x09
+            int x08 = (value - (x09 * 0x100 * A)) / A; // 得到 x08
+
+            x3Bytes[index * 2] = (byte) x08;
+            x3Bytes[(index * 2) + 1] = (byte) x09;
+        }
 
         getBuffer().put(get1ByteAddress(), x1Bytes);
         getBuffer().put(get2ByteAddress(), x2Bytes);
-//        getBuffer().put(get3ByteAddress(), x3Bytes);
-    }
-
-    private static byte[] EE41(byte A, byte[] x81FA) {
-        // A寄存器储存数据值的key
-        // X寄存器储存物品ID（但是会被初始化为0）
-        // Y寄存器未知
-        byte X, Y;
-
-        // $00-$02储存3byte的数据值，初始化为0
-        int x00 = 0, x01 = 0, x02 = 0;
-
-        int x80EA = 0x80EA; // 1byte数据值使用
-        int x8130 = 0x8130, x8131 = 0x8131; // 2byte数据值使用
-
-        // 3byte数据值使用
-        int x08 = 0, x09 = 0;
-//        int x81FA = 0x81FA, x81FB = 0x81FB;
-
-        // 数据值key与0x47对比
-        if ((A & 0xFF) < 0x47) {
-            // 数据值key小于0x47
-            X = A;
-            A = (byte) (x80EA + X); // 这里是获取目标内存地址的值，不是内存地址
-            x00 = A;
-            return new byte[]{(byte) x00, (byte) x01, (byte) x02}; // 单字节的数据值结束
-        } else {
-            // 数据值key大于或等于0x47
-            // 数据值key与0xAC对比
-            if ((A & 0xFF) < 0xAC) {
-                // 数据值key小于0xAC
-                A -= 0x47;
-                A <<= 1;
-                X = A;
-                x00 = x8130 + X;
-                x01 = x8131 + X;
-                return new byte[]{(byte) x00, (byte) x01, (byte) x02}; // 双字节的数据值结束
-            } else {
-                // 数据值key大于或等于0xAC
-                A -= 0xAC;
-                A <<= 1;
-                X = A;
-                A = x81FA[X];
-//                A = (byte) 0xD6;
-                x00 = A;
-                x08 = A;
-                A = x81FA[X + 1];
-//                A = (byte) 0x1F;
-                x01 = A;
-                x09 = A;
-
-                if ((X & 0xFF) < 0x48) {
-                    // 直接结束
-                    return new byte[]{(byte) x00, (byte) x01, (byte) x02};
-                }
-                A = 0x0A;
-                x00 = A;
-                byte[] bs = D654(x08, x09, x00);
-                x00 = bs[0];
-                x01 = bs[1];
-                x02 = bs[2];
-                return bs;
-            }
-        }
-    }
-
-    private static byte[] D654(int x08, int x09, int x00) {
-        int A, X, Y; // 寄存器
-
-        int x0E, x0F, x10; // 这个函数会使用的内存地址
-
-        A = 0;
-        x0E = A;
-        x0F = A;
-        x10 = A;
-
-        X = 0x08;
-        do { // D660 循环X次
-            boolean C = (x00 & 0B0000_0001) == 1; // C标志位，x00右移一位后的状态
-            x00 >>>= 1;
-            if (C) {
-                x0F += (x08 & 0xFF);
-
-                x10 += (x09 & 0xFF) + (x0F / 0x100); // x0F超过0x100后x10会+1
-
-                x0F %= 0x100;
-                x10 %= 0x100;
-            }
-            // D671
-
-            C = (x10 & 0B0000_0001) == 1;
-            x10 >>>= 1;
-
-            // TODO ROR右旋逻辑错误
-
-            // ROR右旋 x0F
-            boolean C1 = (x0F & 0B0000_0001) == 1; // 右旋结束后的C标志位状态
-            x0F >>>= 1;
-            if (C) {
-                x0F |= 0B1000_0000;
-            }
-            C = C1;
-            // ROR右旋结束 x0F
-
-            // ROR右旋 x0E
-            C1 = (x0E & 0B0000_0001) == 1; // 右旋结束后的C标志位状态
-            x0E >>>= 1;
-            if (C) {
-                x0E |= 0B1000_0000;
-            }
-            C = C1;
-            // ROR右旋结束 x0E
-        } while (--X != 0);
-        return new byte[]{(byte) x0E, (byte) x0F, (byte) x10};
+        getBuffer().put(get3ByteAddress(), x3Bytes);
     }
 
     @Override

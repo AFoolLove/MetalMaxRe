@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
+import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
@@ -83,6 +84,8 @@ public class MainTest {
 
         IDataValueEditor iDataValueEditor = editorManager.getEditor(IDataValueEditor.class);
         iDataValueEditor.getValues().put(0, 6);
+        IItemEditor iItemEditor = editorManager.getEditor(IItemEditor.class);
+        iItemEditor.getItem(0x2A).setPrice(0xD0);
 
         editorManager.applyEditors().get();
 
