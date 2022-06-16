@@ -187,6 +187,20 @@ public class EditorManagerImpl implements IEditorManager {
                             }
                         }
                     }
+
+                    // 确保被移除的编辑器（first）不是其它编辑器的前置
+                    var iterator = tmpList.iterator();
+                    isPre:
+                    while (iterator.hasNext()) {
+                        var next = iterator.next();
+                        for (Class<?> parameterType : next.getValue().getParameterTypes()) {
+                            if (first.getKey() == parameterType) {
+                                // 放在末尾，等待后面的编辑器将其作为前置移除
+                                tmpList.addLast(first);
+                                break isPre;
+                            }
+                        }
+                    }
                 }
 
                 if (nextEditors.isEmpty()) {
@@ -270,6 +284,20 @@ public class EditorManagerImpl implements IEditorManager {
                                 iterator.remove();
                                 nextEditors.add(next);
                                 break;
+                            }
+                        }
+                    }
+
+                    // 确保被移除的编辑器（first）不是其它编辑器的前置
+                    var iterator = tmpList.iterator();
+                    isPre:
+                    while (iterator.hasNext()) {
+                        var next = iterator.next();
+                        for (Class<?> parameterType : next.getValue().getParameterTypes()) {
+                            if (first.getKey() == parameterType) {
+                                // 放在末尾，等待后面的编辑器将其作为前置移除
+                                tmpList.addLast(first);
+                                break isPre;
                             }
                         }
                     }
