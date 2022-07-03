@@ -74,7 +74,7 @@ public class DogSystemEditorImpl extends AbstractEditor implements IDogSystemEdi
 
         // 读取x和y并储存
         final byte[][] points = new byte[2][getTownMaxCount()];
-        getBuffer().getAABytes(getTownLocationsAddress().getStartAddress(), 0, getTownMaxCount(), points);
+        getBuffer().getAABytes(getTownLocationsAddress(), 0, getTownMaxCount(), points);
         for (int i = 0; i < getTownMaxCount(); i++) {
             getTownLocation(i).setCamera(points[0][i], points[1][i]);
         }
@@ -126,7 +126,7 @@ public class DogSystemEditorImpl extends AbstractEditor implements IDogSystemEdi
             townPoints[0][i] = townLocation.getCameraX();
             townPoints[1][i] = townLocation.getCameraY();
         }
-        getBuffer().putAABytes(getTownLocationsAddress().getStartAddress(), 0, getTownMaxCount(), townPoints);
+        getBuffer().putAABytes(getTownLocationsAddress(), 0, getTownMaxCount(), townPoints);
 
         // map
         final byte[] teleportMaps = new byte[getTeleportMaxCount() - 0x03];

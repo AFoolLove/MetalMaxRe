@@ -93,8 +93,8 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
         // 读取坦克的底盘重量
         position(getTankInitChassisWeightsAddress());
-        for (int noTank = 0; noTank < Tank.PLAYER_TANK_COUNT; noTank++) {
-            tankInitialAttributes[noTank].setWeight(NumberR.toInt(getBuffer().get(), getBuffer().get()));
+        for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
+            tankInitialAttributes[playerTank].setWeight(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
 
         // 读取出租坦克的底盘重量（2byte）
@@ -109,8 +109,8 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
         // 读取坦克的初始SP
         position(getTankInitSPAddress());
-        for (int noTank = 0; noTank < Tank.PLAYER_TANK_COUNT; noTank++) {
-            tankInitialAttributes[noTank].setSp(NumberR.toInt(getBuffer().get(), getBuffer().get()));
+        for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
+            tankInitialAttributes[playerTank].setSp(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
 
         // 读取坦克的初始坐标
@@ -135,7 +135,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     public void onApply(@NotNull ByteBuffer buffer) {
         // 写入初始属性
 
-        TankInitialAttribute[] tankInitialAttributes = new TankInitialAttribute[Tank.values().length];
+        TankInitialAttribute[] tankInitialAttributes = new TankInitialAttribute[Tank.ALL_COUNT];
         for (Map.Entry<Tank, TankInitialAttribute> entry : getTankInitAttributes().entrySet()) {
             tankInitialAttributes[entry.getKey().getId() & 0xFF] = entry.getValue();
         }
@@ -160,8 +160,8 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
         // 写入坦克的底盘重量
         position(getTankInitChassisWeightsAddress());
-        for (int noTank = 0; noTank < Tank.PLAYER_TANK_COUNT; noTank++) {
-            getBuffer().put(tankInitialAttributes[noTank].getWeightByteArray());
+        for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
+            getBuffer().put(tankInitialAttributes[playerTank].getWeightByteArray());
         }
 
         // 写入出租坦克的底盘重量（2byte）
@@ -176,8 +176,8 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
         // 写入坦克的初始SP
         position(getTankInitSPAddress());
-        for (int noTank = 0; noTank < Tank.PLAYER_TANK_COUNT; noTank++) {
-            getBuffer().put(tankInitialAttributes[noTank].getSpByteArray());
+        for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
+            getBuffer().put(tankInitialAttributes[playerTank].getSpByteArray());
         }
 
         // 写入坦克的初始坐标

@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.utils.DataAddress;
-import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -459,6 +458,14 @@ public class RomBuffer implements AutoCloseable, Closeable {
         put(index, tmp, offset, tmp.length);
     }
 
+    public void getWholeBytes(@NotNull DataAddress address, int offset, int length, byte[]... aaBytes) {
+        getWholeBytes(address.getAbsStartAddress(this), offset, length, aaBytes);
+    }
+
+    public void putWholeBytes(@NotNull DataAddress address, int offset, int length, byte[]... aaBytes) {
+        putWholeBytes(address.getAbsStartAddress(this), offset, length, aaBytes);
+    }
+
     /**
      * 获取相同大小的数据到数组中
      * <p>
@@ -474,6 +481,14 @@ public class RomBuffer implements AutoCloseable, Closeable {
         for (int i = 0; i < aaBytes.length; i++) {
             put(index + (i * length), aaBytes[i], offset, length);
         }
+    }
+
+    public void getAABytes(@NotNull DataAddress address, int offset, int length, byte[]... aaBytes) {
+        getAABytes(address.getAbsStartAddress(this), offset, length, aaBytes);
+    }
+
+    public void putAABytes(@NotNull DataAddress address, int offset, int length, byte[]... aaBytes) {
+        putAABytes(address.getAbsStartAddress(this), offset, length, aaBytes);
     }
 
 

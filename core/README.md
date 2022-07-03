@@ -62,6 +62,11 @@ editorManager.save(Path);
 
 ~~~
 
+## 继承一个编辑器
+
+如果你只是想在已有的编辑器上添加一些功能  
+需要重写定义 ```@Editor.Load``` 和 ```@Editor.Apply```注解到相应的方法中
+
 ## 创建一个编辑器
 
 * 继承抽象类 [AbstractEditor](src/main/java/me/afoolslove/metalmaxre/editors/AbstractEditor.java)
@@ -82,28 +87,28 @@ editorManager.save(Path);
 
 ~~~java
 class TestEventListener implements EventListener {
-    public void test(EditorLoadEvent.Pre event) {
-        System.out.println(String.format("准备加载编辑器[%s]", event.getEditor().getClass().getSimpleName()));
-    }
+  public void test(EditorLoadEvent.Pre event) {
+    System.out.println(String.format("准备加载编辑器[%s]", event.getEditor().getClass().getSimpleName()));
+  }
 
-    public void test(EditorLoadEvent.Post event) {
-        System.out.println(String.format("加载编辑器[%s]完毕", event.getEditor().getClass().getSimpleName()));
-    }
+  public void test(EditorLoadEvent.Post event) {
+    System.out.println(String.format("加载编辑器[%s]完毕", event.getEditor().getClass().getSimpleName()));
+  }
 }
 
 class Main {
-    public static void main(String[] args) {
-        RomBuffer buffer = new RomBuffer((RomVersion.getChinese(), null));
-        MetalMaxRe metalMaxRe = new MetalMaxRe(buffer);
-        metalMaxRe.useDefault();
-        // ---------------- 注册事件监听器
-        TestEventListener eventListener = new TestEventListener();
-        metalMaxRe.getEventHandler().register(eventListener);
+  public static void main(String[] args) {
+    RomBuffer buffer = new RomBuffer(RomVersion.getChinese(), null);
+    MetalMaxRe metalMaxRe = new MetalMaxRe(buffer);
+    metalMaxRe.useDefault();
+    // ---------------- 注册事件监听器
+    TestEventListener eventListener = new TestEventListener();
+    metalMaxRe.getEventHandler().register(eventListener);
 
-        EditorManagerImpl editorManager = metalMaxRe.getEditorManager();
-        editorManager.registerDefaultEditors();
-        editorManager.loadEditors();
-    }
+    EditorManagerImpl editorManager = metalMaxRe.getEditorManager();
+    editorManager.registerDefaultEditors();
+    editorManager.loadEditors();
+  }
 }
 ~~~
 

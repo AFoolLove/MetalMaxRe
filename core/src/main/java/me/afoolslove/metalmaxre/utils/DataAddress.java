@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.utils;
 
+import me.afoolslove.metalmaxre.RomBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 public class DataAddress extends SingleMapEntry<Integer, Integer> {
     public enum Type {
         PRG,
-        CHR;
+        CHR
     }
 
     private Type type;
@@ -96,6 +97,27 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
     }
 
     /**
+     * 获取起始地址偏移后的地址
+     *
+     * @return 起始地址偏移后的地址
+     */
+    public int getStartAddress(int offset) {
+        return getStartAddress() + offset;
+    }
+
+    /**
+     * 获取实际起始地址，包含头长度等
+     *
+     * @return 实际起始地址
+     */
+    public int getAbsStartAddress(@NotNull RomBuffer buffer) {
+        return switch (getType()) {
+            case PRG -> buffer.getHeader().getPrgRomStart(getStartAddress());
+            case CHR -> buffer.getHeader().getChrRomStart(getStartAddress());
+        };
+    }
+
+    /**
      * 设置结束地址
      *
      * @param endAddress 结束地址
@@ -112,6 +134,27 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
      */
     public int getEndAddress() {
         return getValue();
+    }
+
+    /**
+     * 获取结束地址偏移后的地址
+     *
+     * @return 结束地址偏移后的地址
+     */
+    public int getEndAddress(int offset) {
+        return getValue() + offset;
+    }
+
+    /**
+     * 获取实际结束地址，包含头长度等
+     *
+     * @return 实际结束地址
+     */
+    public int getAbsEndAddress(@NotNull RomBuffer buffer) {
+        return switch (getType()) {
+            case PRG -> buffer.getHeader().getPrgRomStart(getEndAddress());
+            case CHR -> buffer.getHeader().getChrRomStart(getEndAddress());
+        };
     }
 
     /**
@@ -180,6 +223,7 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
         }
         return new DataAddress(Type.CHR, start, end);
     }
+
     public static DataAddress fromCHR(int start) {
         return new DataAddress(Type.CHR, start, null);
     }

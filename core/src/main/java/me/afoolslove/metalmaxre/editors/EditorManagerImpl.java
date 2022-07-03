@@ -11,13 +11,8 @@ import me.afoolslove.metalmaxre.editors.data.DataValueEditorImpl;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.items.ItemEditorImpl;
-import me.afoolslove.metalmaxre.editors.map.*;
-import me.afoolslove.metalmaxre.editors.map.events.EventTilesEditorImpl;
-import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
-import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
-import me.afoolslove.metalmaxre.editors.map.tileset.TileSetEditorImpl;
-import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
-import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
+import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
+import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
 import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
 import me.afoolslove.metalmaxre.editors.palette.PaletteEditorImpl;
 import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
@@ -74,32 +69,41 @@ public class EditorManagerImpl implements IEditorManager {
 
     public void registerDefaultEditors() {
         register(IComputerEditor.class, ComputerEditorImpl::new);
-        register(IDogSystemEditor.class, DogSystemEditorImpl::new);
-        register(ITreasureEditor.class, TreasureEditorImpl::new);
-        register(ISpriteEditor.class, SpriteEditorImpl::new);
-        register(IItemEditor.class, ItemEditorImpl::new);
-        register(IPlayerEditor.class, PlayerEditorImpl::new);
-        register(IPlayerExpEditor.class, PlayerExpEditorImpl::new);
-        register(ITankEditor.class, TankEditorImpl::new);
-        register(IPaletteEditor.class, PaletteEditorImpl::new);
         register(IVendorEditor.class, VendorEditorImpl::new);
-
-        register(IMapEditor.class, MapEditorImpl::new);
-        register(IMapPropertiesEditor.class, MapPropertiesEditorImpl::new);
-        register(IEventTilesEditor.class, EventTilesEditorImpl::new);
-        register(IWorldMapEditor.class, WorldMapEditorImpl::new);
-        register(IMapEntranceEditor.class, metalMaxRe -> {
+        register(IDataValueEditor.class, DataValueEditorImpl::new);
+        register(IItemEditor.class, ItemEditorImpl::new);
+        register(IDogSystemEditor.class, DogSystemEditorImpl::new);
+        register(IPaletteEditor.class, metalMaxRe -> {
             var version = metalMaxRe.getBuffer().getVersion();
-            if (version == RomVersion.getSuperHack()) {
-                return new MapEntranceEditorImpl.SHMapEntranceEditorImpl(metalMaxRe);
-            } else if (version == RomVersion.getSuperHackGeneral()) {
-                return new MapEntranceEditorImpl.SHGMapEntranceEditorImpl(metalMaxRe);
+            if (version == RomVersion.getJapanese()) {
+                return new PaletteEditorImpl.JPaletteEditorImpl(metalMaxRe);
+            } else if (version == RomVersion.getSuperHack()) {
+                return new PaletteEditorImpl.SHPaletteEditorImpl(metalMaxRe);
             } else {
-                return new MapEntranceEditorImpl(metalMaxRe);
+                return new PaletteEditorImpl(metalMaxRe);
             }
         });
-        register(ITileSetEditor.class, TileSetEditorImpl::new);
-        register(IDataValueEditor.class, DataValueEditorImpl::new);
+        register(IPlayerEditor.class, PlayerEditorImpl::new);
+        register(IPlayerExpEditor.class, PlayerExpEditorImpl::new);
+        register(ISpriteEditor.class, SpriteEditorImpl::new);
+        register(ITankEditor.class, TankEditorImpl::new);
+        register(ITreasureEditor.class, TreasureEditorImpl::new);
+//        register(IMapEditor.class, MapEditorImpl::new);
+//        register(IMapPropertiesEditor.class, MapPropertiesEditorImpl::new);
+//        register(IEventTilesEditor.class, EventTilesEditorImpl::new);
+//        register(IWorldMapEditor.class, WorldMapEditorImpl::new);
+        // TODO 出入口编辑器 存在写入错误，暂时不使用
+//        register(IMapEntranceEditor.class, metalMaxRe -> {
+//            var version = metalMaxRe.getBuffer().getVersion();
+//            if (version == RomVersion.getSuperHack()) {
+//                return new MapEntranceEditorImpl.SHMapEntranceEditorImpl(metalMaxRe);
+//            } else if (version == RomVersion.getSuperHackGeneral()) {
+//                return new MapEntranceEditorImpl.SHGMapEntranceEditorImpl(metalMaxRe);
+//            } else {
+//                return new MapEntranceEditorImpl(metalMaxRe);
+//            }
+//        });
+//        register(ITileSetEditor.class, TileSetEditorImpl::new);
     }
 
     @Override

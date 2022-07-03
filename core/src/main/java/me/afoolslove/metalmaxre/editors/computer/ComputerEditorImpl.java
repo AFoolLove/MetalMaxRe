@@ -56,7 +56,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         // data[2] = x
         // data[3] = y
         byte[][] data = new byte[4][getMaxCount()];
-        getBuffer().getAABytes(getComputerAddress().getStartAddress(), 0, getMaxCount(), data);
+        getBuffer().getAABytes(getComputerAddress(), 0, getMaxCount(), data);
 
         for (int i = 0; i < getMaxCount(); i++) {
             getComputers().add(new Computer(data[0][i], data[1][i], data[2][i], data[3][i]));

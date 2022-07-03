@@ -10,9 +10,7 @@ import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -37,7 +35,7 @@ import java.util.Map;
  * <p>
  * 支持世界地图的部分属性 {@link WorldMapProperties}
  * <p>
- * 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
+ * 地图属性索引不需要且不建议被编辑！！所以不提供修改功能！！
  *
  * @author AFoolLove
  */
@@ -92,8 +90,8 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         properties[0x05] = getBuffer().getPrg(0x28A95 - 0x10);
         properties[0x06] = properties[0x05];
         // 世界地图的出入口初始地址
-        properties[0x0B] = (byte) 0x80;
-        properties[0x0C] = (byte) 0x89;
+        properties[0x0B] = getBuffer().getPrg(0x28ABB - 0x10); // 默认 0x80
+        properties[0x0C] = getBuffer().getPrg(0x28ABF - 0x10); // 默认 0x89
         // 读取事件图块索引
         properties[0x1A] = getBuffer().getPrg(0x28AC3 - 0x10);
         properties[0x1B] = getBuffer().getPrg(0x28AC7 - 0x10);
@@ -139,6 +137,12 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
                 mapProperties.monsterGroupIndex = getBuffer().get();
             }
             this.mapProperties.put(mapId, mapProperties);
+
+//            System.out.format("%02X : %05X [", mapId, mapPropertiesOffset + index);
+//            for (byte b : mapProperties.toByteArray()) {
+//                System.out.format("%02X ", b);
+//            }
+//            System.out.println();
         }
 
         // 读取重定向的条件数据和地图
@@ -159,16 +163,16 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
     @Editor.Apply
     public void onApply(IMapEditor mapEditor,
                         IPaletteEditor paletteEditor,
-                        @Editor.QuoteOnly IEventTilesEditor eventTilesEditor,
-                        @Editor.QuoteOnly MapEntranceEditorImpl mapEntranceEditor) {
+                        IEventTilesEditor eventTilesEditor,
+                        IMapEntranceEditor mapEntranceEditor) {
         // 写入地图属性索引，上卷 0x40、下卷 0xB0
         // 地图属性索引不建议被编辑！！所以不提供修改功能！！
 
         // 将地图属性整合为写入的格式，index=0无效
         byte[][] properties = new byte[mapEditor.getMapMaxCount() + 1][];
-        for (Map.Entry<Integer, MapProperties> entry : mapProperties.entrySet()) {
+        for (Map.Entry<Integer, MapProperties> entry : getMapProperties().entrySet()) {
             // 排除世界地图
-            if ((!(entry.getValue() instanceof WorldMapProperties))) {
+            if (!(entry.getValue() instanceof WorldMapProperties)) {
                 properties[entry.getKey()] = entry.getValue().toByteArray();
             }
         }
@@ -176,7 +180,8 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // K: properties hashCode
         // V: propertiesIndex
         // 通过hash判断地图属性是否重复，根据已重复的地图进行索引到已有的数据
-        Map<Integer, Character> mapping = new HashMap<>();
+        // 根据顺序写如地图属性
+        LinkedHashMap<Integer, SingleMapEntry<Character, byte[]>> mapping = new LinkedHashMap<>();
 //        char[] mapIndexRoll = new char[0x40 + 0xB0];
 
         position(getMapPropertiesIndexUpRollAddress());
@@ -188,14 +193,14 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         char mapPropertiesIndex = 0x8500;
         for (int i = 0x01; i < 0x40; i++) {
             int hashCode = Arrays.hashCode(properties[i]);
-            Character character = mapping.get(hashCode);
-            if (character != null) {
+            var entry = mapping.get(hashCode);
+            if (entry != null) {
                 // 如果有相同的地图属性索引，则索引到同一个位置
 //                mapIndexRoll[i] = character;
-                getBuffer().putChar(NumberR.toChar(character));
+                getBuffer().putChar(NumberR.toChar(entry.getKey()));
             } else {
                 // 如果是新的地图属性，就设置地图属性索引和写入地图属性
-                mapping.put(hashCode, mapPropertiesIndex);
+                mapping.put(hashCode, SingleMapEntry.create(mapPropertiesIndex, properties[i]));
 //                mapIndexRoll[i] = mapPropertiesIndex;
                 getBuffer().putChar(NumberR.toChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
@@ -205,14 +210,14 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         position(getMapPropertiesIndexDownRollAddress());
         for (int i = 0x40; i < (0x40 + 0xB0); i++) {
             int hashCode = Arrays.hashCode(properties[i]);
-            Character character = mapping.get(hashCode);
-            if (character != null) {
+            var entry = mapping.get(hashCode);
+            if (entry != null) {
                 // 如果有相同的地图属性索引，则索引到同一个位置
 //                mapIndexRoll[i] = character;
-                getBuffer().putChar(NumberR.toChar(character));
+                getBuffer().putChar(NumberR.toChar(entry.getKey()));
             } else {
                 // 如果是新的地图属性，就设置地图属性索引和写入地图属性
-                mapping.put(hashCode, mapPropertiesIndex);
+                mapping.put(hashCode, SingleMapEntry.create(mapPropertiesIndex, properties[i]));
 //                mapIndexRoll[i] = mapPropertiesIndex;
                 getBuffer().putChar(NumberR.toChar(mapPropertiesIndex));
                 mapPropertiesIndex += properties[i].length;
@@ -252,8 +257,8 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
 
         // 写入地图属性
         position(getMapPropertiesAddress());
-        for (int i = 0x01; i < properties.length - 1; i++) {
-            getBuffer().put(properties[i]);
+        for (SingleMapEntry<Character, byte[]> entry : mapping.values()) {
+            getBuffer().put(entry.getValue());
         }
 
         // 写入世界地图属性
@@ -264,6 +269,9 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         getBuffer().putPrg(0x28A8D - 0x10, worldMapProperties.movableWidthOffset);
         // 写入可移动区域，同上
         getBuffer().putPrg(0x28A95 - 0x10, worldMapProperties.movableWidth);
+        // 写入出入口初始地址
+        getBuffer().putPrg(0x28ABB - 0x10, NumberR.at(worldMapProperties.entrance, 0)); // 默认 0x80
+        getBuffer().putPrg(0x28ABF - 0x10, NumberR.at(worldMapProperties.entrance, 1)); // 默认 0x89
         // 写入事件图块索引
         getBuffer().putPrg(0x28AC3 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 0));
         getBuffer().putPrg(0x28AC7 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 1));

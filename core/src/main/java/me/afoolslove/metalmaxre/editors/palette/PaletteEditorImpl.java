@@ -178,4 +178,47 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
 //        MapPropertiesEditor mapPropertiesEditor = EditorManager.getEditor(MapPropertiesEditor.class);
 //        return getPalettes(mapPropertiesEditor.getMapProperties(map).palette);
 //    }
+
+
+    public static class JPaletteEditorImpl extends PaletteEditorImpl {
+        public JPaletteEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+            super(metalMaxRe,
+                    DataAddress.fromPRG(0x1DAE0 - 0x10, 0x1DCCE - 0x10),
+                    DataAddress.fromPRG(0x3D737 - 0x10, 0x3D746 - 0x10),
+                    DataAddress.fromPRG(0x22B66 - 0x10, 0x22B71 - 0x10));
+        }
+
+        @Editor.Load
+        @Override
+        public void onLoad() {
+            super.onLoad();
+        }
+
+        @Editor.Apply
+        @Override
+        public void onApply() {
+            super.onApply();
+        }
+    }
+
+    public static class SHPaletteEditorImpl extends PaletteEditorImpl {
+        public SHPaletteEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+            super(metalMaxRe,
+                    DataAddress.fromPRG(0x1DAE0 - 0x10, 0x1DCCE - 0x10),
+                    DataAddress.fromPRG(0x81737 - 0x10, 0x81746 - 0x10),
+                    DataAddress.fromPRG(0x22B66 - 0x10, 0x22B71 - 0x10));
+        }
+
+        @Editor.Load
+        @Override
+        public void onLoad() {
+            super.onLoad();
+        }
+
+        @Editor.Apply
+        @Override
+        public void onApply() {
+            super.onApply();
+        }
+    }
 }
