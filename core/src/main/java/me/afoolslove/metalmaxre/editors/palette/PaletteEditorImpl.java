@@ -22,6 +22,7 @@ import java.util.List;
  *
  * @author AFoolLove
  */
+@Editor.TargetVersions
 public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements IPaletteEditor {
     private final DataAddress paletteAddress;
     private final DataAddress globalSpritePalettesAddress;
@@ -180,6 +181,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
 //    }
 
 
+    @Editor.TargetVersion("japanese")
     public static class JPaletteEditorImpl extends PaletteEditorImpl {
         public JPaletteEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe,
@@ -201,6 +203,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
     }
 
+    @Editor.TargetVersion({"super_hack", "super_hack_general"})
     public static class SHPaletteEditorImpl extends PaletteEditorImpl {
         public SHPaletteEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe,

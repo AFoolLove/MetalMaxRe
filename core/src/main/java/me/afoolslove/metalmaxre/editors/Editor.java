@@ -50,6 +50,27 @@ public @interface Editor {
         Class<? extends IRomEditor>[] value() default {};
     }
 
+    /**
+     * 会在目标类的内部类中查找 {@link TargetVersion}，默认和未找到时使用当前类
+     * <p>
+     * *只能适用于实现 {@link IRomEditor} 的编辑器
+     */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface TargetVersions {
+    }
+
+    /**
+     * 编辑器的目标版本
+     * <p>
+     * *只能适用于实现 {@link IRomEditor} 的编辑器
+     */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface TargetVersion {
+        String[] value();
+    }
+
     enum Type {
         PRE,
         LOAD,

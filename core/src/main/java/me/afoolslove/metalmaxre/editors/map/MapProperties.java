@@ -40,8 +40,8 @@ public class MapProperties {
     public static final int PROPERTIES_BASE_LENGTH = PROPERTIES_MAX_LENGTH - 2 - 2;
 
 
-    public byte head;
-    public byte width, height;
+    private byte head;
+    private byte width, height;
     public byte movableWidthOffset, movableHeightOffset;
     public byte movableWidth, movableHeight;
     public char mapIndex;
@@ -50,10 +50,10 @@ public class MapProperties {
     public char palette;
     public byte spriteIndex;
     public byte tilesIndexA, tilesIndexB, tilesIndexC, tilesIndexD;
-    public byte hideTile;
+    private byte hideTile;
     public byte unknown;
-    public byte fillTile;
-    public byte music;
+    private byte fillTile;
+    private byte music;
     /**
      * 可能不存在
      */
@@ -180,6 +180,24 @@ public class MapProperties {
     }
 
     /**
+     * 设置背景音乐
+     * <p>
+     * 进入该地图后切换音乐，如果与上一个地图的音乐一致，不会重新开始播放
+     *
+     * @param music 音乐
+     */
+    public void setMusic(byte music) {
+        this.music = music;
+    }
+
+    /**
+     * 设置地图的头属性
+     */
+    public void setHead(byte head) {
+        this.head = head;
+    }
+
+    /**
      * @return 地图的宽度
      */
     public byte getWidth() {
@@ -198,6 +216,7 @@ public class MapProperties {
         return height;
     }
 
+    @Range(from = 0x00, to = 0xFF)
     public int intHeight() {
         return getHeight() & 0xFF;
     }
@@ -224,6 +243,38 @@ public class MapProperties {
     @Range(from = 0x00, to = 0xFF)
     public int intHideTile() {
         return getHideTile() & 0xFF;
+    }
+
+    /**
+     * 获取当前地图的背景音乐
+     *
+     * @return 音乐
+     */
+    public byte getMusic() {
+        return music;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intMusic() {
+        return getMusic() & 0xFF;
+    }
+
+
+    /**
+     * 获取地图的头属性
+     *
+     * @return 地图的头属性
+     * @see #hasDyTile(int)
+     * @see #hasEventTile(int)
+     * @see #isUnderground(int)
+     */
+    public byte getHead() {
+        return head;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intHead() {
+        return getHead() & 0xFF;
     }
 
     public boolean hasEventTile() {

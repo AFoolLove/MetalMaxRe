@@ -19,6 +19,7 @@ import java.util.*;
  *
  * @author AFoolLove
  */
+@Editor.TargetVersions
 public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implements IMapEntranceEditor {
     private final DataAddress mapEntranceAddress;
 
@@ -43,9 +44,8 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         // 读取前清空数据
         getMapEntrances().clear();
 
-        for (Map.Entry<Integer, MapProperties> mapPropertiesEntry : mapPropertiesEditor.getMapProperties().entrySet()) {
-            Integer map = mapPropertiesEntry.getKey();
-            MapProperties mapProperties = mapPropertiesEntry.getValue();
+        for (int map = 0, maxMapCount = mapPropertiesEditor.getMapProperties().size(); map < maxMapCount; map++) {
+            MapProperties mapProperties = mapPropertiesEditor.getMapProperties(map);
 
             if (getMapEntrances().containsKey(map)) {
                 // 排除已读取的地图
@@ -56,6 +56,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             // 索引到数据
             // 兼容SH和SHG，只用0xFF000中的FF，后三个无用
             prgPosition((getMapEntranceAddress().getStartAddress() & 0xFF000) + mapProperties.entrance - 0x8000);
+//            System.out.printf("%02X. %05X ",map, position());
 
             int temp = getBuffer().getToInt();
 
@@ -100,8 +101,12 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     mapEntrance.getEntrances().put(entrances[i], new MapPoint(getBuffer().get(), getBuffer().get(), getBuffer().get()));
                 }
             }
+//            System.out.format("%05X\n", position());
+//            if (map != 0) {
+//                System.out.format("%02X. %02X\n", map, (mapProperties.entrance - mapPropertiesEditor.getMapProperties(map - 1).entrance) & 0xFF);
+//            }
 
-            System.out.format("%02X. %02X, %s\n", map, temp, Arrays.toString(mapEntrance.getEntrances().values().stream().map(Object::toString).toArray()));
+//            System.out.format("%02X. %02X, %s\n", map, temp, Arrays.toString(mapEntrance.getEntrances().values().stream().map(Object::toString).toArray()));
 
             // 设置所有使用此属性的地图
             mapPropertiesEditor.getMapProperties().entrySet().parallelStream()
@@ -114,10 +119,11 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
     }
 
     @Editor.Apply
-    public void onApply(@Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
+    public void onApply(@Editor.QuoteOnly IMapEditor mapEditor,
+                        @Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
         position(getMapEntranceAddress());
         // 将每个地图添加一个是否已经写入入口相关数据的标志
-        List<SingleMapEntry<Boolean, MapEntrance>> mapEntries = new ArrayList<>(getMapEntrances().size());
+        List<SingleMapEntry<Boolean, MapEntrance>> mapEntries = new ArrayList<>(mapEditor.getMapMaxCount());
         for (MapEntrance mapEntrance : getMapEntrances().values()) {
             mapEntries.add(SingleMapEntry.create(Boolean.FALSE, mapEntrance));
         }
@@ -134,7 +140,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
             var mapEntrance = singleMapEntry.getValue();
 
-            int currentPosition = position();
+            final int currentPosition = position();
             // 写入边界数据
             getBuffer().put(mapEntrance.getBorder().toByteArray());
 
@@ -170,7 +176,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             for (int j = i + 1; j < size; j++) {
                 // 更新后面相同地址的地图，并修改为已处理
                 var entry = mapEntries.get(j);
-                if (entry.getValue() == mapEntrance) {
+                if (!entry.getKey() && entry.getValue() == mapEntrance) {
                     mapPropertiesEditor.getMapProperties(j).entrance = newEntrance;
                     entry.setKey(Boolean.TRUE);
                 }
@@ -197,6 +203,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
     /**
      * SuperHack版本
      */
+    @Editor.TargetVersion("super_hack")
     public static class SHMapEntranceEditorImpl extends MapEntranceEditorImpl {
         public SHMapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, DataAddress.fromPRG(0x7E7B0 - 0x10));
@@ -210,14 +217,15 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
         @Override
         @Editor.Apply
-        public void onApply(IMapPropertiesEditor mapPropertiesEditor) {
-            super.onApply(mapPropertiesEditor);
+        public void onApply(@Editor.QuoteOnly IMapEditor mapEditor, @Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
+            super.onApply(mapEditor, mapPropertiesEditor);
         }
     }
 
     /**
      * SuperHack通用版本
      */
+    @Editor.TargetVersion("super_hack_general")
     public static class SHGMapEntranceEditorImpl extends MapEntranceEditorImpl {
         public SHGMapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, DataAddress.fromPRG(0x527B0 - 0x10));
@@ -231,8 +239,8 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
         @Override
         @Editor.Apply
-        public void onApply(IMapPropertiesEditor mapPropertiesEditor) {
-            super.onApply(mapPropertiesEditor);
+        public void onApply(@Editor.QuoteOnly IMapEditor mapEditor, @Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
+            super.onApply(mapEditor, mapPropertiesEditor);
         }
     }
 }

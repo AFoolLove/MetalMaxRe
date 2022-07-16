@@ -3,11 +3,13 @@ package me.afoolslove.metalmaxre.editors.map;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 地图编辑器
@@ -60,7 +62,7 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
 
             MapBuilder mapBuilder = new MapBuilder();
             // 获取地图图块所有数量
-            int size = (mapProperties.width & 0xFF) * (mapProperties.height & 0xFF);
+            int size = mapProperties.intWidth() * mapProperties.intHeight();
 
             // 通过地图属性的地图数据索引读取地图数据
             MapBuilder.parseMap(getBuffer(), position(), 0, bytes -> mapBuilder.getTileCount() < size, new Predicate<>() {
@@ -119,14 +121,14 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
 
         // K:mapID
         // V:mapData
-        var maps = new HashMap<Integer, byte[]>();
-        for (Integer map : indexMaps.values()) {
-            maps.put(map, getMap(map).build());
-        }
+        var maps = indexMaps.values().parallelStream()
+                .map(m -> SingleMapEntry.create(m, getMap(m).build()))
+                .collect(Collectors.toMap(SingleMapEntry::getKey, SingleMapEntry::getValue));
+
         // TODO 将地图数据放入 0x00610-0x0B6D3和0xBB010-0xBF00F 两个地址中（包含值），并将每个byte[]的起始地址记录下来
 
         for (Map.Entry<Integer, byte[]> entry : maps.entrySet()) {
-            MapProperties mapProperties = mapPropertiesEditor.getMapProperties().get(entry.getKey());
+            MapProperties mapProperties = mapPropertiesEditor.getMapProperties(entry.getKey());
             if (mapProperties instanceof WorldMapProperties) {
                 // 排除世界地图
                 continue;
@@ -135,7 +137,8 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
 
             // 定位到地图数据的起始地址
             if (mapIndex >= 0xC000) {
-                chrPosition(0x2F000 + mapIndex);
+                mapIndex = 0x2F000 + mapIndex;
+                chrPosition(mapIndex);
 //                int i = buffer.position() + entry.getValue().length;
 //                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
 //                if (i >= 0xBF010) {

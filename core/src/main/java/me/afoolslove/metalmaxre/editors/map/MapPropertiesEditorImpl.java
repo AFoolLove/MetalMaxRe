@@ -52,7 +52,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
     public MapPropertiesEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x0BE10 - 0x10, 0x0BE8F - 0x10),
-                DataAddress.fromPRG(0x1DEB0 - 0x10, 0x1E010 - 0x10),
+                DataAddress.fromPRG(0x1DEB0 - 0x10, 0x1E00F - 0x10),
                 DataAddress.fromPRG(0x0E510 - 0x10, 0x0FBBD - 0x10),
                 DataAddress.fromPRG(0x28707 - 0x10, 0x2870F - 0x10),
                 DataAddress.fromPRG(0x39343 - 0x10, 0x393B2 - 0x10));
@@ -264,7 +264,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // 写入世界地图属性
         MapProperties worldMapProperties = this.mapProperties.get(0x00);
         // 写入宽度、高度
-        getBuffer().putPrg(0x28A87 - 0x10, worldMapProperties.width);
+        getBuffer().putPrg(0x28A87 - 0x10, worldMapProperties.getWidth());
         // 写入可移动区域偏移量，同上
         getBuffer().putPrg(0x28A8D - 0x10, worldMapProperties.movableWidthOffset);
         // 写入可移动区域，同上

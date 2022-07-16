@@ -95,4 +95,17 @@ public class RomVersion {
     public List<String> getModifyRecords() {
         return modifyRecords;
     }
+
+    public String getId() {
+        return idFromInstance(this);
+    }
+
+    public static String idFromInstance(@NotNull RomVersion instance) {
+        for (Map.Entry<String, RomVersion> entry : VERSIONS.entrySet()) {
+            if (entry.getValue() == instance) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 }

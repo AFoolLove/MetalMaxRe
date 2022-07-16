@@ -2,7 +2,6 @@ package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
-import me.afoolslove.metalmaxre.RomVersion;
 import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.computer.vendor.IVendorEditor;
@@ -31,6 +30,8 @@ import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.*;
@@ -73,16 +74,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(IDataValueEditor.class, DataValueEditorImpl::new);
         register(IItemEditor.class, ItemEditorImpl::new);
         register(IDogSystemEditor.class, DogSystemEditorImpl::new);
-        register(IPaletteEditor.class, metalMaxRe -> {
-            var version = metalMaxRe.getBuffer().getVersion();
-            if (version == RomVersion.getJapanese()) {
-                return new PaletteEditorImpl.JPaletteEditorImpl(metalMaxRe);
-            } else if (version == RomVersion.getSuperHack()) {
-                return new PaletteEditorImpl.SHPaletteEditorImpl(metalMaxRe);
-            } else {
-                return new PaletteEditorImpl(metalMaxRe);
-            }
-        });
+        register(IPaletteEditor.class, PaletteEditorImpl.class);
         register(IPlayerEditor.class, PlayerEditorImpl::new);
         register(IPlayerExpEditor.class, PlayerExpEditorImpl::new);
         register(ISpriteEditor.class, SpriteEditorImpl::new);
@@ -93,16 +85,7 @@ public class EditorManagerImpl implements IEditorManager {
 //        register(IEventTilesEditor.class, EventTilesEditorImpl::new);
 //        register(IWorldMapEditor.class, WorldMapEditorImpl::new);
         // TODO 出入口编辑器 存在写入错误，暂时不使用
-//        register(IMapEntranceEditor.class, metalMaxRe -> {
-//            var version = metalMaxRe.getBuffer().getVersion();
-//            if (version == RomVersion.getSuperHack()) {
-//                return new MapEntranceEditorImpl.SHMapEntranceEditorImpl(metalMaxRe);
-//            } else if (version == RomVersion.getSuperHackGeneral()) {
-//                return new MapEntranceEditorImpl.SHGMapEntranceEditorImpl(metalMaxRe);
-//            } else {
-//                return new MapEntranceEditorImpl(metalMaxRe);
-//            }
-//        });
+//        register(IMapEntranceEditor.class, MapEntranceEditorImpl.class);
 //        register(ITileSetEditor.class, TileSetEditorImpl::new);
     }
 
@@ -111,10 +94,13 @@ public class EditorManagerImpl implements IEditorManager {
         if (editorBuilders.get(editorType) != null) {
             return;
         }
-        editorBuilders.put(editorType, builder);
-
         // 创建并储存编辑器实例
         var editor = builder.apply(getMetalMaxRe());
+        if (editor == null) {
+            throw new IllegalArgumentException(String.format("editor(%s) is null.", editorType.getSimpleName()));
+        }
+        editorBuilders.put(editorType, builder);
+
         editors.put(editorType, editor);
 
 
@@ -148,6 +134,66 @@ public class EditorManagerImpl implements IEditorManager {
 
         loadMethods.put(editorType, loadMethod);
         applyMethods.put(editorType, applyMethod);
+    }
+
+    public <E extends IRomEditor, CE extends E> void register(@NotNull Class<E> editorType, @NotNull Class<CE> editor) {
+        register(editorType, metalMaxRe -> {
+            Class<CE> editorClazz = editor;
+            final var versionId = metalMaxRe.getBuffer().getVersion().getId();
+            if (editorClazz.getAnnotation(Editor.TargetVersions.class) != null) {
+                for (Class<?> declaredClass : editorClazz.getDeclaredClasses()) {
+                    if (!IRomEditor.class.isAssignableFrom(declaredClass)) {
+                        // 排除未实现IRomEditor接口的类
+                        continue;
+                    }
+                    var targetVersion = declaredClass.getAnnotation(Editor.TargetVersion.class);
+                    if (targetVersion == null || targetVersion.value().length == 0) {
+                        // 该类没有目标版本的标识
+                        continue;
+                    }
+
+                    for (String id : targetVersion.value()) {
+                        if (Objects.equals(id, versionId)) {
+                            // 找到目标编辑器对应的版本
+                            editorClazz = (Class<CE>) declaredClass;
+                            break;
+                        }
+                    }
+                }
+            } else if (editorClazz.getAnnotation(Editor.TargetVersion.class) != null) {
+                var targetVersion = editorClazz.getAnnotation(Editor.TargetVersion.class);
+                if (targetVersion.value().length > 0) {
+                    boolean has = false;
+                    for (String id : targetVersion.value()) {
+                        if (Objects.equals(id, versionId)) {
+                            has = true;
+                            break;
+                        }
+                    }
+                    if (!has) {
+                        // 目标编辑器不是对应的版本
+                        throw new RuntimeException(String.format("editor(%s) target:%s current:%s.", editorType.getSimpleName(), versionId, Arrays.toString(targetVersion.value())));
+                    }
+                }
+            }
+
+            if (editorClazz.getDeclaredClasses().length > 0) {
+                // 创建该对象
+                Constructor<CE> constructor;
+                try {
+                    constructor = editorClazz.getConstructor(MetalMaxRe.class);
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException(String.format("editor(%s) no constructor \"Constructor(me.afoolslove.metalmaxre.MetalMaxRe)\".", editorClazz.getSimpleName()), e);
+                }
+                try {
+                    return constructor.newInstance(metalMaxRe);
+                } catch (InvocationTargetException | InstantiationException |
+                         IllegalAccessException e) {
+                    throw new RuntimeException(String.format("editor(%s) failed to create instance.", editorClazz.getSimpleName()), e);
+                }
+            }
+            return null;
+        });
     }
 
     @Override

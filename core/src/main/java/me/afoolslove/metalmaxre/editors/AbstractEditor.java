@@ -22,6 +22,13 @@ public abstract class AbstractEditor implements IRomEditor {
         return metalMaxRe;
     }
 
+    /**
+     * 获取当前编辑器的RomBuffer的位置
+     * <p>
+     * *位置为绝对位置，包括头文件0x10等
+     *
+     * @return 当前编辑器的RomBuffer的位置
+     */
     @Override
     public int position() {
         return position;
