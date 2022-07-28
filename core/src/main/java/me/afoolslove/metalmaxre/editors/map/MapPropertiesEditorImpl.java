@@ -39,6 +39,7 @@ import java.util.Map;
  *
  * @author AFoolLove
  */
+@Editor.TargetVersions
 public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor implements IMapPropertiesEditor {
     private final DataAddress mapPropertiesIndexUpRollAddress;
     private final DataAddress mapPropertiesIndexDownRollAddress;
@@ -169,7 +170,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // 地图属性索引不建议被编辑！！所以不提供修改功能！！
 
         // 将地图属性整合为写入的格式，index=0无效
-        byte[][] properties = new byte[mapEditor.getMapMaxCount() + 1][];
+        byte[][] properties = new byte[mapEditor.getMapMaxCount()][];
         for (Map.Entry<Integer, MapProperties> entry : getMapProperties().entrySet()) {
             // 排除世界地图
             if (!(entry.getValue() instanceof WorldMapProperties)) {
@@ -190,7 +191,9 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         getBuffer().put((byte) 0x00);
 //        mapIndexRoll[0x00] = 0x0000;
 
+        // 索引起始固定值
         char mapPropertiesIndex = 0x8500;
+        // 应用上卷的索引
         for (int i = 0x01; i < 0x40; i++) {
             int hashCode = Arrays.hashCode(properties[i]);
             var entry = mapping.get(hashCode);
@@ -207,6 +210,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             }
         }
 
+        // 应用下卷的索引
         position(getMapPropertiesIndexDownRollAddress());
         for (int i = 0x40; i < (0x40 + 0xB0); i++) {
             int hashCode = Arrays.hashCode(properties[i]);
@@ -224,27 +228,38 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             }
         }
 
+        // 写入地图属性
+        position(getMapPropertiesAddress());
+        for (SingleMapEntry<Character, byte[]> entry : mapping.values()) {
+            getBuffer().put(entry.getValue());
+        }
+
+        int end = getMapPropertiesAddress().getEndAddress(-position() + 0x10 + 1);
+        if (end >= 0) {
+            System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", end);
+        } else {
+            System.out.printf("地图属性编辑器：错误！超出了数据上限%d字节\n", -end);
+        }
+
         // 写入重定向的条件数据和地图
         // data[0] = fromMaps
         // data[1] = data
         // data[2] = toMaps
         byte[][] redirectData = new byte[3][getMapPropertiesRedirectMaxCount()];
-
-        for (int count = 0; ; ) {
-            for (Map.Entry<Integer, MapProperties> entry : getMapProperties().entrySet()) {
-                if (count >= getMapPropertiesRedirectMaxCount()) {
-                    break;
-                }
-                SingleMapEntry<Byte, Byte> redirect = entry.getValue().redirect;
-                if (redirect != null) {
-                    redirectData[0][count] = (byte) (entry.getKey() & 0xFF);
-                    redirectData[1][count] = redirect.getValue();
-                    redirectData[2][count] = redirect.getKey();
-                    count++;
-                }
+        int count = 0;
+        for (Map.Entry<Integer, MapProperties> entry : getMapProperties().entrySet()) {
+            if (count >= getMapPropertiesRedirectMaxCount()) {
+                break;
             }
-            break;
+            SingleMapEntry<Byte, Byte> redirect = entry.getValue().redirect;
+            if (redirect != null) {
+                redirectData[0][count] = (byte) (entry.getKey() & 0xFF);
+                redirectData[1][count] = redirect.getValue();
+                redirectData[2][count] = redirect.getKey();
+                count++;
+            }
         }
+
         position(getMapPropertiesRedirectAddress());
         getBuffer().putAABytes(0, getMapPropertiesRedirectMaxCount(), redirectData);
 
@@ -253,12 +268,6 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         for (int mapId = 0x80; mapId < mapEditor.getMapMaxCount(); mapId++) {
             MapProperties mapProperties = this.mapProperties.get(mapId);
             getBuffer().put(mapProperties.monsterGroupIndex);
-        }
-
-        // 写入地图属性
-        position(getMapPropertiesAddress());
-        for (SingleMapEntry<Character, byte[]> entry : mapping.values()) {
-            getBuffer().put(entry.getValue());
         }
 
         // 写入世界地图属性
@@ -275,13 +284,6 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // 写入事件图块索引
         getBuffer().putPrg(0x28AC3 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 0));
         getBuffer().putPrg(0x28AC7 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 1));
-
-        int end = position() - 1;
-        if (end <= 0x0FBBD) {
-            System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", 0x0FBBD - end);
-        } else {
-            System.out.printf("地图属性编辑器：错误！超出了数据上限%d字节\n", end - 0x0FBBD);
-        }
     }
 
 
@@ -323,5 +325,60 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
     @Override
     public DataAddress getMapPropertiesMonsterGroupIndexAddress() {
         return mapPropertiesMonsterGroupIndexAddress;
+    }
+
+
+    /**
+     * SuperHack版本
+     */
+    @Editor.TargetVersion("super_hack")
+    public static class SHMapPropertiesEditorImpl extends MapPropertiesEditorImpl {
+        public SHMapPropertiesEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+            super(metalMaxRe);
+        }
+
+        @Override
+        @Editor.Load
+        public void onLoad() {
+            super.onLoad();
+        }
+
+        @Override
+        @Editor.Apply
+        public void onApply(IMapEditor mapEditor,
+                            IPaletteEditor paletteEditor,
+                            IEventTilesEditor eventTilesEditor,
+                            IMapEntranceEditor mapEntranceEditor) {
+            super.onApply(mapEditor, paletteEditor, eventTilesEditor, mapEntranceEditor);
+            // SH的固定入口
+            getWorldMapProperties().entrance = 0x87A0;
+        }
+    }
+
+    /**
+     * SuperHack通用版本
+     */
+    @Editor.TargetVersion("super_hack_general")
+    public static class SHGMapPropertiesEditorImpl extends MapPropertiesEditorImpl {
+        public SHGMapPropertiesEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+            super(metalMaxRe);
+        }
+
+        @Override
+        @Editor.Load
+        public void onLoad() {
+            super.onLoad();
+        }
+
+        @Override
+        @Editor.Apply
+        public void onApply(IMapEditor mapEditor,
+                            IPaletteEditor paletteEditor,
+                            IEventTilesEditor eventTilesEditor,
+                            IMapEntranceEditor mapEntranceEditor) {
+            super.onApply(mapEditor, paletteEditor, eventTilesEditor, mapEntranceEditor);
+            // SH的固定入口
+            getWorldMapProperties().entrance = 0x87A0;
+        }
     }
 }

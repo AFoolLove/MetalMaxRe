@@ -4,7 +4,6 @@ import me.afoolslove.metalmaxre.RomBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -202,6 +201,11 @@ public class MapBuilder extends LinkedList<MapTile> {
                 append(bytes, mapTile.tile);
                 append(bytes, mapTile.count);
             }
+        }
+
+        // 使用 0B1 填充未使用的bit，否则部分地图会出现错误
+        if (offset != 0) {
+            bytes[length - 1] |= (0B1111_1111 >>> offset);
         }
         return bytes;
     }

@@ -85,12 +85,12 @@ public class MainTest {
         TestEventListener eventListener = new TestEventListener();
 
 
-        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_Chinese.nes");
-        var romBuffer = new RomBuffer(RomVersion.getChinese(), rom);
+//        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_Chinese.nes");
+//        var romBuffer = new RomBuffer(RomVersion.getChinese(), rom);
 //        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_Japanese.nes");
 //        var romBuffer = new RomBuffer(RomVersion.getJapanese(), rom);
-//        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_SuperHackGeneral.nes");
-//        var romBuffer = new RomBuffer(RomVersion.getSuperHackGeneral(), rom);
+        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_SuperHackGeneral.nes");
+        var romBuffer = new RomBuffer(RomVersion.getSuperHackGeneral(), rom);
 //        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_SuperHack.nes");
 //        var romBuffer = new RomBuffer(RomVersion.getSuperHack(), rom);
         var metalMaxRe = new MetalMaxRe(romBuffer);
@@ -113,7 +113,7 @@ public class MainTest {
 //        // 世界地图编辑器
 //        // 这玩意儿和上面差不多，直接修改困难
 //        testIDogSystemEditor(editorManager);
-//        testIMapEntranceEditor(editorManager);
+        testIMapEntranceEditor(editorManager);
 //        testIMapPropertiesEditor(editorManager);
 //        testIPaletteEditor(editorManager);
 //        testIPlayerEditor(editorManager);
@@ -124,9 +124,9 @@ public class MainTest {
 
         editorManager.applyEditors().get();
 
-        romBuffer.save(rom.resolveSibling("MetalMax_ChineseC.nes"));
+//        romBuffer.save(rom.resolveSibling("MetalMax_ChineseC.nes"));
 //        romBuffer.save(rom.resolveSibling("MetalMax_JapaneseC.nes"));
-//        romBuffer.save(rom.resolveSibling("MetalMax_SuperHackGeneralC.nes"));
+        romBuffer.save(rom.resolveSibling("MetalMax_SuperHackGeneralC.nes"));
 //        romBuffer.save(rom.resolveSibling("MetalMax_SuperHackC.nes"));
     }
 

@@ -10,8 +10,9 @@ import me.afoolslove.metalmaxre.editors.data.DataValueEditorImpl;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.items.ItemEditorImpl;
-import me.afoolslove.metalmaxre.editors.map.DogSystemEditorImpl;
-import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.editors.map.*;
+import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
+import me.afoolslove.metalmaxre.editors.map.tileset.TileSetEditorImpl;
 import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
 import me.afoolslove.metalmaxre.editors.palette.PaletteEditorImpl;
 import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
@@ -80,13 +81,12 @@ public class EditorManagerImpl implements IEditorManager {
         register(ISpriteEditor.class, SpriteEditorImpl::new);
         register(ITankEditor.class, TankEditorImpl::new);
         register(ITreasureEditor.class, TreasureEditorImpl::new);
-//        register(IMapEditor.class, MapEditorImpl::new);
-//        register(IMapPropertiesEditor.class, MapPropertiesEditorImpl::new);
+        register(IMapEditor.class, MapEditorImpl::new);
+        register(IMapPropertiesEditor.class, MapPropertiesEditorImpl.class);
 //        register(IEventTilesEditor.class, EventTilesEditorImpl::new);
 //        register(IWorldMapEditor.class, WorldMapEditorImpl::new);
-        // TODO 出入口编辑器 存在写入错误，暂时不使用
-//        register(IMapEntranceEditor.class, MapEntranceEditorImpl.class);
-//        register(ITileSetEditor.class, TileSetEditorImpl::new);
+        register(IMapEntranceEditor.class, MapEntranceEditorImpl.class);
+        register(ITileSetEditor.class, TileSetEditorImpl::new);
     }
 
     @Override
@@ -136,6 +136,7 @@ public class EditorManagerImpl implements IEditorManager {
         applyMethods.put(editorType, applyMethod);
     }
 
+    @SuppressWarnings("unchecked")
     public <E extends IRomEditor, CE extends E> void register(@NotNull Class<E> editorType, @NotNull Class<CE> editor) {
         register(editorType, metalMaxRe -> {
             Class<CE> editorClazz = editor;
@@ -177,22 +178,19 @@ public class EditorManagerImpl implements IEditorManager {
                 }
             }
 
-            if (editorClazz.getDeclaredClasses().length > 0) {
-                // 创建该对象
-                Constructor<CE> constructor;
-                try {
-                    constructor = editorClazz.getConstructor(MetalMaxRe.class);
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(String.format("editor(%s) no constructor \"Constructor(me.afoolslove.metalmaxre.MetalMaxRe)\".", editorClazz.getSimpleName()), e);
-                }
-                try {
-                    return constructor.newInstance(metalMaxRe);
-                } catch (InvocationTargetException | InstantiationException |
-                         IllegalAccessException e) {
-                    throw new RuntimeException(String.format("editor(%s) failed to create instance.", editorClazz.getSimpleName()), e);
-                }
+            // 创建该对象
+            Constructor<CE> constructor;
+            try {
+                constructor = editorClazz.getConstructor(MetalMaxRe.class);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(String.format("editor(%s) no constructor \"Constructor(me.afoolslove.metalmaxre.MetalMaxRe)\".", editorClazz.getSimpleName()), e);
             }
-            return null;
+            try {
+                return constructor.newInstance(metalMaxRe);
+            } catch (InvocationTargetException | InstantiationException |
+                     IllegalAccessException e) {
+                throw new RuntimeException(String.format("editor(%s) failed to create instance.", editorClazz.getSimpleName()), e);
+            }
         });
     }
 
@@ -321,12 +319,20 @@ public class EditorManagerImpl implements IEditorManager {
                     }
 
                     // 将参数中的编辑器作为前置编辑器
-                    for (Class<?> parameterType : first.getValue().getParameterTypes()) {
-                        var quoteOnly = parameterType.getAnnotation(Editor.QuoteOnly.class);
-                        if (quoteOnly != null) {
-                            // 作为引用，不作为前置
-                            continue;
+                    final var parameterTypes = first.getValue().getParameterTypes();
+                    final var parameterAnnotations = first.getValue().getParameterAnnotations();
+
+                    pars:
+                    for (int i = 0, count = first.getValue().getParameterCount(); i < count; i++) {
+                        Class<?> parameterType = parameterTypes[i];
+                        Annotation[] parameterAnnotation = parameterAnnotations[i];
+                        for (Annotation annotation : parameterAnnotation) {
+                            if (annotation instanceof Editor.QuoteOnly) {
+                                // 作为引用，不作为前置
+                                continue pars;
+                            }
                         }
+
                         var iterator = tmpList.iterator();
                         while (iterator.hasNext()) {
                             var next = iterator.next();
@@ -410,6 +416,7 @@ public class EditorManagerImpl implements IEditorManager {
         return loadEditor(type, false);
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     @Override
     public Future<IRomEditor> applyEditor(@NotNull Class<? extends IRomEditor> type) {
@@ -465,6 +472,7 @@ public class EditorManagerImpl implements IEditorManager {
         return loadEditor(type, true);
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     private Future<IRomEditor> loadEditor(@NotNull Class<? extends IRomEditor> type, boolean reload) {
         return EDITOR_EXECUTOR.submit(() -> {

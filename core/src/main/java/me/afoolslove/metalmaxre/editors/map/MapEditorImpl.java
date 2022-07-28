@@ -139,21 +139,23 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
             if (mapIndex >= 0xC000) {
                 mapIndex = 0x2F000 + mapIndex;
                 chrPosition(mapIndex);
-//                int i = buffer.position() + entry.getValue().length;
-//                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
+//                int i = position() + entry.getValue().length;
+//                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), position(), i);
 //                if (i >= 0xBF010) {
-////                    System.out.print(" >= 0xBF010");
-//                    more += i - 0xBF010;
+//                    System.out.print(" >= 0xBF010");
+////                    more += i - 0xBF010;
 //                }
+//                System.out.println();
             } else {
                 mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
                 prgPosition(mapIndex);
-//                int i = buffer.position() + entry.getValue().length;
-//                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), buffer.position(), i);
+//                int i = position() + entry.getValue().length;
+//                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), position(), i);
 //                if (i >= 0x0B6D4) {
-////                    System.out.print(" >= 0x0B6D4");
-//                    more += i - 0x0B6D4;
+//                    System.out.print(" >= 0x0B6D4");
+////                    more += i - 0x0B6D4;
 //                }
+//                System.out.println();
             }
 //            System.out.println();
             // 写入地图数据

@@ -7,7 +7,10 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 地图边界和出入口编辑器
@@ -37,7 +40,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
     /**
      * K：map
      */
-    private final Map<Integer, MapEntrance> mapEntrances = new HashMap<>();
+    private final Map<Integer, MapEntrance> mapEntrances = new LinkedHashMap<>();
 
     @Editor.Load
     public void onLoad(IMapPropertiesEditor mapPropertiesEditor) {
@@ -130,8 +133,8 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
         char newEntrance = mapPropertiesEditor.getWorldMapProperties().entrance;
 
-        for (int i = 0, size = mapEntries.size(); i < size; i++) {
-            var singleMapEntry = mapEntries.get(i);
+        for (int mapId = 0, size = mapEntries.size(); mapId < size; mapId++) {
+            var singleMapEntry = mapEntries.get(mapId);
             if (singleMapEntry.getKey()) {
                 // 为true表示已处理，跳过
                 continue;
@@ -170,24 +173,26 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 //            char diff = (char) (getMapEntranceAddress().getStartAddress() & 0xFF000);
 //            char newEntrance = (char) (position() - (getBuffer().getHeader().isTrained() ? 0x200 : 0x000) - (0x10 + diff + 0x8000));
 //            char newEntrance = (char) (position() - getBuffer().getHeader().getPrgRomStart(diff + 0x8000));
-            newEntrance += position() - currentPosition;
 
+            mapPropertiesEditor.getMapProperties(mapId).entrance = newEntrance;
             // 更新所有使用此数据的地图
-            for (int j = i + 1; j < size; j++) {
-                // 更新后面相同地址的地图，并修改为已处理
-                var entry = mapEntries.get(j);
+            for (int afterMapId = mapId + 1; afterMapId < size; afterMapId++) {
+                // 更新当前以及后面相同地址的地图，并修改为已处理
+                var entry = mapEntries.get(afterMapId);
                 if (!entry.getKey() && entry.getValue() == mapEntrance) {
-                    mapPropertiesEditor.getMapProperties(j).entrance = newEntrance;
+                    mapPropertiesEditor.getMapProperties(afterMapId).entrance = newEntrance;
                     entry.setKey(Boolean.TRUE);
                 }
             }
+
+            newEntrance += position() - currentPosition;
         }
-        int end = position() - 1;
-        if (end <= 0x1F999) {
-            System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", 0x1F999 - end);
-        } else {
-            System.out.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", end - 0x1F999);
-        }
+//        int end = getMapEntranceAddress().getEndAddress(-position() + 0x10 + 1);
+//        if (end >= 0) {
+//            System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", 0x1F999 - end);
+//        } else {
+//            System.out.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", end - 0x1F999);
+//        }
     }
 
     @Override

@@ -122,7 +122,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         // data[0] 和 data[1] 作为物品和物品的概率使用
         getBuffer().get(data[0], 0, getRandomTreasureMaxCount());
         getBuffer().get(data[1], 0, getRandomTreasureMaxCount());
-        for (int index = 0; index < getTreasureMaxCount(); index++) {
+        for (int index = 0; index < getRandomTreasureMaxCount(); index++) {
             getRandomTreasures().add(SingleMapEntry.create(data[0][index], data[1][index]));
         }
     }
