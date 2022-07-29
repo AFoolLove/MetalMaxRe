@@ -341,6 +341,8 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         @Editor.Load
         public void onLoad() {
             super.onLoad();
+            // SH的固定入口
+            getWorldMapProperties().entrance = 0x87A0;
         }
 
         @Override
@@ -350,8 +352,6 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
                             IEventTilesEditor eventTilesEditor,
                             IMapEntranceEditor mapEntranceEditor) {
             super.onApply(mapEditor, paletteEditor, eventTilesEditor, mapEntranceEditor);
-            // SH的固定入口
-            getWorldMapProperties().entrance = 0x87A0;
         }
     }
 
@@ -368,6 +368,8 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         @Editor.Load
         public void onLoad() {
             super.onLoad();
+            // SH的固定入口
+            getWorldMapProperties().entrance = 0x87A0;
         }
 
         @Override
@@ -377,8 +379,6 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
                             IEventTilesEditor eventTilesEditor,
                             IMapEntranceEditor mapEntranceEditor) {
             super.onApply(mapEditor, paletteEditor, eventTilesEditor, mapEntranceEditor);
-            // SH的固定入口
-            getWorldMapProperties().entrance = 0x87A0;
         }
     }
 }

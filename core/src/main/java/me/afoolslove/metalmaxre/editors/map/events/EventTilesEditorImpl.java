@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 事件图块编辑器
@@ -56,8 +55,8 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
 
     @Editor.Load
     public void onLoad(IWorldMapEditor worldMapEditor,
-                          IMapPropertiesEditor mapPropertiesEditor,
-                          IMapEditor mapEditor) {
+                       IMapPropertiesEditor mapPropertiesEditor,
+                       IMapEditor mapEditor) {
         // 读取前清空数据
         getEventTiles().clear();
         worldMapInteractiveEvent = null;
@@ -160,7 +159,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
 
     @Editor.Apply
     public void onApply(IWorldMapEditor worldMapEditor,
-                           @Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
+                        @Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
         // 排除事件为 0x00 ！！！！
         getEventTiles().values().forEach(each ->
                 each.entrySet().removeIf(entry -> entry.getKey() == 0x00)
