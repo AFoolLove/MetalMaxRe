@@ -36,4 +36,12 @@ public class WorldMapProperties extends MapProperties {
     public boolean hasDyTile() {
         return super.hasDyTile();
     }
+
+    /**
+     * @return {@code null}，世界地图的属性不能转换为普通地图的数据格式
+     */
+    @Override
+    public byte[] toByteArray() {
+        return null;
+    }
 }

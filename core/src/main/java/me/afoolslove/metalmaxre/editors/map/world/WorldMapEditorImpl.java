@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editors.map.world;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.MapPoint;
 import me.afoolslove.metalmaxre.editors.map.events.EventTile;
 import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
@@ -12,7 +13,6 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.*;
 
@@ -80,13 +80,13 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
      * K: line<p>
      * V：目的地
      */
-    private final Map.Entry<List<MapPoint>, MapPoint> shippingLineOut = Map.entry(new ArrayList<>(0x1), new MapPoint());
+    private final Map.Entry<List<MapPoint>, CameraMapPoint> shippingLineOut = Map.entry(new ArrayList<>(0x10), new CameraMapPoint());
     /**
      * 归航的航线<p>
      * K: line<p>
      * V：目的地
      */
-    private final Map.Entry<List<MapPoint>, MapPoint> shippingLineBack = Map.entry(new ArrayList<>(0x10), new MapPoint());
+    private final Map.Entry<List<MapPoint>, CameraMapPoint> shippingLineBack = Map.entry(new ArrayList<>(0x10), new CameraMapPoint());
 
     public WorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -124,7 +124,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Editor.Load
-    public void onLoad(@NotNull ByteBuffer buffer) {
+    public void onLoad() {
         // 读取前清除数据
         for (byte[] bytes : map) {
             Arrays.fill(bytes, (byte) 0x00);
@@ -279,7 +279,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             getBuffer().get(); // 所有路径点全部使用，跳过 0xE5
         }
         // 读取出航目的地
-        getShippingLineOut().getValue().set(getBuffer().get(), getBuffer().get(), getBuffer().get());
+        getShippingLineOut().getValue().setCamera(getBuffer().get(), getBuffer().get(), getBuffer().get());
 
         // 读取归航航线
         position(getWorldMapBackLineAddress());
@@ -312,7 +312,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             getBuffer().get(); // 所有路径点全部使用，跳过 0xE5
         }
         // 读取归航目的地
-        getShippingLineBack().getValue().set(getBuffer().get(), getBuffer().get(), getBuffer().get());
+        getShippingLineBack().getValue().setCamera(getBuffer().get(), getBuffer().get(), getBuffer().get());
     }
 
     @Editor.Apply
@@ -682,11 +682,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                 getBuffer().put(Math.abs(linePoint.getX())); // 得到正数的移动格数
             }
         }
-        // 写入出航目的地
+        // 航线结束标志
         getBuffer().put(0x5E);
+        // 写入出航目的地
         getBuffer().put(getShippingLineOut().getValue().getMap());
-        getBuffer().put(getShippingLineOut().getValue().getX());
-        getBuffer().put(getShippingLineOut().getValue().getY());
+        getBuffer().put(getShippingLineOut().getValue().getCameraX());
+        getBuffer().put(getShippingLineOut().getValue().getCameraY());
 
         // 写入归航路径点和目的地
         position(getWorldMapBackLineAddress());
@@ -702,7 +703,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                     // 是负数，上方移动
                     getBuffer().put(0x50);
                 }
-                getBuffer().put(Math.abs(linePoint.getX())); // 得到正数的移动格数
+                getBuffer().put(Math.abs(linePoint.getY())); // 得到正数的移动格数
             } else {
                 // 左或右移动
                 if ((linePoint.getX() & 0B1000_0000) == 0x00) {
@@ -712,14 +713,15 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                     // 是负数，左方移动
                     getBuffer().put(0x52);
                 }
-                getBuffer().put(Math.abs(linePoint.getY())); // 得到正数的移动格数
+                getBuffer().put(Math.abs(linePoint.getX())); // 得到正数的移动格数
             }
         }
-        // 写入归航目的地
+        // 航线结束标志
         getBuffer().put(0x5E);
+        // 写入归航目的地
         getBuffer().put(getShippingLineBack().getValue().getMap());
-        getBuffer().put(getShippingLineBack().getValue().getX());
-        getBuffer().put(getShippingLineBack().getValue().getY());
+        getBuffer().put(getShippingLineBack().getValue().getCameraX());
+        getBuffer().put(getShippingLineBack().getValue().getCameraY());
     }
 
     @Override
@@ -857,12 +859,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Override
-    public Map.Entry<List<MapPoint>, MapPoint> getShippingLineOut() {
+    public Map.Entry<List<MapPoint>, CameraMapPoint> getShippingLineOut() {
         return shippingLineOut;
     }
 
     @Override
-    public Map.Entry<List<MapPoint>, MapPoint> getShippingLineBack() {
+    public Map.Entry<List<MapPoint>, CameraMapPoint> getShippingLineBack() {
         return shippingLineBack;
     }
 }

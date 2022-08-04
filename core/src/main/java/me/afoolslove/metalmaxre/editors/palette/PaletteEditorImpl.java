@@ -67,7 +67,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         position(getPaletteAddress());
         // 读取所有调色板集（(3+3+3)byte ）
-        for (int i = 0; i < getPaletteMaxCount(); i++) {
+        for (int i = 0, maxCount = getPaletteMaxCount() / 0x03; i < maxCount; i++) {
             List<PaletteRow> palettes = new ArrayList<>();
             palettes.add(0x00, new PaletteRow(getBuffer(), position()));
             offsetPosition(3);
@@ -100,7 +100,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
     public void onApply() {
         // 写入调色板
         position(getPaletteAddress());
-        for (int i = 0; i < getPaletteMaxCount(); i++) {
+        for (int i = 0, maxCount = getPaletteMaxCount() / 0x03; i < maxCount; i++) {
             var paletteRows = getPalettes().get(i);
             // 3个调色板，1个调色板3byte
             for (int j = 0; j < 0x03; j++) {

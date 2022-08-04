@@ -1,9 +1,9 @@
 package me.afoolslove.metalmaxre.editors.map.world;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
+import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.MapPoint;
 import me.afoolslove.metalmaxre.utils.DataAddress;
-import org.jetbrains.annotations.Range;
 
 import java.util.List;
 import java.util.Map;
@@ -58,12 +58,12 @@ public interface IWorldMapEditor extends IRomEditor {
     /**
      * @return 出航路径点和目的地
      */
-    Map.Entry<List<MapPoint>, MapPoint> getShippingLineOut();
+    Map.Entry<List<MapPoint>, CameraMapPoint> getShippingLineOut();
 
     /**
      * @return 归航路径点和目的地
      */
-    Map.Entry<List<MapPoint>, MapPoint> getShippingLineBack();
+    Map.Entry<List<MapPoint>, CameraMapPoint> getShippingLineBack();
 
     /**
      * 世界地图图块索引偏移地址

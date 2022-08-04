@@ -19,6 +19,7 @@ import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
 import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
 import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
 import me.afoolslove.metalmaxre.editors.player.IPlayerExpEditor;
+import me.afoolslove.metalmaxre.editors.player.PlayerWeapon;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.Sprite;
 import me.afoolslove.metalmaxre.editors.tank.ITankEditor;
@@ -85,12 +86,12 @@ public class MainTest {
         TestEventListener eventListener = new TestEventListener();
 
 
-//        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_Chinese.nes");
-//        var romBuffer = new RomBuffer(RomVersion.getChinese(), rom);
+        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_Chinese.nes");
+        var romBuffer = new RomBuffer(RomVersion.getChinese(), rom);
 //        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_Japanese.nes");
 //        var romBuffer = new RomBuffer(RomVersion.getJapanese(), rom);
-        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_SuperHackGeneral.nes");
-        var romBuffer = new RomBuffer(RomVersion.getSuperHackGeneral(), rom);
+//        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_SuperHackGeneral.nes");
+//        var romBuffer = new RomBuffer(RomVersion.getSuperHackGeneral(), rom);
 //        var rom = Path.of("E:/emulator/fceux/roms/MetalMax_SuperHack.nes");
 //        var romBuffer = new RomBuffer(RomVersion.getSuperHack(), rom);
         var metalMaxRe = new MetalMaxRe(romBuffer);
@@ -113,7 +114,7 @@ public class MainTest {
 //        // 世界地图编辑器
 //        // 这玩意儿和上面差不多，直接修改困难
 //        testIDogSystemEditor(editorManager);
-        testIMapEntranceEditor(editorManager);
+//        testIMapEntranceEditor(editorManager);
 //        testIMapPropertiesEditor(editorManager);
 //        testIPaletteEditor(editorManager);
 //        testIPlayerEditor(editorManager);
@@ -124,30 +125,30 @@ public class MainTest {
 
         editorManager.applyEditors().get();
 
-//        romBuffer.save(rom.resolveSibling("MetalMax_ChineseC.nes"));
+        romBuffer.save(rom.resolveSibling("MetalMax_ChineseC.nes"));
 //        romBuffer.save(rom.resolveSibling("MetalMax_JapaneseC.nes"));
-        romBuffer.save(rom.resolveSibling("MetalMax_SuperHackGeneralC.nes"));
+//        romBuffer.save(rom.resolveSibling("MetalMax_SuperHackGeneralC.nes"));
 //        romBuffer.save(rom.resolveSibling("MetalMax_SuperHackC.nes"));
     }
 
     void testIVendorEditor(IEditorManager editorManager) {
         // 售货机编辑器
-        // 将所有售货机物品的第一个物品改成 犬系统（传真）
+        // 将所有售货机物品的第二个物品改成 犬系统（传真）
         IVendorEditor iVendorEditor = editorManager.getEditor(IVendorEditor.class);
         for (VendorItemList vendorItemList : iVendorEditor.getVendorItemLists()) {
-            vendorItemList.get(0).setItem(0xCB);
+            vendorItemList.get(1).setItem(0xCB);
         }
     }
 
     void testIComputerEditor(IEditorManager editorManager) {
         // 计算机编辑器
-        // 将楼下的售货机和经验值查看机器都设置为 售货机
+        // 将楼下的所有计算机都设置为 售货机
         IComputerEditor<Computer> iComputerEditor = editorManager.getEditor(IComputerEditor.class);
-        for (Computer computer : iComputerEditor.getComputers()) {
-            if (computer.getMap() == 0x02) {
-                computer.setType(0x00);
-            }
-        }
+        iComputerEditor.getComputers().parallelStream()
+                .filter(computer -> computer.getMap() == 0x02)
+                .forEach(computer -> {
+                    computer.setType(0x00);
+                });
     }
 
     void testIDataValueEditor(IEditorManager editorManager) {
@@ -161,16 +162,21 @@ public class MainTest {
         // 物品编辑器
         // 将人类武器 弩 的价格变更为 0xD0(85100)，通过 IDataValueEditor 可以修改价格
         IItemEditor iItemEditor = editorManager.getEditor(IItemEditor.class);
+        // 人类武器 弩，设置价格
         iItemEditor.getItem(0x2A).setPrice(0xD0);
+        // 人类武器 弹筒，设置攻击力
+        ((PlayerWeapon) iItemEditor.getItem(0x39)).setAttack(0xD0);
     }
 
     void testIEventTilesEditor(IEditorManager editorManager) {
         // 事件图块编辑器
-        // 将拉多的坦克出租屋的帐篷上面两个图块分别左移一格和图块与另一个相同
+        // 将地图id 1的第一个事件图块坐标改为5,5，并将图块设置为当前地图的图块集的第一个图块，一般为纯黑色图块
         IEventTilesEditor iEventTilesEditor = editorManager.getEditor(IEventTilesEditor.class);
         for (Map.Entry<Integer, List<EventTile>> entry : iEventTilesEditor.getEventTile(0x01).entrySet()) {
-            entry.getValue().get(0x00).offsetX(-1);
-            entry.getValue().get(0x00).setTile(entry.getValue().get(0x00).getTile());
+//            entry.getValue().get(0x00).offsetX(-1);
+//            entry.getValue().get(0x00).setTile(entry.getValue().get(0x00).getTile());
+            entry.getValue().add(new EventTile(0x05, 0x05, 0x00));
+            break;
         }
     }
 

@@ -172,10 +172,9 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // 将地图属性整合为写入的格式，index=0无效
         byte[][] properties = new byte[mapEditor.getMapMaxCount()][];
         for (Map.Entry<Integer, MapProperties> entry : getMapProperties().entrySet()) {
-            // 排除世界地图
-            if (!(entry.getValue() instanceof WorldMapProperties)) {
-                properties[entry.getKey()] = entry.getValue().toByteArray();
-            }
+            // 将地图属性转换为字节
+            // 世界地图不包括在内
+            properties[entry.getKey()] = entry.getValue().toByteArray();
         }
 
         // K: properties hashCode
@@ -254,8 +253,8 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             SingleMapEntry<Byte, Byte> redirect = entry.getValue().redirect;
             if (redirect != null) {
                 redirectData[0][count] = (byte) (entry.getKey() & 0xFF);
-                redirectData[1][count] = redirect.getValue();
-                redirectData[2][count] = redirect.getKey();
+                redirectData[1][count] = redirect.getKey();
+                redirectData[2][count] = redirect.getValue();
                 count++;
             }
         }

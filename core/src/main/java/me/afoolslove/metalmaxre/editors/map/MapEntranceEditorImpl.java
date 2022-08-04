@@ -127,8 +127,8 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         position(getMapEntranceAddress());
         // 将每个地图添加一个是否已经写入入口相关数据的标志
         List<SingleMapEntry<Boolean, MapEntrance>> mapEntries = new ArrayList<>(mapEditor.getMapMaxCount());
-        for (MapEntrance mapEntrance : getMapEntrances().values()) {
-            mapEntries.add(SingleMapEntry.create(Boolean.FALSE, mapEntrance));
+        for (int mapId = 0, mapMaxCount = mapEditor.getMapMaxCount(); mapId < mapMaxCount; mapId++) {
+            mapEntries.add(SingleMapEntry.create(Boolean.FALSE, getMapEntrance(mapId)));
         }
 
         char newEntrance = mapPropertiesEditor.getWorldMapProperties().entrance;
