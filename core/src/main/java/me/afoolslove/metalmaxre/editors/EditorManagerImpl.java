@@ -27,6 +27,8 @@ import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.SpriteEditorImpl;
 import me.afoolslove.metalmaxre.editors.tank.ITankEditor;
 import me.afoolslove.metalmaxre.editors.tank.TankEditorImpl;
+import me.afoolslove.metalmaxre.editors.text.ITextEditor;
+import me.afoolslove.metalmaxre.editors.text.TextEditorImpl;
 import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.editors.treasure.TreasureEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
@@ -91,6 +93,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(IWorldMapEditor.class, WorldMapEditorImpl::new);
         register(IMapEntranceEditor.class, MapEntranceEditorImpl.class);
         register(ITileSetEditor.class, TileSetEditorImpl::new);
+        register(ITextEditor.class, TextEditorImpl::new);
     }
 
     @Override

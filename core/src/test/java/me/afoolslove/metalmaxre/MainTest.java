@@ -24,6 +24,7 @@ import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.Sprite;
 import me.afoolslove.metalmaxre.editors.tank.ITankEditor;
 import me.afoolslove.metalmaxre.editors.tank.Tank;
+import me.afoolslove.metalmaxre.editors.text.ITextEditor;
 import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.editors.treasure.Treasure;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
@@ -122,6 +123,7 @@ public class MainTest {
 //        testISpriteEditor(editorManager);
 //        testITankEditor(editorManager);
 //        testITreasureEditor(editorManager);
+//        testITextEditor(editorManager);
 
         editorManager.applyEditors().get();
 
@@ -255,5 +257,13 @@ public class MainTest {
                 break;
             }
         }
+    }
+
+    void testITextEditor(IEditorManager editorManager) {
+        ITextEditor textEditor = editorManager.getEditor(ITextEditor.class);
+        // 将城镇名称 拉多 更改为 本地
+        textEditor.setTownName(0x00, "本地");
+        // 将人类武器名称 弩 更名为 BB
+        textEditor.setItemName(0x2A, "BB");
     }
 }
