@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream;
  * @author AFoolLove
  */
 public class ByteArrayAction implements IBaseText {
-    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(16);
 
     public ByteArrayAction() {
     }

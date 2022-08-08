@@ -93,7 +93,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(IWorldMapEditor.class, WorldMapEditorImpl::new);
         register(IMapEntranceEditor.class, MapEntranceEditorImpl.class);
         register(ITileSetEditor.class, TileSetEditorImpl::new);
-        register(ITextEditor.class, TextEditorImpl::new);
+        register(ITextEditor.class, TextEditorImpl.class);
     }
 
     @Override

@@ -16,23 +16,14 @@ import java.util.concurrent.Executors;
 
 /**
  * 文本编辑器
+ * <p>
+ * *暂不支持读取日文原版文本
  *
  * @author AFoolLove
  */
+@Editor.TargetVersions
 public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements ITextEditor {
-    private final Map<Integer, DataAddress> textAddresses = Map.ofEntries(
-            Map.entry(0x0BE90 - 0x10, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)),
-            Map.entry(0x10010 - 0x10, DataAddress.from(0x10010 - 0x10, 0x10DB2 - 0x10)),
-            Map.entry(0x10DB3 - 0x10, DataAddress.from(0x10DB3 - 0x10, 0x1157B - 0x10)),
-            Map.entry(0x1157C - 0x10, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)),
-            Map.entry(0x11933 - 0x10, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)),
-            Map.entry(0x11A20 - 0x10, DataAddress.from(0x11A20 - 0x10, 0x11F74 - 0x10)),
-            Map.entry(0x11F75 - 0x10, DataAddress.from(0x11F75 - 0x10, 0x1200F - 0x10)),
-            Map.entry(0x12010 - 0x10, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)),
-            Map.entry(0x120E0 - 0x10, DataAddress.from(0x120E0 - 0x10, 0x132FE - 0x10)),
-            Map.entry(0x14010 - 0x10, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)),
-            Map.entry(0x17680 - 0x10, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10))
-    );
+    private final Map<Integer, DataAddress> textAddresses;
 
     private final Map<DataAddress, List<TextBuilder>> text = new HashMap<>();
 
@@ -40,7 +31,27 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
 
     public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+        this(metalMaxRe, Map.ofEntries(
+                Map.entry(0x0BE90 - 0x10, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)),
+                Map.entry(0x10010 - 0x10, DataAddress.from(0x10010 - 0x10, 0x10DB2 - 0x10)),
+                Map.entry(0x10DB3 - 0x10, DataAddress.from(0x10DB3 - 0x10, 0x1157B - 0x10)),
+                Map.entry(0x1157C - 0x10, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)),
+                Map.entry(0x11933 - 0x10, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)),
+                Map.entry(0x11A20 - 0x10, DataAddress.from(0x11A20 - 0x10, 0x11F74 - 0x10)),
+                Map.entry(0x11F75 - 0x10, DataAddress.from(0x11F75 - 0x10, 0x1200F - 0x10)),
+                Map.entry(0x12010 - 0x10, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)),
+                Map.entry(0x120E0 - 0x10, DataAddress.from(0x120E0 - 0x10, 0x132FE - 0x10)),
+                Map.entry(0x14010 - 0x10, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)),
+                Map.entry(0x17680 - 0x10, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)),
+                Map.entry(0x1F99A - 0x10, DataAddress.from(0x1F99A - 0x10, 0x20F83 - 0x10)),
+                Map.entry(0x21AF6 - 0x10, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)),
+                Map.entry(0x36010 - 0x10, DataAddress.from(0x36010 - 0x10, 0x37CA5 - 0x10))
+        ));
+    }
+
+    public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe, @NotNull Map<Integer, DataAddress> textAddresses) {
         super(metalMaxRe);
+        this.textAddresses = textAddresses;
     }
 
     @Editor.Load
@@ -278,6 +289,12 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
             byte[] bytes = outputStream.toByteArray();
             // 覆盖写入该段地址的文本
             getBuffer().put(entry.getKey(), bytes, 0, Math.min(bytes.length, entry.getKey().length() - 1));
+
+            if (bytes.length < entry.getKey().length()) {
+                System.out.println(String.format("文本编辑器：%05X-%05X 剩余%d个字节", entry.getKey().getStartAddress(), entry.getKey().getEndAddress(), entry.getKey().length() - bytes.length));
+            } else if (bytes.length > entry.getKey().length()) {
+                System.out.println(String.format("文本编辑器：%05X-%05X 溢出%d个字节", entry.getKey().getStartAddress(), entry.getKey().getEndAddress(), bytes.length - entry.getKey().length()));
+            }
         });
     }
 
@@ -319,16 +336,57 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public DataAddress getTownNameAddress() {
-        return textAddresses.get(0x120E0 - 0x10);
+        return getTextAddresses().get(0x120E0 - 0x10);
     }
 
     @Override
     public DataAddress getItemNameAddress() {
-        return textAddresses.get(0x11A20 - 0x10);
+        return getTextAddresses().get(0x11A20 - 0x10);
     }
 
     @Override
     public DataAddress getMonsterNameAddress() {
-        return textAddresses.get(0x21AF6 - 0x10);
+        return getTextAddresses().get(0x21AF6 - 0x10);
+    }
+
+    @Editor.TargetVersion({"super_hack", "super_hack_general"})
+    public static class SHGTextEditorImpl extends TextEditorImpl {
+
+        public SHGTextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+            super(metalMaxRe, Map.ofEntries(
+                    Map.entry(0x0BE90 - 0x10, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)),
+                    Map.entry(0x10010 - 0x10, DataAddress.from(0x10010 - 0x10, 0x10DB2 - 0x10)),
+                    Map.entry(0x10DB3 - 0x10, DataAddress.from(0x10DB3 - 0x10, 0x1157B - 0x10)),
+                    Map.entry(0x1157C - 0x10, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)),
+                    Map.entry(0x11933 - 0x10, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)),
+                    Map.entry(0x11F75 - 0x10, DataAddress.from(0x11F75 - 0x10, 0x1200F - 0x10)),
+                    Map.entry(0x12010 - 0x10, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)),
+                    Map.entry(0x120E0 - 0x10, DataAddress.from(0x120E0 - 0x10, 0x132FE - 0x10)),
+                    Map.entry(0x14010 - 0x10, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)),
+                    Map.entry(0x17680 - 0x10, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)),
+                    Map.entry(0x1F99A - 0x10, DataAddress.from(0x1F99A - 0x10, 0x20F83 - 0x10)),
+                    Map.entry(0x21AF6 - 0x10, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)),
+                    Map.entry(0x36010 - 0x10, DataAddress.from(0x36010 - 0x10, 0x37CA5 - 0x10)),
+//                    Map.entry(0x11A20 - 0x10, DataAddress.from(0x11A20 - 0x10, 0x11F74 - 0x10)),
+                    Map.entry(0x52010 - 0x10, DataAddress.from(0x52010 - 0x10, 0x527AF - 0x10))
+            ));
+        }
+
+        @Override
+        @Editor.Load
+        public void onLoad() {
+            super.onLoad();
+        }
+
+        @Override
+        @Editor.Apply
+        public void onApply() {
+            super.onApply();
+        }
+
+        @Override
+        public DataAddress getItemNameAddress() {
+            return getTextAddresses().get(0x52010 - 0x10);
+        }
     }
 }
