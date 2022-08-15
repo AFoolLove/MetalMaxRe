@@ -5,3 +5,9 @@
 
 /desktop/.gradle
 /desktop/build
+
+/web/.gradle
+/web/build
+
+/tiled/.gradle
+/tiled/build

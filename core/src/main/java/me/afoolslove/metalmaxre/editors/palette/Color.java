@@ -1,12 +1,23 @@
 package me.afoolslove.metalmaxre.editors.palette;
 
+import java.util.Objects;
+
 /**
  * 基本颜色
  *
  * @author AFoolLove
  */
 public class Color {
+    /**
+     * 透明颜色
+     */
+    public static final Color TRANSPARENT = new Color(0x00_00_00_00);
+
     private final int argb;
+
+    public Color(int argb) {
+        this.argb = argb;
+    }
 
     public Color(int a, int r, int g, int b) {
         a &= 0xFF;
@@ -34,6 +45,10 @@ public class Color {
         this(0, r, g, b);
     }
 
+    public int getArgb() {
+        return argb;
+    }
+
     public byte getAlpha() {
         return (byte) ((argb & 0xFF_000000) >>> 24);
     }
@@ -48,5 +63,21 @@ public class Color {
 
     public byte getBlue() {
         return (byte) ((argb & 0x000000FF));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Color color)) return false;
+        return getArgb() == color.getArgb();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getArgb());
+    }
+
+    public java.awt.Color toAwtColor() {
+        return new java.awt.Color(argb);
     }
 }

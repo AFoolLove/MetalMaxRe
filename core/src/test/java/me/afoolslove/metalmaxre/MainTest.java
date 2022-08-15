@@ -42,7 +42,7 @@ public class MainTest {
 
         // 创建所有预设版本的实例
         for (Map.Entry<String, RomVersion> entry : RomVersion.getVersions().entrySet()) {
-            RomBuffer romBuffer = new RomBuffer(entry.getValue(), null);
+            RomBuffer romBuffer = new RomBuffer(entry.getValue(), (Path) null);
             var metalMaxRe = new MetalMaxRe(romBuffer);
             var editorManager = new EditorManagerImpl(metalMaxRe);
             metalMaxRe.setEditorManager(editorManager);

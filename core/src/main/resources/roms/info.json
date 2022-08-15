@@ -1,12 +1,12 @@
 {
   "japanese": {
-    "path": "./MetalMax_Japanese.nes",
+    "path": "/roms/MetalMax_Japanese.nes",
     "name": "MetalMax Japanese",
     "size": 524304,
     "description": "日文原版"
   },
   "chinese": {
-    "path": "./MetalMax_Chinese.nes",
+    "path": "/roms/MetalMax_Chinese.nes",
     "name": "MetalMax Chinese",
     "size": 786448,
     "description": "基于doubledr修正的版本，并在此之上修复部分内容",
@@ -19,7 +19,7 @@
     ]
   },
   "super_hack": {
-    "path": "./MetalMax_SuperHack.nes",
+    "path": "/roms/MetalMax_SuperHack.nes",
     "name": "MetalMax SuperHack",
     "size": 802832,
     "description": "由doubledr发起的大型HACK，部分模拟器不支持",
@@ -28,7 +28,7 @@
     ]
   },
   "super_hack_general": {
-    "path": "./MetalMax_SuperHackGeneral.nes",
+    "path": "/roms/MetalMax_SuperHackGeneral.nes",
     "name": "MetalMax SuperHackGeneral",
     "size": 786448,
     "description": "由doubledr发起的大型HACK，通用版本，适用于大部分模拟器",

@@ -75,6 +75,24 @@ public class PaletteRow {
         return paletteRow;
     }
 
+    /**
+     * @return Color对象的指定位置的颜色
+     */
+    public Color getToColor(@NotNull SystemPalette systemPalette, @Range(from = 0x00, to = 0x03) int colorIndex) {
+        return systemPalette.getColor(paletteRow[colorIndex]);
+    }
+
+    /**
+     * @return 转换为颜色
+     */
+    public Color[] toColors(@NotNull SystemPalette systemPalette) {
+        Color[] colors = new Color[0x04];
+        colors[0x00] = systemPalette.getBlack();
+        colors[0x01] = systemPalette.getColor(paletteRow[0x01]);
+        colors[0x02] = systemPalette.getColor(paletteRow[0x02]);
+        colors[0x03] = systemPalette.getColor(paletteRow[0x03]);
+        return colors;
+    }
 
     @Override
     public String toString() {

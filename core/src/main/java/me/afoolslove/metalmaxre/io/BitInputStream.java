@@ -1,11 +1,10 @@
 package me.afoolslove.metalmaxre.io;
 
-import org.jetbrains.annotations.Range;
-
 import java.io.ByteArrayInputStream;
-import java.util.Objects;
 
 /**
+ * 二进制输入流
+ *
  * @author AFoolLove
  */
 public class BitInputStream extends ByteArrayInputStream {

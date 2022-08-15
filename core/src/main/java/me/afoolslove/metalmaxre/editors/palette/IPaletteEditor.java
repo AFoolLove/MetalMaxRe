@@ -35,6 +35,20 @@ public interface IPaletteEditor extends IRomEditor {
     List<PaletteRow> getBattleSpritePalette();
 
     /**
+     * 通过游戏中使用的数据索引获取调色板集
+     * ！不是本程序的索引！
+     *
+     * @return 调色板
+     */
+    default List<PaletteRow> getPaletteByIndex(int position) {
+        // 0x8000+0x1AD0=基础数据起始
+        // 9byte 每组数据的长度
+        // 获取索引
+        int index = (position - (0x8000 + 0x1AD0)) / 9;
+        return getPalettes().get(index);
+    }
+
+    /**
      * @return 调色板数据地址
      */
     DataAddress getPaletteAddress();

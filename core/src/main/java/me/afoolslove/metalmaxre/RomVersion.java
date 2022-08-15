@@ -56,9 +56,11 @@ public class RomVersion {
     }
 
     static {
-        //TODO: 临时
-        VERSIONS.putAll(new Gson().fromJson(new String(ResourceManager.getAsBytes("/roms/info.json")), new TypeToken<Map<String, RomVersion>>() {
-        }.getType()));
+        var infoBytes = ResourceManager.getAsBytes("/roms/info.json");
+        var gson = new Gson();
+        Map<String, RomVersion> map = gson.fromJson(new String(infoBytes), new TypeToken<Map<String, RomVersion>>() {
+        }.getType());
+        VERSIONS.putAll(map);
     }
 
 

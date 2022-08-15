@@ -96,13 +96,32 @@ public class RomBuffer implements AutoCloseable, Closeable {
         this.chrRom = romBuffer.chrRom;
     }
 
+    public RomBuffer(@NotNull RomVersion version, @NotNull byte[] bytes) {
+        this.version = version;
+        this.path = null;
+
+        this.header = new GameHeader(Arrays.copyOfRange(bytes, 0x00000, GameHeader.HEADER_LENGTH));
+        if (getHeader().isTrained()) {
+            this.trainer = new Trainer(Arrays.copyOfRange(bytes, GameHeader.HEADER_LENGTH, GameHeader.HEADER_LENGTH + Trainer.TRAINER_LENGTH));
+        }
+        this.prgRom = ByteBuffer.allocate(getHeader().getPrgRomLength());
+        this.chrRom = ByteBuffer.allocate(getHeader().getChrRomLength());
+
+        prgRom.put(0x00000, Arrays.copyOfRange(bytes, getHeader().getPrgRomStart(), getHeader().getPrgRomEnd() + 1));
+        chrRom.put(0x00000, Arrays.copyOfRange(bytes, getHeader().getChrRomStart(), getHeader().getChrRomEnd() + 1));
+
+        // 监听PrgRom和ChrRom变更
+        getHeader().addPrgRomChangeListener(prgRomChangeListener);
+        getHeader().addChrRomChangeListener(chrRomChangeListener);
+    }
+
     public RomBuffer(@NotNull RomVersion version, @Nullable Path path) throws IOException {
         this.version = version;
         this.path = path;
 
         byte[] bytes;
         if (path == null) {
-            bytes = ResourceManager.getAsBytes("/roms/" + version.getPath());
+            bytes = ResourceManager.getAsBytes(version.getPath());
         } else {
             // 读取外部文件
             bytes = Files.readAllBytes(path);

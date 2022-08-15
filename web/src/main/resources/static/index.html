@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html lang="zh">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>MetalMax Re</title>
+</head>
+<label>
+    <span>ROM源：</span>
+    <select id="use_rom_type" onchange="use_rom_type(this)">
+        <option value="default_rom">默认ROM</option>
+        <option value="custom_rom">上传ROM</option>
+    </select>
+    <br>
+    <span>ROM版本：</span>
+    <select id="versions" required>
+        <option>chinese</option>
+        <option>japanese</option>
+        <option>super_hack</option>
+        <option>super_hack_general</option>
+    </select>
+</label>
+<form hidden="hidden" id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="uploadFile" value="Choose File"/>
+    <input type="submit" value="Upload"/>
+</form>
+
+<label>
+    <button id="use_default_rom" onclick="use_default_rom(this)">load</button>
+</label>
+
+<span id="rom_states">
+
+</span>
+
+<script>
+    function use_rom_type(that) {
+        let uploadForm = document.getElementById("uploadForm");
+        let useDefaultRom = document.getElementById("use_default_rom");
+        switch (that.value) {
+            case "default_rom":
+                uploadForm.setAttribute("hidden", "hidden");
+                useDefaultRom.removeAttribute("hidden");
+                break
+            case "custom_rom":
+                uploadForm.removeAttribute("hidden");
+                useDefaultRom.setAttribute("hidden", "hidden");
+                break;
+        }
+    }
+
+    function use_default_rom(that) {
+        const versions = document.getElementById("versions");
+        const xmlHttpRequest = new XMLHttpRequest();
+        xmlHttpRequest.open("GET", "/load?version=" + versions.options[versions.options.selectedIndex].value);
+        xmlHttpRequest.send();
+        xmlHttpRequest.onreadystatechange = function () {
+            if (xmlHttpRequest.readyState === 4 && xmlHttpRequest.status === 200) {
+                // 服务器返回 boolean 判断是否已经创建
+                const default_rom_loaded = document.getElementById("rom_states");
+                if (xmlHttpRequest.response === "true") {
+                    default_rom_loaded.innerText = "已经创建"
+                }
+            }
+        }
+    }
+
+    const xmlHttpRequest = new XMLHttpRequest();
+    xmlHttpRequest.open("GET", "/hasCreate");
+    xmlHttpRequest.send();
+
+    xmlHttpRequest.onreadystatechange = function () {
+        if (xmlHttpRequest.readyState === 4 && xmlHttpRequest.status === 200) {
+            // 服务器返回 boolean 判断是否已经创建
+            const rom_states = document.getElementById("rom_states");
+            if (xmlHttpRequest.response === "true") {
+                rom_states.innerText = "已经创建了一个实例"
+            } else {
+                rom_states.innerText = "还未进行加载ROM"
+            }
+        }
+    }
+</script>
+
+</html>

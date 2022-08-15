@@ -5,6 +5,11 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * 二进制输出流
+ *
+ * @author AFoolLove
+ */
 public class BitOutputStream extends ByteArrayOutputStream {
 
     private int nextBitIndex = 0; // 下一个被写入的bit位

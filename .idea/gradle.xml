@@ -21,6 +21,26 @@
           </set>
         </option>
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/tiled" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/tiled" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/web" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/web" />
+          </set>
+        </option>
+      </GradleProjectSettings>
     </option>
   </component>
 </project>

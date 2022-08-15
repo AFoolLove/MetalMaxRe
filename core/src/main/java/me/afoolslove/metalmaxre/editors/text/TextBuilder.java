@@ -1,10 +1,14 @@
 package me.afoolslove.metalmaxre.editors.text;
 
+import me.afoolslove.metalmaxre.editors.text.action.ByteAction;
+import me.afoolslove.metalmaxre.editors.text.action.ByteArrayAction;
 import me.afoolslove.metalmaxre.editors.text.action.SelectAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class TextBuilder implements IBaseText {
@@ -67,5 +71,128 @@ public class TextBuilder implements IBaseText {
     @Override
     public String toString() {
         return String.format("size=%d,text=%s", texts.size(), toText());
+    }
+
+    /**
+     * 将文本段转换为 List<TextBuilder>
+     *
+     * @param text 文本
+     * @return List<TextBuilder>
+     */
+    public static List<TextBuilder> fromTexts(char[] text) {
+        if (text == null || text.length == 0) {
+            // null或空文本返回空的list
+            return Collections.emptyList();
+        }
+
+        final LinkedList<TextBuilder> textBuilders = new LinkedList<>();
+
+        TextBuilder textBuilder = new TextBuilder();
+
+        // 用于文本拼接
+        final StringBuilder builder = new StringBuilder();
+        charsLoop:
+        for (int i = 0; i < text.length; ) {
+            char ch = text[i];
+
+            if (ch == '[') {
+                // 判断是否为十六进制 [00FF] [00 FF] [0 F] 等，
+                // []里面只能是十六进制
+                // 持续读取到末尾或']'
+                while (++i < text.length) {
+                    if (text[i] == ']') {
+                        break;
+                    }
+                    builder.append(text[i]);
+                }
+                if (!builder.isEmpty()) {
+                    // 将字符十六进制转换为byte数组
+                    byte[] bytes = readBracketHex(builder.toString().toCharArray());
+                    builder.setLength(0);
+
+                    if (bytes.length == 1) {
+                        textBuilder.add(new ByteAction(bytes[0]));
+                    } else if (bytes.length > 1) {
+                        textBuilder.add(new ByteArrayAction(bytes));
+                    }
+                    i++;
+                    continue;
+                }
+            }
+
+            // 从重复单byte中获取
+            Object temp = WordBank.FONTS_SINGLE_REPEATED.get(ch);
+            if (temp == null) {
+                // 从单byte中获取
+                temp = WordBank.FONTS_SINGLE.get(ch);
+            }
+            if (temp == null) {
+                // 从多byte中获取
+                temp = WordBank.FONTS.get(ch);
+            }
+            if (temp == null) {
+                // 从重复多byte中获取
+                temp = WordBank.FONTS_REPEATED.get(ch);
+            }
+            if (temp != null) {
+                if (temp instanceof byte[] bytes) {
+                    // 写入多字节
+                    textBuilder.add(new Text(Character.toString(ch)));
+                } else {
+                    // 写入单字节
+                    textBuilder.add(new ByteAction((byte) temp));
+                }
+            } else {
+                // 没有这个字符
+                System.out.println("未知字符：" + ch);
+            }
+            i++;
+        }
+        textBuilders.add(textBuilder);
+        return textBuilders;
+    }
+
+
+    /**
+     * 不包含 []
+     */
+    public static byte[] readBracketHex(char[] chars) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        for (int i = 0; i < chars.length; ) {
+            char ch = chars[i++];
+
+            if (ch == ' ') {
+                continue;
+            }
+
+            // 转换为大写
+            if (ch >= 'a' && ch <= 'f') {
+                ch -= 32;
+            }
+
+            if (i >= chars.length || chars[i] == ' ') {
+                // 单十六进制 0-F
+                outputStream.write(WordBank.HEX_DIGITS.indexOf(ch));
+                continue;
+            }
+
+            // 转换为大写
+            if (chars[i] >= 'a' && chars[i] <= 'f') {
+                chars[i] -= 32;
+            }
+            // 高F(4bit)+低F(4bit)
+            outputStream.write((WordBank.HEX_DIGITS.indexOf(ch) << 4) + WordBank.HEX_DIGITS.indexOf(chars[i++]));
+        }
+        return outputStream.toByteArray();
+    }
+
+    public static void main(String[] args) {
+        var textBuilders = fromTexts("你的名字是[E8]，想知道我的名字吗？[F70001][EB0001]".toCharArray());
+        System.out.println();
+    }
+
+    public static boolean isHexChar(char ch) {
+        return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
     }
 }

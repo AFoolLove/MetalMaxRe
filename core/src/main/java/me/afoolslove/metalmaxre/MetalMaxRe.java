@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.IEditorManager;
+import me.afoolslove.metalmaxre.editors.palette.SystemPalette;
 import me.afoolslove.metalmaxre.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +14,8 @@ public class MetalMaxRe {
     private IEditorManager editorManager;
 
     private EventHandler eventHandler = new EventHandler();
+
+    private SystemPalette systemPalette = SystemPalette.DEFAULT_SYSTEM_PALETTE;
 
     private MetalMaxRe() {
     }
@@ -44,5 +47,13 @@ public class MetalMaxRe {
 
     public EventHandler getEventHandler() {
         return eventHandler;
+    }
+
+    public void setSystemPalette(SystemPalette systemPalette) {
+        this.systemPalette = systemPalette;
+    }
+
+    public SystemPalette getSystemPalette() {
+        return systemPalette;
     }
 }
