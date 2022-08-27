@@ -43,14 +43,14 @@ public class SystemPalette {
      * @return 指定颜色
      */
     public Color getColor(@Range(from = 0x00, to = 0x3F) int color) {
-        return getColors()[color & 0B0011_11111];
+        return getColors()[color & 0B0011_1111];
     }
 
     /**
      * @return 指定颜色
      */
     public Color getColor(@Range(from = 0x00, to = 0x3F) byte color) {
-        return getColors()[color & 0B0011_11111];
+        return getColors()[color & 0B0011_1111];
     }
 
     /**

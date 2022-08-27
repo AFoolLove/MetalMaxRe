@@ -47,7 +47,15 @@ public class RomVersion {
     }
 
     public static RomVersion getVersion(String version) {
-        return VERSIONS.get(version);
+        return getVersion(version, "chinese");
+    }
+
+    public static RomVersion getVersion(String version, String def) {
+        var ver = VERSIONS.get(version);
+        if (ver == null && def != null) {
+            return VERSIONS.get(def);
+        }
+        return ver;
     }
 
     @NotNull

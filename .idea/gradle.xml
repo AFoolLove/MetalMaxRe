@@ -17,6 +17,7 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$/desktop" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/desktop" />
           </set>
         </option>
@@ -37,6 +38,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/tiled" />
             <option value="$PROJECT_DIR$/web" />
           </set>
         </option>

@@ -16,6 +16,7 @@ dependencies {
 
     implementation 'org.jetbrains:annotations:23.0.0'
 
+    implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'org.mapeditor:libtiled:1.4.2'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.3'

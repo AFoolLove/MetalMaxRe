@@ -2,7 +2,6 @@ package me.afoolslove.metalmaxre.editors.text;
 
 import me.afoolslove.metalmaxre.editors.text.action.ByteAction;
 import me.afoolslove.metalmaxre.editors.text.action.ByteArrayAction;
-import me.afoolslove.metalmaxre.editors.text.action.SelectAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
@@ -44,10 +43,10 @@ public class TextBuilder implements IBaseText {
         for (IBaseText text : texts) {
             outputStream.writeBytes(text.toByteArray());
         }
-        if (texts.isEmpty() || !(texts.get(texts.size() - 1) instanceof SelectAction)) {
-            // 如果最后一个不是SelectAction，就需要0x9F结尾，否则不需要
-            outputStream.write(0x9F);
-        }
+//        if (texts.isEmpty() || !(texts.get(texts.size() - 1) instanceof SelectAction)) {
+//            // 如果最后一个不是SelectAction，就需要0x9F结尾，否则不需要
+//            outputStream.write(0x9F);
+//        }
         return outputStream.toByteArray();
     }
 

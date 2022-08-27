@@ -3,9 +3,24 @@ package me.afoolslove.metalmaxre.editors.text;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ITextEditor extends IRomEditor {
+    /**
+     * 获取所有索引文本集
+     *
+     * @return 所有索引文本集
+     */
+    Map<Integer, List<TextBuilder>> getIndexPages();
+
+    /**
+     * 获取指定页的文本集
+     *
+     * @param page 页
+     * @return 指定页的文本集
+     */
+    List<TextBuilder> getIndexPage(int page);
 
     /**
      * 获取城镇的名称

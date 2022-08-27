@@ -6,6 +6,8 @@ import me.afoolslove.metalmaxre.editors.map.IMapPropertiesEditor;
 import me.afoolslove.metalmaxre.editors.map.MapProperties;
 import me.afoolslove.metalmaxre.editors.map.MapTile;
 import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
+import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
+import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
 import me.afoolslove.metalmaxre.editors.palette.Color;
 import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
 import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
@@ -14,9 +16,12 @@ import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TileSetHelper {
     private TileSetHelper() {
@@ -545,6 +550,56 @@ public class TileSetHelper {
                         int rgb = tileSet.getRGB(x2 + tileX, y2 + tileY);
                         graphics.setColor(new java.awt.Color(rgb));
                         graphics.drawLine(x3, y3, x3, y3);
+                    }
+                }
+            }
+        }
+        graphics.dispose();
+        return bufferedImage;
+    }
+
+    public static BufferedImage generateWorldMapImage(@NotNull MetalMaxRe metalMaxRe) {
+        IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
+
+        byte[][] map = worldMapEditor.getMap();
+
+        Map<Integer, BufferedImage> tileSetMap = WorldMapEditorImpl.DEFAULT_PIECES.values().parallelStream().distinct().map(integer -> {
+                    BufferedImage bufferedImage = BufferedImageUtils.fromColors(TileSetHelper.generateWorldTileSet(metalMaxRe, integer));
+                    return Map.entry(integer, bufferedImage);
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        BufferedImage bufferedImage = new BufferedImage(0x100 * 0x10, 0x100 * 0x10, BufferedImage.TYPE_INT_ARGB);
+
+
+        Graphics graphics = bufferedImage.getGraphics();
+
+        for (java.util.Map.Entry<Rectangle, Integer> entry : WorldMapEditorImpl.DEFAULT_PIECES.entrySet()) {
+            Rectangle rectangle = entry.getKey();
+            BufferedImage tileSet = tileSetMap.get(entry.getValue());
+            int x = (int) rectangle.getX();
+            int y = (int) rectangle.getY();
+            int width = (int) rectangle.getWidth();
+            int height = (int) rectangle.getHeight();
+
+            for (int offsetY = 0; offsetY < height; offsetY++) {
+                for (int offsetX = 0; offsetX < width; offsetX++) {
+                    int mapX = x + offsetX;
+                    int mapY = y + offsetY;
+
+                    // 绘制16*16的tile
+                    int tile = map[mapY][mapX] & 0xFF;
+                    int y2 = (tile / 0x10) * 0x10;
+                    int x2 = (tile % 0x10) * 0x10;
+
+                    for (int tileY = 0; tileY < 0x10; tileY++) {
+                        int y3 = (mapY * 0x10) + tileY;
+                        for (int tileX = 0; tileX < 0x10; tileX++) {
+                            int x3 = (mapX * 0x10) + tileX;
+                            int rgb = tileSet.getRGB(x2 + tileX, y2 + tileY);
+                            graphics.setColor(new java.awt.Color(rgb));
+                            graphics.drawLine(x3, y3, x3, y3);
+                        }
                     }
                 }
             }

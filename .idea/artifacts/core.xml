@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="core">
+    <output-path>$PROJECT_DIR$/core/out/artifacts/core</output-path>
+    <root id="archive" name="core.jar">
+      <element id="module-output" name="tiled.core.main" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.9.0/8a1167e089096758b49f9b34066ef98b2f4b37aa/gson-2.9.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar" path-in-jar="/" />
+      <element id="dir-copy" path="$PROJECT_DIR$/core/src/main/resources" />
+    </root>
+  </artifact>
+</component>

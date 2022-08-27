@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author AFoolLove
  */
-public class TiledMap {
+public class TiledMapUtils {
 
     /**
      * 生成Tiled地图
@@ -265,8 +265,8 @@ public class TiledMap {
         for (Sprite sprite : spriteEditor.getSprites().get(map)) {
             MapObject mapObject = new MapObject();
             mapObject.setId(nextObjectId++);
-            // 将精灵动作和对话类型作为名称
-            mapObject.setName(String.format("%02X:%02X:%02X", sprite.getAction(), sprite.getTalk1(), sprite.getTalk2()));
+            // 将精灵对话类型和动作为名称
+            mapObject.setName(String.format("%02X:%02X:%02X", sprite.getTalk1(), sprite.getTalk2(), sprite.getAction()));
             // 添加标志，Tiled程序可以识别
             mapObject.setType("sprites");
             // 0x80 为fistID，tileSet的结尾
@@ -631,7 +631,7 @@ public class TiledMap {
             // 添加标志，Tiled程序可以识别
             mapObject.setType("treasure");
             // 设置物品ID和物品当前的名称
-            mapObject.setName(String.format("%02X|%s", treasure.getItem(), textEditor.getItemName(treasure.getItem())));
+            mapObject.setName(String.format("%02X|%s", treasure.getItem(), textEditor.getItemName(treasure.intItem())));
 
             // 添加宝藏
             treasureGroup.addObject(mapObject);
@@ -688,8 +688,8 @@ public class TiledMap {
         for (Sprite sprite : spriteEditor.getWorldSprites()) {
             MapObject mapObject = new MapObject();
             mapObject.setId(nextObjectId++);
-            // 将精灵动作和对话类型作为名称
-            mapObject.setName(String.format("%02X:%02X:%02X", sprite.getAction(), sprite.getTalk1(), sprite.getTalk2()));
+            // 将精灵对话类型和动作为名称
+            mapObject.setName(String.format("%02X:%02X:%02X", sprite.getTalk1(), sprite.getTalk2(), sprite.getAction()));
             // 添加标志，Tiled程序可以识别
             mapObject.setType("sprites");
             // 0x80 为fistID，tileSet的结尾

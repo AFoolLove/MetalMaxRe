@@ -1,13 +1,18 @@
 /build/
+/out/
 
 /core/.gradle
 /core/build
+/core/out
 
 /desktop/.gradle
 /desktop/build
+/desktop/out
 
 /web/.gradle
 /web/build
+/web/out
 
 /tiled/.gradle
 /tiled/build
+/tiled/out

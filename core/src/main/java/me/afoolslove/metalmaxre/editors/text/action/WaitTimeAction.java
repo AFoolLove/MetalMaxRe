@@ -16,6 +16,10 @@ public class WaitTimeAction implements IBaseText {
         setTime(time);
     }
 
+    public WaitTimeAction(int time) {
+        setTime((byte) (time & 0xFF));
+    }
+
     /**
      * 获取等待时间
      *

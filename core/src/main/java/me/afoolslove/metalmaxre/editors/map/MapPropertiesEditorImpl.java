@@ -101,7 +101,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         getMapProperties().put(0x00, new WorldMapProperties(properties));
 
         // 读取地图属性索引，上卷 0x40、下卷 0xB0
-        // 地图属性索引不需要建议被编辑！！所以不提供修改功能！！
+        // 地图属性索引不需要并且不建议被编辑！！所以不提供修改功能！！
         char[] mapIndexRoll = new char[0x40 + 0xB0];
         position(getMapPropertiesIndexUpRollAddress());
         for (int i = 0; i < 0x40; i++) {

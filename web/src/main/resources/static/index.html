@@ -13,13 +13,15 @@
         <option value="custom_rom">上传ROM</option>
     </select>
     <br>
-    <span>ROM版本：</span>
-    <select id="versions" required>
-        <option>chinese</option>
-        <option>japanese</option>
-        <option>super_hack</option>
-        <option>super_hack_general</option>
-    </select>
+    <label hidden="hidden">
+        <span>ROM版本：</span>
+        <select id="versions" required>
+            <option>chinese</option>
+            <option>japanese</option>
+            <option>super_hack</option>
+            <option>super_hack_general</option>
+        </select>
+    </label>
 </label>
 <form hidden="hidden" id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
     <input type="file" name="uploadFile" value="Choose File"/>
@@ -30,6 +32,38 @@
     <button id="use_default_rom" onclick="use_default_rom(this)">load</button>
 </label>
 
+<br>
+<div id="hasCreatedLabel">
+    <label>
+        <form id="getMapImage" action="/map" method="get" enctype="multipart/form-data">
+            <input type="text" name="mapId" placeholder="hex map id" required/>
+            <input type="submit" value="GET Map Image"/>
+        </form>
+    </label>
+</div>
+<br>
+<label>
+    <form id="hexMap" action="/hexMap" method="post" enctype="multipart/form-data">
+        <input type="text" name="mapId" placeholder="hex map id">
+        <input type="file" name="uploadFile" value="Choose File"/>
+        <input type="submit" value="Upload"/>
+    </form>
+</label>
+<br>
+<label>
+    <form id="getHexMap" action="/getHexMap" method="get" enctype="multipart/form-data">
+        <input type="text" name="mapId" placeholder="hex map id">
+        <input type="submit" value="Get Map Data"/>
+    </form>
+</label>
+<br>
+<label>
+    <form id="getTileset" action="/tileSet" method="get" enctype="multipart/form-data">
+        <input type="text" name="mapId" placeholder="hex map id">
+        <input type="submit" value="Get Map Tileset"/>
+    </form>
+</label>
+<br>
 <span id="rom_states">
 
 </span>
