@@ -56,9 +56,9 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                 Map.entry(0x10DB3 - 0x10, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
                 Map.entry(0x112F2 - 0x10, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
                 Map.entry(0x1157C - 0x10, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                Map.entry(0x11933 - 0x10, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
+                Map.entry(0x11933 - 0x10, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //--
                 Map.entry(0x11A20 - 0x10, DataAddress.from(0x11A20 - 0x10, 0x11F74 - 0x10)), //-
-                Map.entry(0x11F75 - 0x10, DataAddress.from(0x11F75 - 0x10, 0x1200F - 0x10)), //-
+                Map.entry(0x11F75 - 0x10, DataAddress.from(0x11F75 - 0x10, 0x1200F - 0x10)), //-*
                 Map.entry(0x12010 - 0x10, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
                 Map.entry(0x120E0 - 0x10, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
                 Map.entry(0x124EE - 0x10, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
@@ -141,6 +141,17 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                 final int opcode = bytes[position] & 0xFF;
 
                 switch (opcode) {
+                    case 0xE3: // 仅进行选择？？？？
+                        // 保存当前文本，并清空缓存文本
+                        text.append("[E3]");
+                        textBuilder.add(new Text(text.toString()));
+                        text.setLength(0);
+                        // 因为选择只能放在最后，所以结束当前文本
+                        textBuilders.add(textBuilder);
+                        position++;
+
+                        textBuilder = new TextBuilder();
+                        break;
                     case 0xEB: // 进行选择
                         // 保存当前文本，并清空缓存文本
                         if (!text.isEmpty()) {
@@ -274,15 +285,21 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                         break;
                     default:
                         // 未知或无特殊数据的，直接读取相应的字节数量
-                        text.append('[');
                         int len = opcodeLength + 1; // 包含opcode
-                        for (int j = 0; j < len; j++) {
-                            text.append(String.format("%02X", bytes[j]));
+                        if (len == 1) {
+                            text.append(String.format("[%02X]", bytes[position]));
+                            position++;
+                        } else {
+                            text.append('[');
+                            for (int j = 0; j < len; j++) {
+                                text.append(String.format("%02X", bytes[position + j]));
+                            }
+                            // 读取结束
+                            text.append(']');
+
+                            position += len;
                         }
-                        // 至少 +1 opcode
-                        position += len;
-                        // 读取结束
-                        text.append(']');
+
                 }
             }
             this.text.put(textAddress, textBuilders);
