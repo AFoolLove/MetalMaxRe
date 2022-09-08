@@ -23,6 +23,14 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     private final Map<DataAddress, List<TextBuilder>> text = new HashMap<>();
 
+    public Map<DataAddress, List<TextBuilder>> getText() {
+        return text;
+    }
+
+    public Integer getIndexPagexx(int page) {
+        return indexPages.get(page);
+    }
+
     private final List<Integer> indexPages = List.of(
             0x11A20 - 0x10, // 0x00*
             0x21AF6 - 0x10, // 0x01*
@@ -113,9 +121,11 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                             if (bytes[position] == (byte) 0x9F) {
                                 // 断句
                                 // 保存当前文本，并清空缓存文本
-                                text.append("[9F]");
-                                textBuilder.add(new Text(text.toString()));
-                                text.setLength(0);
+                                if (!text.isEmpty()) {
+                                    textBuilder.add(new Text(text.toString()));
+                                    text.setLength(0);
+                                }
+                                textBuilder.has9F(true);
 
                                 textBuilders.add(textBuilder);
 
@@ -262,12 +272,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                                     break;
                                 case 0x9F:
                                     // 文本段结束，另一个的开始
-                                    text.append("][9F]");
+                                    text.append("]");
 
                                     // 断句
                                     // 保存当前文本，并清空缓存文本
                                     textBuilder.add(new Text(text.toString()));
                                     text.setLength(0);
+                                    textBuilder.has9F(true);
 
                                     textBuilders.add(textBuilder);
 
@@ -363,7 +374,11 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public String getItemName(int itemId) {
-        return text.get(getItemNameAddress()).get(itemId).toText();
+        List<TextBuilder> textBuilders = text.get(getItemNameAddress());
+        if (itemId >= textBuilders.size()) {
+            return "null";
+        }
+        return textBuilders.get(itemId).toText();
     }
 
     @Override

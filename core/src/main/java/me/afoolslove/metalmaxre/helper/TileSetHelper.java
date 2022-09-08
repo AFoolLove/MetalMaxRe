@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -533,7 +534,11 @@ public class TileSetHelper {
         BufferedImage tileSet = BufferedImageUtils.fromColors(TileSetHelper.generateTileSet(metalMaxRe, mapProperties, null));
 
         BufferedImage bufferedImage = new BufferedImage(width * 0x10, height * 0x10, BufferedImage.TYPE_INT_ARGB);
-        var graphics = bufferedImage.getGraphics();
+
+        // 储存1tile(16*16)
+        final Map<Integer, BufferedImage> tmpTiles = new HashMap<>();
+
+        Graphics2D graphics = bufferedImage.createGraphics();
 
         // mapX和mapY的单位是tile，1tile=16*16像素
         for (int mapY = 0; mapY < height; mapY++) {
@@ -542,16 +547,14 @@ public class TileSetHelper {
                 int y2 = (tile / 0x10) * 0x10;
                 int x2 = (tile % 0x10) * 0x10;
 
-                // 绘制16*16的tile
-                for (int tileY = 0; tileY < 0x10; tileY++) {
-                    int y3 = (mapY * 0x10) + tileY;
-                    for (int tileX = 0; tileX < 0x10; tileX++) {
-                        int x3 = (mapX * 0x10) + tileX;
-                        int rgb = tileSet.getRGB(x2 + tileX, y2 + tileY);
-                        graphics.setColor(new java.awt.Color(rgb));
-                        graphics.drawLine(x3, y3, x3, y3);
-                    }
+                BufferedImage tileImage = tmpTiles.get(tile);
+                if (tileImage == null) {
+                    // 复制一个tile出来保存到临时map中
+                    tileImage = tileSet.getSubimage(x2, y2, 0x10, 0x10);
+                    tmpTiles.put(tile, tileImage);
                 }
+                // 绘制tile
+                graphics.drawImage(tileImage, mapX * 0x10, mapY * 0x10, 0x10, 0x10, null);
             }
         }
         graphics.dispose();

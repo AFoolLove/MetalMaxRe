@@ -1,0 +1,6 @@
+rootProject.name = 'MetalMaxRe'
+include 'core'
+include 'desktop'
+include 'tiled'
+include 'web'
+

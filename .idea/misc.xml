@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
-    <file type="web" url="file://$PROJECT_DIR$/core" />
-    <file type="web" url="file://$PROJECT_DIR$/desktop" />
-    <file type="web" url="file://$PROJECT_DIR$/tiled" />
-    <file type="web" url="file://$PROJECT_DIR$/web" />
+    <file type="web" url="file://$PROJECT_DIR$" />
   </component>
   <component name="PWA">
     <option name="wasEnabledAtLeastOnce" value="true" />

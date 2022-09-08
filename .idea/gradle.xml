@@ -4,40 +4,15 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <option name="delegatedBuild" value="false" />
+        <option name="testRunner" value="GRADLE" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/core" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/core" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/desktop" />
-        <option name="modules">
-          <set>
+            <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/desktop" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/tiled" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$/core" />
-            <option value="$PROJECT_DIR$/tiled" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/web" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/tiled" />
             <option value="$PROJECT_DIR$/web" />
           </set>

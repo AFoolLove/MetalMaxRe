@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Tiled地图
@@ -39,6 +40,10 @@ import java.util.*;
  * @author AFoolLove
  */
 public class TiledMapUtils {
+    // FFFFFFFF-FFFF-FFFF
+    public static final Pattern TILESET_NAME_PATTERN = Pattern.compile("([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4})$");
+    // FFFFFFFF
+    public static final Pattern SPRITES_NAME_PATTERN = Pattern.compile("([0-9a-fA-F]{8})$");
 
     /**
      * 生成Tiled地图
@@ -189,7 +194,7 @@ public class TiledMapUtils {
             // 添加标志，Tiled程序可以识别
             mapObject.setType("treasure");
             // 设置物品ID和物品当前的名称
-//            mapObject.setName(String.format("%02X|%s", treasure.item, textEditor.getItemName(treasure.item)));
+            mapObject.setName(String.format("%02X|%s", treasure.getItem(), textEditor.getItemName(treasure.intItem())));
 
             // 添加宝藏
             treasureGroup.addObject(mapObject);
@@ -988,6 +993,28 @@ public class TiledMapUtils {
         // 地图属性
         MapProperties mapProperties = mapPropertiesEditor.getMapProperties(map);
 
+        for (TileSet tileSet : tiledMap.getTileSets()) {
+            String name = tileSet.getName();
+            if (name == null || name.isEmpty()) {
+                continue;
+            }
+            // 地图图块集
+            if (TILESET_NAME_PATTERN.matcher(name).find()) {
+                int xXX = (int) Long.parseLong(name.substring(0, 8), 16);
+                int combination = Integer.parseInt(name.substring(9, 13), 16);
+                int palette = Integer.parseInt(name.substring(14, 18), 16);
+                mapProperties.setIntTiles(xXX);
+                mapProperties.setCombination(combination);
+                mapProperties.setPalette((char) palette);
+            }
+            // 精灵图块集
+            if (SPRITES_NAME_PATTERN.matcher(name).find()) {
+                int xXX = (int) Long.parseLong(name.substring(0, 8), 16);
+                // 只有 0000FF00有效，其它是无法更改的
+                mapProperties.setSpriteIndex(NumberR.at(xXX, 1));
+            }
+        }
+
         // 读取地图属性
         for (Property property : tiledMap.getProperties().getProperties()) {
             String name = property.getName();
@@ -1098,9 +1125,9 @@ public class TiledMapUtils {
 
                             // 通过对象名称设置行动方式和对话模式
                             // FF:FF:FF
-                            byte action = (byte) Integer.parseInt(sprite.getName().substring(0, 2), 16);
-                            byte talk1 = (byte) Integer.parseInt(sprite.getName().substring(3, 5), 16);
-                            byte talk2 = (byte) Integer.parseInt(sprite.getName().substring(6, 8), 16);
+                            byte talk1 = (byte) Integer.parseInt(sprite.getName().substring(0, 2), 16);
+                            byte talk2 = (byte) Integer.parseInt(sprite.getName().substring(3, 5), 16);
+                            byte action = (byte) Integer.parseInt(sprite.getName().substring(6, 8), 16);
 
                             // 其它精灵属性
                             for (Property property : sprite.getProperties().getProperties()) {

@@ -1,4 +1,0 @@
-rootProject.name = 'desktop'
-include ':core'
-project(':core').projectDir = new File(settingsDir, "../core")
-

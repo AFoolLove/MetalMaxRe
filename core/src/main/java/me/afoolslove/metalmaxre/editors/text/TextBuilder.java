@@ -13,6 +13,7 @@ import java.util.List;
 public class TextBuilder implements IBaseText {
 
     private final List<IBaseText> texts = new ArrayList<>();
+    private boolean has9F = false;
 
     public TextBuilder() {
     }
@@ -37,11 +38,23 @@ public class TextBuilder implements IBaseText {
         return this;
     }
 
+    public boolean has9F() {
+        return has9F;
+    }
+
+    public boolean has9F(boolean has9F) {
+        this.has9F = has9F;
+        return has9F;
+    }
+
     @Override
     public byte[] toByteArray() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (IBaseText text : texts) {
             outputStream.writeBytes(text.toByteArray());
+        }
+        if (has9F()) {
+            outputStream.write(0x9F);
         }
 //        if (texts.isEmpty() || !(texts.get(texts.size() - 1) instanceof SelectAction)) {
 //            // 如果最后一个不是SelectAction，就需要0x9F结尾，否则不需要
@@ -60,9 +73,16 @@ public class TextBuilder implements IBaseText {
 
     @Override
     public String toText() {
+        return toText(false);
+    }
+
+    public String toText(boolean include9F) {
         StringBuilder builder = new StringBuilder();
         for (IBaseText text : texts) {
             builder.append(text.toText());
+        }
+        if (include9F && has9F()) {
+            builder.append("[9F]");
         }
         return builder.toString();
     }

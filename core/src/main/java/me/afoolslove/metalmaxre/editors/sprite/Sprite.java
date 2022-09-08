@@ -122,10 +122,10 @@ public class Sprite extends Point2B {
         return (byte) (super.getY() & 0x3F);
     }
 
-    @Range(from = 0x00, to = 0xFF)
+    @Range(from = 0x00, to = 0x3F)
     @Override
     public int intY() {
-        return super.getY() & 0xFF;
+        return super.getY() & 0x3F;
     }
 
     /**

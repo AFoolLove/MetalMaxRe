@@ -128,6 +128,33 @@ public class MapProperties {
     }
 
     /**
+     * 将int分为4个byte，并设置到tilesIndexA、tilesIndexB、tilesIndexC、tilesIndexD
+     */
+    public void setIntTiles(int xXX) {
+        this.tilesIndexA = NumberR.at(xXX, 3);
+        this.tilesIndexB = NumberR.at(xXX, 2);
+        this.tilesIndexC = NumberR.at(xXX, 1);
+        this.tilesIndexD = NumberR.at(xXX, 0);
+    }
+
+    public void setCombination(byte combinationA, byte combinationB) {
+        this.combinationA = combinationA;
+        this.combinationB = combinationB;
+    }
+
+    public void setCombination(int combination) {
+        setCombination(NumberR.at(combination, 1), NumberR.at(combination, 0));
+    }
+
+    public void setPalette(char palette) {
+        this.palette = palette;
+    }
+
+    public void setSpriteIndex(byte spriteIndex) {
+        this.spriteIndex = spriteIndex;
+    }
+
+    /**
      * 设置地图的宽度
      *
      * @param width 宽度
@@ -367,29 +394,29 @@ public class MapProperties {
             return false;
         }
         return head == that.head
-                && width == that.width
-                && height == that.height
-                && movableWidthOffset == that.movableWidthOffset
-                && movableHeightOffset == that.movableHeightOffset
-                && movableWidth == that.movableWidth
-                && movableHeight == that.movableHeight
-                && mapIndex == that.mapIndex
-                && combinationA == that.combinationA
-                && combinationB == that.combinationB
-                && entrance == that.entrance
-                && palette == that.palette
-                && spriteIndex == that.spriteIndex
-                && tilesIndexA == that.tilesIndexA
-                && tilesIndexB == that.tilesIndexB
-                && tilesIndexC == that.tilesIndexC
-                && tilesIndexD == that.tilesIndexD
-                && hideTile == that.hideTile
-                && unknown == that.unknown
-                && fillTile == that.fillTile
-                && music == that.music
-                && dyTileSpeed == that.dyTileSpeed
-                && dyTile == that.dyTile
-                && eventTilesIndex == that.eventTilesIndex;
+               && width == that.width
+               && height == that.height
+               && movableWidthOffset == that.movableWidthOffset
+               && movableHeightOffset == that.movableHeightOffset
+               && movableWidth == that.movableWidth
+               && movableHeight == that.movableHeight
+               && mapIndex == that.mapIndex
+               && combinationA == that.combinationA
+               && combinationB == that.combinationB
+               && entrance == that.entrance
+               && palette == that.palette
+               && spriteIndex == that.spriteIndex
+               && tilesIndexA == that.tilesIndexA
+               && tilesIndexB == that.tilesIndexB
+               && tilesIndexC == that.tilesIndexC
+               && tilesIndexD == that.tilesIndexD
+               && hideTile == that.hideTile
+               && unknown == that.unknown
+               && fillTile == that.fillTile
+               && music == that.music
+               && dyTileSpeed == that.dyTileSpeed
+               && dyTile == that.dyTile
+               && eventTilesIndex == that.eventTilesIndex;
     }
 
     @Override

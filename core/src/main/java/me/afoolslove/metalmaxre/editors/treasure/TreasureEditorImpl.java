@@ -80,7 +80,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
             if (!add) {
                 // 重复的宝藏
                 System.out.println("读取到重复的宝藏 " + treasure);
-                System.out.format("位置：Map:%05X, X:%05X, Y:%05X,Item:%05X\n", treasure.getMap(), treasure.getX(), treasure.getY(), treasure.getItem());
+                System.out.format("位置：Map:%02X, X:%02X, Y:%02X,Item:%02X\n", treasure.getMap(), treasure.getX(), treasure.getY(), treasure.getItem());
             }
         }
 

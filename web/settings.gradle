@@ -1,5 +1,0 @@
-rootProject.name = 'web'
-include ':core'
-project(':core').projectDir = new File(settingsDir, "../core")
-include ':tiled'
-project(':tiled').projectDir = new File(settingsDir, "../tiled")

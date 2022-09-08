@@ -15,6 +15,13 @@ public interface IEditorManager {
     MetalMaxRe getMetalMaxRe();
 
     /**
+     * 获取编辑器数量
+     *
+     * @return 编辑器数量
+     */
+    int getCount();
+
+    /**
      * 注册一个编辑器
      *
      * @param editorType 编辑器类类型

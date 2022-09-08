@@ -7,7 +7,6 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -60,7 +59,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     }
 
     @Editor.Load
-    public void onLoad(@NotNull ByteBuffer buffer) {
+    public void onLoad() {
         // 读取前清空数据
         getTankInitAttributes().clear();
 
@@ -132,7 +131,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     }
 
     @Editor.Apply
-    public void onApply(@NotNull ByteBuffer buffer) {
+    public void onApply() {
         // 写入初始属性
 
         TankInitialAttribute[] tankInitialAttributes = new TankInitialAttribute[Tank.ALL_COUNT];

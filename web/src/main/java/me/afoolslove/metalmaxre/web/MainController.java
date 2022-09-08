@@ -13,6 +13,7 @@ import me.afoolslove.metalmaxre.utils.BufferedImageUtils;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.mapeditor.io.TMXMapReader;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -259,5 +260,48 @@ public class MainController {
             builder.append(String.format("%02X", b));
         }
         return builder.toString();
+    }
+
+
+    @RequestMapping("/download")
+    public ResponseEntity<byte[]> onDownload(@CookieValue("session") String session,
+                                             @RequestHeader("User-Agent") String userAgent,
+                                             HttpServletRequest httpRequest,
+                                             HttpServletResponse response) throws ExecutionException, InterruptedException {
+
+        var metalMaxRe = map.get(Objects.hash(httpRequest.getRemotePort(), httpRequest.getRemoteAddr()));
+        if (metalMaxRe == null) {
+            if (session != null) {
+                metalMaxRe = map.get(Integer.parseInt(session));
+            }
+        }
+
+        if (metalMaxRe == null) {
+            return null;
+        }
+
+        metalMaxRe.getEditorManager().applyEditors().get();
+        byte[] bytes = metalMaxRe.getBuffer().toByteArray();
+
+        //创建用于生成响应结果的BodyBuilder对象，响应状态代码为200
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
+
+        //设置响应正文长度
+        builder.contentLength(bytes.length);
+
+        //设置响应正文类型application/octet-stream二进制数据流，
+        //这是最常见的文件下载类型
+        builder.contentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        // 根据浏览器类型，决定"Content-Disposition"响应头的值
+        if (userAgent.indexOf("MSIE") > 0) {
+            builder.header("Content-Disposition",
+                    "attachment;filename=mmre.nes");
+        } else {
+            builder.header("Content-Disposition",
+                    "attacher;filename*=UTF-8''mmre.nes");
+        }
+        //返回包含下载文件数据的响应结果
+        return builder.body(bytes);
     }
 }

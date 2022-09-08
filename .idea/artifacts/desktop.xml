@@ -1,0 +1,27 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="desktop">
+    <output-path>$PROJECT_DIR$/out/artifacts/desktop</output-path>
+    <root id="archive" name="desktop.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/desktop/src/main/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="MetalMaxRe.desktop.main" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.9.0/8a1167e089096758b49f9b34066ef98b2f4b37aa/gson-2.9.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/com.sun.activation/jakarta.activation/1.2.2/74548703f9851017ce2f556066659438019e7eb5/jakarta.activation-1.2.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/com.sun.istack/istack-commons-runtime/3.0.11/4293b5f4e4e89d598f62bb2ba73b32132e7c3a27/istack-commons-runtime-3.0.11.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/jakarta.xml.bind/jakarta.xml.bind-api/2.3.3/48e3b9cfc10752fba3521d6511f4165bea951801/jakarta.xml.bind-api-2.3.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/javax.activation/javax.activation-api/1.2.0/85262acf3ca9816f9537ca47d5adeabaead7cb16/javax.activation-api-1.2.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/javax.xml.bind/jaxb-api/2.3.1/8531ad5ac454cc2deb9d4d32c40c4d7451939b5d/jaxb-api-2.3.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/jaxb-runtime/2.3.3/c46b68a6e3a2d84ba4eb14c6a8a1a9a7be4048bc/jaxb-runtime-2.3.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/txw2/2.3.3/12f70b0ea4fc1ad45315e842f63f7c9a46f46530/txw2-2.3.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/org.mapeditor/libtiled/1.4.2/da62669fee2ecfc36b68eb430fbccf9e9906a47c/libtiled-1.4.2.jar" path-in-jar="/" />
+      <element id="module-output" name="MetalMaxRe.core.main" />
+      <element id="module-output" name="MetalMaxRe.tiled.main" />
+      <element id="directory" name="roms">
+        <element id="dir-copy" path="$PROJECT_DIR$/core/src/main/resources/roms" />
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/core/src/main/resources/fonts.txt" />
+    </root>
+  </artifact>
+</component>

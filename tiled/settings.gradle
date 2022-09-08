@@ -1,4 +1,0 @@
-rootProject.name = 'tiled'
-include ':core'
-project(':core').projectDir = new File(settingsDir, "../core")
-

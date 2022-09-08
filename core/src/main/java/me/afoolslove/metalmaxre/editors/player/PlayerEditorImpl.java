@@ -8,7 +8,6 @@ import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
@@ -43,7 +42,7 @@ public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements 
     }
 
     @Editor.Load
-    public void onLoad(@NotNull ByteBuffer buffer) {
+    public void onLoad() {
         // 读取前清空数据
         initialAttributes.clear();
 

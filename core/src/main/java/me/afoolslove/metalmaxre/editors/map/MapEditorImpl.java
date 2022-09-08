@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -125,45 +126,105 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
                 .map(m -> SingleMapEntry.create(m, getMap(m).build()))
                 .collect(Collectors.toMap(SingleMapEntry::getKey, SingleMapEntry::getValue));
 
-        // TODO 将地图数据放入 0x00610-0x0B6D3和0xBB010-0xBF00F 两个地址中（包含值），并将每个byte[]的起始地址记录下来
+        // TODO 将地图数据放入 0x00610-0x0B6D2和0xBB010-0xBF00F 两个地址中（包含值），并将每个byte[]的起始地址记录下来
 
+        int mapIndex = 0xC000;
+        int mapIndex2 = 0x0600;
         for (Map.Entry<Integer, byte[]> entry : maps.entrySet()) {
             MapProperties mapProperties = mapPropertiesEditor.getMapProperties(entry.getKey());
             if (mapProperties instanceof WorldMapProperties) {
                 // 排除世界地图
                 continue;
             }
-            int mapIndex = mapProperties.mapIndex;
 
-            // 定位到地图数据的起始地址
-            if (mapIndex >= 0xC000) {
-                mapIndex = 0x2F000 + mapIndex;
-                chrPosition(mapIndex);
-//                int i = position() + entry.getValue().length;
-//                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), position(), i);
-//                if (i >= 0xBF010) {
-//                    System.out.print(" >= 0xBF010");
-////                    more += i - 0xBF010;
-//                }
-//                System.out.println();
-            } else {
-                mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
-                prgPosition(mapIndex);
-//                int i = position() + entry.getValue().length;
-//                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), position(), i);
-//                if (i >= 0x0B6D4) {
-//                    System.out.print(" >= 0x0B6D4");
-////                    more += i - 0x0B6D4;
-//                }
-//                System.out.println();
+            byte[] mapData = entry.getValue();
+            if (mapIndex < 0x10000 && mapIndex + mapData.length >= 0x10000) {
+                for (Map.Entry<Integer, MapProperties> mapEntry : mapPropertiesEditor.getMapProperties().entrySet()) {
+                    if (Objects.equals(mapEntry.getKey(), entry.getKey())) {
+                        continue;
+                    }
+                    if (mapEntry.getValue().mapIndex == mapProperties.mapIndex) {
+                        mapEntry.getValue().mapIndex = (char) mapIndex;
+                    }
+                }
+                mapProperties.mapIndex = (char) mapIndex;
+                // 截取，能写入的部分数据
+                System.out.format("地图编辑器：地图%02X剩余%d字节未写入\n", entry.getKey(), (mapIndex + mapData.length) - 0x10000);
+                getBuffer().putChr(0x2F000 + mapIndex, mapData, 0, 0x10000 - mapIndex);
+                mapIndex = 0x10000;
+                continue;
+            } else if (mapIndex2 < 0x0B6D3 && mapIndex2 + mapData.length >= 0x0B6D3) {
+                for (Map.Entry<Integer, MapProperties> mapEntry : mapPropertiesEditor.getMapProperties().entrySet()) {
+                    if (Objects.equals(mapEntry.getKey(), entry.getKey())) {
+                        continue;
+                    }
+                    if (mapEntry.getValue().mapIndex == mapProperties.mapIndex) {
+                        mapEntry.getValue().mapIndex = (char) mapIndex2;
+                    }
+                }
+                mapProperties.mapIndex = (char) mapIndex2;
+                // 截取，能写入的部分数据
+                System.out.format("地图编辑器：地图%02X剩余%d字节未写入\n", entry.getKey(), (mapIndex2 + mapData.length) - 0x0B6D3);
+                getBuffer().putPrg(mapIndex2, mapData, 0, 0x0B6D3 - mapIndex2);
+                mapIndex2 = 0x0B6D3;
+                continue;
             }
-//            System.out.println();
-            // 写入地图数据
-            getBuffer().put(entry.getValue());
 
-//            MapBuilder mapTiles = maps.get(i);
-//            buffer.put(mapTiles.build());
+
+//            // 定位到地图数据的起始地址
+//            if (mapIndex >= 0xC000) {
+//                mapIndex = 0x2F000 + mapIndex;
+//                chrPosition(mapIndex);
+////                int i = position() + entry.getValue().length;
+////                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), position(), i);
+////                if (i >= 0xBF010) {
+////                    System.out.print(" >= 0xBF010");
+//////                    more += i - 0xBF010;
+////                }
+////                System.out.println();
+//            } else {
+//                mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
+//                prgPosition(mapIndex);
+////                int i = position() + entry.getValue().length;
+////                System.out.printf("0x%02X, 0x%05X-0x%05X", entry.getKey(), position(), i);
+////                if (i >= 0x0B6D4) {
+////                    System.out.print(" >= 0x0B6D4");
+//////                    more += i - 0x0B6D4;
+////                }
+////                System.out.println();
+//            }
+////            System.out.println();
+
+            if (mapIndex < 0x10000) {
+                for (Map.Entry<Integer, MapProperties> mapEntry : mapPropertiesEditor.getMapProperties().entrySet()) {
+                    if (Objects.equals(mapEntry.getKey(), entry.getKey())) {
+                        continue;
+                    }
+                    if (mapEntry.getValue().mapIndex == mapProperties.mapIndex) {
+                        mapEntry.getValue().mapIndex = (char) mapIndex;
+                    }
+                }
+                mapProperties.mapIndex = (char) mapIndex;
+                // 写入地图数据
+                getBuffer().putChr(0x2F000 + mapIndex, mapData);
+                mapIndex += mapData.length;
+            } else {
+                for (Map.Entry<Integer, MapProperties> mapEntry : mapPropertiesEditor.getMapProperties().entrySet()) {
+                    if (Objects.equals(mapEntry.getKey(), entry.getKey())) {
+                        continue;
+                    }
+                    if (mapEntry.getValue().mapIndex == mapProperties.mapIndex) {
+                        mapEntry.getValue().mapIndex = (char) mapIndex2;
+                    }
+                }
+                mapProperties.mapIndex = (char) mapIndex2;
+                // 写入地图数据
+                getBuffer().putPrg(mapIndex2, mapData);
+                mapIndex2 += mapData.length;
+            }
         }
+        System.out.println(mapIndex);
+        System.out.println(mapIndex2);
 //        System.out.println("more byte:" + more);
     }
 

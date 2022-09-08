@@ -35,6 +35,7 @@ import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.editors.treasure.TreasureEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
@@ -97,6 +98,12 @@ public class EditorManagerImpl implements IEditorManager {
         register(ITileSetEditor.class, TileSetEditorImpl::new);
         register(ITextEditor.class, TextEditorImpl.class);
         register(IMonsterEditor.class, MonsterEditorImpl::new);
+    }
+
+
+    @Override
+    public int getCount() {
+        return editorBuilders.size();
     }
 
     @Override
@@ -214,6 +221,8 @@ public class EditorManagerImpl implements IEditorManager {
 
     @Override
     public synchronized Future<?> loadEditors() {
+        // call event
+        getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.Pre(metalMaxRe));
         return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
             var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
             editors.addFirst(new HashSet<>());
@@ -312,6 +321,9 @@ public class EditorManagerImpl implements IEditorManager {
                 latch.await();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } finally {
+                // call event
+                getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.Post(metalMaxRe));
             }
         });
     }
