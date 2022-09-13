@@ -2,9 +2,6 @@
   <artifact type="jar" name="desktop">
     <output-path>$PROJECT_DIR$/out/artifacts/desktop</output-path>
     <root id="archive" name="desktop.jar">
-      <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/desktop/src/main/META-INF/MANIFEST.MF" />
-      </element>
       <element id="module-output" name="MetalMaxRe.desktop.main" />
       <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.9.0/8a1167e089096758b49f9b34066ef98b2f4b37aa/gson-2.9.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="D:/.gradle/caches/modules-2/files-2.1/com.sun.activation/jakarta.activation/1.2.2/74548703f9851017ce2f556066659438019e7eb5/jakarta.activation-1.2.2.jar" path-in-jar="/" />
