@@ -18,7 +18,6 @@ import java.util.Map;
  * <p>
  * 修改地图的边界类型和地图的出入口
  * <p>
- * TODO: 写入错误
  *
  * @author AFoolLove
  */
@@ -187,12 +186,12 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
             newEntrance += position() - currentPosition;
         }
-//        int end = getMapEntranceAddress().getEndAddress(-position() + 0x10 + 1);
-//        if (end >= 0) {
-//            System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", 0x1F999 - end);
-//        } else {
-//            System.out.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", end - 0x1F999);
-//        }
+        int end = getMapEntranceAddress().getEndAddress(-position() + 0x10 + 1);
+        if (end >= 0) {
+            System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", end);
+        } else {
+            System.out.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", -end);
+        }
     }
 
     @Override

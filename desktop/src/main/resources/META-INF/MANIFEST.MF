@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: me.afoolslove.metalmaxer.desktop.Main
+Main-Class: me.afoolslove.metalmaxre.desktop.Main

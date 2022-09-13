@@ -5,7 +5,7 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
 
-public interface IVendorEditor extends IRomEditor {
+public interface IShopEditor extends IRomEditor {
     /**
      * @return 售货机商品的最大组合数量
      */
@@ -18,6 +18,21 @@ public interface IVendorEditor extends IRomEditor {
      */
     default int getVendorTypeCount() {
         return 0x06;
+    }
+
+    /**
+     * @return 获取所有商店的商品列表
+     */
+    List<List<Byte>> getShopLists();
+
+    /**
+     * 通过索引获取商店的商品列表
+     *
+     * @param shop 商店索引
+     * @return 某个商店的商品列表
+     */
+    default List<Byte> getShopList(int shop) {
+        return getShopLists().get(shop);
     }
 
     /**
@@ -36,6 +51,11 @@ public interface IVendorEditor extends IRomEditor {
     default VendorItemList getVendorItemList(int vendor) {
         return getVendorItemLists().get(vendor);
     }
+
+    /**
+     * @return 商店数据地址
+     */
+    DataAddress getShopAddress();
 
     /**
      * @return 售货机数据地址

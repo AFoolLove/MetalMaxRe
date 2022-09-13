@@ -180,6 +180,13 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
         return getValue() - getKey() + 1;
     }
 
+    /**
+     * @return 判断value是否在范围内
+     */
+    public boolean range(int value) {
+        return getStartAddress() > value || getValue() == null || getEndAddress() <= value;
+    }
+
     @Override
     public String toString() {
         if (isLimited()) {

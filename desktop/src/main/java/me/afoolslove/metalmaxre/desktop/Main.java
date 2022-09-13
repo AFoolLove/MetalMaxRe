@@ -1,8 +1,10 @@
-package me.afoolslove.metalmaxer.desktop;
+package me.afoolslove.metalmaxre.desktop;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
 import me.afoolslove.metalmaxre.RomVersion;
+import me.afoolslove.metalmaxre.desktop.dialog.DataValueEditorDialog;
+import me.afoolslove.metalmaxre.desktop.dialog.MapEntranceEditorDialog;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
@@ -10,11 +12,15 @@ import me.afoolslove.metalmaxre.editors.map.*;
 import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.Sprite;
+import me.afoolslove.metalmaxre.editors.text.ITextEditor;
+import me.afoolslove.metalmaxre.editors.text.TextBuilder;
+import me.afoolslove.metalmaxre.editors.text.TextEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
 import me.afoolslove.metalmaxre.helper.TileSetHelper;
 import me.afoolslove.metalmaxre.tiled.TiledMapUtils;
 import me.afoolslove.metalmaxre.utils.BufferedImageUtils;
+import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.mapeditor.core.TileSet;
@@ -25,25 +31,22 @@ import org.mapeditor.util.BasicTileCutter;
 import javax.activation.DataHandler;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.bind.JAXBException;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class Main extends JFrame {
     private final LinkedList<MetalMaxRe> metalMaxRes = new LinkedList<>();
@@ -90,6 +93,9 @@ public class Main extends JFrame {
     private final Map<Integer, ImageIcon> mapImages = new HashMap<>();
 
     private MapSelectListModel mapSelectListModel;
+
+    private String currentOpenDirectoryPath;
+    private String currentSaveAsDirectoryPath;
 
     public static void main(String[] args) {
         try {
@@ -144,14 +150,15 @@ public class Main extends JFrame {
         JMenuItem fileMenuOpen = new JMenuItem("打开...");
         fileMenuOpen.addActionListener(e -> {
             // 文件选择器
-            JFileChooser fileChooser = new JFileChooser();
+            JFileChooser fileChooser = new JFileChooser(currentOpenDirectoryPath);
             // 添加一个nes后缀的文件过滤器
-            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("NES FILE(*.nes)", "NES"));
+            fileChooser.setFileFilter(new FileNameExtensionFilter("NES 文件(*.nes)", "NES"));
             // 开始选择文件
             int state = fileChooser.showOpenDialog(this);
             if (state == JFileChooser.APPROVE_OPTION) {
                 // 获取选择的NES文件
                 File selectedFile = fileChooser.getSelectedFile();
+                currentOpenDirectoryPath = selectedFile.getParent();
 
                 try {
                     RomBuffer buffer = new RomBuffer(RomVersion.getChinese(), selectedFile.toPath());
@@ -174,13 +181,32 @@ public class Main extends JFrame {
             }
         });
 
+        // 重新打开
+        JMenuItem fileMenuReopen = new JMenuItem("重新加载");
+        fileMenuReopen.addActionListener(e -> {
+            if (metalMaxRes.isEmpty()) {
+                return;
+            }
+
+            int i = JOptionPane.showConfirmDialog(this, "重新加载会丢失已修改的所有数据", "重新加载", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (i == JOptionPane.OK_OPTION) {
+                showLoadingDialog(metalMaxRes.getFirst());
+            }
+        });
+
+
         JMenuItem fileMenuSaveAs = new JMenuItem("另存为...");
         // 快捷键：Ctrl + Shift + S
         fileMenuSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK));
         fileMenuSaveAs.addActionListener(e -> {
+            if (metalMaxRes.isEmpty()) {
+                return;
+            }
+
+            MetalMaxRe metalMaxRe = metalMaxRes.getFirst();
             // 文件选择器
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new FileNameExtensionFilter("NES file", "nes"));
+            JFileChooser fileChooser = new JFileChooser(currentSaveAsDirectoryPath);
+            fileChooser.setFileFilter(new FileNameExtensionFilter("NES 文件(*.nes)", "nes"));
             // 选择保存的路径或替换的文件
             int state = fileChooser.showSaveDialog(this);
             // 只关心是否选中了导出的目标文件
@@ -198,9 +224,14 @@ public class Main extends JFrame {
                 if (result == JOptionPane.OK_OPTION) {
                     // 保存
                     try {
-                        Files.write(selectedFile.toPath(), metalMaxRes.getFirst().getBuffer().toByteArray());
+                        currentSaveAsDirectoryPath = selectedFile.getParent();
+                        Files.write(selectedFile.toPath(), metalMaxRe.getBuffer().toByteArray());
                     } catch (IOException ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        PrintWriter printWriter = new PrintWriter(out);
+                        ex.printStackTrace(printWriter);
+                        JOptionPane.showMessageDialog(this, "保存失败\n" + out);
                     }
                 }
 
@@ -219,22 +250,109 @@ public class Main extends JFrame {
         });
 
 
-        JMenuItem fileMenuImport = new JMenuItem("导入");
-        fileMenuImport.addActionListener(e -> {
-            BufferedImage bufferedImage = new BufferedImage(0x10, 0x10, BufferedImage.TYPE_INT_RGB);
-            Graphics2D graphics = bufferedImage.createGraphics();
-            graphics.setColor(Color.black);
-            for (int i = 0; i < 0x10; i++) {
-                graphics.drawLine(0, i, 0x10, i);
-            }
-            graphics.dispose();
-            ImageIcon imageIcon = new ImageIcon(bufferedImage);
-            mapHideTile.setIcon(imageIcon);
-            mapFillTile.setIcon(imageIcon);
+        JMenu fileMenuImport = new JMenu("导入");
+        JMenuItem fileMenuImportWorld = new JMenuItem("导入世界地图(undone)");
+        fileMenuImportWorld.addActionListener(e -> {
+//            JFileChooser fileChooser = new JFileChooser();
+//            fileChooser.setFileFilter(new FileNameExtensionFilter("TiledMap", "tmx"));
+//            int state = fileChooser.showOpenDialog(this);
+//            if (state == JFileChooser.APPROVE_OPTION) {
+//                File selectedFile = fileChooser.getSelectedFile();
+//
+//                int result = 0;
+//                if (selectedFile.exists()) {
+//                    result = JOptionPane.showConfirmDialog(this,
+//                            "导入世界地图会覆盖现有的世界地图数据！", "覆盖数据",
+//                            JOptionPane.OK_CANCEL_OPTION,
+//                            JOptionPane.WARNING_MESSAGE);
+//                }
+//                if (result == JOptionPane.OK_OPTION) {
+//                    // 导入世界地图
+//                    try {
+//                        TiledMap.importWorldMap(new TMXMapReader().readMap(selectedFile.getAbsolutePath()));
+//                    } catch (Exception ex) {
+//                        ex.printStackTrace();
+//                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//                        PrintWriter printWriter = new PrintWriter(out);
+//                        ex.printStackTrace(printWriter);
+//                        JOptionPane.showMessageDialog(this, "导入失败\n" + out);
+//                    }
+//                    System.out.printf("Import world map from %s OK.\n", selectedFile.getAbsolutePath());
+//                }
+//            }
         });
+
+        JMenuItem fileMenuImportMap = new JMenuItem("导入地图");
+        fileMenuImportMap.addActionListener(e -> {
+            if (metalMaxRes.isEmpty()) {
+                return;
+            }
+            MetalMaxRe metalMaxRe = metalMaxRes.getFirst();
+
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("TiledMaps(*.tmx)", "tmx"));
+            fileChooser.setMultiSelectionEnabled(true);
+            int state = fileChooser.showOpenDialog(this);
+            if (state == JFileChooser.APPROVE_OPTION) {
+                File[] selectedFiles = fileChooser.getSelectedFiles();
+                if (selectedFiles.length == 0) {
+                    return;
+                }
+
+                List<File> files = Arrays.stream(selectedFiles).filter(File::exists).toList();
+
+
+                var maps = files.parallelStream().map(value -> {
+                            // 移除后缀
+                            String name = value.getName();
+                            int lastIndexOf = name.lastIndexOf('.');
+
+                            // 将十六进制字符转换为数字
+                            int map;
+                            if (lastIndexOf == -1) {
+                                map = Integer.parseInt(name, 16);
+                            } else {
+                                map = Integer.parseInt(name.substring(0, lastIndexOf), 16);
+                            }
+                            return Map.entry(map, value);
+                        })
+                        .distinct() // 去重
+//                        .filter(entry -> entry.getKey() > 0x00 && entry.getKey() < MapEditor.MAP_MAX_COUNT) // 过滤大于最大地图ID的数据
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                int result = JOptionPane.showConfirmDialog(this, String.format("""
+                                这些地图的数据将会被覆盖
+                                %s
+                                """, Arrays.toString(maps.keySet().toArray(new Integer[0]))),
+                        "覆盖数据",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    // 已确认覆盖
+                    try {
+                        TMXMapReader tmxMapReader = new TMXMapReader();
+                        for (Map.Entry<Integer, File> entry : maps.entrySet()) {
+                            try {
+                                TiledMapUtils.importMap(metalMaxRe, entry.getKey(), tmxMapReader.readMap(entry.getValue().getAbsolutePath()));
+                            } catch (Exception ex) {
+                                System.out.println("导入失败：" + entry.getKey());
+                                ex.printStackTrace();
+                            }
+                        }
+                    } catch (JAXBException ex) {
+                        ex.printStackTrace();
+                    }
+                    System.out.printf("导入地图 %s 完成.\n", Arrays.toString(maps.keySet().toArray()));
+                }
+            }
+        });
+
+        fileMenuImport.add(fileMenuImportWorld);
+        fileMenuImport.add(fileMenuImportMap);
 
         // 文件
         fileMenu.add(fileMenuOpen);     // 打开
+        fileMenu.add(fileMenuReopen);   // 重新加载
         fileMenu.addSeparator();        //----------------
         fileMenu.add(fileMenuSaveAs);   // 另存为...
         fileMenu.addSeparator();        //----------------
@@ -244,19 +362,67 @@ public class Main extends JFrame {
 
         JMenu editorMenu = new JMenu("编辑器");
 
-        JMenuItem editorMenuText = new JMenuItem("文本编辑器");
+        JMenuItem editorMenuText = new JMenuItem("文本编辑器(undone)");
         editorMenuText.addActionListener(e -> {
             if (metalMaxRes.isEmpty()) {
                 return;
             }
+
+            TextEditorImpl textEditor = metalMaxRes.getFirst().getEditorManager().getEditor(ITextEditor.class);
+
+            Path textPath = Path.of("C:\\Users\\AFoolLove\\Desktop\\text.txt");
+            StringBuilder builder = new StringBuilder();
+            for (Map.Entry<Integer, List<TextBuilder>> listEntry : textEditor.getIndexPages().entrySet()) {
+                int indexPage = textEditor.getIndexPagexx(listEntry.getKey());
+                DataAddress dataAddress = textEditor.getTextAddresses().get(indexPage);
+
+                builder.append(String.format("%02X:%05X-%05X\n", listEntry.getKey(), dataAddress.getKey() + 0x10, dataAddress.getValue() + 0x10));
+
+                for (int i = 0; i < listEntry.getValue().size(); i++) {
+                    builder.append(String.format("%02X:%02X  ", listEntry.getKey(), i));
+                    builder.append(listEntry.getValue().get(i));
+                    builder.append('\n');
+                }
+            }
+
+            try (OutputStream outputStream = Files.newOutputStream(textPath)) {
+                outputStream.write(builder.toString().getBytes());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        JMenuItem editorMenuEntrances = new JMenuItem("出入口编辑器");
+        editorMenuEntrances.addActionListener(e -> {
+            if (metalMaxRes.isEmpty()) {
+                return;
+            }
+            MapEntranceEditorDialog mapEntranceEditorDialog = new MapEntranceEditorDialog(metalMaxRes.getFirst());
+            mapEntranceEditorDialog.pack();
+            mapEntranceEditorDialog.setVisible(true);
+
+
+        });
+
+        JMenuItem editorMenuDataValue = new JMenuItem("数据值编辑器");
+        editorMenuDataValue.addActionListener(e -> {
+            if (metalMaxRes.isEmpty()) {
+                return;
+            }
+
+            DataValueEditorDialog dataValueEditorDialog = new DataValueEditorDialog(metalMaxRes.getFirst());
+            dataValueEditorDialog.pack();
+            dataValueEditorDialog.setVisible(true);
         });
 
 
         // 编辑器
-        editorMenu.add(editorMenuText); // 文本编辑器
+        editorMenu.add(editorMenuText);         // 文本编辑器
+        editorMenu.add(editorMenuEntrances);    // 出入口编辑器
+        editorMenu.add(editorMenuDataValue);    // 数据值编辑器
 
 
-        JMenu paletteMenu = new JMenu("调色板");
+        JMenu paletteMenu = new JMenu("调色板(undone)");
         JMenuItem paletteMenuSystem = new JMenuItem("系统调色板");
         paletteMenu.add(paletteMenuSystem);
 
@@ -266,22 +432,6 @@ public class Main extends JFrame {
     }
 
     private void createLayout() {
-        mapFilter.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                mapList.updateUI();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                mapList.updateUI();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                mapList.updateUI();
-            }
-        });
         mapSelectListModel = new MapSelectListModel(mapList, metalMaxRes, mapFilter);
         mapList.setModel(mapSelectListModel);
         mapList.addListSelectionListener(e -> {
@@ -335,18 +485,10 @@ public class Main extends JFrame {
                             """, selectedIndex, mapProperties.intWidth(), mapProperties.intHeight(), mapPropertiesData));
 
                     // 设置头属性
-                    if (mapProperties.isUnderground()) {
-                        mapHeadUnderground.setSelected(true);
-                    }
-                    if (mapProperties.hasEventTile()) {
-                        mapHeadEventTile.setSelected(true);
-                    }
-                    if ((mapProperties.getHead() & 0B0000_0010) == 0B0000_0010) {
-                        mapHeadUnknown.setSelected(true);
-                    }
-                    if (mapProperties.hasDyTile()) {
-                        mapHeadDyTile.setSelected(true);
-                    }
+                    mapHeadUnderground.setSelected(mapProperties.isUnderground());
+                    mapHeadEventTile.setSelected(mapProperties.hasEventTile());
+                    mapHeadUnknown.setSelected((mapProperties.getHead() & 0B0000_0010) == 0B0000_0010);
+                    mapHeadDyTile.setSelected(mapProperties.hasDyTile());
 
                     // 设置地图大小
                     mapWidth.setValue(mapProperties.intWidth());

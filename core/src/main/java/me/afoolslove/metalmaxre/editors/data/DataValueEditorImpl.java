@@ -55,7 +55,7 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
         byte[] x1Bytes = new byte[get1ByteMaxCount()];
         getBuffer().get(get1ByteAddress(), x1Bytes);
         for (byte x1Byte : x1Bytes) {
-            getValues().put(getValues().size(), x1Byte);
+            getValues().put(getValues().size(), x1Byte & 0xFF);
         }
 
         byte[] x2Bytes = new byte[get2ByteMaxCount() * 2];

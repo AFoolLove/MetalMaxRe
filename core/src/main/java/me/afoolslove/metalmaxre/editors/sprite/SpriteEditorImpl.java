@@ -122,12 +122,12 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
             }
         }
 
-//        int end = position() - 1;
-//        if (end <= 0x25176) {
-//            System.out.printf("精灵编辑器：剩余%d个空闲字节\n", 0x25176 - end);
-//        } else {
-//            System.out.printf("精灵编辑器：错误！超出了数据上限%d字节\n", end - 0x25176);
-//        }
+        int end = getSpriteAddress().getEndAddress(-position() + 0x10 + 1);
+        if (end >= 0) {
+            System.out.printf("精灵编辑器：剩余%d个空闲字节\n", end);
+        } else {
+            System.out.printf("精灵编辑器：错误！超出了数据上限%d字节\n", -end);
+        }
 
         // 写入精灵数据索引
         position(getSpriteIndexAddress());

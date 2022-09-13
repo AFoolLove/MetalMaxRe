@@ -4,6 +4,7 @@ import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -172,7 +173,7 @@ public class WordBank {
         // 读取字库
         InputStream resourceAsStream = ResourceManager.getAsStream("/fonts.txt");
         if (resourceAsStream != null) {
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream, StandardCharsets.UTF_8))) {
                 bufferedReader.readLine(); // 忽略第一行
 
                 byte row; // 行数，代表文字的第二个byte

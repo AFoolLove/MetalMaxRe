@@ -3,7 +3,6 @@ package me.afoolslove.metalmaxre.tiled;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
-import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.map.*;
 import me.afoolslove.metalmaxre.editors.map.events.EventTile;
 import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
@@ -56,7 +55,7 @@ public class TiledMapUtils {
         IMapEditor mapEditor = editorManager.getEditor(IMapEditor.class);
         IEventTilesEditor eventTilesEditor = editorManager.getEditor(IEventTilesEditor.class);
         ITreasureEditor treasureEditor = editorManager.getEditor(ITreasureEditor.class);
-        IItemEditor itemsEditor = editorManager.getEditor(IItemEditor.class);
+//        IItemEditor itemsEditor = editorManager.getEditor(IItemEditor.class);
         IMapEntranceEditor mapEntranceEditor = editorManager.getEditor(IMapEntranceEditor.class);
         IComputerEditor<Computer> computerEditor = editorManager.getEditor(IComputerEditor.class);
         ISpriteEditor spriteEditor = editorManager.getEditor(ISpriteEditor.class);
@@ -74,6 +73,8 @@ public class TiledMapUtils {
 
         // 创建TiledMap，设置地图宽度和高度
         Map tiledMap = new Map(width, height);
+        // 无限地图
+        tiledMap.setInfinite(1);
         // Tile的宽度和高度
         tiledMap.setTileWidth(16);
         tiledMap.setTileHeight(16);
@@ -234,7 +235,7 @@ public class TiledMapUtils {
             mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
             mapObject.setId(nextObjectId++);
             // 设置出口坐标为名称 Map:X:Y
-            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
+            mapObject.setName(String.format("%02X:%03d:%03d", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
 
             // 添加到入口的对象层
             entrances.addObject(mapObject);
@@ -339,7 +340,7 @@ public class TiledMapUtils {
             }
             case FIXED -> {
                 MapPoint fixed = border.getFirst();
-                String fixedStr = String.format("%02X:%02X:%02X", fixed.getMap(), fixed.getX(), fixed.getY());
+                String fixedStr = String.format("%02X:%03d:%03d", fixed.getMap(), fixed.getX(), fixed.getY());
                 borderUP.setName(fixedStr);
                 borderDOWN.setName(fixedStr);
                 borderLEFT.setName(fixedStr);
@@ -351,22 +352,24 @@ public class TiledMapUtils {
                 MapPoint left = border.get(0x02);
                 MapPoint right = border.get(0x03);
 
-                borderUP.setName(String.format("%02X:%02X:%02X", up.getMap(), up.getX(), up.getY()));
-                borderDOWN.setName(String.format("%02X:%02X:%02X", down.getMap(), down.getX(), down.getY()));
-                borderLEFT.setName(String.format("%02X:%02X:%02X", left.getMap(), left.getX(), left.getY()));
-                borderRIGHT.setName(String.format("%02X:%02X:%02X", right.getMap(), right.getX(), right.getY()));
+                borderUP.setName(String.format("%02X:%03d:%03d", up.getMap(), up.getX(), up.getY()));
+                borderDOWN.setName(String.format("%02X:%03d:%03d", down.getMap(), down.getX(), down.getY()));
+                borderLEFT.setName(String.format("%02X:%03d:%03d", left.getMap(), left.getX(), left.getY()));
+                borderRIGHT.setName(String.format("%02X:%03d:%03d", right.getMap(), right.getX(), right.getY()));
             }
         }
 
 
         // ----------------
 
+        // 区域，地图区域
         // 可移动区域，超出后按走出边界处理
-        ObjectGroup movable = new ObjectGroup();
-        movable.setId(nextObjectId++);
-        movable.setName("movable");
+        ObjectGroup areas = new ObjectGroup();
+        areas.setId(nextObjectId++);
+        areas.setName("areas");
         // 默认隐藏
-        movable.setVisible(false);
+        areas.setVisible(false);
+
         // 可移动区域偏移量
         int movableWidthOffset = (mapProperties.movableWidthOffset & 0xFF) * 0x10;
         int movableHeightOffset = (mapProperties.movableHeightOffset & 0xFF) * 0x10;
@@ -376,12 +379,17 @@ public class TiledMapUtils {
         // 可移动区域实际高度
         int movableHeight = (mapProperties.movableHeight & 0xFF) * 0x10;
         movableHeight -= movableHeightOffset;
-        // 只有这一个对象
+        // 可移动区域
         MapObject movableObject = new MapObject(movableWidthOffset, movableHeightOffset, movableWidth, movableHeight, 0);
         movableObject.setId(nextObjectId++);
         movableObject.setName("movable");
         // 添加
-        movable.addObject(movableObject);
+        areas.addObject(movableObject);
+        // 地图区域
+        MapObject area = new MapObject(0x00, 0x00, width * 0x10, height * 0x10, 0);
+        area.setId(nextObjectId++);
+        area.setName("area");
+        areas.addObject(area);
 
         // ----------------
 
@@ -395,14 +403,14 @@ public class TiledMapUtils {
         tiledMap.addLayer(computerGroup);
         tiledMap.addLayer(spriteGroup);
         tiledMap.addLayer(borderGroup);
-        tiledMap.addLayer(movable);
+        tiledMap.addLayer(areas);
 
         // 不可抗力的强制属性（写入文件时）
         // 旧版本没有的
         tiledMap.setTiledversion("");
         tiledMap.setNextlayerid(nextLayerId);
         tiledMap.setNextobjectid(nextObjectId);
-        tiledMap.setInfinite(0);
+        // tiledMap.setInfinite(1);
         // 旧版本有的
         for (Tile tile : tileSet) {
             if (tile.getType() == null) {
@@ -590,7 +598,7 @@ public class TiledMapUtils {
         backLineObject.getPolyline().setPoints(backLinePoints.toString());
 
         MapPoint backLinePoint = worldMapEditor.getShippingLineBack().getValue();
-        backLineObject.setName(String.format("%02X:%02X:%02X", backLinePoint.getMap(), backLinePoint.getX(), backLinePoint.getY()));
+        backLineObject.setName(String.format("%02X:%03d:%03d", backLinePoint.getMap(), backLinePoint.getX(), backLinePoint.getY()));
         lineGroup.addObject(backLineObject);
 
         // 出航航线和目的地
@@ -617,7 +625,7 @@ public class TiledMapUtils {
         outLineObject.getPolyline().setPoints(outLinePoints.toString());
 
         MapPoint outLinePoint = worldMapEditor.getShippingLineOut().getValue();
-        outLineObject.setName(String.format("%02X:%02X:%02X", outLinePoint.getMap(), outLinePoint.getX(), outLinePoint.getY()));
+        outLineObject.setName(String.format("%02X:%03d:%03d", outLinePoint.getMap(), outLinePoint.getX(), outLinePoint.getY()));
         lineGroup.addObject(outLineObject);
 
         // ----------------
@@ -676,7 +684,7 @@ public class TiledMapUtils {
             mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
             mapObject.setId(nextObjectId++);
             // 设置出口坐标为名称 Map:X:Y
-            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
+            mapObject.setName(String.format("%02X:%03d:%03d", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
 
             // 添加到入口的对象层
             entrances.addObject(mapObject);
@@ -763,7 +771,7 @@ public class TiledMapUtils {
             }
             case FIXED -> {
                 MapPoint fixed = border.getFirst();
-                String fixedStr = String.format("%02X:%02X:%02X", fixed.getMap(), fixed.getX(), fixed.getY());
+                String fixedStr = String.format("%02X:%03d:%03d", fixed.getMap(), fixed.getX(), fixed.getY());
                 borderUP.setName(fixedStr);
                 borderDOWN.setName(fixedStr);
                 borderLEFT.setName(fixedStr);
@@ -775,10 +783,10 @@ public class TiledMapUtils {
                 MapPoint left = border.get(0x02);
                 MapPoint right = border.get(0x03);
 
-                borderUP.setName(String.format("%02X:%02X:%02X", up.getMap(), up.getX(), up.getY()));
-                borderDOWN.setName(String.format("%02X:%02X:%02X", down.getMap(), down.getX(), down.getY()));
-                borderLEFT.setName(String.format("%02X:%02X:%02X", left.getMap(), left.getX(), left.getY()));
-                borderRIGHT.setName(String.format("%02X:%02X:%02X", right.getMap(), right.getX(), right.getY()));
+                borderUP.setName(String.format("%02X:%03d:%03d", up.getMap(), up.getX(), up.getY()));
+                borderDOWN.setName(String.format("%02X:%03d:%03d", down.getMap(), down.getX(), down.getY()));
+                borderLEFT.setName(String.format("%02X:%03d:%03d", left.getMap(), left.getX(), left.getY()));
+                borderRIGHT.setName(String.format("%02X:%03d:%03d", right.getMap(), right.getX(), right.getY()));
             }
         }
 
@@ -1038,24 +1046,31 @@ public class TiledMapUtils {
 
 
         // 遍历所有图层
-        for (MapLayer layer : tiledMap.getLayers()) {
+        for (MapLayer layer : new ArrayList<>(tiledMap.getLayers())) {
             if (layer instanceof ObjectGroup objectGroup) {
                 // 对象层
                 switch (layer.getName()) {
-                    case "movable": // 可移动区域层
-                        Iterator<MapObject> iterator = objectGroup.iterator();
-                        if (iterator.hasNext()) {
-                            // 获取移动区域对象的第一个数据的宽高和偏移作为可移动区域
-                            MapObject movable = iterator.next();
-                            // X、Y作为偏移值
-                            mapProperties.movableWidthOffset = (byte) (((int) movable.getX()) / 0x10);
-                            mapProperties.movableHeightOffset = (byte) (((int) movable.getY()) / 0x10);
+                    case "areas":
+                        // 地图区域层
+                        // 可移动区域层
+                        for (MapObject mapObject : objectGroup) {
+                            switch (mapObject.getName()) {
+                                case "movable": // 可移动区域层
+                                    // 获取移动区域对象的第一个数据的宽高和偏移作为可移动区域
+                                    // X、Y作为偏移值
+                                    mapProperties.movableWidthOffset = (byte) (((int) mapObject.getX()) / 0x10);
+                                    mapProperties.movableHeightOffset = (byte) (((int) mapObject.getY()) / 0x10);
 
-                            mapProperties.movableWidth = (byte) (movable.getWidth() / 0x10);
-                            mapProperties.movableWidth += mapProperties.movableWidthOffset;
-                            mapProperties.movableHeight = (byte) (movable.getHeight() / 0x10);
-                            mapProperties.movableHeight += mapProperties.movableHeightOffset;
-                        } // 不会没有吧？？？
+                                    mapProperties.movableWidth = (byte) (mapObject.getWidth() / 0x10);
+                                    mapProperties.movableWidth += mapProperties.movableWidthOffset;
+                                    mapProperties.movableHeight = (byte) (mapObject.getHeight() / 0x10);
+                                    mapProperties.movableHeight += mapProperties.movableHeightOffset;
+                                    break;
+                                case "area": // 地图区域层
+
+                                    break;
+                            }
+                        }
                         break;
                     case "border": // 边界传送方式
                         MapBorder mapBorder = mapEntranceEditor.getMapEntrance(map).getBorder();
@@ -1084,8 +1099,8 @@ public class TiledMapUtils {
                                         String[] split = mapObject.getName().split(":");
                                         mapBorder.add(new MapPoint(
                                                 Integer.parseInt(split[0], 16),
-                                                Integer.parseInt(split[1], 16),
-                                                Integer.parseInt(split[2], 16)
+                                                Integer.parseInt(split[1]),
+                                                Integer.parseInt(split[2])
                                         ));
                                     }
                                     mapObject = null; // 设置为null表示已经设置过类型了
@@ -1098,8 +1113,8 @@ public class TiledMapUtils {
                                 String[] split = objects.get(0x00).getName().split(":");
                                 mapBorder.add(new MapPoint(
                                         Integer.parseInt(split[0], 16),
-                                        Integer.parseInt(split[1], 16),
-                                        Integer.parseInt(split[2], 16)
+                                        Integer.parseInt(split[1]),
+                                        Integer.parseInt(split[2])
                                 ));
                             }
                         }
@@ -1186,11 +1201,11 @@ public class TiledMapUtils {
                             int inX = (int) (entrance.getX() / 0x10);
                             int inY = (int) (entrance.getY() / 0x10);
                             // 出口Map、X、Y ，从名称中解析
-                            // FF:FF:FF
+                            // FF:255:255
                             String[] split = entrance.getName().split(":");
-                            int outMap = Integer.valueOf(split[0], 16);
-                            int outX = Integer.valueOf(split[1], 16);
-                            int outY = Integer.valueOf(split[2], 16);
+                            int outMap = Integer.parseInt(split[0], 16);
+                            int outX = Integer.parseInt(split[1]);
+                            int outY = Integer.parseInt(split[2]);
 
                             // 入口和出口
                             entrances.put(new MapPoint(map, inX, inY), new MapPoint(outMap, outX, outY));
@@ -1218,14 +1233,38 @@ public class TiledMapUtils {
                 // Tile层
                 switch (tileLayer.getName()) {
                     case "map" -> {
-                        // 构建地图
-                        MapBuilder mapBuilder = new MapBuilder();
-                        Rectangle mapBounds = tiledMap.getBounds();
+                        MapObject areaObject = null;
+                        area:
+                        for (MapLayer mapLayer : tiledMap.getLayers()) {
+                            if (mapLayer instanceof ObjectGroup mapObjects && Objects.equals("areas", mapLayer.getName())) {
+                                for (MapObject mapObject : mapObjects) {
+                                    if (Objects.equals("area", mapObject.getName())) {
+                                        areaObject = mapObject;
+                                        break area;
+                                    }
+                                }
+                            }
+                        }
+                        if (areaObject == null) {
+                            Rectangle mapLayerBounds = tileLayer.getBounds();
+                            areaObject = new MapObject(0x00, 0x00, mapLayerBounds.getWidth(), mapLayerBounds.getHeight(), 0);
+                        }
+
+                        Rectangle mapBounds = new Rectangle(
+                                ((int) (areaObject.getX() / 0x10)),
+                                ((int) (areaObject.getY() / 0x10)),
+                                ((int) (areaObject.getWidth() / 0x10)),
+                                ((int) (areaObject.getHeight() / 0x10))
+                        );
+
                         mapProperties.setHeight(mapBounds.height & 0xFF);
                         mapProperties.setWidth(mapBounds.width & 0xFF);
+                        // 构建地图
+                        MapBuilder mapBuilder = new MapBuilder();
+
                         for (int y = 0; y < mapBounds.height; y++) {
                             for (int x = 0; x < mapBounds.width; x++) {
-                                Tile tileAt = tileLayer.getTileAt(x, y);
+                                Tile tileAt = tileLayer.getTileAt(mapBounds.x + x, mapBounds.y + y);
                                 if (tileAt != null) {
                                     mapBuilder.add(tileAt.getId());
                                 } else {
@@ -1488,8 +1527,8 @@ public class TiledMapUtils {
                             MapPoint inPoint = new MapPoint(0x00, (int) entranceObject.getX() / 0x10, (int) entranceObject.getY() / 0x10);
                             MapPoint outPoint = new MapPoint(
                                     Integer.parseInt(split[0], 16) & 0xFF,
-                                    Integer.parseInt(split[1], 16) & 0xFF,
-                                    Integer.parseInt(split[2], 16) & 0xFF
+                                    Integer.parseInt(split[1]) & 0xFF,
+                                    Integer.parseInt(split[2]) & 0xFF
                             );
                             // 添加出入口
                             worldMapEntrance.getEntrances().put(inPoint, outPoint);

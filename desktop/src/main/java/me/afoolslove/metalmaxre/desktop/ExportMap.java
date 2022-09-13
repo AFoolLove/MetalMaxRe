@@ -1,4 +1,4 @@
-package me.afoolslove.metalmaxer.desktop;
+package me.afoolslove.metalmaxre.desktop;
 
 import javax.swing.*;
 import java.awt.event.*;
