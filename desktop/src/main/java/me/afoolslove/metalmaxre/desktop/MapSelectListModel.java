@@ -1,25 +1,25 @@
 package me.afoolslove.metalmaxre.desktop;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.MultipleMetalMaxRe;
 import me.afoolslove.metalmaxre.editors.map.IMapEditor;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
 public class MapSelectListModel extends DefaultListModel<String> implements DocumentListener {
-    private final LinkedList<MetalMaxRe> metalMaxRes;
+    private final MultipleMetalMaxRe multipleMetalMaxRe;
     private final JList<String> mapList;
     private final JTextField mapFilter;
     private final List<Integer> mapIds = new ArrayList<>();
 
-    public MapSelectListModel(JList<String> mapList, LinkedList<MetalMaxRe> metalMaxRes, JTextField mapFilter) {
+    public MapSelectListModel(JList<String> mapList, MultipleMetalMaxRe multipleMetalMaxRe, JTextField mapFilter) {
         this.mapList = mapList;
-        this.metalMaxRes = metalMaxRes;
+        this.multipleMetalMaxRe = multipleMetalMaxRe;
         this.mapFilter = mapFilter;
 
         mapFilter.getDocument().addDocumentListener(this);
@@ -27,12 +27,12 @@ public class MapSelectListModel extends DefaultListModel<String> implements Docu
 
     @Override
     public int getSize() {
-        if (metalMaxRes.isEmpty()) {
+        if (!multipleMetalMaxRe.hasInstance()) {
             return 0x01;
         }
         mapIds.clear();
 
-        MetalMaxRe metalMaxRe = metalMaxRes.getFirst();
+        MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
         IMapEditor mapEditor = metalMaxRe.getEditorManager().getEditor(IMapEditor.class);
 
         if (mapFilter == null || mapFilter.getText().isEmpty()) {
@@ -65,11 +65,15 @@ public class MapSelectListModel extends DefaultListModel<String> implements Docu
     }
 
 
-    public int getSelectMap() {
+    public int getSelectedMap() {
         if (mapList.getSelectedIndex() == -1) {
             return -1;
         }
-        return mapIds.get(mapList.getSelectedIndex());
+        return mapIds.isEmpty() ? 0 : mapIds.get(mapList.getSelectedIndex());
+    }
+
+    public int getSelectedIndex() {
+        return mapList.getSelectedIndex();
     }
 
 

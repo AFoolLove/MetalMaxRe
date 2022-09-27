@@ -1,4 +1,4 @@
-package me.afoolslove.metalmaxre.editors.computer.vendor;
+package me.afoolslove.metalmaxre.editors.computer.shop;
 
 import org.jetbrains.annotations.Range;
 

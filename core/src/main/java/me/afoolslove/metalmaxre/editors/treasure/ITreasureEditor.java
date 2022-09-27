@@ -5,7 +5,6 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 宝藏编辑器
@@ -45,7 +44,7 @@ public interface ITreasureEditor extends IRomEditor {
      *
      * @return 所有宝藏
      */
-    Set<Treasure> getTreasures();
+    List<Treasure> getTreasures();
 
     /**
      * 随机进行调查获取的宝藏和宝藏的概率

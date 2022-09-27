@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="me.afoolslove.metalmaxre.desktop.Main">
-  <grid id="27dc6" binding="contentPane" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="contentPane" layout-manager="GridLayoutManager" row-count="4" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="16" left="16" bottom="16" right="16"/>
     <constraints>
-      <xy x="20" y="20" width="725" height="802"/>
+      <xy x="20" y="20" width="869" height="1277"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
       <hspacer id="64442">
         <constraints>
-          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="1" row-span="1" col-span="3" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
       </hspacer>
-      <grid id="aa0c8" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="aa0c8" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="1" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
@@ -24,12 +24,12 @@
           <grid id="7ec64" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties/>
             <border type="none"/>
             <children>
-              <scrollpane id="202b9">
+              <scrollpane id="202b9" binding="mapImageScrollPane">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -37,7 +37,7 @@
                 <border type="none"/>
                 <children>
                   <grid id="34aef" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="8" left="8" bottom="8" right="8"/>
+                    <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints/>
                     <properties/>
                     <border type="none"/>
@@ -54,212 +54,235 @@
                   </grid>
                 </children>
               </scrollpane>
-              <grid id="b33c7" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                <margin top="0" left="0" bottom="0" right="0"/>
+              <tabbedpane id="48890">
                 <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="200" height="200"/>
+                  </grid>
                 </constraints>
-                <properties>
-                  <visible value="true"/>
-                </properties>
+                <properties/>
                 <border type="none"/>
                 <children>
-                  <scrollpane id="42340">
+                  <grid id="a1090" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <tabbedpane title="地图属性"/>
                     </constraints>
-                    <properties>
-                      <enabled value="true"/>
-                    </properties>
-                    <border type="empty"/>
+                    <properties/>
+                    <border type="none"/>
                     <children>
-                      <grid id="b27f6" layout-manager="GridLayoutManager" row-count="6" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                        <margin top="8" left="8" bottom="8" right="8"/>
-                        <constraints/>
-                        <properties/>
-                        <border type="none" title="地图属性">
-                          <font/>
-                        </border>
+                      <scrollpane id="357f7" binding="mapPropertiesScrollPane">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <verticalScrollBarPolicy value="22"/>
+                        </properties>
+                        <border type="none"/>
                         <children>
-                          <grid id="cf2dc" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                            <margin top="0" left="0" bottom="0" right="0"/>
-                            <constraints>
-                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
+                          <grid id="9b1f4" layout-manager="GridLayoutManager" row-count="7" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                            <margin top="8" left="8" bottom="8" right="8"/>
+                            <constraints/>
                             <properties/>
-                            <border type="none" title="头属性"/>
+                            <border type="none"/>
                             <children>
-                              <component id="85bf0" class="javax.swing.JCheckBox" binding="mapHeadUnderground">
-                                <constraints>
-                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="地下地图"/>
-                                </properties>
-                              </component>
-                              <component id="dbb30" class="javax.swing.JCheckBox" binding="mapHeadEventTile">
-                                <constraints>
-                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="事件图块"/>
-                                </properties>
-                              </component>
-                              <component id="b6929" class="javax.swing.JCheckBox" binding="mapHeadUnknown">
-                                <constraints>
-                                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="unknown"/>
-                                </properties>
-                              </component>
-                              <component id="614b7" class="javax.swing.JCheckBox" binding="mapHeadDyTile">
-                                <constraints>
-                                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="dy tile"/>
-                                </properties>
-                              </component>
-                            </children>
-                          </grid>
-                          <grid id="5f79b" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="true" same-size-vertically="false" hgap="-1" vgap="-1">
-                            <margin top="4" left="4" bottom="4" right="4"/>
-                            <constraints>
-                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties/>
-                            <border type="none" title="地图大小"/>
-                            <children>
-                              <component id="e9098" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="宽"/>
-                                </properties>
-                              </component>
-                              <component id="d4473" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="高"/>
-                                </properties>
-                              </component>
-                              <component id="e4b5b" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="地图"/>
-                                </properties>
-                              </component>
-                              <component id="34c2a" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="可移动"/>
-                                </properties>
-                              </component>
-                              <component id="139c4" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="可移动偏移"/>
-                                </properties>
-                              </component>
-                              <component id="c82c6" class="javax.swing.JSpinner" binding="mapWidth">
-                                <constraints>
-                                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties/>
-                              </component>
-                              <component id="dffa0" class="javax.swing.JSpinner" binding="mapHeight">
-                                <constraints>
-                                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties/>
-                              </component>
-                              <component id="8bcb0" class="javax.swing.JSpinner" binding="mapMovableWidth">
-                                <constraints>
-                                  <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties/>
-                              </component>
-                              <component id="1be56" class="javax.swing.JSpinner" binding="mapMovableHeight">
-                                <constraints>
-                                  <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties/>
-                              </component>
-                              <component id="919a5" class="javax.swing.JSpinner" binding="mapMovableWidthOffset">
-                                <constraints>
-                                  <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties/>
-                              </component>
-                              <component id="d2e4" class="javax.swing.JSpinner" binding="mapMovableHeightOffset">
-                                <constraints>
-                                  <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties/>
-                              </component>
-                            </children>
-                          </grid>
-                          <grid id="37aa4" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                            <margin top="0" left="0" bottom="0" right="0"/>
-                            <constraints>
-                              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties/>
-                            <border type="none" title="超过边界后"/>
-                            <children>
-                              <grid id="fb151" binding="borderTypes" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                              <grid id="bb54" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                 <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
                                 </constraints>
                                 <properties/>
-                                <border type="none"/>
+                                <border type="none" title="头属性"/>
                                 <children>
-                                  <component id="518ae" class="javax.swing.JRadioButton" binding="borderTypeLast">
+                                  <component id="e55b3" class="javax.swing.JCheckBox" binding="mapHeadUnderground">
                                     <constraints>
                                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                                     </constraints>
                                     <properties>
-                                      <text value="返回入口"/>
+                                      <text value="地下地图"/>
                                     </properties>
                                   </component>
-                                  <component id="99463" class="javax.swing.JRadioButton" binding="borderTypeFixed">
+                                  <component id="79bf0" class="javax.swing.JCheckBox" binding="mapHeadEventTile">
                                     <constraints>
                                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                                     </constraints>
                                     <properties>
-                                      <text value="指定地图"/>
+                                      <text value="事件图块"/>
                                     </properties>
                                   </component>
-                                  <component id="2832" class="javax.swing.JRadioButton" binding="borderTypeDirection">
+                                  <component id="57e7b" class="javax.swing.JCheckBox" binding="mapHeadUnknown">
                                     <constraints>
                                       <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                                     </constraints>
                                     <properties>
-                                      <text value="根据方向"/>
+                                      <text value="unknown"/>
                                     </properties>
+                                  </component>
+                                  <component id="58cac" class="javax.swing.JCheckBox" binding="mapHeadDyTile">
+                                    <constraints>
+                                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="dy tile"/>
+                                    </properties>
+                                  </component>
+                                  <component id="114a6" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="事件索引"/>
+                                    </properties>
+                                  </component>
+                                  <component id="bbaa" class="javax.swing.JSpinner" binding="eventTilesIndex">
+                                    <constraints>
+                                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <enabled value="false"/>
+                                    </properties>
+                                  </component>
+                                  <grid id="342fa" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
+                                    <constraints>
+                                      <grid row="1" column="2" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                    <border type="none"/>
+                                    <children>
+                                      <component id="bc593" class="javax.swing.JLabel">
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="动态属性"/>
+                                        </properties>
+                                      </component>
+                                      <component id="c0b6f" class="javax.swing.JComboBox" binding="dyDataA">
+                                        <constraints>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <enabled value="false"/>
+                                          <model>
+                                            <item value="FF"/>
+                                            <item value="00"/>
+                                            <item value="01"/>
+                                          </model>
+                                          <selectedIndex value="1"/>
+                                        </properties>
+                                      </component>
+                                      <component id="85a93" class="javax.swing.JComboBox" binding="dyDataB">
+                                        <constraints>
+                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <enabled value="false"/>
+                                          <model>
+                                            <item value="00"/>
+                                            <item value="01"/>
+                                          </model>
+                                        </properties>
+                                      </component>
+                                    </children>
+                                  </grid>
+                                </children>
+                              </grid>
+                              <grid id="2a130" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="true" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="4" left="4" bottom="4" right="4"/>
+                                <constraints>
+                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties/>
+                                <border type="none" title="地图大小"/>
+                                <children>
+                                  <component id="2da95" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="宽"/>
+                                    </properties>
+                                  </component>
+                                  <component id="29022" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="高"/>
+                                    </properties>
+                                  </component>
+                                  <component id="d350" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="地图"/>
+                                    </properties>
+                                  </component>
+                                  <component id="b069" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="可移动"/>
+                                    </properties>
+                                  </component>
+                                  <component id="dd820" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="可移动偏移"/>
+                                    </properties>
+                                  </component>
+                                  <component id="1c858" class="javax.swing.JSpinner" binding="mapWidth">
+                                    <constraints>
+                                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                  </component>
+                                  <component id="aa5e8" class="javax.swing.JSpinner" binding="mapHeight">
+                                    <constraints>
+                                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                  </component>
+                                  <component id="fb9b7" class="javax.swing.JSpinner" binding="mapMovableWidth">
+                                    <constraints>
+                                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                  </component>
+                                  <component id="14172" class="javax.swing.JSpinner" binding="mapMovableHeight">
+                                    <constraints>
+                                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                  </component>
+                                  <component id="719a5" class="javax.swing.JSpinner" binding="mapMovableWidthOffset">
+                                    <constraints>
+                                      <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                  </component>
+                                  <component id="8e61c" class="javax.swing.JSpinner" binding="mapMovableHeightOffset">
+                                    <constraints>
+                                      <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
                                   </component>
                                 </children>
                               </grid>
-                              <grid id="2263e" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                                <margin top="4" left="4" bottom="4" right="4"/>
+                              <grid id="8753e" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
                                 </constraints>
                                 <properties/>
-                                <border type="none"/>
+                                <border type="none" title="超过边界后"/>
                                 <children>
-                                  <grid id="a19a" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="true" same-size-vertically="false" hgap="-1" vgap="-1">
+                                  <grid id="1216a" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                     <margin top="0" left="0" bottom="0" right="0"/>
                                     <constraints>
                                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -267,238 +290,639 @@
                                     <properties/>
                                     <border type="none"/>
                                     <children>
-                                      <component id="c0537" class="javax.swing.JLabel">
+                                      <component id="d6d28" class="javax.swing.JRadioButton" binding="borderTypeLast">
                                         <constraints>
-                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties>
-                                          <text value="目标地图"/>
+                                          <text value="返回入口"/>
                                         </properties>
                                       </component>
-                                      <component id="7c41c" class="javax.swing.JLabel">
+                                      <component id="266c2" class="javax.swing.JRadioButton" binding="borderTypeFixed">
                                         <constraints>
-                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties>
-                                          <text value="X"/>
+                                          <text value="指定地图"/>
                                         </properties>
                                       </component>
-                                      <component id="fc467" class="javax.swing.JLabel">
+                                      <component id="73181" class="javax.swing.JRadioButton" binding="borderTypeDirection">
                                         <constraints>
-                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties>
-                                          <text value="Y"/>
+                                          <text value="根据方向"/>
                                         </properties>
-                                      </component>
-                                      <component id="7d379" class="javax.swing.JSpinner" binding="borderLocation00">
-                                        <constraints>
-                                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties/>
-                                      </component>
-                                      <component id="c2c08" class="javax.swing.JSpinner" binding="borderLocation01">
-                                        <constraints>
-                                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties/>
-                                      </component>
-                                      <component id="8394f" class="javax.swing.JSpinner" binding="borderLocation02">
-                                        <constraints>
-                                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties/>
                                       </component>
                                     </children>
                                   </grid>
-                                  <grid id="be0e4" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="true" same-size-vertically="false" hgap="-1" vgap="-1">
-                                    <margin top="0" left="0" bottom="0" right="0"/>
+                                  <grid id="6e96" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="4" left="4" bottom="4" right="4"/>
                                     <constraints>
-                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                     </constraints>
-                                    <properties>
-                                      <visible value="true"/>
-                                    </properties>
+                                    <properties/>
                                     <border type="none"/>
                                     <children>
-                                      <component id="ae884" class="javax.swing.JSpinner" binding="borderLocation10">
+                                      <grid id="d5948" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="true" same-size-vertically="false" hgap="-1" vgap="-1">
+                                        <margin top="0" left="0" bottom="0" right="0"/>
                                         <constraints>
-                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
-                                      </component>
-                                      <component id="a00cb" class="javax.swing.JSpinner" binding="borderLocation11">
+                                        <border type="none"/>
+                                        <children>
+                                          <component id="2b890" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="目标地图"/>
+                                            </properties>
+                                          </component>
+                                          <component id="87859" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="X"/>
+                                            </properties>
+                                          </component>
+                                          <component id="50cc5" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="Y"/>
+                                            </properties>
+                                          </component>
+                                          <component id="c5913" class="javax.swing.JSpinner" binding="borderLocation00">
+                                            <constraints>
+                                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="4a0d1" class="javax.swing.JSpinner" binding="borderLocation01">
+                                            <constraints>
+                                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="1bf49" class="javax.swing.JSpinner" binding="borderLocation02">
+                                            <constraints>
+                                              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                        </children>
+                                      </grid>
+                                      <grid id="e96a7" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="true" same-size-vertically="false" hgap="-1" vgap="-1">
+                                        <margin top="0" left="0" bottom="0" right="0"/>
                                         <constraints>
-                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                         </constraints>
-                                        <properties/>
-                                      </component>
-                                      <component id="ce472" class="javax.swing.JSpinner" binding="borderLocation12">
-                                        <constraints>
-                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties/>
-                                      </component>
-                                      <component id="cd9b2" class="javax.swing.JSpinner" binding="borderLocation20">
+                                        <properties>
+                                          <visible value="true"/>
+                                        </properties>
+                                        <border type="none"/>
+                                        <children>
+                                          <component id="bc9b" class="javax.swing.JSpinner" binding="borderLocation10">
+                                            <constraints>
+                                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="62838" class="javax.swing.JSpinner" binding="borderLocation11">
+                                            <constraints>
+                                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="ac764" class="javax.swing.JSpinner" binding="borderLocation12">
+                                            <constraints>
+                                              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="8098" class="javax.swing.JSpinner" binding="borderLocation20">
+                                            <constraints>
+                                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="11863" class="javax.swing.JSpinner" binding="borderLocation21">
+                                            <constraints>
+                                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="ac4f3" class="javax.swing.JSpinner" binding="borderLocation22">
+                                            <constraints>
+                                              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="b4d1" class="javax.swing.JSpinner" binding="borderLocation30">
+                                            <constraints>
+                                              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="529cb" class="javax.swing.JSpinner" binding="borderLocation31">
+                                            <constraints>
+                                              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                          <component id="c9e0e" class="javax.swing.JSpinner" binding="borderLocation32">
+                                            <constraints>
+                                              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                          </component>
+                                        </children>
+                                      </grid>
+                                    </children>
+                                  </grid>
+                                </children>
+                              </grid>
+                              <grid id="16725" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
+                                <constraints>
+                                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties/>
+                                <border type="none" title="其它"/>
+                                <children>
+                                  <component id="8ca26" class="javax.swing.JLabel" default-binding="true">
+                                    <constraints>
+                                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="背景音乐"/>
+                                    </properties>
+                                  </component>
+                                  <component id="f4d5" class="javax.swing.JSpinner" binding="mapMusic">
+                                    <constraints>
+                                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                  </component>
+                                  <component id="ec60" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="地图索引"/>
+                                    </properties>
+                                  </component>
+                                  <component id="9f2dc" class="javax.swing.JSpinner" binding="mapDataIndex">
+                                    <constraints>
+                                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <toolTipText value="该值不会生效"/>
+                                    </properties>
+                                  </component>
+                                  <component id="e179d" class="javax.swing.JLabel" default-binding="true">
+                                    <constraints>
+                                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="属性索引"/>
+                                    </properties>
+                                  </component>
+                                  <component id="a84d4" class="javax.swing.JSpinner" binding="mapPropertiesIndex">
+                                    <constraints>
+                                      <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <toolTipText value="该值不会生效"/>
+                                    </properties>
+                                  </component>
+                                  <component id="ed65c" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="怪物组合"/>
+                                    </properties>
+                                  </component>
+                                  <component id="ffb3e" class="javax.swing.JSpinner" binding="monsterGroupIndex">
+                                    <constraints>
+                                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                  </component>
+                                </children>
+                              </grid>
+                              <vspacer id="988be">
+                                <constraints>
+                                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                              </vspacer>
+                              <grid id="ff6a6" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
+                                <constraints>
+                                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties/>
+                                <border type="none" title="图块集"/>
+                                <children>
+                                  <grid id="35262" layout-manager="GridLayoutManager" row-count="6" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
+                                    <constraints>
+                                      <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                    <border type="none" title="地图"/>
+                                    <children>
+                                      <component id="7c044" class="javax.swing.JSpinner" binding="X00">
                                         <constraints>
                                           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                       </component>
-                                      <component id="46990" class="javax.swing.JSpinner" binding="borderLocation21">
+                                      <component id="d5842" class="javax.swing.JSpinner" binding="X40">
                                         <constraints>
                                           <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                       </component>
-                                      <component id="98c4b" class="javax.swing.JSpinner" binding="borderLocation22">
+                                      <component id="f31f1" class="javax.swing.JSpinner" binding="X80">
                                         <constraints>
                                           <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                       </component>
-                                      <component id="233ea" class="javax.swing.JSpinner" binding="borderLocation30">
+                                      <component id="86bf9" class="javax.swing.JSpinner" binding="XC0">
                                         <constraints>
-                                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                       </component>
-                                      <component id="4bf55" class="javax.swing.JSpinner" binding="borderLocation31">
+                                      <component id="63ea4" class="javax.swing.JLabel">
                                         <constraints>
-                                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="00"/>
+                                        </properties>
+                                      </component>
+                                      <component id="7128a" class="javax.swing.JLabel">
+                                        <constraints>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="40"/>
+                                        </properties>
+                                      </component>
+                                      <component id="9c240" class="javax.swing.JLabel">
+                                        <constraints>
+                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="80"/>
+                                        </properties>
+                                      </component>
+                                      <component id="265fb" class="javax.swing.JLabel">
+                                        <constraints>
+                                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="C0"/>
+                                        </properties>
+                                      </component>
+                                      <component id="94a0d" class="javax.swing.JSpinner" binding="combinationA">
+                                        <constraints>
+                                          <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                       </component>
-                                      <component id="25c6d" class="javax.swing.JSpinner" binding="borderLocation32">
+                                      <component id="ecc62" class="javax.swing.JSpinner" binding="combinationB">
                                         <constraints>
-                                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                          <grid row="3" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                       </component>
+                                      <component id="f9267" class="javax.swing.JLabel">
+                                        <constraints>
+                                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="调色板"/>
+                                        </properties>
+                                      </component>
+                                      <component id="b4236" class="javax.swing.JSpinner" binding="palette">
+                                        <constraints>
+                                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties/>
+                                      </component>
+                                      <component id="7a1d9" class="javax.swing.JLabel">
+                                        <constraints>
+                                          <grid row="2" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="图块组合"/>
+                                        </properties>
+                                      </component>
+                                      <grid id="45c61" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                        <margin top="0" left="0" bottom="0" right="0"/>
+                                        <constraints>
+                                          <grid row="5" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                                            <preferred-size width="256" height="-1"/>
+                                          </grid>
+                                        </constraints>
+                                        <properties/>
+                                        <border type="none"/>
+                                        <children>
+                                          <component id="9eeda" class="javax.swing.JButton" binding="collapsedMapTileSetImage">
+                                            <constraints>
+                                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="隐藏"/>
+                                            </properties>
+                                          </component>
+                                          <grid id="3cc68" class="org.jdesktop.swingx.JXCollapsiblePane" binding="mapTileSetImagePane" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                            <margin top="0" left="0" bottom="0" right="0"/>
+                                            <constraints>
+                                              <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                            <border type="none"/>
+                                            <children>
+                                              <component id="a43ef" class="javax.swing.JLabel" binding="mapTileSetImage">
+                                                <constraints>
+                                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+                                                </constraints>
+                                                <properties>
+                                                  <text value=""/>
+                                                </properties>
+                                              </component>
+                                            </children>
+                                          </grid>
+                                          <component id="b9f8d" class="javax.swing.JLabel" binding="mapTileSetIndex">
+                                            <constraints>
+                                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="Label"/>
+                                            </properties>
+                                          </component>
+                                        </children>
+                                      </grid>
+                                    </children>
+                                  </grid>
+                                  <grid id="fd353" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
+                                    <constraints>
+                                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                    <border type="none" title="精灵"/>
+                                    <children>
+                                      <component id="faf7f" class="javax.swing.JSpinner" binding="S00">
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <enabled value="false"/>
+                                        </properties>
+                                      </component>
+                                      <component id="47fa9" class="javax.swing.JSpinner" binding="S40">
+                                        <constraints>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <enabled value="false"/>
+                                        </properties>
+                                      </component>
+                                      <component id="6c693" class="javax.swing.JSpinner" binding="S80">
+                                        <constraints>
+                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties/>
+                                      </component>
+                                      <component id="9962e" class="javax.swing.JSpinner" binding="SC0">
+                                        <constraints>
+                                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <enabled value="false"/>
+                                        </properties>
+                                      </component>
+                                      <grid id="1e2b7" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                        <margin top="0" left="0" bottom="0" right="0"/>
+                                        <constraints>
+                                          <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                                            <preferred-size width="256" height="-1"/>
+                                          </grid>
+                                        </constraints>
+                                        <properties/>
+                                        <border type="none"/>
+                                        <children>
+                                          <grid id="3eef0" class="org.jdesktop.swingx.JXCollapsiblePane" binding="spriteTileSetImagePane" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                            <margin top="0" left="0" bottom="0" right="0"/>
+                                            <constraints>
+                                              <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                            <border type="none"/>
+                                            <children>
+                                              <component id="8f21a" class="javax.swing.JLabel" binding="spriteTileSetImage">
+                                                <constraints>
+                                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+                                                </constraints>
+                                                <properties>
+                                                  <text value=""/>
+                                                </properties>
+                                              </component>
+                                            </children>
+                                          </grid>
+                                          <component id="b3851" class="javax.swing.JButton" binding="collapsedSpriteTileSetImage">
+                                            <constraints>
+                                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="隐藏"/>
+                                            </properties>
+                                          </component>
+                                          <component id="ca8c5" class="javax.swing.JLabel" binding="spriteTileSetIndex">
+                                            <constraints>
+                                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="Label"/>
+                                            </properties>
+                                          </component>
+                                        </children>
+                                      </grid>
                                     </children>
                                   </grid>
                                 </children>
                               </grid>
-                            </children>
-                          </grid>
-                          <grid id="4cac6" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                            <margin top="0" left="0" bottom="0" right="0"/>
-                            <constraints>
-                              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties/>
-                            <border type="none" title="其它"/>
-                            <children>
-                              <component id="148db" class="javax.swing.JLabel">
+                              <grid id="392d2" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="背景音乐"/>
-                                </properties>
-                              </component>
-                              <component id="2e868" class="javax.swing.JSpinner" binding="mapMusic">
-                                <constraints>
-                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                 </constraints>
                                 <properties/>
-                              </component>
-                              <component id="d8532" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="Label"/>
-                                </properties>
-                              </component>
-                              <component id="bb297" class="javax.swing.JSpinner" binding="spinner20" default-binding="true">
-                                <constraints>
-                                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties/>
-                              </component>
+                                <border type="none" title="特殊"/>
+                                <children/>
+                              </grid>
                             </children>
                           </grid>
-                          <grid id="d4877" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                            <margin top="0" left="0" bottom="0" right="0"/>
-                            <constraints>
-                              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties/>
-                            <border type="none"/>
-                            <children>
-                              <component id="dd1a" class="javax.swing.JButton" binding="applyProperties">
-                                <constraints>
-                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="保存修改"/>
-                                </properties>
-                              </component>
-                              <hspacer id="62314">
-                                <constraints>
-                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                              </hspacer>
-                            </children>
-                          </grid>
-                          <vspacer id="e13de">
-                            <constraints>
-                              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                          </vspacer>
                         </children>
-                      </grid>
+                      </scrollpane>
                     </children>
-                  </scrollpane>
+                  </grid>
                 </children>
-              </grid>
+              </tabbedpane>
+            </children>
+          </grid>
+          <grid id="3eddd" layout-manager="GridLayoutManager" row-count="2" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="none" title="地图显示"/>
+            <children>
+              <component id="cf849" class="javax.swing.JCheckBox" binding="showSprites">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="NPC"/>
+                </properties>
+              </component>
+              <hspacer id="a5a47">
+                <constraints>
+                  <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
+              <component id="6151e" class="javax.swing.JCheckBox" binding="showFillTile">
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="界外图块"/>
+                </properties>
+              </component>
+              <component id="8bc17" class="javax.swing.JCheckBox" binding="showEntrances">
+                <constraints>
+                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="地图入口"/>
+                </properties>
+              </component>
+              <component id="a9ff8" class="javax.swing.JCheckBox" binding="showComputers">
+                <constraints>
+                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="计算机"/>
+                </properties>
+              </component>
+              <component id="80352" class="javax.swing.JCheckBox" binding="showEvents">
+                <constraints>
+                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="false"/>
+                  <text value="动态图块"/>
+                </properties>
+              </component>
+              <component id="900b5" class="javax.swing.JCheckBox" binding="showTreasures">
+                <constraints>
+                  <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="宝藏"/>
+                </properties>
+              </component>
+              <component id="79f59" class="javax.swing.JButton" binding="mapImageRefresh">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="刷新"/>
+                  <toolTipText value="如果图片未更新，点此刷新"/>
+                </properties>
+              </component>
+              <component id="5da2c" class="javax.swing.JLabel" binding="mapImageSelectedPoint">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Label"/>
+                </properties>
+              </component>
             </children>
           </grid>
         </children>
       </grid>
-      <grid id="b0684" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="b0684" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="true"/>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="true"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <component id="97a3d" class="javax.swing.JButton" binding="mapHideTile">
+          <component id="ad952" class="javax.swing.JLabel" binding="mapHideTile">
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="隐藏图块"/>
             </properties>
           </component>
-          <component id="3ab25" class="javax.swing.JButton" binding="mapFillTile">
+          <component id="2e239" class="javax.swing.JLabel" binding="mapFillTile">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="填充图块"/>
+              <text value="界外图块"/>
             </properties>
           </component>
-          <hspacer id="c4b83">
+          <component id="e3223" class="javax.swing.JSpinner" binding="mapHideTileValue">
             <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="64" height="-1"/>
+              </grid>
             </constraints>
-          </hspacer>
+            <properties/>
+          </component>
+          <component id="3c4bd" class="javax.swing.JSpinner" binding="mapFillTileValue">
+            <constraints>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="64" height="-1"/>
+              </grid>
+            </constraints>
+            <properties/>
+          </component>
         </children>
       </grid>
       <grid id="e194f" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="0" column="0" row-span="5" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="4" col-span="1" vsize-policy="3" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
           <scrollpane id="75596">
             <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
                 <preferred-size width="64" height="-1"/>
               </grid>
             </constraints>
@@ -508,24 +932,26 @@
               <component id="5abb2" class="javax.swing.JList" binding="mapList">
                 <constraints/>
                 <properties>
-                  <selectionMode value="1"/>
+                  <selectionMode value="0"/>
                 </properties>
               </component>
             </children>
           </scrollpane>
-          <component id="1711f" class="javax.swing.JTextField" binding="mapFilter">
+          <component id="b57d7" class="javax.swing.JTextField" binding="mapFilter">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="64" height="-1"/>
               </grid>
             </constraints>
-            <properties/>
+            <properties>
+              <toolTipText value="搜索地图"/>
+            </properties>
           </component>
         </children>
       </grid>
       <scrollpane id="f1a4d">
         <constraints>
-          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <verticalScrollBarPolicy value="21"/>
@@ -535,12 +961,25 @@
           <component id="f2782" class="javax.swing.JTextArea" binding="mapDes">
             <constraints/>
             <properties>
-              <rows value="6"/>
+              <rows value="5"/>
               <text value="Label"/>
             </properties>
           </component>
         </children>
       </scrollpane>
+      <component id="5be5" class="javax.swing.JButton" binding="applyProperties">
+        <constraints>
+          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="保存修改"/>
+        </properties>
+      </component>
+      <hspacer id="2f362">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </hspacer>
     </children>
   </grid>
   <buttonGroups>
@@ -548,6 +987,11 @@
       <member id="518ae"/>
       <member id="99463"/>
       <member id="2832"/>
+    </group>
+    <group name="borderTypeGroup">
+      <member id="d6d28"/>
+      <member id="266c2"/>
+      <member id="73181"/>
     </group>
   </buttonGroups>
 </form>

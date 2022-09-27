@@ -30,7 +30,7 @@
 
 | 编辑器类名                                                                                                     | 名称       | 状态          |
 |-----------------------------------------------------------------------------------------------------------|----------|-------------|
-| [IVendorEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/vendor/IVendorEditor.java)   | 售货机商品编辑器 | 完成          |
+| [IShopEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/IShopEditor.java)         | 商店编辑器    | 完成          |
 | [IComputerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/IComputerEditor.java)      | 计算机编辑器   | 完成          |
 | [IDataValueEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/data/IDataValueEditor.java)        | 数据值编辑器   | 完成          |
 | [IItemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)                 | 物品编辑器    | 完成          |
@@ -52,14 +52,13 @@
 
 ## 编辑器可编辑内容
 
-### [IVendorEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/IComputerEditor.java)（售货机商品编辑器）
+### [IShopEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/IShopEditor.java)（售货机商品编辑器）
 
-实现类：[VendorEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/ComputerEditorImpl.java)
+实现类：[ShopEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/ShopEditorImpl.java)
 
 不支持世界地图，世界地图也不支持使用售货机
 
 *
-
 售货机的商品、商品数量和所在地图，修改商品价格请使用 [`IItemEditor`](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)
 
 ### [IComputerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/IComputerEditor.java)（计算机编辑器）
@@ -83,9 +82,7 @@
 * 玩家的防具属性 [`PlayerArmor`](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerArmor.java)
 * 玩家的武器属性 [`PlayerWeapon`](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerWeapon.java)
 *
-
 坦克的装备属性 [`TankEquipmentItem`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEquipmentItem.java) [`TankEngine`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEngine.java)
-
 * 坦克的武器属性 [`TankWeapon`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankWeapon.java)
 
 ### [IEventEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/events/IEventTilesEditor.java)（事件编辑器）

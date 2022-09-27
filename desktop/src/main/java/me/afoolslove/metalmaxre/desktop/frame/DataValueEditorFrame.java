@@ -1,4 +1,4 @@
-package me.afoolslove.metalmaxre.desktop.dialog;
+package me.afoolslove.metalmaxre.desktop.frame;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
@@ -10,16 +10,14 @@ import java.awt.*;
 import java.awt.event.*;
 import java.nio.file.Path;
 
-public class DataValueEditorDialog extends JDialog {
+public class DataValueEditorFrame extends JDialog {
     private final MetalMaxRe metalMaxRe;
 
     private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
     private JTable dataValueTable;
     private JTextField dataValueFilter;
 
-    public DataValueEditorDialog(@NotNull MetalMaxRe metalMaxRe) {
+    public DataValueEditorFrame(@NotNull Frame frame, @NotNull MetalMaxRe metalMaxRe) {
         super((Dialog) null, false);
         this.metalMaxRe = metalMaxRe;
 
@@ -31,20 +29,7 @@ public class DataValueEditorDialog extends JDialog {
         }
 
         setContentPane(contentPane);
-        getRootPane().setDefaultButton(buttonOK);
-
-
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        setLocation(frame.getX(), frame.getY());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -98,6 +83,8 @@ public class DataValueEditorDialog extends JDialog {
 
             @Override
             public void setValueAt(Object aValue, int row, int column) {
+                fireTableCellUpdated(row, column);
+
                 if (column == 0x00 || column == 0x01) {
                     return;
                 }

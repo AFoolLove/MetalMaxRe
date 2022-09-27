@@ -4,9 +4,6 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Range;
-
-import java.util.List;
 
 /**
  * 提供了编辑器部分所需的方法
@@ -21,6 +18,22 @@ public interface IRomEditor {
      */
     @NotNull
     MetalMaxRe getMetalMaxRe();
+
+    /**
+     * 设置启用或禁用编辑器
+     * <p>
+     * *禁用后依然会加载，但不会进行写入
+     *
+     * @param enabled 启用或禁用编辑器
+     */
+    void setEnabled(boolean enabled);
+
+    /**
+     * 当前编辑器是否已启用
+     *
+     * @return 当前编辑器是否已启用
+     */
+    boolean isEnabled();
 
     /**
      * 获取当前编辑器的数据指针位置

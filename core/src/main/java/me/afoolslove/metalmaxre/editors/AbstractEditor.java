@@ -1,6 +1,8 @@
 package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorDisabledEvent;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorEnabledEvent;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -10,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class AbstractEditor implements IRomEditor {
     private final MetalMaxRe metalMaxRe;
+    private boolean enabled = true;
     private int position = 0;
 
     protected AbstractEditor(@NotNull MetalMaxRe metalMaxRe) {
@@ -20,6 +23,24 @@ public abstract class AbstractEditor implements IRomEditor {
     @Override
     public MetalMaxRe getMetalMaxRe() {
         return metalMaxRe;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (this.enabled == enabled) {
+            return;
+        }
+        this.enabled = enabled;
+        if (enabled) {
+            metalMaxRe.getEventHandler().callEvent(new EditorEnabledEvent(metalMaxRe, this));
+        } else {
+            metalMaxRe.getEventHandler().callEvent(new EditorDisabledEvent(metalMaxRe, this));
+        }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     /**

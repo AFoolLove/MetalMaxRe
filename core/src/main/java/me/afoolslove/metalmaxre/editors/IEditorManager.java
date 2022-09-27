@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editors;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
@@ -79,4 +80,11 @@ public interface IEditorManager {
      * @return 编辑器
      */
     <E extends IRomEditor> E getEditor(Class<? extends IRomEditor> editor);
+
+    /**
+     * 获取所有编辑器实例
+     *
+     * @return 所有编辑器
+     */
+    Map<Class<? extends IRomEditor>, IRomEditor> getEditors();
 }

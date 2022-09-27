@@ -4,8 +4,8 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
 import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
-import me.afoolslove.metalmaxre.editors.computer.vendor.IVendorEditor;
-import me.afoolslove.metalmaxre.editors.computer.vendor.VendorEditorImpl;
+import me.afoolslove.metalmaxre.editors.computer.shop.IShopEditor;
+import me.afoolslove.metalmaxre.editors.computer.shop.ShopEditorImpl;
 import me.afoolslove.metalmaxre.editors.data.DataValueEditorImpl;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
@@ -80,7 +80,7 @@ public class EditorManagerImpl implements IEditorManager {
 
     public void registerDefaultEditors() {
         register(IComputerEditor.class, ComputerEditorImpl::new);
-        register(IVendorEditor.class, VendorEditorImpl::new);
+        register(IShopEditor.class, ShopEditorImpl::new);
         register(IDataValueEditor.class, DataValueEditorImpl::new);
         register(IItemEditor.class, ItemEditorImpl::new);
         register(IDogSystemEditor.class, DogSystemEditorImpl::new);
@@ -450,7 +450,7 @@ public class EditorManagerImpl implements IEditorManager {
     public Future<IRomEditor> applyEditor(@NotNull Class<? extends IRomEditor> type) {
         return EDITOR_EXECUTOR.submit(() -> {
             var editor = getEditor(type);
-            if (editor != null) {
+            if (editor != null && editor.isEnabled()) {
                 Method applyMethod = applyMethods.get(type);
 
                 if (applyMethod == null) {
@@ -559,4 +559,8 @@ public class EditorManagerImpl implements IEditorManager {
         return (E) editors.get(editor);
     }
 
+    @Override
+    public Map<Class<? extends IRomEditor>, IRomEditor> getEditors() {
+        return editors;
+    }
 }

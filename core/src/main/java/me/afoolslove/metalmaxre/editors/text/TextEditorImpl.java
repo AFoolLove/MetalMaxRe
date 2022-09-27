@@ -345,9 +345,9 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
             if (bytes.length != length) {
                 if (bytes.length < length) {
-                    System.out.println(String.format("文本编辑器：%05X-%05X 剩余%d个字节", entry.getKey().getStartAddress(), entry.getKey().getEndAddress(), length - bytes.length));
+                    System.out.printf("文本编辑器：%05X-%05X 剩余%d个字节\n", entry.getKey().getStartAddress(), entry.getKey().getEndAddress(), length - bytes.length);
                 } else {
-                    System.out.println(String.format("文本编辑器：%05X-%05X 溢出%d个字节", entry.getKey().getStartAddress(), entry.getKey().getEndAddress(), bytes.length - length));
+                    System.err.printf("文本编辑器：%05X-%05X 溢出%d个字节未写入\n", entry.getKey().getStartAddress(), entry.getKey().getEndAddress(), bytes.length - length);
                 }
             }
         });

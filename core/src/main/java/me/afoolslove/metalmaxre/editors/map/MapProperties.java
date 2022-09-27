@@ -267,9 +267,9 @@ public class MapProperties {
         return hideTile;
     }
 
-    @Range(from = 0x00, to = 0xFF)
+    @Range(from = 0x00, to = 0x7F)
     public int intHideTile() {
-        return getHideTile() & 0xFF;
+        return getHideTile() & 0x7F;
     }
 
     /**

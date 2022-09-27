@@ -3,9 +3,8 @@ package me.afoolslove.metalmaxre.editors.computer;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * 计算机编辑器
@@ -21,14 +20,16 @@ public interface IComputerEditor<C extends Computer> extends IRomEditor {
      *
      * @return 计算机的最大数量
      */
-    int getMaxCount();
+    default int getMaxCount() {
+        return 0x7B;
+    }
 
     /**
      * 获取所有的计算机。售货机、游戏机、计算机等
      *
      * @return 所有的计算机
      */
-    Set<C> getComputers();
+    List<C> getComputers();
 
     /**
      * 添加一个计算机

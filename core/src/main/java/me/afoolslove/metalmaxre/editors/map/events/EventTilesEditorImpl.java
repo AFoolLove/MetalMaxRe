@@ -13,6 +13,7 @@ import me.afoolslove.metalmaxre.utils.Point2B;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -158,50 +159,106 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
 
     @Editor.Apply
     public void onApply(IWorldMapEditor worldMapEditor,
+                        @Editor.QuoteOnly IMapEditor mapEditor,
                         @Editor.QuoteOnly IMapPropertiesEditor mapPropertiesEditor) {
-        // 排除事件为 0x00 ！！！！
-        getEventTiles().values().forEach(each ->
-                each.entrySet().removeIf(entry -> entry.getKey() == 0x00)
-        );
+//        // 排除事件为 0x00 ！！！！
+//        getEventTiles().values().forEach(each ->
+//                each.entrySet().removeIf(entry -> entry.getKey() == 0x00)
+//        );
+        byte[][] eventTiles = new byte[mapEditor.getMapMaxCount()][];
+        // 事件图块数据
+        List<byte[]> eventTilesData = new ArrayList<>();
 
-        List<Map<Integer, List<EventTile>>> eventList = getEventTiles().values()
-                .parallelStream()
-                .filter(entry -> !entry.isEmpty()) // 过滤没有事件图块的地图
-                .distinct().toList();
-
-        position(getEventTilesAddress());
-        eventList.forEach(events -> {
-            // 计算新的事件图块索引，太长了！简称：索引
-            final char newEventTilesIndex = (char) (position() - (getBuffer().getHeader().isTrained() ? 0x200 : 0x000) - 0x10 - 0x1C000 + 0x8000);
-            // 将旧的索引替换为新的索引
-            getEventTiles().entrySet()
-                    .parallelStream()
-                    .filter(entry1 -> entry1.getValue() == events) // 获取相同事件图块的地图
-                    .forEach(mapEntry -> {
-                        // 通过相同的事件图块组更新索引
-                        mapPropertiesEditor.getMapProperties(mapEntry.getKey()).eventTilesIndex = newEventTilesIndex;
-                    });
-
-            // 写入数据
-            for (Map.Entry<Integer, List<EventTile>> eventsList : events.entrySet()) {
+        for (Map.Entry<Integer, Map<Integer, List<EventTile>>> entry : getEventTiles().entrySet()) {
+            if (entry.getValue() == null || entry.getValue().isEmpty()) {
+                continue;
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            for (Map.Entry<Integer, List<EventTile>> listEntry : entry.getValue().entrySet()) {
                 // 写入事件
-                getBuffer().put(eventsList.getKey().byteValue());
+                outputStream.write(listEntry.getKey());
                 // 写入事件数量
-                getBuffer().put(eventsList.getValue().size());
+                outputStream.write(listEntry.getValue().size());
                 // 写入 X、Y、Tile
-                for (EventTile eventTile : eventsList.getValue()) {
-                    getBuffer().put(eventTile.toByteArray());
+                for (EventTile eventTile : listEntry.getValue()) {
+                    outputStream.writeBytes(eventTile.toByteArray());
                 }
             }
             // 写入事件组结束符
-            getBuffer().put(0x00);
-        });
+            outputStream.write(0x00);
+            eventTiles[entry.getKey()] = outputStream.toByteArray();
+        }
+
+        // 事件图块索引
+        char eventTilesIndex = (char) (getEventTilesAddress().getStartAddress() - 0x1C000 + 0x8000);
+        final char endEventTilesIndex = (char) (eventTilesIndex + getEventTilesAddress().length());
+        for (int mapId = 0, count = mapEditor.getMapMaxCount(); mapId < count; mapId++) {
+            byte[] eventTile = eventTiles[mapId];
+            if (eventTile == null || eventTile.length == 0) {
+                // 没有或已经设置过
+                continue;
+            }
+            if (eventTilesIndex == endEventTilesIndex) {
+                System.err.printf("事件图块编辑器：没有剩余的空间写入地图%02X的事件：%s\n", mapId, Arrays.toString(eventTile));
+                continue;
+            }
+            if ((endEventTilesIndex - eventTilesIndex) < eventTile.length) {
+                // 剩余空间不能完整的写入了
+
+                if ((endEventTilesIndex - eventTilesIndex) < (1 + 1 + 3 + 1)) {
+                    // 剩余的空间已经不能写入任何事件了
+                    // 设置为已写满
+                    eventTilesIndex = endEventTilesIndex;
+                    System.err.printf("事件图块编辑器：没有剩余的空间写入地图%02X的事件：%s\n", mapId, Arrays.toString(eventTile));
+                    continue;
+                }
+
+                // 裁剪后还能尽量塞入一些事件
+
+                // 去除基本数据外，还能塞入的事件图块数量
+                int c = ((endEventTilesIndex - eventTilesIndex) - 1 - 1 - 1) / 3;
+                eventTile = new byte[1 + 1 + (c * 3) + 1];
+                eventTile[0] = eventTiles[mapId][0];    // 复制事件
+                eventTile[1] = (byte) (c & 0xFF);       // 设置数量
+//                eventTile[eventTile.length - 1] = (byte) 0x00;       // 设置结束符，默认为0x00
+                // 复制 X、Y、Tile
+                System.arraycopy(eventTiles[mapId], 0x02, eventTile, 0x02, c * 3);
+
+                System.err.printf("事件图块编辑器：%02X写入部分事件图块：%s\n", mapId, Arrays.toString(eventTile));
+            }
+            // 将后面相同数据的事件图块索引一同设置
+            byte[] currentData = eventTiles[mapId];
+            for (int afterMapId = mapId; afterMapId < count; afterMapId++) {
+                if (Arrays.equals(eventTiles[afterMapId], currentData)) {
+                    mapPropertiesEditor.getMapProperties(mapId).eventTilesIndex = eventTilesIndex;
+                    eventTiles[afterMapId] = null;
+                    if (afterMapId != mapId) {
+                        System.out.printf("事件图块编辑器：地图%02X与%02X使用相同事件图块\n", afterMapId, mapId);
+                    }
+                }
+            }
+            eventTilesIndex += eventTile.length;
+
+            eventTilesData.add(eventTile);
+        }
+
+        // 写入数据
+        position(getEventTilesAddress());
+        for (byte[] eventTilesDatum : eventTilesData) {
+            getBuffer().put(eventTilesDatum);
+        }
 
         int end = getEventTilesAddress().getEndAddress(-position() + 0x10 + 1);
         if (end >= 0) {
+            if (end > 0) {
+                // 使用0xFF填充未使用的数据
+                byte[] fillBytes = new byte[end];
+                Arrays.fill(fillBytes, (byte) 0x00);
+                getBuffer().put(fillBytes);
+            }
             System.out.printf("事件图块编辑器：剩余%d个空闲字节\n", end);
         } else {
-            System.out.printf("事件图块编辑器：错误！超出了数据上限%d字节\n", -end);
+            System.err.printf("事件图块编辑器：错误！超出了数据上限%d字节\n", -end);
         }
 
         if (worldMapInteractiveEvent != null) {

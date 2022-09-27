@@ -2,7 +2,9 @@ package me.afoolslove.metalmaxre.editors.map;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.io.ByteArrayOutputStream;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -24,8 +26,10 @@ public class MapEntrance {
 
     /**
      * 地图内的出入口
+     * <p>
+     * *支持相同出入口
      */
-    private final Map<MapPoint, MapPoint> entrance = new HashMap<>();
+    private final Map<MapPoint, MapPoint> entrance = new IdentityHashMap<>();
 
     public MapEntrance(@NotNull MapBorder border) {
         this.border = border;
@@ -54,5 +58,33 @@ public class MapEntrance {
 
     public void setBorder(MapBorder border) {
         this.border = border;
+    }
+
+    public byte[] toByteArray() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        // 写入边界数据
+        outputStream.writeBytes(getBorder().toByteArray());
+        // 写入入口数量
+        outputStream.write(getEntrances().size());
+
+        // 写入边界目标位置
+        if (!getEntrances().isEmpty()) {
+            // 写入地图出入口数据
+
+            // 重新排序，需要顺序写入 出入口的坐标
+            LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(getEntrances());
+            // 写入入口 X、Y
+            for (MapPoint mapPoint : linkedEntrances.keySet()) {
+                outputStream.write(mapPoint.getX());
+                outputStream.write(mapPoint.getY());
+            }
+            // 写入出口 Map、X、Y
+            for (MapPoint mapPoint : linkedEntrances.values()) {
+                outputStream.write(mapPoint.getMap());
+                outputStream.write(mapPoint.getX());
+                outputStream.write(mapPoint.getY());
+            }
+        }
+        return outputStream.toByteArray();
     }
 }

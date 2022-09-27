@@ -73,8 +73,6 @@ public class TiledMapUtils {
 
         // 创建TiledMap，设置地图宽度和高度
         Map tiledMap = new Map(width, height);
-        // 无限地图
-        tiledMap.setInfinite(1);
         // Tile的宽度和高度
         tiledMap.setTileWidth(16);
         tiledMap.setTileHeight(16);
@@ -235,7 +233,7 @@ public class TiledMapUtils {
             mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
             mapObject.setId(nextObjectId++);
             // 设置出口坐标为名称 Map:X:Y
-            mapObject.setName(String.format("%02X:%03d:%03d", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
+            mapObject.setName(String.format("%02X:%03d:%03d", outPoint.getMap(), outPoint.intX(), outPoint.intY()));
 
             // 添加到入口的对象层
             entrances.addObject(mapObject);
@@ -340,7 +338,7 @@ public class TiledMapUtils {
             }
             case FIXED -> {
                 MapPoint fixed = border.getFirst();
-                String fixedStr = String.format("%02X:%03d:%03d", fixed.getMap(), fixed.getX(), fixed.getY());
+                String fixedStr = String.format("%02X:%03d:%03d", fixed.getMap(), fixed.intX(), fixed.intY());
                 borderUP.setName(fixedStr);
                 borderDOWN.setName(fixedStr);
                 borderLEFT.setName(fixedStr);
@@ -352,10 +350,10 @@ public class TiledMapUtils {
                 MapPoint left = border.get(0x02);
                 MapPoint right = border.get(0x03);
 
-                borderUP.setName(String.format("%02X:%03d:%03d", up.getMap(), up.getX(), up.getY()));
-                borderDOWN.setName(String.format("%02X:%03d:%03d", down.getMap(), down.getX(), down.getY()));
-                borderLEFT.setName(String.format("%02X:%03d:%03d", left.getMap(), left.getX(), left.getY()));
-                borderRIGHT.setName(String.format("%02X:%03d:%03d", right.getMap(), right.getX(), right.getY()));
+                borderUP.setName(String.format("%02X:%03d:%03d", up.getMap(), up.intX(), up.intY()));
+                borderDOWN.setName(String.format("%02X:%03d:%03d", down.getMap(), down.intX(), down.intY()));
+                borderLEFT.setName(String.format("%02X:%03d:%03d", left.getMap(), left.intX(), left.intY()));
+                borderRIGHT.setName(String.format("%02X:%03d:%03d", right.getMap(), right.intX(), right.intY()));
             }
         }
 
@@ -410,7 +408,9 @@ public class TiledMapUtils {
         tiledMap.setTiledversion("");
         tiledMap.setNextlayerid(nextLayerId);
         tiledMap.setNextobjectid(nextObjectId);
-        // tiledMap.setInfinite(1);
+        if (tiledMap.getInfinite() == null) {
+            tiledMap.setInfinite(0);
+        }
         // 旧版本有的
         for (Tile tile : tileSet) {
             if (tile.getType() == null) {
@@ -598,7 +598,7 @@ public class TiledMapUtils {
         backLineObject.getPolyline().setPoints(backLinePoints.toString());
 
         MapPoint backLinePoint = worldMapEditor.getShippingLineBack().getValue();
-        backLineObject.setName(String.format("%02X:%03d:%03d", backLinePoint.getMap(), backLinePoint.getX(), backLinePoint.getY()));
+        backLineObject.setName(String.format("%02X:%03d:%03d", backLinePoint.getMap(), backLinePoint.intX(), backLinePoint.intY()));
         lineGroup.addObject(backLineObject);
 
         // 出航航线和目的地
@@ -625,7 +625,7 @@ public class TiledMapUtils {
         outLineObject.getPolyline().setPoints(outLinePoints.toString());
 
         MapPoint outLinePoint = worldMapEditor.getShippingLineOut().getValue();
-        outLineObject.setName(String.format("%02X:%03d:%03d", outLinePoint.getMap(), outLinePoint.getX(), outLinePoint.getY()));
+        outLineObject.setName(String.format("%02X:%03d:%03d", outLinePoint.getMap(), outLinePoint.intX(), outLinePoint.intY()));
         lineGroup.addObject(outLineObject);
 
         // ----------------
@@ -684,7 +684,7 @@ public class TiledMapUtils {
             mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
             mapObject.setId(nextObjectId++);
             // 设置出口坐标为名称 Map:X:Y
-            mapObject.setName(String.format("%02X:%03d:%03d", outPoint.getMap(), outPoint.getX(), outPoint.getY()));
+            mapObject.setName(String.format("%02X:%03d:%03d", outPoint.getMap(), outPoint.intX(), outPoint.intY()));
 
             // 添加到入口的对象层
             entrances.addObject(mapObject);
@@ -771,7 +771,7 @@ public class TiledMapUtils {
             }
             case FIXED -> {
                 MapPoint fixed = border.getFirst();
-                String fixedStr = String.format("%02X:%03d:%03d", fixed.getMap(), fixed.getX(), fixed.getY());
+                String fixedStr = String.format("%02X:%03d:%03d", fixed.getMap(), fixed.intX(), fixed.intY());
                 borderUP.setName(fixedStr);
                 borderDOWN.setName(fixedStr);
                 borderLEFT.setName(fixedStr);
@@ -783,10 +783,10 @@ public class TiledMapUtils {
                 MapPoint left = border.get(0x02);
                 MapPoint right = border.get(0x03);
 
-                borderUP.setName(String.format("%02X:%03d:%03d", up.getMap(), up.getX(), up.getY()));
-                borderDOWN.setName(String.format("%02X:%03d:%03d", down.getMap(), down.getX(), down.getY()));
-                borderLEFT.setName(String.format("%02X:%03d:%03d", left.getMap(), left.getX(), left.getY()));
-                borderRIGHT.setName(String.format("%02X:%03d:%03d", right.getMap(), right.getX(), right.getY()));
+                borderUP.setName(String.format("%02X:%03d:%03d", up.getMap(), up.intX(), up.intY()));
+                borderDOWN.setName(String.format("%02X:%03d:%03d", down.getMap(), down.intX(), down.intY()));
+                borderLEFT.setName(String.format("%02X:%03d:%03d", left.getMap(), left.intX(), left.intY()));
+                borderRIGHT.setName(String.format("%02X:%03d:%03d", right.getMap(), right.intX(), right.intY()));
             }
         }
 
@@ -1044,34 +1044,58 @@ public class TiledMapUtils {
             }
         }
 
+        // 获取areas中的area和moving，得到地图相对位置与大小
+        // 地图区域层
+        MapObject areaObject = null;
+        // 地图可移动区域层
+        MapObject movableObject = null;
+
+        areas:
+        for (MapLayer layer : tiledMap.getLayers()) {
+            if (layer instanceof ObjectGroup mapObjects && Objects.equals("areas", layer.getName())) {
+                for (MapObject mapObject : mapObjects) {
+                    if (Objects.equals("area", mapObject.getName())) {
+                        areaObject = mapObject;
+                    }
+                    if (Objects.equals("movable", mapObject.getName())) {
+                        movableObject = mapObject;
+                    }
+                    if (areaObject != null && movableObject != null) {
+                        // 获取完毕
+                        break areas;
+                    }
+                }
+            }
+        }
+
+        if (areaObject == null || movableObject == null) {
+            // 获取失败
+            System.err.println("导入地图失败，丢失area或moving");
+            return;
+        }
+
+        // 地图宽高
+        int mapOffsetX = (int) (areaObject.getX() / 0x10);
+        int mapOffsetY = (int) (areaObject.getY() / 0x10);
+        int mapWidth = (int) (areaObject.getWidth() / 0x10);
+        int mapHeight = (int) (areaObject.getHeight() / 0x10);
+
+
+        // 获取移动区域对象的第一个数据的宽高和偏移作为可移动区域
+        // X、Y作为偏移值
+        mapProperties.movableWidthOffset = (byte) (((int) movableObject.getX()) / 0x10);
+        mapProperties.movableHeightOffset = (byte) (((int) movableObject.getY()) / 0x10);
+        mapProperties.movableWidth = (byte) (movableObject.getWidth() / 0x10);
+        mapProperties.movableWidth += mapProperties.movableWidthOffset;
+        mapProperties.movableHeight = (byte) (movableObject.getHeight() / 0x10);
+        mapProperties.movableHeight += mapProperties.movableHeightOffset;
+
 
         // 遍历所有图层
         for (MapLayer layer : new ArrayList<>(tiledMap.getLayers())) {
             if (layer instanceof ObjectGroup objectGroup) {
                 // 对象层
                 switch (layer.getName()) {
-                    case "areas":
-                        // 地图区域层
-                        // 可移动区域层
-                        for (MapObject mapObject : objectGroup) {
-                            switch (mapObject.getName()) {
-                                case "movable": // 可移动区域层
-                                    // 获取移动区域对象的第一个数据的宽高和偏移作为可移动区域
-                                    // X、Y作为偏移值
-                                    mapProperties.movableWidthOffset = (byte) (((int) mapObject.getX()) / 0x10);
-                                    mapProperties.movableHeightOffset = (byte) (((int) mapObject.getY()) / 0x10);
-
-                                    mapProperties.movableWidth = (byte) (mapObject.getWidth() / 0x10);
-                                    mapProperties.movableWidth += mapProperties.movableWidthOffset;
-                                    mapProperties.movableHeight = (byte) (mapObject.getHeight() / 0x10);
-                                    mapProperties.movableHeight += mapProperties.movableHeightOffset;
-                                    break;
-                                case "area": // 地图区域层
-
-                                    break;
-                            }
-                        }
-                        break;
                     case "border": // 边界传送方式
                         MapBorder mapBorder = mapEntranceEditor.getMapEntrance(map).getBorder();
                         // 移除原本的边界传送方式
@@ -1131,18 +1155,18 @@ public class TiledMapUtils {
                                 continue;
                             }
                             // 精灵坐标
-                            byte x = (byte) (((int) sprite.getX() / 0x10) & 0xFF);
-                            byte y = (byte) ((((int) sprite.getY() / 0x10) & 0xFF) - 1);
+                            int x = (int) sprite.getX() / 0x10;
+                            int y = ((int) sprite.getY() / 0x10) - 1;
 
                             // 通过图块ID获取精灵的朝向和图像
                             // 精灵图像和朝向
-                            byte type = (byte) (sprite.getTile().getId() & 0xFF);
+                            int type = sprite.getTile().getId();
 
                             // 通过对象名称设置行动方式和对话模式
                             // FF:FF:FF
-                            byte talk1 = (byte) Integer.parseInt(sprite.getName().substring(0, 2), 16);
-                            byte talk2 = (byte) Integer.parseInt(sprite.getName().substring(3, 5), 16);
-                            byte action = (byte) Integer.parseInt(sprite.getName().substring(6, 8), 16);
+                            int talk1 = Integer.parseInt(sprite.getName().substring(0, 2), 16);
+                            int talk2 = Integer.parseInt(sprite.getName().substring(3, 5), 16);
+                            int action = Integer.parseInt(sprite.getName().substring(6, 8), 16);
 
                             // 其它精灵属性
                             for (Property property : sprite.getProperties().getProperties()) {
@@ -1164,7 +1188,7 @@ public class TiledMapUtils {
                                 }
                             }
                             // 创建并添加精灵
-                            sprites.add(new Sprite(type, x, y, talk1, talk2, action));
+                            sprites.add(new Sprite(type, x - mapOffsetX, y - mapOffsetY, talk1, talk2, action));
                         }
                         break;
                     case "computers": // 计算机层
@@ -1182,7 +1206,7 @@ public class TiledMapUtils {
                             int y = (int) (computer.getY() / 0x10);
 
                             // 添加计算机
-                            computerEditor.addComputer(new Computer(map, type, x, y));
+                            computerEditor.addComputer(new Computer(map, type, x - mapOffsetX, y - mapOffsetY));
                         }
                         break;
                     case "entrances": // 出入口层（不含边界
@@ -1208,7 +1232,7 @@ public class TiledMapUtils {
                             int outY = Integer.parseInt(split[2]);
 
                             // 入口和出口
-                            entrances.put(new MapPoint(map, inX, inY), new MapPoint(outMap, outX, outY));
+                            entrances.put(new MapPoint(map, inX - mapOffsetX, inY - mapOffsetY), new MapPoint(outMap, outX, outY));
                         }
                         break;
                     case "treasure":
@@ -1222,10 +1246,10 @@ public class TiledMapUtils {
                             }
                             // 通过名称获取宝藏
                             int item = Integer.parseInt(treasure.getName().substring(0, 2), 16);
-                            int x = (int) (treasure.getX() / 0x10);
+                            int x = (int) treasure.getX() / 0x10;
                             int y = (int) treasure.getY() / 0x10;
                             // 添加宝藏
-                            treasureEditor.getTreasures().add(new Treasure(map, x, y, item));
+                            treasureEditor.getTreasures().add(new Treasure(map, x - mapOffsetX, y - mapOffsetY, item));
                         }
                         break;
                 }
@@ -1233,42 +1257,18 @@ public class TiledMapUtils {
                 // Tile层
                 switch (tileLayer.getName()) {
                     case "map" -> {
-                        MapObject areaObject = null;
-                        area:
-                        for (MapLayer mapLayer : tiledMap.getLayers()) {
-                            if (mapLayer instanceof ObjectGroup mapObjects && Objects.equals("areas", mapLayer.getName())) {
-                                for (MapObject mapObject : mapObjects) {
-                                    if (Objects.equals("area", mapObject.getName())) {
-                                        areaObject = mapObject;
-                                        break area;
-                                    }
-                                }
-                            }
-                        }
-                        if (areaObject == null) {
-                            Rectangle mapLayerBounds = tileLayer.getBounds();
-                            areaObject = new MapObject(0x00, 0x00, mapLayerBounds.getWidth(), mapLayerBounds.getHeight(), 0);
-                        }
-
-                        Rectangle mapBounds = new Rectangle(
-                                ((int) (areaObject.getX() / 0x10)),
-                                ((int) (areaObject.getY() / 0x10)),
-                                ((int) (areaObject.getWidth() / 0x10)),
-                                ((int) (areaObject.getHeight() / 0x10))
-                        );
-
-                        mapProperties.setHeight(mapBounds.height & 0xFF);
-                        mapProperties.setWidth(mapBounds.width & 0xFF);
+                        mapProperties.setWidth(mapWidth);
+                        mapProperties.setHeight(mapHeight);
                         // 构建地图
                         MapBuilder mapBuilder = new MapBuilder();
 
-                        for (int y = 0; y < mapBounds.height; y++) {
-                            for (int x = 0; x < mapBounds.width; x++) {
-                                Tile tileAt = tileLayer.getTileAt(mapBounds.x + x, mapBounds.y + y);
+                        for (int y = 0; y < mapHeight; y++) {
+                            for (int x = 0; x < mapWidth; x++) {
+                                Tile tileAt = tileLayer.getTileAt(x + mapOffsetX, y + mapOffsetY);
                                 if (tileAt != null) {
                                     mapBuilder.add(tileAt.getId());
                                 } else {
-                                    mapBuilder.add(0);
+                                    mapBuilder.add(0x00);
                                 }
                             }
                         }
@@ -1327,7 +1327,7 @@ public class TiledMapUtils {
                                     Tile tileAt = eventLayer.getTileAt(x, y);
                                     // 将所有有效的图块作为事件图块
                                     if (tileAt != null) {
-                                        events.add(new EventTile(x, y, tileAt.getId().byteValue()));
+                                        events.add(new EventTile(x - mapOffsetX, y - mapOffsetY, tileAt.getId().byteValue()));
                                     }
                                 }
                             }
@@ -1454,18 +1454,18 @@ public class TiledMapUtils {
                                 continue;
                             }
                             // 精灵坐标
-                            byte x = (byte) (((int) sprite.getX() / 0x10) & 0xFF);
-                            byte y = (byte) ((((int) sprite.getY() / 0x10) & 0xFF) - 1);
+                            int x = (int) sprite.getX() / 0x10;
+                            int y = ((int) sprite.getY() / 0x10) - 1;
 
                             // 通过图块ID获取精灵的朝向和图像
                             // 精灵图像和朝向
-                            byte type = (byte) (sprite.getTile().getId() & 0xFF);
+                            int type = sprite.getTile().getId();
 
                             // 通过对象名称设置行动方式和对话模式
                             // FF:FF:FF
-                            byte action = (byte) Integer.parseInt(sprite.getName().substring(0, 2), 16);
-                            byte talk1 = (byte) Integer.parseInt(sprite.getName().substring(3, 5), 16);
-                            byte talk2 = (byte) Integer.parseInt(sprite.getName().substring(6, 8), 16);
+                            int talk1 = Integer.parseInt(sprite.getName().substring(0, 2), 16);
+                            int talk2 = Integer.parseInt(sprite.getName().substring(3, 5), 16);
+                            int action = Integer.parseInt(sprite.getName().substring(6, 8), 16);
 
                             // 其它精灵属性
                             for (Property property : sprite.getProperties().getProperties()) {
@@ -1500,11 +1500,11 @@ public class TiledMapUtils {
                                 // 不添加被隐藏的宝藏
                                 continue;
                             }
+                            int x = (int) treasureObject.getX() / 0x10;
+                            int y = (int) treasureObject.getY() / 0x10;
+                            int item = Integer.parseInt(treasureObject.getName().substring(0, 2), 16) & 0xFF;
                             // 添加宝藏
-                            treasureEditor.getTreasures().add(new Treasure(0x00,
-                                    (int) treasureObject.getX() / 0x10,
-                                    (int) treasureObject.getY() / 0x10,
-                                    Integer.parseInt(treasureObject.getName().substring(0, 2), 16) & 0xFF));
+                            treasureEditor.getTreasures().add(new Treasure(0x00, x, y, item));
                         }
                         break;
                     case "entrances": // 出入口

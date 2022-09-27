@@ -15,7 +15,10 @@ dependencies {
 
     implementation project(':core')
     implementation project(':tiled')
-
+    implementation 'org.swinglabs.swingx:swingx-core:1.6.5-1'
+//    implementation 'org.swinglabs.swingx:swingx-beaninfo:1.6.5-1'
+//    implementation 'org.swinglabs:swingx:1.6.1'
+//    implementation 'org.swinglabs:swingx-beaninfo:1.6.2-2'
     implementation 'org.jetbrains:annotations:23.0.0'
 
     implementation 'org.mapeditor:libtiled:1.4.2'

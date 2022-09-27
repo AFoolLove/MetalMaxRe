@@ -7,6 +7,7 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteEditor {
@@ -62,7 +63,7 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
 
             // 读取精灵
             prgPosition(0x24000 + spritesIndex - 0x8000);
-            // 获取奖励数量
+            // 获取精灵数量
             int count = getBuffer().get();
 
             List<Sprite> spriteList = new ArrayList<>();
@@ -86,53 +87,86 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
     public void onApply() {
         // 不提供精灵数据索引的修改！！
 
-        // 指向精灵数据
-        position(getSpriteAddress());
-
+        // 会被写入的精灵数据
+        List<byte[]> spritesData = new ArrayList<>();
+        // 精灵索引
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
+        // 精灵索引起始
+//        char spriteIndex = 0x81F4;
+        char spriteIndex = (char) (getSpriteAddress().getStartAddress() - 0x24000 + 0x8000);
+        final char endSpriteIndex = (char) (spriteIndex + getSpriteAddress().length());
 
-        final boolean isTrained = getBuffer().getHeader().isTrained();
-        for (int map = 0; map < 0xF0 + 0x0A; map++) {
-            List<Sprite> spriteList = getSprites().get(map);
-            if (spriteList.isEmpty()) {
-                // 跳过没有精灵的地图
-                spritesIndexes[map] = 0x0000;
+        for (int mapId = 0, count = 0xF0 + 0x0A; mapId < count; mapId++) {
+            if (spritesIndexes[mapId] != null) {
+                // 已经设置
                 continue;
             }
 
-            // 排除已写入的精灵
-            if (spritesIndexes[map] == null) {
-                // 获取新的精灵数据索引
-                char newSpritesIndex = (char) (position() - (isTrained ? 0x200 : 0x000) - 0x24000 + 0x8000 - 0x10);
-                // 将其它使用与此精灵数据一样的地图一起设置
-                for (int nextMap = map; nextMap < 0xF0 + 0x0A; nextMap++) {
-                    if (getSprites().get(nextMap) == spriteList) {
-                        //
-                        spritesIndexes[nextMap] = newSpritesIndex;
+            List<Sprite> mapSprites = getSprites().get(mapId);
+            if (mapSprites.isEmpty()) {
+                // 该地图没有精灵
+                continue;
+            }
+            if (spriteIndex == endSpriteIndex) {
+                System.err.printf("精灵编辑器：剩余的空间无法写入地图%02X的所有精灵\n", mapId);
+                continue;
+            }
+            if (endSpriteIndex - spriteIndex < (0x01 + (mapSprites.size() * 0x06))) {
+                // 剩余空间不能完整的写入了
+                spriteIndex = endSpriteIndex;
+                System.err.printf("精灵编辑器：剩余的空间无法写入地图%02X的所有精灵\n", mapId);
+                continue;
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(0x01 + (mapSprites.size() * 0x06));
+            // 数量
+            outputStream.write(mapSprites.size() & 0xFF);
+            for (Sprite mapSprite : mapSprites) {
+                outputStream.writeBytes(mapSprite.toByteArray());
+            }
+            byte[] mapSpriteData = outputStream.toByteArray();
+
+            // 将后面相同的数据一同设置
+            for (int afterMapId = mapId; afterMapId < count; afterMapId++) {
+                if (Objects.equals(getSprites().get(afterMapId), mapSprites)) {
+                    spritesIndexes[afterMapId] = spriteIndex;
+                    if (afterMapId != mapId) {
+                        System.out.printf("精灵编辑器：地图%02X与%02X使用相同的精灵\n", afterMapId, mapId);
                     }
                 }
-
-                // 写入精灵数量
-                getBuffer().put((byte) spriteList.size());
-
-                // 写入精灵
-                for (Sprite sprite : spriteList) {
-                    getBuffer().put(sprite.toByteArray());
-                }
             }
-        }
 
-        int end = getSpriteAddress().getEndAddress(-position() + 0x10 + 1);
-        if (end >= 0) {
-            System.out.printf("精灵编辑器：剩余%d个空闲字节\n", end);
-        } else {
-            System.out.printf("精灵编辑器：错误！超出了数据上限%d字节\n", -end);
+            spritesData.add(mapSpriteData);
+            spriteIndex += outputStream.size();
         }
 
         // 写入精灵数据索引
         position(getSpriteIndexAddress());
         for (Character spritesIndex : spritesIndexes) {
+            if (spritesIndex == null) {
+                // 没有精灵
+                spritesIndex = 0x0000;
+            }
             getBuffer().putChar(NumberR.toChar(spritesIndex));
+        }
+
+        // 写入精灵数据
+        position(getSpriteAddress());
+        for (byte[] spritesDatum : spritesData) {
+            getBuffer().put(spritesDatum);
+        }
+
+        int end = getSpriteAddress().getEndAddress(-position() + 0x10 + 1);
+        if (end >= 0) {
+            if (end > 0) {
+                // 使用0xFF填充未使用的数据
+                byte[] fillBytes = new byte[end];
+                Arrays.fill(fillBytes, (byte) 0x00);
+                getBuffer().put(fillBytes);
+            }
+            System.out.printf("精灵编辑器：剩余%d个空闲字节\n", end);
+        } else {
+            System.err.printf("精灵编辑器：错误！超出了数据上限%d字节\n", -end);
         }
     }
 

@@ -226,7 +226,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                     position(getWorldMapIndexBAddress(), offset * 0x10);
                     tiles = new byte[0x10];
                     getBuffer().get(tiles);
-                    System.out.println("世界地图编辑器：警告！使用了安全编辑范围外的地图数据 " + Arrays.toString(tiles));
+                    System.err.println("世界地图编辑器：警告！使用了安全编辑范围外的地图数据 " + Arrays.toString(tiles));
                 }
             } else {
                 tiles = tempIndex[offset];

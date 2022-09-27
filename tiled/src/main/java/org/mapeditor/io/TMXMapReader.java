@@ -885,7 +885,7 @@ public class TMXMapReader {
     private Map unmarshal(InputStream in) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         Document doc;
-        try {
+        try (in) {
             factory.setIgnoringComments(true);
             factory.setIgnoringElementContentWhitespace(true);
             factory.setExpandEntityReferences(false);

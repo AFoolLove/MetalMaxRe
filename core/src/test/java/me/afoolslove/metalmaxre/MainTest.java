@@ -5,8 +5,8 @@ import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.IEditorManager;
 import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
-import me.afoolslove.metalmaxre.editors.computer.vendor.IVendorEditor;
-import me.afoolslove.metalmaxre.editors.computer.vendor.VendorItemList;
+import me.afoolslove.metalmaxre.editors.computer.shop.IShopEditor;
+import me.afoolslove.metalmaxre.editors.computer.shop.VendorItemList;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
@@ -127,6 +127,44 @@ public class MainTest {
 
         editorManager.applyEditors().get();
 
+//        TextEditorImpl textEditor = editorManager.getEditor(ITextEditor.class);
+//
+//        Path textPath = Path.of("C:\\Users\\AFoolLove\\Desktop\\text.txt");
+//        StringBuilder builder = new StringBuilder();
+//        for (Map.Entry<Integer, List<TextBuilder>> listEntry : textEditor.getIndexPages().entrySet()) {
+//            int indexPage = textEditor.getIndexPagexx(listEntry.getKey());
+//            DataAddress dataAddress = textEditor.getTextAddresses().get(indexPage);
+//
+//            builder.append(String.format("%02X:%05X-%05X\n", listEntry.getKey(), dataAddress.getKey() + 0x10, dataAddress.getValue() + 0x10));
+//
+//            for (int i = 0; i < listEntry.getValue().size(); i++) {
+//                builder.append(String.format("%02X:%02X  ", listEntry.getKey(), i));
+//                builder.append(listEntry.getValue().get(i));
+//                builder.append('\n');
+//            }
+//        }
+//
+//        try (OutputStream outputStream = Files.newOutputStream(textPath)) {
+//            outputStream.write(builder.toString().getBytes());
+//        }
+
+        /**
+         * 文本编辑器：36000-37FFF 剩余2个字节
+         * 文本编辑器：18000-19FFF 剩余92个字节
+         * 文本编辑器：124DE-1330F 剩余2个字节
+         *
+         *
+         * 文本编辑器：14000-15FFF 剩余4个字节
+         * 文本编辑器：1F98A-1FFFF 剩余1个字节
+         * 文本编辑器：10119-10DA2 剩余1个字节
+         * 文本编辑器：36000-37FFF 剩余7个字节
+         * 文本编辑器：18000-19FFF 剩余97个字节
+         * 文本编辑器：13310-13FFF 剩余3个字节
+         * 文本编辑器：124DE-1330F 剩余4个字节
+         * 文本编辑器：10DA3-112E1 剩余1个字节
+         *
+         */
+
         romBuffer.save(rom.resolveSibling("MetalMax_ChineseC.nes"));
 //        romBuffer.save(rom.resolveSibling("MetalMax_JapaneseC.nes"));
 //        romBuffer.save(rom.resolveSibling("MetalMax_SuperHackGeneralC.nes"));
@@ -136,8 +174,8 @@ public class MainTest {
     void testIVendorEditor(IEditorManager editorManager) {
         // 售货机编辑器
         // 将所有售货机物品的第二个物品改成 犬系统（传真）
-        IVendorEditor iVendorEditor = editorManager.getEditor(IVendorEditor.class);
-        for (VendorItemList vendorItemList : iVendorEditor.getVendorItemLists()) {
+        IShopEditor iShopEditor = editorManager.getEditor(IShopEditor.class);
+        for (VendorItemList vendorItemList : iShopEditor.getVendorItemLists()) {
             vendorItemList.get(1).setItem(0xCB);
         }
     }
@@ -146,11 +184,11 @@ public class MainTest {
         // 计算机编辑器
         // 将楼下的所有计算机都设置为 售货机
         IComputerEditor<Computer> iComputerEditor = editorManager.getEditor(IComputerEditor.class);
-        iComputerEditor.getComputers().parallelStream()
-                .filter(computer -> computer.getMap() == 0x02)
-                .forEach(computer -> {
-                    computer.setType(0x00);
-                });
+        for (Computer computer : iComputerEditor.getComputers()) {
+            if (computer.intMap() == 0x02) {
+                computer.setType(0x00);
+            }
+        }
     }
 
     void testIDataValueEditor(IEditorManager editorManager) {

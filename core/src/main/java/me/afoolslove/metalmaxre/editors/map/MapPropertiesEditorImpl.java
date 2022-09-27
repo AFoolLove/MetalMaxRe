@@ -10,9 +10,7 @@ import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 地图属性编辑器
@@ -177,67 +175,62 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             properties[entry.getKey()] = entry.getValue().toByteArray();
         }
 
-        // K: properties hashCode
-        // V: propertiesIndex
-        // 通过hash判断地图属性是否重复，根据已重复的地图进行索引到已有的数据
-        // 根据顺序写如地图属性
-        LinkedHashMap<Integer, SingleMapEntry<Character, byte[]>> mapping = new LinkedHashMap<>();
-//        char[] mapIndexRoll = new char[0x40 + 0xB0];
-
-        position(getMapPropertiesIndexUpRollAddress());
-        // 固定值，无任何作用？
-        getBuffer().put((byte) 0x00);
-        getBuffer().put((byte) 0x00);
-//        mapIndexRoll[0x00] = 0x0000;
+        List<byte[]> propertiesData = new ArrayList<>();
 
         // 索引起始固定值
         char mapPropertiesIndex = 0x8500;
-        // 应用上卷的索引
-        for (int i = 0x01; i < 0x40; i++) {
-            int hashCode = Arrays.hashCode(properties[i]);
-            var entry = mapping.get(hashCode);
-            if (entry != null) {
-                // 如果有相同的地图属性索引，则索引到同一个位置
-//                mapIndexRoll[i] = character;
-                getBuffer().putChar(NumberR.toChar(entry.getKey()));
-            } else {
-                // 如果是新的地图属性，就设置地图属性索引和写入地图属性
-                mapping.put(hashCode, SingleMapEntry.create(mapPropertiesIndex, properties[i]));
-//                mapIndexRoll[i] = mapPropertiesIndex;
-                getBuffer().putChar(NumberR.toChar(mapPropertiesIndex));
-                mapPropertiesIndex += properties[i].length;
+
+        char[] mapIndexRoll = new char[0x40 + 0xB0];
+        mapIndexRoll[0x00] = 0x0000;    // 固定数据，好像没用
+        // 世界地图无效，所以从1开始
+        for (int mapId = 0x01; mapId < properties.length; mapId++) {
+            if (mapIndexRoll[mapId] != 0x0000) {
+                // 已经设置过了
+                continue;
             }
+
+            byte[] property = properties[mapId];
+            propertiesData.add(property);
+
+            // 将后面相同数据的地图属性一同设置
+            for (int afterMap = mapId; afterMap < properties.length; afterMap++) {
+                if (Arrays.equals(properties[mapId], properties[afterMap])) {
+                    mapIndexRoll[afterMap] = mapPropertiesIndex;
+                }
+            }
+            mapPropertiesIndex += property.length;
         }
+        // 应用上卷的索引
+        byte[] mapIndexUpRoll = new byte[0x40 * 0x02];
+        for (int i = 0; i < 0x40; i++) {
+            char value = mapIndexRoll[i];
+            mapIndexUpRoll[(i * 0x02) + 0x00] = NumberR.at(value, 0);
+            mapIndexUpRoll[(i * 0x02) + 0x01] = NumberR.at(value, 1);
+        }
+        position(getMapPropertiesIndexUpRollAddress());
+        getBuffer().put(mapIndexUpRoll);
 
         // 应用下卷的索引
-        position(getMapPropertiesIndexDownRollAddress());
+        byte[] mapIndexDownRoll = new byte[0xB0 * 0x02];
         for (int i = 0x40; i < (0x40 + 0xB0); i++) {
-            int hashCode = Arrays.hashCode(properties[i]);
-            var entry = mapping.get(hashCode);
-            if (entry != null) {
-                // 如果有相同的地图属性索引，则索引到同一个位置
-//                mapIndexRoll[i] = character;
-                getBuffer().putChar(NumberR.toChar(entry.getKey()));
-            } else {
-                // 如果是新的地图属性，就设置地图属性索引和写入地图属性
-                mapping.put(hashCode, SingleMapEntry.create(mapPropertiesIndex, properties[i]));
-//                mapIndexRoll[i] = mapPropertiesIndex;
-                getBuffer().putChar(NumberR.toChar(mapPropertiesIndex));
-                mapPropertiesIndex += properties[i].length;
-            }
+            char value = mapIndexRoll[i];
+            mapIndexDownRoll[((i - 0x40) * 0x02) + 0x00] = NumberR.at(value, 0);
+            mapIndexDownRoll[((i - 0x40) * 0x02) + 0x01] = NumberR.at(value, 1);
         }
+        position(getMapPropertiesIndexDownRollAddress());
+        getBuffer().put(mapIndexDownRoll);
 
         // 写入地图属性
         position(getMapPropertiesAddress());
-        for (SingleMapEntry<Character, byte[]> entry : mapping.values()) {
-            getBuffer().put(entry.getValue());
+        for (byte[] property : propertiesData) {
+            getBuffer().put(property);
         }
 
         int end = getMapPropertiesAddress().getEndAddress(-position() + 0x10 + 1);
         if (end >= 0) {
             System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", end);
         } else {
-            System.out.printf("地图属性编辑器：错误！超出了数据上限%d字节\n", -end);
+            System.err.printf("地图属性编辑器：错误！超出了数据上限%d字节\n", -end);
         }
 
         // 写入重定向的条件数据和地图

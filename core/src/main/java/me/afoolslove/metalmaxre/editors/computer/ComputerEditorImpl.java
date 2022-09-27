@@ -9,8 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * 计算机编辑器
@@ -32,13 +31,12 @@ import java.util.Set;
  */
 public class ComputerEditorImpl extends AbstractEditor implements IComputerEditor<Computer> {
     protected final DataAddress computerAddress;
-    protected int maxCount = 0x7B;
-    private final Set<Computer> computers = new LinkedHashSet<>(getMaxCount());
+    private final List<Computer> computers = new ArrayList<>(getMaxCount());
 
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         super(metalMaxRe);
         // 通用地址，兼容已知的版本
-        this.computerAddress = DataAddress.fromPRG(0x39DD2 - 0x10, 0x39FB0 - 0x10);
+        this.computerAddress = DataAddress.fromPRG(0x39DD2 - 0x10, 0x39FBD - 0x10);
     }
 
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress dataAddress) {
@@ -66,7 +64,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
 
     @Editor.Apply
     public void onApply() {
-        var computers = new ArrayList<>(getComputers());
+        List<Computer> computers = getComputers();
         int count = Math.min(getMaxCount(), computers.size());
 
         // data[0] = map
@@ -88,8 +86,16 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         if (remain > 0) {
             Arrays.fill(data[0], count, getMaxCount(), (byte) 0xFF);
         }
-
+        // 写入计算机
         getBuffer().put(getComputerAddress(), data);
+
+        if (computers.size() > count) {
+            for (Computer computer : computers.subList(count, computers.size())) {
+                System.err.printf("计算机编辑器：计算机未写入 %s\n", computer);
+            }
+        } else if (computers.size() < count) {
+            System.out.printf("计算机编辑器：%d个计算机空闲空间", count - computers.size());
+        }
     }
 
     @Override
@@ -98,12 +104,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
     }
 
     @Override
-    public int getMaxCount() {
-        return maxCount;
-    }
-
-    @Override
-    public Set<Computer> getComputers() {
+    public List<Computer> getComputers() {
         return computers;
     }
 

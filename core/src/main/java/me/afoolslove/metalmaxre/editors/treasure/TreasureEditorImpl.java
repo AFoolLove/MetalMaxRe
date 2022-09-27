@@ -9,7 +9,10 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * 宝藏编辑器
@@ -21,7 +24,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
     private final DataAddress checkPointsAddress;
     private final DataAddress treasureAddress;
 
-    private final LinkedHashSet<Treasure> treasures = new LinkedHashSet<>(getTreasureMaxCount());
+    private final List<Treasure> treasures = new ArrayList<>(getTreasureMaxCount());
     /**
      * 调查的随机宝藏
      * <p>
@@ -76,11 +79,19 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
 
         for (int i = 0; i < getTreasureMaxCount(); i++) {
             Treasure treasure = new Treasure(data[0][i], data[1][i], data[2][i], data[3][i]);
-            boolean add = treasures.add(treasure);
-            if (!add) {
+            treasures.add(treasure);
+        }
+
+        // 显示重复的宝藏
+        HashSet<Treasure> setTreasures = new HashSet<>(getTreasures());
+        ArrayList<Treasure> listTreasures = new ArrayList<>(getTreasures());
+        listTreasures.removeAll(setTreasures);
+
+
+        if (!listTreasures.isEmpty()) {
+            for (Treasure treasure : listTreasures) {
                 // 重复的宝藏
                 System.out.println("读取到重复的宝藏 " + treasure);
-                System.out.format("位置：Map:%02X, X:%02X, Y:%02X,Item:%02X\n", treasure.getMap(), treasure.getX(), treasure.getY(), treasure.getItem());
             }
         }
 
@@ -137,18 +148,30 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         byte[][] data = new byte[4][getTreasureMaxCount()];
 
         // 优先储存后加入的
-        ArrayList<Treasure> treasures = new ArrayList<>(getTreasures());
-        int fromIndex = Math.max(0, treasures.size() - getTreasureMaxCount());
-        for (int index = fromIndex, size = treasures.size(); index < size; index++) {
+        List<Treasure> treasures = getTreasures();
+        int count = Math.min(treasures.size(), getTreasureMaxCount());
+        for (int index = 0; index < count; index++) {
             Treasure treasure = treasures.get(index);
             data[0][index] = treasure.getMap();
             data[1][index] = treasure.getX();
             data[2][index] = treasure.getY();
             data[3][index] = treasure.getItem();
         }
+        // 如果有空的宝藏，将空的宝藏设置到地图 0xFF 中去
+        var remain = getTreasureMaxCount() - count;
+        if (remain > 0) {
+            Arrays.fill(data[0], count, getTreasureMaxCount(), (byte) 0xFF);
+        }
         // 写入宝藏
         getBuffer().put(getTreasureAddress(), data);
 
+        if (treasures.size() > count) {
+            for (Treasure treasure : treasures.subList(count, treasures.size())) {
+                System.err.printf("宝藏编辑器：宝藏未写入 %s\n", treasure);
+            }
+        } else if (treasures.size() < count) {
+            System.out.printf("宝藏编辑器：%d个宝藏空闲空间", count - treasures.size());
+        }
 
         // 写入地图的调查点
         position(getCheckPointsAddress());
@@ -197,8 +220,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         Arrays.fill(data[0], 0x00, getRandomTreasureMaxCount(), (byte) 0x00);
         Arrays.fill(data[1], 0x00, getRandomTreasureMaxCount(), (byte) 0x00);
 
-        fromIndex = Math.max(0, getRandomTreasures().size() - getRandomTreasureMaxCount());
-        for (int index = fromIndex, size = getRandomTreasures().size(); index < size; index++) {
+        for (int index = 0, size = getRandomTreasures().size(); index < size; index++) {
             SingleMapEntry<Byte, Byte> randomTreasure = getRandomTreasures().get(index);
 
             data[0][index] = randomTreasure.getKey();
@@ -211,7 +233,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Override
-    public Set<Treasure> getTreasures() {
+    public List<Treasure> getTreasures() {
         return treasures;
     }
 
