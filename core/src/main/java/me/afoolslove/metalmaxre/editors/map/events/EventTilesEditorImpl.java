@@ -92,8 +92,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                     }
                     // 世界地图的图块事件还需要读取图块内容
                     for (EventTile eventTile : eventTiles) {
-                        int offset = 0x200 + eventTile.intTile();
-                        byte[] tiles = worldMapEditor.getIndexA(offset, true);
+                        byte[] tiles = worldMapEditor.getIndex(eventTile.intX(), eventTile.intY(), eventTile.intTile());
                         ((WorldEventTile) eventTile).setTiles(tiles);
                     }
                 } else {
@@ -137,13 +136,13 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
             for (EventTile eventTile : entry.getValue()) {
                 if (eventTile.intX() == aX && eventTile.intY() == aY) {
                     worldMapInteractiveEvent.aPoint = new Point2B(aX, aY);
-                    worldMapInteractiveEvent.aTrue = worldMapEditor.getIndexA()[0x200 + eventTile.tile];
+                    worldMapInteractiveEvent.aTrue = worldMapEditor.getIndex(eventTile.intX(), eventTile.intY(), eventTile.intTile());
                     worldMapInteractiveEvent.aFalse = IWorldMapEditor.getTiles4x4(worldMapEditor.getMap(), aX, aY);
                     continue;
                 }
                 if (eventTile.intX() == bX && eventTile.intY() == bY) {
                     worldMapInteractiveEvent.bPoint = new Point2B(bX, bY);
-                    worldMapInteractiveEvent.bTrue = worldMapEditor.getIndexA()[0x200 + eventTile.tile];
+                    worldMapInteractiveEvent.bTrue = worldMapEditor.getIndex(eventTile.intX(), eventTile.intY(), eventTile.intTile());
                     worldMapInteractiveEvent.bFalse = IWorldMapEditor.getTiles4x4(worldMapEditor.getMap(), bX, bY);
                 }
             }
@@ -165,6 +164,28 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
 //        getEventTiles().values().forEach(each ->
 //                each.entrySet().removeIf(entry -> entry.getKey() == 0x00)
 //        );
+
+        // 世界地图事件4*4tiles因为重新排序过，所以要更新事件的tile索引
+        byte[][][] indexes = worldMapEditor.getIndexes();
+        int[] indexesCapacity = worldMapEditor.getIndexesCapacity();
+        getWorldEventTile().values().forEach(eventTiles -> {
+            for (EventTile eventTile : eventTiles) {
+                if (eventTile instanceof WorldEventTile worldEventTile) {
+                    tile:
+                    for (int i = 0; i < indexes.length; i++) {
+                        byte[][] newTile = indexes[i];
+                        for (int index = 0; index < indexesCapacity[i]; index++) {
+                            if (Arrays.equals(worldEventTile.getTiles(), newTile[index])) {
+                                // 设置新的索引
+                                worldEventTile.setTile(index % 0x100);
+                                break tile;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
         byte[][] eventTiles = new byte[mapEditor.getMapMaxCount()][];
         // 事件图块数据
         List<byte[]> eventTilesData = new ArrayList<>();
@@ -199,7 +220,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                 continue;
             }
             if (eventTilesIndex == endEventTilesIndex) {
-                System.err.printf("事件图块编辑器：没有剩余的空间写入地图%02X的事件：%s\n", mapId, Arrays.toString(eventTile));
+                System.err.printf("事件图块编辑器：没有剩余的空间写入地图%02X的事件：%s\n", mapId, NumberR.toHexString(eventTile));
                 continue;
             }
             if ((endEventTilesIndex - eventTilesIndex) < eventTile.length) {
@@ -209,7 +230,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                     // 剩余的空间已经不能写入任何事件了
                     // 设置为已写满
                     eventTilesIndex = endEventTilesIndex;
-                    System.err.printf("事件图块编辑器：没有剩余的空间写入地图%02X的事件：%s\n", mapId, Arrays.toString(eventTile));
+                    System.err.printf("事件图块编辑器：没有剩余的空间写入地图%02X的事件：%s\n", mapId, NumberR.toHexString(eventTile));
                     continue;
                 }
 
@@ -224,7 +245,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                 // 复制 X、Y、Tile
                 System.arraycopy(eventTiles[mapId], 0x02, eventTile, 0x02, c * 3);
 
-                System.err.printf("事件图块编辑器：%02X写入部分事件图块：%s\n", mapId, Arrays.toString(eventTile));
+                System.err.printf("事件图块编辑器：%02X写入部分事件图块：%s\n", mapId, NumberR.toHexString(eventTile));
             }
             // 将后面相同数据的事件图块索引一同设置
             byte[] currentData = eventTiles[mapId];
@@ -271,73 +292,37 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
             getBuffer().put(worldMapInteractiveEvent.getDirection());
 
             if (worldMapInteractiveEvent.aPoint != null || worldMapInteractiveEvent.bPoint != null) {
-                Map<Integer, List<EventTile>> worldEventTile = getWorldEventTile();
-                for (int i = 0x200; i < worldMapEditor.getIndexA().length; i++) {
-                    if (worldMapInteractiveEvent.aPoint != null) {
-                        if (Arrays.equals(worldMapEditor.getIndexA()[i], worldMapInteractiveEvent.aFalse)) {
-                            prgPosition(0x2818D);
-                            getBuffer().put(i - 0x200);
-                            point:
-                            for (List<EventTile> value : worldEventTile.values()) {
-                                for (EventTile eventTile : value) {
-                                    if (eventTile.intX() == worldMapInteractiveEvent.aPoint.intX()
-                                        && eventTile.intY() == worldMapInteractiveEvent.aPoint.intY()) {
-                                        eventTile.setTile(i);
-                                        break point;
-                                    }
-                                }
+                for (int i = 0; i < indexes.length; i++) {
+                    byte[][] index = indexes[i];
+
+                    for (int j = 0; j < indexesCapacity[i]; j++) {
+                        if (worldMapInteractiveEvent.aPoint != null) {
+                            if (Arrays.equals(index[j], worldMapInteractiveEvent.aFalse)) {
+                                prgPosition(0x2818D);
+                                getBuffer().put(j % 0x100);
+                                continue;
                             }
-                            continue;
+                            if (Arrays.equals(index[j], worldMapInteractiveEvent.aTrue)) {
+                                prgPosition(0x2818E);
+                                getBuffer().put(j % 0x100);
+                                continue;
+                            }
                         }
-                        if (Arrays.equals(worldMapEditor.getIndexA()[i], worldMapInteractiveEvent.aTrue)) {
-                            prgPosition(0x2818E);
-                            getBuffer().put(i - 0x200);
-                            point:
-                            for (List<EventTile> value : worldEventTile.values()) {
-                                for (EventTile eventTile : value) {
-                                    if (eventTile.intX() == worldMapInteractiveEvent.aPoint.intX()
-                                        && eventTile.intY() == worldMapInteractiveEvent.aPoint.intY()) {
-                                        eventTile.setTile((byte) (i - 0x200));
-                                        break point;
-                                    }
-                                }
+                        if (worldMapInteractiveEvent.bPoint != null) {
+                            if (Arrays.equals(index[j], worldMapInteractiveEvent.bFalse)) {
+                                prgPosition(0x2818F);
+                                getBuffer().put(j % 0x100);
+                                continue;
                             }
-                            continue;
-                        }
-                    }
-                    if (worldMapInteractiveEvent.bPoint != null) {
-                        if (Arrays.equals(worldMapEditor.getIndexA()[i], worldMapInteractiveEvent.bFalse)) {
-                            prgPosition(0x2818F);
-                            getBuffer().put(i - 0x200);
-                            point:
-                            for (List<EventTile> value : worldEventTile.values()) {
-                                for (EventTile eventTile : value) {
-                                    if (eventTile.intX() == worldMapInteractiveEvent.bPoint.intX()
-                                        && eventTile.intY() == worldMapInteractiveEvent.bPoint.intY()) {
-                                        eventTile.setTile((byte) (i - 0x200));
-                                        break point;
-                                    }
-                                }
+                            if (Arrays.equals(index[j], worldMapInteractiveEvent.bTrue)) {
+                                prgPosition(0x28190);
+                                getBuffer().put(j % 0x100);
+                                continue;
                             }
-                            continue;
-                        }
-                        if (Arrays.equals(worldMapEditor.getIndexA()[i], worldMapInteractiveEvent.bTrue)) {
-                            prgPosition(0x28190);
-                            getBuffer().put(i - 0x200);
-                            point:
-                            for (List<EventTile> value : worldEventTile.values()) {
-                                for (EventTile eventTile : value) {
-                                    if (eventTile.intX() == worldMapInteractiveEvent.bPoint.intX()
-                                        && eventTile.intY() == worldMapInteractiveEvent.bPoint.intY()) {
-                                        eventTile.setTile((byte) (i - 0x200));
-                                        break point;
-                                    }
-                                }
-                            }
-                            continue;
                         }
                     }
                 }
+
             }
 
             if (worldMapInteractiveEvent.aPoint != null) {

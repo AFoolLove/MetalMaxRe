@@ -29,11 +29,11 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
     /**
      * 世界地图图块的组合数据，全局固定
      */
-    private byte[][][] worldCombinations = new byte[0x03][0x40][0x04];
+    private byte[][][] worldCombinations = new byte[0x04][0x40][0x04];
     /**
      * 世界地图图块的特性和调色板
      */
-    private byte[][] worldAttributes = new byte[0x03][0x40];
+    private byte[][] worldAttributes = new byte[0x04][0x40];
 
 
     private byte[] xA597 = new byte[0x004]; // 精灵的朝向帧，全局属性（移动和未移动的图像
@@ -53,7 +53,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
                 DataAddress.fromCHR(0x35000, 0x386FF),
                 DataAddress.fromCHR(0x38700, 0x394C0),
                 DataAddress.fromPRG(0x0FBBE - 0x10, 0x1000F - 0x10),
-                DataAddress.fromPRG(0x0FEAA - 0x10));
+                DataAddress.fromPRG(0x0FEAA - 0x10, 0x0FFA9 - 0x10));
     }
 
     public TileSetEditorImpl(@NotNull MetalMaxRe metalMaxRe,
@@ -74,32 +74,20 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
     public void onLoad() {
         // 读取前清空数据
         // 所有tile
-        if (tiles == null) {
-            tiles = new byte[0xD4][0x40][0x10];
-        } else {
-            for (byte[][] tile : tiles) {
-                for (byte[] bytes : tile) {
-                    Arrays.fill(bytes, (byte) 0x00);
-                }
+        for (byte[][] tile : tiles) {
+            for (byte[] bytes : tile) {
+                Arrays.fill(bytes, (byte) 0x00);
             }
         }
         // tile组合
-        if (combinations == null) {
-            combinations = new byte[0x37][0x40][0x04];
-        } else {
-            for (byte[][] combination : combinations) {
-                for (byte[] bytes : combination) {
-                    Arrays.fill(bytes, (byte) 0x00);
-                }
+        for (byte[][] combination : combinations) {
+            for (byte[] bytes : combination) {
+                Arrays.fill(bytes, (byte) 0x00);
             }
         }
         // tile特性和调色板
-        if (attributes == null) {
-            attributes = new byte[0x37][0x40];
-        } else {
-            for (byte[] index : attributes) {
-                Arrays.fill(index, (byte) 0x00);
-            }
+        for (byte[] index : attributes) {
+            Arrays.fill(index, (byte) 0x00);
         }
         // 世界地图的tile组合
         for (byte[][] worldCombination : worldCombinations) {
@@ -146,7 +134,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 0x04byte = 1tile combination
         // 0x40tile = x40（0x00、0x80、0xC0）
         position(getTileSetCombinationsAddress());
-        for (int count = 0; count < 0x37; count++) {
+        for (int count = 0; count < combinations.length; count++) {
             // 0x40 tile combination
             byte[][] tileCombinations = combinations[count] != null ? combinations[count] : new byte[0x40][0x04];
             combinations[count] = tileCombinations;
@@ -162,7 +150,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 0x01byte = 1tile特性和调色板
         // 0x40tile = 0x40（0x00、0x80、0xC0）
         position(getTileSetAttributesAddress());
-        for (int count = 0; count < 0x37; count++) {
+        for (int count = 0; count < attributes.length; count++) {
             byte[] color = attributes[count] != null ? attributes[count] : new byte[0x40];
             attributes[count] = color;
             // 读取 x40 tile特性和调色板
@@ -171,7 +159,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         // 读取世界地图的tile组合
         position(getWorldTileSetCombinationsAddress());
-        for (int count = 0; count < 0x03; count++) {
+        for (int count = 0; count < worldCombinations.length; count++) {
             // 0x40 tile combination
             byte[][] tileCombinations = worldCombinations[count] != null ? worldCombinations[count] : new byte[0x40][0x04];
             worldCombinations[count] = tileCombinations;
@@ -185,7 +173,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         // 读取世界地图的特性和调色板
         position(getWorldTileSetAttributesAddress());
-        for (int count = 0; count < 0x03; count++) {
+        for (int count = 0; count < worldAttributes.length; count++) {
             byte[] color = worldAttributes[count] != null ? worldAttributes[count] : new byte[0x40];
             worldAttributes[count] = color;
             // 读取 x40 tile特性和调色板

@@ -2,52 +2,47 @@ package me.afoolslove.metalmaxre.desktop.frame;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
+import org.jdesktop.swingx.JXSearchField;
+import org.jdesktop.swingx.JXTable;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.*;
-import java.nio.file.Path;
 
-public class DataValueEditorFrame extends JDialog {
-    private final MetalMaxRe metalMaxRe;
-
+public class DataValueEditorFrame extends AbstractEditorFrame {
     private JPanel contentPane;
-    private JTable dataValueTable;
-    private JTextField dataValueFilter;
+    private JXTable dataValueTable;
+    private JXSearchField dataValueFilter;
 
     public DataValueEditorFrame(@NotNull Frame frame, @NotNull MetalMaxRe metalMaxRe) {
-        super((Dialog) null, false);
-        this.metalMaxRe = metalMaxRe;
+        super(frame, metalMaxRe);
+        init("数据值编辑器", contentPane);
+    }
 
-        Path path = metalMaxRe.getBuffer().getPath();
-        if (path != null) {
-            setTitle(String.format("数据值编辑器 [%s] - %s", path.getName(path.getNameCount() - 1), path));
-        } else {
-            setTitle(String.format("数据值编辑器 [%s]", metalMaxRe.getBuffer().getVersion().getName()));
-        }
-
-        setContentPane(contentPane);
-        setLocation(frame.getX(), frame.getY());
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
+    @Override
+    protected void createLayout() {
+        dataValueFilter.addActionListener(e -> {
+            if (e.getActionCommand().isEmpty()) {
+                dataValueTable.setRowFilter(null);
+            } else {
+                dataValueTable.setRowFilter(new RowFilter<TableModel, Integer>() {
+                    @Override
+                    public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
+                        for (int i = 0; i < entry.getValueCount(); i++) {
+                            if (entry.getValue(i).toString().contains(e.getActionCommand())) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                });
             }
         });
 
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
         dataValueTable.setModel(new DefaultTableModel() {
-            private final IDataValueEditor dataValueEditor = metalMaxRe.getEditorManager().getEditor(IDataValueEditor.class);
+            private final IDataValueEditor dataValueEditor = getMetalMaxRe().getEditorManager().getEditor(IDataValueEditor.class);
             private final String[] columnNames = {"索引", "数据", "数值"};
             private int rowCount;
 
@@ -144,15 +139,5 @@ public class DataValueEditorFrame extends JDialog {
 //                }
 //            }
 //        });
-    }
-
-    private void onOK() {
-        // add your code here
-        dispose();
-    }
-
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
     }
 }

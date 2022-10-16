@@ -80,9 +80,9 @@ public class WordBank {
 //        FONTS_SINGLE.put('', (byte) (0x9E)); // 可自定义图块
         FONTS_SINGLE.put(' ', (byte) (0xFF)); // 空格，占一个英文字符，全角空格占两个英文字符'　'
         FONTS_SINGLE.put('\t', (byte) (0xE5)); // 换行
-        FONTS_SINGLE.put('\r', (byte) (0xFE)); // 带名称换行
+//        FONTS_SINGLE.put('\r', (byte) (0xFE)); // 带名称换行
         FONTS_SINGLE.put('\n', (byte) (0x9F)); // 文本结束
-        FONTS_SINGLE.put('\b', (byte) (0x42)); // 忽略字符
+//        FONTS_SINGLE.put('\b', (byte) (0x42)); // 忽略字符
 
 
         // 使用小写英文字母对应另外一组相同字符
@@ -117,6 +117,7 @@ public class WordBank {
 
         // 对话时按键确认后带名称换行
         OPCODES.put((byte) 0x33, 1);  // 不显示精灵和上半部分，第二字节未知
+        OPCODES.put((byte) 0x42, 0);  // 忽略字符
         OPCODES.put((byte) 0xE2, 0);
         OPCODES.put((byte) 0xE3, 0);
         OPCODES.put((byte) 0xE4, 0);  // 等待确认后继续对话
@@ -135,7 +136,7 @@ public class WordBank {
         OPCODES.put((byte) 0xF1, 1);  // 对话 sleep
         OPCODES.put((byte) 0xF2, 1);  // 引用 0x10010 文本集
         OPCODES.put((byte) 0xF3, 1);  // 引用 0x1F99A 文本集
-        OPCODES.put((byte) 0xF4, 1);  // 重复文本，直到遇见 0XFE ！！？
+        OPCODES.put((byte) 0xF4, 1);  // 重复文本，直到遇见 0XFE ！！？，全屏文本时使用，否则文字刷屏死机
         OPCODES.put((byte) 0xF5, 1);  // 与NPC对话时，对NPC移动操作，未与NPC对话引用会死机(等待NPC移动完成，但没有目标NPC)
         OPCODES.put((byte) 0xF6, 0);  // 后面的字符将直接显示，不进行转换为中文等
         OPCODES.put((byte) 0xF7, 2);  // 跨文本集引用文本段，第一字节为第几段文本，第二字节为哪一页的文本集
@@ -228,6 +229,26 @@ public class WordBank {
     private WordBank() {
     }
 
+    /**
+     * @return 字符对应的字节或字节数组，否则返回 {@code null}
+     */
+    public static Object getValue(char ch) {
+        Object temp = FONTS_SINGLE_REPEATED.get(ch);
+        if (temp == null) {
+            // 从单byte中获取
+            temp = FONTS_SINGLE.get(ch);
+        }
+        if (temp == null) {
+            // 从多byte中获取
+            temp = FONTS.get(ch);
+        }
+        if (temp == null) {
+            // 从重复多byte中获取
+            temp = FONTS_REPEATED.get(ch);
+        }
+        return temp;
+    }
+
     public static byte[] toBytes(@Nullable String text) {
         if (text == null || text.isEmpty()) {
             // 空字符直接返回
@@ -301,19 +322,7 @@ public class WordBank {
             }
 
             // 从重复单byte中获取
-            Object temp = FONTS_SINGLE_REPEATED.get(ch);
-            if (temp == null) {
-                // 从单byte中获取
-                temp = FONTS_SINGLE.get(ch);
-            }
-            if (temp == null) {
-                // 从多byte中获取
-                temp = FONTS.get(ch);
-            }
-            if (temp == null) {
-                // 从重复多byte中获取
-                temp = FONTS_REPEATED.get(ch);
-            }
+            Object temp = getValue(ch);
             if (temp != null) {
                 if (temp instanceof byte[] bytes) {
                     // 写入多字节

@@ -66,7 +66,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                 DataAddress.fromPRG(0x38DAC - 0x10, 0x38E2E - 0x10),
                 DataAddress.fromPRG(0x393B3 - 0x10, 0x398C8 - 0x10),
                 DataAddress.fromPRG(0x39979 - 0x10, 0x39B38 - 0x10),
-                DataAddress.fromPRG(0x7EBE0 - 0x10, 0x7EBEB - 0x10),
+//                DataAddress.fromPRG(0x7EBE0 - 0x10, 0x7EBEB - 0x10),
+                DataAddress.fromPRG(metalMaxRe.getBuffer().getHeader().getLastPrgRomLength() + 0x02BE0 - 0x10),
                 DataAddress.fromPRG(0x39243 - 0x10, 0x39342 - 0x10)
         );
     }

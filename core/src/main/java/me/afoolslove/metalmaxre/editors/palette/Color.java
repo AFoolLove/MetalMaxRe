@@ -80,4 +80,8 @@ public class Color {
     public java.awt.Color toAwtColor() {
         return new java.awt.Color(argb);
     }
+
+    public static Color fromAwtColor(java.awt.Color color) {
+        return new Color(color.getAlpha(), color.getRed(), color.getGreen(), color.getBlue());
+    }
 }

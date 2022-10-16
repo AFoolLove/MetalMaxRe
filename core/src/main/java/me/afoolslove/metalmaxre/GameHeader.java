@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,8 +15,8 @@ import java.util.Set;
  */
 public class GameHeader {
     public static final int HEADER_LENGTH = 0x10;
-    public static final int ROM_LENGTH = 0x4000;
-    public static final int V_ROM_LENGTH = 0x2000;
+    public static final int PRG_LENGTH = 0x4000;
+    public static final int CHR_LENGTH = 0x2000;
 
 
     /**
@@ -133,13 +132,21 @@ public class GameHeader {
         return header[0x04] & 0xFF;
     }
 
+    public int getLastPrgRom() {
+        return getPrgRom() - 1;
+    }
+
+    public int getLastPrgRomLength() {
+        return getLastPrgRom() * PRG_LENGTH;
+    }
+
     /**
      * 获取PRG ROM所占用的字节数量
      *
      * @return PRG ROM的字节数量
      */
     public int getPrgRomLength() {
-        return getPrgRom() * ROM_LENGTH;
+        return getPrgRom() * PRG_LENGTH;
     }
 
     /**
@@ -159,7 +166,7 @@ public class GameHeader {
      * @return CHR ROM的字节数量
      */
     public int getChrRomLength() {
-        return getChrRom() * V_ROM_LENGTH;
+        return getChrRom() * CHR_LENGTH;
     }
 
     /**

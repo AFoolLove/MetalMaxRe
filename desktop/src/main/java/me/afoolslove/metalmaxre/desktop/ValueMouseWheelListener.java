@@ -26,9 +26,23 @@ public class ValueMouseWheelListener implements MouseWheelListener {
 
             int wheelRotation = e.getWheelRotation();
             if (wheelRotation == 1) {
-                spinner.setValue(spinner.getNextValue());
+                Object nextValue = spinner.getNextValue();
+                if (nextValue == null && spinner.getModel() instanceof SpinnerNumberModel numberModel) {
+                    if (numberModel.getMinimum() instanceof Number number) {
+                        spinner.setValue(number);
+                        return;
+                    }
+                }
+                spinner.setValue(nextValue);
             } else if (wheelRotation == -1) {
-                spinner.setValue(spinner.getPreviousValue());
+                Object previousValue = spinner.getPreviousValue();
+                if (previousValue == null && spinner.getModel() instanceof SpinnerNumberModel numberModel) {
+                    if (numberModel.getMaximum() instanceof Number number) {
+                        spinner.setValue(number);
+                        return;
+                    }
+                }
+                spinner.setValue(previousValue);
             }
         }
     }

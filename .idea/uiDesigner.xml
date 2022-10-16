@@ -119,6 +119,9 @@
       <item class="javax.swing.JScrollBar" icon="/com/intellij/uiDesigner/icons/scrollbar.svg" removable="false" auto-create-binding="true" can-attach-label="false">
         <default-constraints vsize-policy="6" hsize-policy="0" anchor="0" fill="2" />
       </item>
+      <item class="com.formdev.flatlaf.extras.components.FlatTriStateCheckBox" icon="/com/intellij/uiDesigner/icons/checkBox.svg" removable="true" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="0" />
+      </item>
     </group>
     <group name="SwingX">
       <item class="org.jdesktop.swingx.JXCollapsiblePane" icon="javax/swing/plaf/metal/icons/ocean/collapsed.gif" removable="true" auto-create-binding="false" can-attach-label="false" is-container="true">
@@ -128,6 +131,18 @@
         <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="0" />
       </item>
       <item class="org.jdesktop.swingx.JXSearchField" icon="/com/intellij/uiDesigner/icons/textField.svg" removable="true" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="0" />
+      </item>
+      <item class="org.jdesktop.swingx.JXList" icon="/com/intellij/uiDesigner/icons/list.svg" removable="true" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="0" />
+      </item>
+      <item class="org.jdesktop.swingx.JXEditorPane" icon="/com/intellij/uiDesigner/icons/editorPane.svg" removable="true" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="0" />
+      </item>
+      <item class="org.jdesktop.swingx.JXTable" icon="/com/intellij/uiDesigner/icons/table.svg" removable="true" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="0" />
+      </item>
+      <item class="org.jdesktop.swingx.JXTreeTable" icon="/com/intellij/uiDesigner/icons/table.svg" removable="true" auto-create-binding="false" can-attach-label="false">
         <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="0" />
       </item>
     </group>

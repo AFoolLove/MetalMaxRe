@@ -192,13 +192,13 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
                         // 塞入一个半截地图
                         mapProperties.mapIndex = (char) mapIndex;
                         getBuffer().putChr(0x2F000 + mapIndex, data, 0, 0x10000 - mapIndex);
-                        System.out.format("地图编辑器A：地图%02X剩余%d字节未写入\n", mapId, (mapIndex + data.length) - 0x10000);
+                        System.err.format("地图编辑器A：地图%02X剩余%d字节未写入\n", mapId, (mapIndex + data.length) - 0x10000);
                         mapIndex = 0x10000;
                     } else if (mapIndex2 < 0x0B6D3) {
                         // 塞入一个半截地图
                         mapProperties.mapIndex = (char) mapIndex2;
                         getBuffer().putPrg(mapIndex2, data, 0, 0x0B6D3 - mapIndex2);
-                        System.out.format("地图编辑器B：地图%02X剩余%d字节未写入\n", mapId, (mapIndex2 + data.length) - 0x0B6D3);
+                        System.err.format("地图编辑器B：地图%02X剩余%d字节未写入\n", mapId, (mapIndex2 + data.length) - 0x0B6D3);
 
                         mapIndex2 = 0x0B6D3;
                     }

@@ -12,7 +12,7 @@ public interface ITextEditor extends IRomEditor {
      *
      * @return 所有索引文本集
      */
-    Map<Integer, List<TextBuilder>> getIndexPages();
+    Map<Integer, List<TextBuilder>> getPages();
 
     /**
      * 获取指定页的文本集
@@ -20,7 +20,7 @@ public interface ITextEditor extends IRomEditor {
      * @param page 页
      * @return 指定页的文本集
      */
-    List<TextBuilder> getIndexPage(int page);
+    List<TextBuilder> getPage(int page);
 
     /**
      * 获取城镇的名称

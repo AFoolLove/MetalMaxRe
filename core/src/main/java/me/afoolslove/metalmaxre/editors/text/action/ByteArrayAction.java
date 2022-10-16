@@ -46,4 +46,9 @@ public class ByteArrayAction implements IBaseText {
         builder.append(']');
         return builder.toString();
     }
+
+    @Override
+    public int length() {
+        return outputStream.size();
+    }
 }

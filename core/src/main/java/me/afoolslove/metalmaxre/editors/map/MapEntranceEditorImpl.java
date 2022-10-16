@@ -4,6 +4,7 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
@@ -166,7 +167,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 // 必须保证地图边界和出入口数据的完整性，不能写入部分
                 mapEntranceIndex = endMapEntranceIndex;
 
-                System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入%02X的边界和出入口数据：%s\n", mapId, Arrays.toString(mapEntrance));
+                System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
                 continue;
             }
 

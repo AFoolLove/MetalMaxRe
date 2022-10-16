@@ -29,6 +29,11 @@ public interface IBaseText extends Comparable<IBaseText> {
      */
     String toText();
 
+    /**
+     * @return 占用长度
+     */
+    int length();
+
     @Override
     default int compareTo(@NotNull IBaseText o) {
         return Byte.compare(priority(), o.priority());

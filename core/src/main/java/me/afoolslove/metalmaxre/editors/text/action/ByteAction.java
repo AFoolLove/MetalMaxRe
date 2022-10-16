@@ -26,4 +26,9 @@ public class ByteAction implements IBaseText {
     public String toText() {
         return String.format("[%02X]", value[0]);
     }
+
+    @Override
+    public int length() {
+        return 1;
+    }
 }

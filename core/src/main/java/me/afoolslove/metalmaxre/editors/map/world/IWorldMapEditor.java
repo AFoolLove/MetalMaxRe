@@ -23,21 +23,11 @@ public interface IWorldMapEditor extends IRomEditor {
 
     byte getX00410(int index);
 
-    byte[][] getIndexA();
-
-    byte[] getIndexA(int index);
-
-    byte[] getIndexA(int offset, boolean canOut);
-
-    byte[][] getIndexB();
-
-    byte[] getIndexB(int index);
-
-    byte[][] getIndexC();
-
-    byte[] getIndexC(int index);
+    byte[] getIndex(int x, int y, int offset);
 
     byte[] getIndex();
+
+    byte[][][] getIndexes();
 
     byte getIndex(int index);
 
@@ -48,6 +38,14 @@ public interface IWorldMapEditor extends IRomEditor {
      */
     default int getWorldMapLineMaxCount() {
         return 0x10;
+    }
+
+
+    /**
+     * 获取图块索引组的容量
+     */
+    default int[] getIndexesCapacity() {
+        return getWorldMapIndexesAddress().stream().mapToInt(m -> m.getStartAddress() == (7 * 0x2000) ? 0x50 : 0x200).toArray();
     }
 
     /**
@@ -81,19 +79,9 @@ public interface IWorldMapEditor extends IRomEditor {
     DataAddress getWorldMapX00410Address();
 
     /**
-     * 图块组A，一组16（byte）个图块
+     * 图块组，一组16（byte）个图块
      */
-    DataAddress getWorldMapIndexAAddress();
-
-    /**
-     * 图块组B，一组16（byte）个图块
-     */
-    DataAddress getWorldMapIndexBAddress();
-
-    /**
-     * 图块组C，一组16（byte）个图块
-     */
-    DataAddress getWorldMapIndexCAddress();
+    List<DataAddress> getWorldMapIndexesAddress();
 
     /**
      * 相对图块索引

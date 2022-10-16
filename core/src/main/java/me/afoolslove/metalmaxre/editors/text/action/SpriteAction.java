@@ -87,6 +87,11 @@ public class SpriteAction implements IBaseText {
     }
 
     @Override
+    public int length() {
+        return 2;
+    }
+
+    @Override
     public String toString() {
         if (this == LOCK_UP || getAction() == LOCK_UP.getAction()) {
             return "Sprite LOCK_UP";

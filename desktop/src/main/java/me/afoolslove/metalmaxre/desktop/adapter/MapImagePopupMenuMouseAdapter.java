@@ -6,6 +6,7 @@ import me.afoolslove.metalmaxre.desktop.MapSelectListModel;
 import me.afoolslove.metalmaxre.editors.map.IMapEditor;
 import me.afoolslove.metalmaxre.editors.map.IMapPropertiesEditor;
 import me.afoolslove.metalmaxre.editors.map.MapProperties;
+import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.helper.TileSetHelper;
 import me.afoolslove.metalmaxre.tiled.TiledMapUtils;
 import me.afoolslove.metalmaxre.utils.BufferedImageUtils;
@@ -23,10 +24,14 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class MapImagePopupMenuMouseAdapter extends MouseAdapter {
     private final JPopupMenu popupMenu = new JPopupMenu();
+    private final JPopupMenu worldPopupMenu = new JPopupMenu();
     private final JLabel mapImage;
     private final MapSelectListModel mapSelectListModel;
 
@@ -169,15 +174,51 @@ public class MapImagePopupMenuMouseAdapter extends MouseAdapter {
         popupMenu.add(exportMap);               // 导出该地图
         popupMenu.add(importAndReplaceMap);     // 导入并替换地图
 
+
+        JMenuItem worldMapCapacity = new JMenuItem("世界地图容量");
+        worldMapCapacity.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+
+            MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
+            IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
+            int sum = Arrays.stream(worldMapEditor.getIndexesCapacity()).sum();
+
+            Set<Integer> tileHashCodes = new HashSet<>();
+            byte[][] map = worldMapEditor.getMap();
+            for (int y = 0; y < 0x40; y++) {
+                for (int x = 0; x < 0x40; x++) {
+                    tileHashCodes.add(Arrays.hashCode(IWorldMapEditor.getTiles4x4(map, x, y)));
+                }
+            }
+            // 根据剩余容量不同提示不同的文本
+            int capacity = sum - tileHashCodes.size();
+            if (sum > 0) {
+                JOptionPane.showConfirmDialog(null, String.format("剩余空间容量：%d/%d", capacity, sum), "世界地图剩余容量", JOptionPane.OK_CANCEL_OPTION);
+            } else if (sum < 0) {
+                JOptionPane.showConfirmDialog(null, String.format("超出空间容量：%d/%d\n超出了%d，请确保剩余空间足够储存后再储存。", tileHashCodes.size(), sum, Math.abs(capacity)), "世界地图剩余容量", JOptionPane.OK_CANCEL_OPTION);
+            } else {
+                JOptionPane.showConfirmDialog(null, "空间刚好使用完毕", "世界地图剩余容量", JOptionPane.OK_CANCEL_OPTION);
+            }
+
+        });
+
+        worldPopupMenu.add(worldMapCapacity);   // 世界地图容量
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
         if (e.isPopupTrigger()) {
             int selectedMap = mapSelectListModel.getSelectedMap();
-            if (selectedMap != 0x00) {
+            if (selectedMap == -1) {
+                return;
+            }
+
+            if (selectedMap == 0x00) {
+                worldPopupMenu.show(mapImage, e.getX(), e.getY());
+            } else {
                 popupMenu.show(mapImage, e.getX(), e.getY());
-                popupMenu.setVisible(true);
             }
         }
     }

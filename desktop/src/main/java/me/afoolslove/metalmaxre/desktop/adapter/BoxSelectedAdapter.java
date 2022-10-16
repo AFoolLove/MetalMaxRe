@@ -140,17 +140,15 @@ public class BoxSelectedAdapter extends MouseInputAdapter {
 
     public interface SelectListener {
         /**
-         * 双击选中后执行
-         */
-        default void selected(int x, int y) {
-
-        }
-
-        /**
          * 鼠标指向的实时位置
          */
         default void select(int x, int y) {
+        }
 
+        /**
+         * 双击选中后执行
+         */
+        default void selected(int x, int y) {
         }
     }
 }

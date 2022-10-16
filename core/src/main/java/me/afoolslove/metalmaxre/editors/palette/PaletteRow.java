@@ -1,10 +1,9 @@
 package me.afoolslove.metalmaxre.editors.palette;
 
 import me.afoolslove.metalmaxre.RomBuffer;
+import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
-
-import java.util.Arrays;
 
 /**
  * 调色板
@@ -96,6 +95,6 @@ public class PaletteRow {
 
     @Override
     public String toString() {
-        return String.format("Palette{colors=%s}", Arrays.toString(paletteRow));
+        return String.format("Palette{colors=%s}", NumberR.toHexString(paletteRow));
     }
 }

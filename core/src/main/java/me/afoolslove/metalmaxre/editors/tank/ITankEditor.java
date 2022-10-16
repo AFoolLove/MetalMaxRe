@@ -19,8 +19,17 @@ public interface ITankEditor extends IRomEditor {
      *
      * @return 指定坦克的初始属性
      */
-    default TankInitialAttribute getTankInitAttribute(@NotNull Tank tank){
+    default TankInitialAttribute getTankInitAttribute(@NotNull Tank tank) {
         return getTankInitAttributes().get(tank);
+    }
+
+    /**
+     * 获取指定坦克的初始属性
+     *
+     * @return 指定坦克的初始属性
+     */
+    default TankInitialAttribute getTankInitAttribute(int tankId) {
+        return getTankInitAttributes().get(Tank.fromId(tankId));
     }
 
     /**

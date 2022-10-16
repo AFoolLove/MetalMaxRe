@@ -166,4 +166,42 @@ public class NumberR {
         }
         return bytes;
     }
+
+    /**
+     * 将字节数组转换为十六进制文本
+     */
+    public static String toHexString(byte[] a) {
+        if (a == null)
+            return "[]";
+        int iMax = a.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0; ; i++) {
+            b.append(String.format("%02X", a[i]));
+            if (i == iMax)
+                return b.append(']').toString();
+            b.append(", ");
+        }
+    }
+
+    /**
+     * 将字节数组转换为纯十六进制文本
+     */
+    public static String toPlainHexString(byte[] a) {
+        if (a == null)
+            return "";
+        int iMax = a.length - 1;
+        if (iMax == -1)
+            return "";
+
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; ; i++) {
+            b.append(String.format("%02X", a[i]));
+            if (i == iMax)
+                return b.toString();
+        }
+    }
 }

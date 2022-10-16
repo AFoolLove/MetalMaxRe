@@ -15,7 +15,7 @@ import java.util.Objects;
  * @author AFoolLove
  */
 public class EventTile extends Point2B {
-    public byte tile;
+    protected byte tile;
 
     public EventTile(int x, int y, int tile) {
         super(x, y);

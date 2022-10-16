@@ -19,6 +19,13 @@ public interface IPlayerEditor extends IRomEditor {
     PlayerInitialAttributes getInitialAttributes(Player player);
 
     /**
+     * @return 指定玩家的初始属性
+     */
+    default PlayerInitialAttributes getInitialAttributes(int playerId) {
+        return getInitialAttributes(Player.formId(playerId));
+    }
+
+    /**
      * 获取玩家的最大等级（包含）
      *
      * @return 玩家的最大等级（包含）

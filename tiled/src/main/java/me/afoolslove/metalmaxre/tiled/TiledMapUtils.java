@@ -42,7 +42,8 @@ public class TiledMapUtils {
     // FFFFFFFF-FFFF-FFFF
     public static final Pattern TILESET_NAME_PATTERN = Pattern.compile("([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4})$");
     // FFFFFFFF
-    public static final Pattern SPRITES_NAME_PATTERN = Pattern.compile("([0-9a-fA-F]{8})$");
+    public static final Pattern SPRITE_NAME_PATTERN = Pattern.compile("([0-9a-fA-F]{8})$");
+    public static final Pattern ENTRANCE_NAME_PATTERN = Pattern.compile("([0-9a-fA-F]{8})$");
 
     /**
      * 生成Tiled地图
@@ -166,7 +167,8 @@ public class TiledMapUtils {
                 eventLayer.setId(nextLayerId++);
                 // event:index
                 // 事件内存地址和地址的bit位
-                eventLayer.setName(String.format("%04X:%01X", 0x0441 + ((entry.getKey() & 0xF8) >>> 3), (entry.getKey() & 0x07)));
+//                eventLayer.setName(String.format("%04X:%01X", 0x0441 + ((entry.getKey() & 0xF8) >>> 3), (entry.getKey() & 0x07)));
+                eventLayer.setName(String.format("%02X", entry.getKey() & 0xFF));
 
                 // 设置该事件影响的图块
                 for (EventTile eventTile : entry.getValue()) {
@@ -233,7 +235,7 @@ public class TiledMapUtils {
             mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
             mapObject.setId(nextObjectId++);
             // 设置出口坐标为名称 Map:X:Y
-            mapObject.setName(String.format("%02X:%03d:%03d", outPoint.getMap(), outPoint.intX(), outPoint.intY()));
+            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.intX(), outPoint.intY()));
 
             // 添加到入口的对象层
             entrances.addObject(mapObject);
@@ -272,7 +274,7 @@ public class TiledMapUtils {
             // 将精灵对话类型和动作为名称
             mapObject.setName(String.format("%02X:%02X:%02X", sprite.getTalk1(), sprite.getTalk2(), sprite.getAction()));
             // 添加标志，Tiled程序可以识别
-            mapObject.setType("sprites");
+            mapObject.setType("sprite");
             // 0x80 为fistID，tileSet的结尾
             // 0x01为软件地址偏移
             mapObject.setGid(0x80 + sprite.intType() + 0x01);
@@ -338,7 +340,7 @@ public class TiledMapUtils {
             }
             case FIXED -> {
                 MapPoint fixed = border.getFirst();
-                String fixedStr = String.format("%02X:%03d:%03d", fixed.getMap(), fixed.intX(), fixed.intY());
+                String fixedStr = String.format("%02X:%02X:%02X", fixed.getMap(), fixed.intX(), fixed.intY());
                 borderUP.setName(fixedStr);
                 borderDOWN.setName(fixedStr);
                 borderLEFT.setName(fixedStr);
@@ -350,10 +352,10 @@ public class TiledMapUtils {
                 MapPoint left = border.get(0x02);
                 MapPoint right = border.get(0x03);
 
-                borderUP.setName(String.format("%02X:%03d:%03d", up.getMap(), up.intX(), up.intY()));
-                borderDOWN.setName(String.format("%02X:%03d:%03d", down.getMap(), down.intX(), down.intY()));
-                borderLEFT.setName(String.format("%02X:%03d:%03d", left.getMap(), left.intX(), left.intY()));
-                borderRIGHT.setName(String.format("%02X:%03d:%03d", right.getMap(), right.intX(), right.intY()));
+                borderUP.setName(String.format("%02X:%02X:%02X", up.getMap(), up.intX(), up.intY()));
+                borderDOWN.setName(String.format("%02X:%02X:%02X", down.getMap(), down.intX(), down.intY()));
+                borderLEFT.setName(String.format("%02X:%02X:%02X", left.getMap(), left.intX(), left.intY()));
+                borderRIGHT.setName(String.format("%02X:%02X:%02X", right.getMap(), right.intX(), right.intY()));
             }
         }
 
@@ -504,8 +506,8 @@ public class TiledMapUtils {
             eventLayer.setId(nextLayerId++);
             // event:index
             // 事件内存地址和地址的bit位
-            eventLayer.setName(String.format("%04X:%01X", 0x0441 + ((entry.getKey() & 0xF8) >>> 3), (entry.getKey() & 0x07)));
-
+//            eventLayer.setName(String.format("%04X:%01X", 0x0441 + ((entry.getKey() & 0xF8) >>> 3), (entry.getKey() & 0x07)));
+            eventLayer.setName(String.format("%02X", entry.getKey() & 0xFF));
             // 设置该事件影响的图块
             for (EventTile eventTile : entry.getValue()) {
                 // 为不同地方的图块集使用不同的图块源
@@ -513,10 +515,10 @@ public class TiledMapUtils {
                     int x = eventTile.intX() * 4;
                     int y = eventTile.intY() * 4;
                     // 找到该坐标的图块集
+                    // TODO 没有判断跨域4*4tile
                     if (rectangleIntegerEntry.getKey().contains(x, y)) {
                         TileSet tileSet = tileSetMap.get(rectangleIntegerEntry.getValue());
-                        int offset = 0x200 + eventTile.intTile();
-                        byte[] tiles = worldMapEditor.getIndexA(offset, true);
+                        byte[] tiles = worldMapEditor.getIndex(eventTile.intX(), eventTile.intY(), eventTile.intTile());
                         // 世界地图的事件图块为 4*4 个tile
                         for (int offsetY = 0; offsetY < 0x04; offsetY++) {
                             for (int offsetX = 0; offsetX < 0x04; offsetX++) {
@@ -598,7 +600,7 @@ public class TiledMapUtils {
         backLineObject.getPolyline().setPoints(backLinePoints.toString());
 
         MapPoint backLinePoint = worldMapEditor.getShippingLineBack().getValue();
-        backLineObject.setName(String.format("%02X:%03d:%03d", backLinePoint.getMap(), backLinePoint.intX(), backLinePoint.intY()));
+        backLineObject.setName(String.format("%02X:%02X:%02X", backLinePoint.getMap(), backLinePoint.intX(), backLinePoint.intY()));
         lineGroup.addObject(backLineObject);
 
         // 出航航线和目的地
@@ -625,7 +627,7 @@ public class TiledMapUtils {
         outLineObject.getPolyline().setPoints(outLinePoints.toString());
 
         MapPoint outLinePoint = worldMapEditor.getShippingLineOut().getValue();
-        outLineObject.setName(String.format("%02X:%03d:%03d", outLinePoint.getMap(), outLinePoint.intX(), outLinePoint.intY()));
+        outLineObject.setName(String.format("%02X:%02X:%02X", outLinePoint.getMap(), outLinePoint.intX(), outLinePoint.intY()));
         lineGroup.addObject(outLineObject);
 
         // ----------------
@@ -684,7 +686,7 @@ public class TiledMapUtils {
             mapObject = new MapObject(inPoint.intX() * 0x10, inPoint.intY() * 0x10, 0x10, 0x10, 0);
             mapObject.setId(nextObjectId++);
             // 设置出口坐标为名称 Map:X:Y
-            mapObject.setName(String.format("%02X:%03d:%03d", outPoint.getMap(), outPoint.intX(), outPoint.intY()));
+            mapObject.setName(String.format("%02X:%02X:%02X", outPoint.getMap(), outPoint.intX(), outPoint.intY()));
 
             // 添加到入口的对象层
             entrances.addObject(mapObject);
@@ -704,7 +706,7 @@ public class TiledMapUtils {
             // 将精灵对话类型和动作为名称
             mapObject.setName(String.format("%02X:%02X:%02X", sprite.getTalk1(), sprite.getTalk2(), sprite.getAction()));
             // 添加标志，Tiled程序可以识别
-            mapObject.setType("sprites");
+            mapObject.setType("sprite");
             // 0x80 为fistID，tileSet的结尾
             // 0x01为软件地址偏移
 //            mapObject.setGid(0x80 + (sprite.type & 0xFF) + 0x01);
@@ -771,7 +773,7 @@ public class TiledMapUtils {
             }
             case FIXED -> {
                 MapPoint fixed = border.getFirst();
-                String fixedStr = String.format("%02X:%03d:%03d", fixed.getMap(), fixed.intX(), fixed.intY());
+                String fixedStr = String.format("%02X:%02X:%02X", fixed.getMap(), fixed.intX(), fixed.intY());
                 borderUP.setName(fixedStr);
                 borderDOWN.setName(fixedStr);
                 borderLEFT.setName(fixedStr);
@@ -783,10 +785,10 @@ public class TiledMapUtils {
                 MapPoint left = border.get(0x02);
                 MapPoint right = border.get(0x03);
 
-                borderUP.setName(String.format("%02X:%03d:%03d", up.getMap(), up.intX(), up.intY()));
-                borderDOWN.setName(String.format("%02X:%03d:%03d", down.getMap(), down.intX(), down.intY()));
-                borderLEFT.setName(String.format("%02X:%03d:%03d", left.getMap(), left.intX(), left.intY()));
-                borderRIGHT.setName(String.format("%02X:%03d:%03d", right.getMap(), right.intX(), right.intY()));
+                borderUP.setName(String.format("%02X:%02X:%02X", up.getMap(), up.intX(), up.intY()));
+                borderDOWN.setName(String.format("%02X:%02X:%02X", down.getMap(), down.intX(), down.intY()));
+                borderLEFT.setName(String.format("%02X:%02X:%02X", left.getMap(), left.intX(), left.intY()));
+                borderRIGHT.setName(String.format("%02X:%02X:%02X", right.getMap(), right.intX(), right.intY()));
             }
         }
 
@@ -925,19 +927,15 @@ public class TiledMapUtils {
     public static TileSet createWorldTsx(@NotNull MetalMaxRe metalMaxRe, @Nullable TMXMapWriter tmxMapWriter, @NotNull File tileBitmap, int xXX, @NotNull File outputDir) throws IOException {
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
         TileSet tileSet = new TileSet();
-        tileSet.setName(String.format("%02X%02X%02X%02X-000102-%04X",
-                NumberR.at(xXX, 3),
-                NumberR.at(xXX, 2),
-                NumberR.at(xXX, 1),
-                NumberR.at(xXX, 0),
-                0x9AD0));
+        tileSet.setName(String.format("%08X-%04X", xXX, 0x9AD0));
         tileSet.importTileBitmap(tileBitmap.getPath(), new BasicTileCutter(0x10, 0x10, 0, 0));
 
         // 获取所有图块属性
-        byte[] tileEffect = new byte[0x40 + 0x40 + 0x40];
+        byte[] tileEffect = new byte[0x40 + 0x40 + 0x40 + 0x40];
         System.arraycopy(tileSetEditor.getWorldAttributes()[0x00], 0, tileEffect, 0x00, 0x40);
         System.arraycopy(tileSetEditor.getWorldAttributes()[0x01], 0, tileEffect, 0x40, 0x40);
         System.arraycopy(tileSetEditor.getWorldAttributes()[0x02], 0, tileEffect, 0x80, 0x40);
+        System.arraycopy(tileSetEditor.getWorldAttributes()[0x03], 0, tileEffect, 0xC0, 0x40);
 
         for (int i = 0; i < tileEffect.length; i++) {
             Tile tile = tileSet.getTile(i);
@@ -1016,7 +1014,7 @@ public class TiledMapUtils {
                 mapProperties.setPalette((char) palette);
             }
             // 精灵图块集
-            if (SPRITES_NAME_PATTERN.matcher(name).find()) {
+            if (SPRITE_NAME_PATTERN.matcher(name).find()) {
                 int xXX = (int) Long.parseLong(name.substring(0, 8), 16);
                 // 只有 0000FF00有效，其它是无法更改的
                 mapProperties.setSpriteIndex(NumberR.at(xXX, 1));
@@ -1123,8 +1121,8 @@ public class TiledMapUtils {
                                         String[] split = mapObject.getName().split(":");
                                         mapBorder.add(new MapPoint(
                                                 Integer.parseInt(split[0], 16),
-                                                Integer.parseInt(split[1]),
-                                                Integer.parseInt(split[2])
+                                                Integer.parseInt(split[1], 16),
+                                                Integer.parseInt(split[2], 16)
                                         ));
                                     }
                                     mapObject = null; // 设置为null表示已经设置过类型了
@@ -1137,8 +1135,8 @@ public class TiledMapUtils {
                                 String[] split = objects.get(0x00).getName().split(":");
                                 mapBorder.add(new MapPoint(
                                         Integer.parseInt(split[0], 16),
-                                        Integer.parseInt(split[1]),
-                                        Integer.parseInt(split[2])
+                                        Integer.parseInt(split[1], 16),
+                                        Integer.parseInt(split[2], 16)
                                 ));
                             }
                         }
@@ -1225,11 +1223,11 @@ public class TiledMapUtils {
                             int inX = (int) (entrance.getX() / 0x10);
                             int inY = (int) (entrance.getY() / 0x10);
                             // 出口Map、X、Y ，从名称中解析
-                            // FF:255:255
+                            // FF:FF:FF
                             String[] split = entrance.getName().split(":");
                             int outMap = Integer.parseInt(split[0], 16);
-                            int outX = Integer.parseInt(split[1]);
-                            int outY = Integer.parseInt(split[2]);
+                            int outX = Integer.parseInt(split[1], 16);
+                            int outY = Integer.parseInt(split[2], 16);
 
                             // 入口和出口
                             entrances.put(new MapPoint(map, inX - mapOffsetX, inY - mapOffsetY), new MapPoint(outMap, outX, outY));
@@ -1310,13 +1308,14 @@ public class TiledMapUtils {
                             continue;
                         }
                         if (mapLayer instanceof TileLayer eventLayer) {
-                            // 通过名称获取事件数据
-                            // 0x0441为实际内存地址起始
-                            int event = Integer.parseInt(eventLayer.getName().substring(0, 4), 16) - 0x0441;
-                            // 左移3bit，空出末尾的bit位
-                            event <<= 0x03;
-                            // 末尾为bit位
-                            event += Byte.parseByte(eventLayer.getName().substring(5));
+//                            // 通过名称获取事件数据
+//                            // 0x0441为实际内存地址起始
+//                            int event = Integer.parseInt(eventLayer.getName().substring(0, 4), 16) - 0x0441;
+//                            // 左移3bit，空出末尾的bit位
+//                            event <<= 0x03;
+//                            // 末尾为bit位
+//                            event += Byte.parseByte(eventLayer.getName().substring(5));
+                            int event = Integer.parseInt(eventLayer.getName(), 16) & 0xFF;
 
                             // 通过地图内容获取事件影响的图块
                             List<EventTile> events = new ArrayList<>();
@@ -1527,8 +1526,8 @@ public class TiledMapUtils {
                             MapPoint inPoint = new MapPoint(0x00, (int) entranceObject.getX() / 0x10, (int) entranceObject.getY() / 0x10);
                             MapPoint outPoint = new MapPoint(
                                     Integer.parseInt(split[0], 16) & 0xFF,
-                                    Integer.parseInt(split[1]) & 0xFF,
-                                    Integer.parseInt(split[2]) & 0xFF
+                                    Integer.parseInt(split[1], 16) & 0xFF,
+                                    Integer.parseInt(split[2], 16) & 0xFF
                             );
                             // 添加出入口
                             worldMapEntrance.getEntrances().put(inPoint, outPoint);
@@ -1645,14 +1644,14 @@ public class TiledMapUtils {
                         continue;
                     }
                     if (groupLayer instanceof TileLayer eventTileLayer) {
-                        // 得到事件
-                        int event = Integer.parseInt(eventTileLayer.getName().substring(0, 4), 16) - 0x0441;
-                        // 得到bit位
-                        int offset = Integer.parseInt(eventTileLayer.getName().substring(5, 6), 16);
-
-                        // 合并
-                        event <<= 3;
-                        event |= offset;
+//                        // 得到事件
+//                        int event = Integer.parseInt(eventTileLayer.getName().substring(0, 4), 16) - 0x0441;
+//                        // 得到bit位
+//                        int offset = Integer.parseInt(eventTileLayer.getName().substring(5, 6), 16);
+//                        // 合并
+//                        event <<= 3;
+//                        event |= offset;
+                        int event = Integer.parseInt(eventTileLayer.getName(), 16) & 0xFF;
 
                         ArrayList<EventTile> events = new ArrayList<>();
 

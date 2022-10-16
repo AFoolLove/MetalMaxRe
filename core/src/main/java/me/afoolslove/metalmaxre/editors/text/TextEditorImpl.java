@@ -3,12 +3,13 @@ package me.afoolslove.metalmaxre.editors.text;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
-import me.afoolslove.metalmaxre.editors.text.action.*;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 文本编辑器
@@ -27,60 +28,31 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         return text;
     }
 
-    public Integer getIndexPagexx(int page) {
-        return indexPages.get(page);
-    }
-
-    private final List<Integer> indexPages = List.of(
-            0x11A20 - 0x10, // 0x00*
-            0x21AF6 - 0x10, // 0x01*
-            0x10129 - 0x10, // 0x02*
-            0x10DB3 - 0x10, // 0x03*
-            0x112F2 - 0x10, // 0x04*
-            0x14010 - 0x10, // 0x05*
-            0x124EE - 0x10, // 0x06*
-            0x16010 - 0x10, // 0x07*
-            0x21E81 - 0x10, // 0x08*
-            0x10010 - 0x10, // 0x09*
-            0x16BDD - 0x10, // 0x0A*
-            0x36010 - 0x10, // 0x0B*
-            0x12010 - 0x10, // 0x0C*
-            0x120E0 - 0x10, // 0x0D*
-            0x18010 - 0x10, // 0x0E*
-            0x17680 - 0x10, // 0x0F*
-            0x13320 - 0x10, // 0x10*
-            0x1F99A - 0x10, // 0x11*
-            0x1157C - 0x10, // 0x12*
-            0x11933 - 0x10, // 0x13*
-            0x0BE90 - 0x10, // 0x14*
-            0x384B5 - 0x10 /// 0x15*
-    );
-
     public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe, Map.ofEntries(
-                Map.entry(0x0BE90 - 0x10, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                Map.entry(0x10010 - 0x10, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                Map.entry(0x10129 - 0x10, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                Map.entry(0x10DB3 - 0x10, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                Map.entry(0x112F2 - 0x10, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                Map.entry(0x1157C - 0x10, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                Map.entry(0x11933 - 0x10, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //--
-                Map.entry(0x11A20 - 0x10, DataAddress.from(0x11A20 - 0x10, 0x11F74 - 0x10)), //-
-                Map.entry(0x11F75 - 0x10, DataAddress.from(0x11F75 - 0x10, 0x1200F - 0x10)), //-*
-                Map.entry(0x12010 - 0x10, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
-                Map.entry(0x120E0 - 0x10, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
-                Map.entry(0x124EE - 0x10, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
-                Map.entry(0x13320 - 0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
-                Map.entry(0x14010 - 0x10, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
-                Map.entry(0x16010 - 0x10, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                Map.entry(0x16BDD - 0x10, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
-                Map.entry(0x17680 - 0x10, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
-                Map.entry(0x18010 - 0x10, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                Map.entry(0x1F99A - 0x10, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                Map.entry(0x21AF6 - 0x10, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
-                Map.entry(0x21E81 - 0x10, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
-                Map.entry(0x36010 - 0x10, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                Map.entry(0x384B5 - 0x10, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
+                Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
+                Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
+                Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
+                Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
+                Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
+                Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
+                Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //--
+                Map.entry(0x00, DataAddress.from(0x11A20 - 0x10, 0x11F74 - 0x10)), //-
+//                Map.entry(-1, DataAddress.from(0x11F75 - 0x10, 0x1200F - 0x10)), //-*
+                Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
+                Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
+                Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
+                Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
+                Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
+                Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
+                Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
+                Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
+                Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
+                Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
+                Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
+                Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
+                Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
+                Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
         ));
     }
 
@@ -92,243 +64,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     @Editor.Load
     public void onLoad() {
         textAddresses.values().parallelStream().forEach(textAddress -> {
-            List<TextBuilder> textBuilders = new ArrayList<>();
-
             // 得到这段文本的数据长度
             final byte[] bytes = new byte[textAddress.length()];
             // 定位，读取
             getBuffer().get(textAddress, bytes);
 
-            // 储存一段对象文本
-            TextBuilder textBuilder = new TextBuilder();
-            // 临时储存纯文本
-            StringBuilder text = new StringBuilder();
-
-            text:
-            for (int position = 0; position < bytes.length; ) {
-                // 在字库中查找对应的字符文本
-                allFonts:
-                for (Map.Entry<Character, ?> entry : WordBank.ALL_FONTS) {
-                    if (entry.getValue() instanceof byte[] bs) {
-                        if (!bytesStartsWith(bytes, position, bs)) {
-                            continue allFonts;
-                        }
-                        text.append(entry.getKey());
-                        position += bs.length;
-                        continue text;
-                    } else {
-                        if (Objects.equals(entry.getValue(), bytes[position])) {
-                            if (bytes[position] == (byte) 0x9F) {
-                                // 断句
-                                // 保存当前文本，并清空缓存文本
-                                if (!text.isEmpty()) {
-                                    textBuilder.add(new Text(text.toString()));
-                                    text.setLength(0);
-                                }
-                                textBuilder.has9F(true);
-
-                                textBuilders.add(textBuilder);
-
-                                textBuilder = new TextBuilder();
-                            } else {
-                                // 单byte对应的字符
-                                text.append(entry.getKey());
-                            }
-                            position++;
-                            continue text;
-                        }
-                    }
-                }
-
-                // 单字节的操作码
-                var opcodeLength = WordBank.OPCODES.get(bytes[position]);
-                if (opcodeLength == null) {
-                    // 未知的数据
-                    text.append(String.format("[%02X]", bytes[position]));
-                    position++;
-                    continue text;
-                }
-                final int opcode = bytes[position] & 0xFF;
-
-                switch (opcode) {
-                    case 0xE3: // 仅进行选择？？？？
-                        // 保存当前文本，并清空缓存文本
-                        text.append("[E3]");
-                        textBuilder.add(new Text(text.toString()));
-                        text.setLength(0);
-                        // 因为选择只能放在最后，所以结束当前文本
-                        textBuilders.add(textBuilder);
-                        position++;
-
-                        textBuilder = new TextBuilder();
-                        break;
-                    case 0xEB: // 进行选择
-                        // 保存当前文本，并清空缓存文本
-                        if (!text.isEmpty()) {
-                            textBuilder.add(new Text(text.toString()));
-                            text.setLength(0);
-                        }
-                        // 添加选择action
-                        textBuilder.add(new SelectAction(bytes[position + 0x01], bytes[position + 0x02]));
-                        position += 3;
-
-                        // 因为选择只能放在最后，所以结束当前文本
-                        textBuilders.add(textBuilder);
-
-                        textBuilder = new TextBuilder();
-                        break;
-                    case 0xEE: // 全局文本速度
-                        // 保存当前文本，并清空缓存文本
-                        if (!text.isEmpty()) {
-                            textBuilder.add(new Text(text.toString()));
-                            text.setLength(0);
-                        }
-                        // 添加设置文本速度
-                        textBuilder.add(new TextSpeedAction(bytes[position + 0x01]));
-                        position += 2;
-                        break;
-                    case 0xED: // 空白占位
-                        // 保存当前文本，并清空缓存文本
-                        if (!text.isEmpty()) {
-                            textBuilder.add(new Text(text.toString()));
-                            text.setLength(0);
-                        }
-                        // 添加占位
-                        textBuilder.add(new SpaceAction(bytes[position + 0x01]));
-                        position += 2;
-                        break;
-                    case 0xF1: // 文本等待
-                        // 保存当前文本，并清空缓存文本
-                        if (!text.isEmpty()) {
-                            textBuilder.add(new Text(text.toString()));
-                            text.setLength(0);
-                        }
-                        // 添加文本等待
-                        textBuilder.add(new WaitTimeAction(bytes[position + 0x01]));
-                        position += 2;
-                        break;
-                    case 0xF5: // 精灵动作
-                        // 保存当前文本，并清空缓存文本
-                        if (!text.isEmpty()) {
-                            textBuilder.add(new Text(text.toString()));
-                            text.setLength(0);
-                        }
-                        // 添加精灵动作
-                        textBuilder.add(new SpriteAction(bytes[position + 0x01]));
-                        position += 2;
-                        break;
-                    case 0xF6:  // 读取到 0x9F 或 0x63 后结束
-                        text.append("[F6");
-                        // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
-                        // 0x63             (结束)
-                        // 0x8C + 2byte     (填充数量，填充字符)
-                        // 0x43 ???
-                        whileF6:
-                        while (true) {
-                            if (++position >= bytes.length) {
-                                // 读取数据完毕
-                                text.append(']');
-                                break text;
-                            }
-
-                            switch (bytes[position] & 0xFF) {
-                                case 0x9E: // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
-                                    // 写入 9E
-                                    text.append(" 9E");
-                                    // 空格填充
-                                    if (++position >= bytes.length) {
-                                        // 读取完毕
-                                        // 没有数量，直接结束
-                                        text.append(']');
-                                        break text;
-                                    }
-                                    // 填充数量
-                                    text.append(String.format("%02X ", bytes[position]));
-                                    break;
-                                case 0x63: // 0x63             (结束)
-                                    // 0xF6 的结束符
-                                    text.append(" 63]");
-                                    position++;
-                                    continue text;
-                                case 0x8C: // 0x8C + 2byte     (填充数量，填充字符)
-                                    text.append(" 8C");
-                                    // 使用指定字符填充指定数量
-                                    if (++position >= bytes.length) {
-                                        // 读取完毕
-                                        // 没有字符，也没有数量，直接结束
-                                        text.append(']');
-                                        break text;
-                                    }
-                                    // 填充数量
-                                    text.append(String.format("%02X", bytes[position]));
-                                    if (++position >= bytes.length) {
-                                        // 读取完毕
-                                        // 没有字符，直接结束
-                                        text.append(']');
-                                        break text;
-                                    }
-                                    // 填充字符
-                                    text.append(String.format("%02X ", bytes[position]));
-                                    break;
-                                case 0x9F:
-                                    // 文本段结束，另一个的开始
-                                    text.append("]");
-
-                                    // 断句
-                                    // 保存当前文本，并清空缓存文本
-                                    textBuilder.add(new Text(text.toString()));
-                                    text.setLength(0);
-                                    textBuilder.has9F(true);
-
-                                    textBuilders.add(textBuilder);
-
-                                    textBuilder = new TextBuilder();
-
-                                    position++;
-                                    // emm？要不要结束？
-                                    break whileF6;
-                                default:
-                                    // 写入不认识的字节
-                                    text.append(String.format("%02X", bytes[position]));
-                                    break;
-                            }
-                        }
-                        break;
-                    default:
-                        // 未知或无特殊数据的，直接读取相应的字节数量
-                        int len = opcodeLength + 1; // 包含opcode
-                        if (len == 1) {
-                            text.append(String.format("[%02X]", bytes[position]));
-                            position++;
-                        } else {
-                            text.append('[');
-                            for (int j = 0; j < len; j++) {
-                                text.append(String.format("%02X", bytes[position + j]));
-                            }
-                            // 读取结束
-                            text.append(']');
-
-                            position += len;
-                        }
-
-                }
-            }
-            this.text.put(textAddress, textBuilders);
+            this.text.put(textAddress, TextBuilder.fromBytes(bytes));
         });
-    }
-
-    private static boolean bytesStartsWith(byte[] bytes, int index, byte[] data) {
-        if ((bytes.length - 1) - index < data.length) {
-            // bytes里的数据，不够验证data
-            return false;
-        }
-
-        for (int i = 0; i < data.length; i++) {
-            if (bytes[index + i] != data[i]) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Editor.Apply
@@ -354,17 +96,17 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     }
 
     @Override
-    public Map<Integer, List<TextBuilder>> getIndexPages() {
+    public Map<Integer, List<TextBuilder>> getPages() {
         Map<Integer, List<TextBuilder>> map = new HashMap<>();
-        for (int i = 0; i < indexPages.size(); i++) {
-            map.put(i, text.get(getTextAddresses().get(indexPages.get(i))));
+        for (Map.Entry<Integer, DataAddress> entry : getTextAddresses().entrySet()) {
+            map.put(entry.getKey(), text.get(entry.getValue()));
         }
         return map;
     }
 
     @Override
-    public List<TextBuilder> getIndexPage(int page) {
-        return text.get(getTextAddresses().get(indexPages.get(page)));
+    public List<TextBuilder> getPage(int page) {
+        return text.get(getTextAddresses().get(page));
     }
 
     @Override
@@ -383,22 +125,38 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public String getMonsterName(int monsterId) {
-        return text.get(getMonsterNameAddress()).get(monsterId).toText();
+        List<TextBuilder> textBuilders = text.get(getMonsterNameAddress());
+        if (monsterId >= textBuilders.size()) {
+            return "null";
+        }
+        return textBuilders.get(monsterId).toText();
     }
 
     @Override
     public void setTownName(int townId, String newName) {
-        text.get(getTownNameAddress()).set(0x30 + townId, new TextBuilder(new Text(newName)));
+        List<TextBuilder> textBuilders = text.get(getTownNameAddress());
+        if ((0x30 + townId) >= textBuilders.size()) {
+            return;
+        }
+        textBuilders.set(0x30 + townId, new TextBuilder(new Text(newName)));
     }
 
     @Override
     public void setItemName(int itemId, String newName) {
-        text.get(getItemNameAddress()).set(itemId, new TextBuilder(new Text(newName)));
+        List<TextBuilder> textBuilders = text.get(getItemNameAddress());
+        if (itemId >= textBuilders.size()) {
+            return;
+        }
+        textBuilders.set(itemId, new TextBuilder(new Text(newName)));
     }
 
     @Override
     public void setMonsterName(int monsterId, String newName) {
-        text.get(getItemNameAddress()).set(monsterId, new TextBuilder(new Text(newName)));
+        List<TextBuilder> textBuilders = text.get(getItemNameAddress());
+        if (monsterId >= textBuilders.size()) {
+            return;
+        }
+        textBuilders.set(monsterId, new TextBuilder(new Text(newName)));
     }
 
     @Override
@@ -408,17 +166,17 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public DataAddress getTownNameAddress() {
-        return getTextAddresses().get(0x120E0 - 0x10);
+        return getTextAddresses().get(0x0D);
     }
 
     @Override
     public DataAddress getItemNameAddress() {
-        return getTextAddresses().get(0x11A20 - 0x10);
+        return getTextAddresses().get(0x00);
     }
 
     @Override
     public DataAddress getMonsterNameAddress() {
-        return getTextAddresses().get(0x21AF6 - 0x10);
+        return getTextAddresses().get(0x01);
     }
 
     @Editor.TargetVersion({"super_hack", "super_hack_general"})
@@ -426,21 +184,29 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
         public SHGTextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, Map.ofEntries(
-                    Map.entry(0x0BE90 - 0x10, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)),
-                    Map.entry(0x10010 - 0x10, DataAddress.from(0x10010 - 0x10, 0x10DB2 - 0x10)),
-                    Map.entry(0x10DB3 - 0x10, DataAddress.from(0x10DB3 - 0x10, 0x1157B - 0x10)),
-                    Map.entry(0x1157C - 0x10, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)),
-                    Map.entry(0x11933 - 0x10, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)),
-                    Map.entry(0x11F75 - 0x10, DataAddress.from(0x11F75 - 0x10, 0x1200F - 0x10)),
-                    Map.entry(0x12010 - 0x10, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)),
-                    Map.entry(0x120E0 - 0x10, DataAddress.from(0x120E0 - 0x10, 0x132FE - 0x10)),
-                    Map.entry(0x14010 - 0x10, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)),
-                    Map.entry(0x17680 - 0x10, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)),
-                    Map.entry(0x1F99A - 0x10, DataAddress.from(0x1F99A - 0x10, 0x20F83 - 0x10)),
-                    Map.entry(0x21AF6 - 0x10, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)),
-                    Map.entry(0x36010 - 0x10, DataAddress.from(0x36010 - 0x10, 0x37CA5 - 0x10)),
-//                    Map.entry(0x11A20 - 0x10, DataAddress.from(0x11A20 - 0x10, 0x11F74 - 0x10)),
-                    Map.entry(0x52010 - 0x10, DataAddress.from(0x52010 - 0x10, 0x527AF - 0x10))
+                    Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
+                    Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
+                    Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
+                    Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
+                    Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
+                    Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
+                    Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //--
+//                    Map.entry(0x00, DataAddress.from(0x11A20 - 0x10, 0x11F74 - 0x10)), //-
+                    Map.entry(0x00, DataAddress.from(0x52010 - 0x10, 0x527AF - 0x10)), //-
+                    Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
+                    Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
+                    Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
+                    Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
+                    Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
+                    Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
+                    Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
+                    Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
+                    Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
+                    Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
+                    Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
+                    Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
+                    Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
+                    Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
             ));
         }
 

@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.desktop;
 
+import com.formdev.flatlaf.*;
+import com.formdev.flatlaf.extras.components.FlatTriStateCheckBox;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.MultipleMetalMaxRe;
 import me.afoolslove.metalmaxre.RomVersion;
@@ -7,9 +9,7 @@ import me.afoolslove.metalmaxre.desktop.adapter.BoxSelectedAdapter;
 import me.afoolslove.metalmaxre.desktop.adapter.MapImagePopupMenuMouseAdapter;
 import me.afoolslove.metalmaxre.desktop.adapter.MiddleMoveMouseAdapter;
 import me.afoolslove.metalmaxre.desktop.dialog.EditorEnabledDialog;
-import me.afoolslove.metalmaxre.desktop.frame.DataValueEditorFrame;
-import me.afoolslove.metalmaxre.desktop.frame.MapEntranceEditorFrame;
-import me.afoolslove.metalmaxre.desktop.frame.TextEditorFrame;
+import me.afoolslove.metalmaxre.desktop.frame.*;
 import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.editors.map.*;
@@ -19,6 +19,9 @@ import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.Sprite;
+import me.afoolslove.metalmaxre.editors.tank.ITankEditor;
+import me.afoolslove.metalmaxre.editors.tank.Tank;
+import me.afoolslove.metalmaxre.editors.tank.TankInitialAttribute;
 import me.afoolslove.metalmaxre.editors.treasure.ITreasureEditor;
 import me.afoolslove.metalmaxre.editors.treasure.Treasure;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
@@ -56,10 +59,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class Main extends JFrame {
@@ -115,12 +115,12 @@ public class Main extends JFrame {
     private JSpinner eventTilesIndex;
     private JSpinner mapHideTileValue;
     private JSpinner mapFillTileValue;
-    private JCheckBox showSprites;
-    private JCheckBox showFillTile;
-    private JCheckBox showEntrances;
-    private JCheckBox showComputers;
-    private JCheckBox showEvents;
-    private JCheckBox showTreasures;
+    private FlatTriStateCheckBox showSprites;
+    private FlatTriStateCheckBox showFillTile;
+    private FlatTriStateCheckBox showEntrances;
+    private FlatTriStateCheckBox showComputers;
+    private FlatTriStateCheckBox showEvents;
+    private FlatTriStateCheckBox showTreasures;
     private JLabel mapTileSetImage;
     private JLabel spriteTileSetImage;
     private JButton mapImageRefresh;
@@ -133,9 +133,14 @@ public class Main extends JFrame {
     private JXCollapsiblePane mapTileSetImagePane;
     private JButton collapsedMapTileSetImage;
     private JScrollPane mapImageScrollPane;
-    private JLabel mapImageSelectedPoint;
     private JLabel mapTileSetIndex;
     private JLabel spriteTileSetIndex;
+    private FlatTriStateCheckBox showTanks;
+    private FlatTriStateCheckBox showLines;
+    private JComboBox<String> sharedEventTilesIndex;
+    private JSpinner mapImageSelectedPointX;
+    private JSpinner mapImageSelectedPointY;
+    private JButton gotoPoint;
     private ButtonGroup borderTypeGroup;
 
 
@@ -150,17 +155,19 @@ public class Main extends JFrame {
     private final Map<Byte, SingleMapEntry<BufferedImage, List<BufferedImage>>> spriteTileSets = new HashMap<>();
 
     private MapSelectListModel mapSelectListModel;
+    private final List<BoxSelectedAdapter.SelectListener> selectListeners = new ArrayList<>();
 
     private String currentOpenDirectoryPath;
     private String currentSaveAsDirectoryPath;
 
+    // 世界地图的动态水
+    private ScheduledExecutorService dynamicWorld = Executors.newSingleThreadScheduledExecutor();
+
     public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                 UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+        UIManager.getDefaults().put("Spinner.editorAlignment", JTextField.LEFT);
+
+        // 亮主题
+        FlatLightLaf.setup();
         Main main = new Main();
 
         main.setContentPane(main.contentPane);
@@ -169,6 +176,31 @@ public class Main extends JFrame {
         main.setSize(1280, 860);
 //        pack();
         main.setVisible(true);
+//        Toolkit.getDefaultToolkit().getSystemEventQueue().push(new EventQueue() {
+//            private final Stack<String> errors = new Stack<>();
+//            private final ScheduledExecutorService showError = Executors.newSingleThreadScheduledExecutor();
+//
+//            {
+//                showError.scheduleWithFixedDelay(() -> {
+//                    if (errors.isEmpty()) {
+//                        return;
+//                    }
+//                    String pop = errors.pop();
+//                    SwingUtilities.invokeLater(() -> JOptionPane.showConfirmDialog(null, pop, "发生了意外", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE));
+//                }, 100, 100, TimeUnit.MILLISECONDS);
+//            }
+//
+//            protected void dispatchEvent(AWTEvent newEvent) {
+//                try {
+//                    super.dispatchEvent(newEvent);
+//                } catch (Throwable t) {
+//                    t.printStackTrace();
+//                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+//                    t.printStackTrace(new PrintWriter(out, true));
+//                    errors.add(out.toString());
+//                }
+//            }
+//        });
     }
 
     public Main() {
@@ -218,6 +250,11 @@ public class Main extends JFrame {
                 File selectedFile = fileChooser.getSelectedFile();
                 currentOpenDirectoryPath = selectedFile.getParent();
 
+                if (selectedFile.length() < 524304) {
+                    JOptionPane.showMessageDialog(this, "你怕不是个傻子吧？");
+                    return;
+                }
+
                 try {
                     MetalMaxRe metalMaxRe = multipleMetalMaxRe.create(RomVersion.getChinese(), selectedFile.toPath(), true);
                     if (testMenuAdvancedMap.isSelected()) {
@@ -238,9 +275,7 @@ public class Main extends JFrame {
 
         // 打开内置ROM
         JMenu fileMenuOpenDefault = new JMenu("打开内置ROM");
-        for (RomVersion romVersion : RomVersion.getVersions().values().stream()
-                .filter(filter -> filter == RomVersion.getChinese() || filter == RomVersion.getJapanese())
-                .toList()) {
+        for (RomVersion romVersion : RomVersion.getVersions().values()) {
             JMenuItem version = new JMenuItem(romVersion.getName());
             fileMenuOpenDefault.add(version);
 
@@ -285,7 +320,20 @@ public class Main extends JFrame {
 
             int i = JOptionPane.showConfirmDialog(this, "重新加载会丢失已修改的所有数据", "重新加载", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
             if (i == JOptionPane.OK_OPTION) {
-                showLoadingDialog(multipleMetalMaxRe.current());
+                try {
+                    // 移除当前的工程
+                    MetalMaxRe oldMetalMaxRe = multipleMetalMaxRe.current();
+                    multipleMetalMaxRe.remove(oldMetalMaxRe);
+                    // 重新加载工程
+                    MetalMaxRe metalMaxRe = multipleMetalMaxRe.create(oldMetalMaxRe.getBuffer().getVersion(), oldMetalMaxRe.getBuffer().getPath(), true);
+                    showLoadingDialog(metalMaxRe);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    PrintWriter printWriter = new PrintWriter(out);
+                    ex.printStackTrace(printWriter);
+                    JOptionPane.showMessageDialog(this, "加载失败\n" + out);
+                }
             }
         });
 
@@ -559,6 +607,12 @@ public class Main extends JFrame {
                         JOptionPane.showMessageDialog(this, "导入失败\n" + out);
                     }
                     System.out.printf("导入世界地图：%s.\n", selectedFile.getAbsolutePath());
+                    worldMapImage = null;
+                    mapImages.remove(0x00);
+                    if (mapSelectListModel.getSelectedMap() == 0x00) {
+                        mapList.removeSelectionInterval(0, 0);
+                        mapList.setSelectedIndex(0);
+                    }
                 }
             }
         });
@@ -654,12 +708,12 @@ public class Main extends JFrame {
             editorEnabledDialog.setVisible(true);
         });
 
-        JMenuItem editorMenuText = new JMenuItem("文本编辑器(undone)");
+        JMenuItem editorMenuText = new JMenuItem("文本编辑器(bata)");
         editorMenuText.addActionListener(e -> {
             if (!multipleMetalMaxRe.hasInstance()) {
                 return;
             }
-            TextEditorFrame textEditorFrame = new TextEditorFrame(this, multipleMetalMaxRe);
+            TextEditorFrame textEditorFrame = new TextEditorFrame(this, multipleMetalMaxRe.current());
             textEditorFrame.pack();
             textEditorFrame.setVisible(true);
         });
@@ -669,7 +723,7 @@ public class Main extends JFrame {
             if (!multipleMetalMaxRe.hasInstance()) {
                 return;
             }
-            MapEntranceEditorFrame mapEntranceEditorFrame = new MapEntranceEditorFrame(this, multipleMetalMaxRe);
+            MapEntranceEditorFrame mapEntranceEditorFrame = new MapEntranceEditorFrame(this, multipleMetalMaxRe.current());
             mapEntranceEditorFrame.pack();
             mapEntranceEditorFrame.setVisible(true);
         });
@@ -685,58 +739,132 @@ public class Main extends JFrame {
             dataValueEditorFrame.setVisible(true);
         });
 
+        JMenuItem editorMenuPlayer = new JMenuItem("玩家编辑器");
+        editorMenuPlayer.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+
+            PlayerEditorFrame playerEditorFrame = new PlayerEditorFrame(this, multipleMetalMaxRe.current());
+            playerEditorFrame.pack();
+            playerEditorFrame.setVisible(true);
+        });
+
+        JMenuItem editorMenuTank = new JMenuItem("坦克编辑器");
+        editorMenuTank.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+
+            TankEditorFrame tankEditorFrame = new TankEditorFrame(this, multipleMetalMaxRe.current());
+            tankEditorFrame.pack();
+            tankEditorFrame.setVisible(true);
+        });
+
+        JMenuItem editorMenuDogSystem = new JMenuItem("犬系统编辑器");
+        editorMenuDogSystem.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+
+            DogSystemEditorFrame dogSystemEditorFrame = new DogSystemEditorFrame(this, multipleMetalMaxRe.current());
+            dogSystemEditorFrame.pack();
+            dogSystemEditorFrame.setVisible(true);
+        });
+        JMenuItem editorMenuShop = new JMenuItem("商店编辑器(undone)");
+        editorMenuShop.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+
+            ShopEditorFrame shopEditorFrame = new ShopEditorFrame(this, multipleMetalMaxRe.current());
+            shopEditorFrame.pack();
+            shopEditorFrame.setVisible(true);
+        });
+        JMenuItem editorMenuTreasure = new JMenuItem("宝藏编辑器(undone)");
+        editorMenuTreasure.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+
+            TreasureEditorFrame treasureEditorFrame = new TreasureEditorFrame(this, multipleMetalMaxRe.current());
+            treasureEditorFrame.pack();
+            treasureEditorFrame.setVisible(true);
+        });
+
+        JMenuItem editorMenuMonster = new JMenuItem("怪物编辑器(undone)");
+        editorMenuMonster.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+
+            MonsterModelEditorFrame monsterModelEditorFrame = new MonsterModelEditorFrame(this, multipleMetalMaxRe.current());
+            monsterModelEditorFrame.pack();
+            monsterModelEditorFrame.setVisible(true);
+        });
+
 
         // 编辑器
         editorMenu.add(editorMenuEnabledStates);// 启用/禁用编辑器
         editorMenu.add(editorMenuText);         // 文本编辑器
         editorMenu.add(editorMenuEntrances);    // 出入口编辑器
         editorMenu.add(editorMenuDataValue);    // 数据值编辑器
+        editorMenu.add(editorMenuPlayer);       // 玩家编辑器
+        editorMenu.add(editorMenuTank);         // 坦克编辑器
+        editorMenu.add(editorMenuDogSystem);    // 犬系统编辑器
+        editorMenu.add(editorMenuShop);         // 商店编辑器
+        editorMenu.add(editorMenuTreasure);     // 宝藏编辑器
+        editorMenu.add(editorMenuMonster);      // 怪物编辑器
 
 
         JMenu paletteMenu = new JMenu("调色板(undone)");
         JMenuItem paletteMenuSystem = new JMenuItem("系统调色板");
         paletteMenu.add(paletteMenuSystem);
 
+        JMenu themeMenu = new JMenu("主题");
+
+        FlatLaf[] flatLafs = {null, new FlatDarculaLaf(), new FlatDarkLaf(), new FlatIntelliJLaf(), new FlatLightLaf()};
+
+        for (FlatLaf flatLaf : flatLafs) {
+            JRadioButtonMenuItem theme;
+            if (flatLaf == null) {
+                theme = new JRadioButtonMenuItem("跟随系统", false);
+            } else {
+                theme = new JRadioButtonMenuItem(flatLaf.getName(), false);
+            }
+
+            themeMenu.add(theme);
+
+            theme.addItemListener(e -> {
+                for (Component component : themeMenu.getPopupMenu().getComponents()) {
+                    if (theme == component) {
+                        // 不设置自己
+                        continue;
+                    }
+                    // 设置未选中
+                    if (component instanceof JRadioButtonMenuItem t) {
+                        t.setSelected(false);
+                    }
+                }
+                if (flatLaf != null) {
+                    FlatLaf.setup(flatLaf);
+                } else {
+                    // 跟随系统
+                    try {
+                        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                             UnsupportedLookAndFeelException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                SwingUtilities.updateComponentTreeUI(Main.this);
+            });
+        }
+
         JMenu testMenu = new JMenu("实验功能");
 
         testMenuAdvancedMap = new JCheckBoxMenuItem("使用扩容地图");
-        testMenuAdvancedMap.addItemListener(e -> {
-            if (!multipleMetalMaxRe.hasInstance()) {
-                return;
-            }
-
-            MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
-
-            IMapEditor mapEditor = metalMaxRe.getEditorManager().getEditor(IMapEditor.class);
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                // 使用特殊地图编辑器
-                if (mapEditor instanceof me.afoolslove.metalmaxre.desktop.editors.map.MapEditorImpl) {
-                    return;
-                } else {
-                    metalMaxRe.getEditorManager().unregister(IMapEditor.class);
-                    metalMaxRe.getEditorManager().register(IMapEditor.class, me.afoolslove.metalmaxre.desktop.editors.map.MapEditorImpl::new);
-                }
-            } else if (e.getStateChange() == ItemEvent.DESELECTED) {
-                // 使用默认地图编辑器
-                if (mapEditor instanceof MapEditorImpl) {
-                    return;
-                } else {
-                    metalMaxRe.getEditorManager().unregister(IMapEditor.class);
-                    metalMaxRe.getEditorManager().register(IMapEditor.class, MapEditorImpl::new);
-                }
-            }
-            try {
-                ((Future<?>) metalMaxRe.getEditorManager().loadEditor(IMapEditor.class)).get();
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new RuntimeException(ex);
-            }
-            mapImages.entrySet().removeIf(entry -> entry.getKey() >= 0xC3);
-            int selectMap = mapSelectListModel.getSelectedMap();
-            if (selectMap >= 0xC3) {
-                mapList.removeSelectionInterval(selectMap, selectMap);
-                mapList.setSelectedIndex(selectMap);
-            }
-        });
+        testMenuAdvancedMap.addItemListener(this::itemStateChanged);
 
         testMenu.add(testMenuAdvancedMap);
 
@@ -753,23 +881,39 @@ public class Main extends JFrame {
         });
 
         JMenuItem helpMenuAbout = new JMenuItem("关于");
-        helpMenuAbout.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, """
-                    这是一个基于java开发的FC游戏 MetalMax ROM编辑器
-                    Copyright 2022 AFoolLove
-                    """);
-        });
+        helpMenuAbout.addActionListener(e -> JOptionPane.showMessageDialog(this, """
+                这是一个基于java开发的FC游戏 MetalMax ROM编辑器
+                Copyright 2022 AFoolLove
+                """));
         helpMenu.add(helpMenuGithub);
         helpMenu.add(helpMenuAbout);
+
+
+        // debug菜单
+        JMenu debugMenu = new JMenu("Debug");
+        JMenuItem debugMenuBreakpoint = new JMenuItem("Breakpoint");
+        debugMenuBreakpoint.addActionListener(e -> Optional.of(Main.this));
+        JMenuItem debugMenuGC = new JMenuItem("GC");
+        debugMenuGC.addActionListener(e -> System.gc());
+        debugMenu.add(debugMenuBreakpoint);
+        debugMenu.add(debugMenuGC);
 
         menuBar.add(fileMenu);
         menuBar.add(editorMenu);
         menuBar.add(paletteMenu);
+        menuBar.add(themeMenu);
 //        menuBar.add(testMenu);
+        menuBar.add(debugMenu);
         menuBar.add(helpMenu);
     }
 
     private void createLayout() {
+//        dynamicWorld.scheduleWithFixedDelay(() -> {
+//            if (!multipleMetalMaxRe.hasInstance() || mapSelectListModel.getSelectedMap() != 0x00) {
+//                return;
+//            }
+//        }, 1, 1, TimeUnit.MICROSECONDS); // 1秒一次
+
         mapSelectListModel = new MapSelectListModel(mapList, multipleMetalMaxRe, mapFilter);
         mapList.setModel(mapSelectListModel);
         mapList.addListSelectionListener(e -> {
@@ -785,10 +929,13 @@ public class Main extends JFrame {
                 return;
             }
 
-            // 显示正在加载
-            // 不显示图标
-            mapImage.setText("正在加载...");
-            mapImage.setIcon(null);
+            // 记录地图滚动条位置
+            final Rectangle mapImageScrollPoint = ((JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, mapImage)).getViewRect();
+
+//            // 显示正在加载
+//            // 不显示图标
+//            mapImage.setText("正在加载...");
+//            mapImage.setIcon(null);
 
             MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
             MapPropertiesEditorImpl mapPropertiesEditor = metalMaxRe.getEditorManager().getEditor(IMapPropertiesEditor.class);
@@ -798,6 +945,8 @@ public class Main extends JFrame {
 
             MapProperties mapProperties = mapPropertiesEditor.getMapProperties(selectMap);
             MapEntrance mapEntrance = mapEntranceEditor.getMapEntrance(selectMap);
+
+            showLines.setEnabled(selectMap == 0x00);
 
             if (selectMap == 0x00) {
                 // 设置头属性
@@ -819,6 +968,9 @@ public class Main extends JFrame {
                 // 边界类型和目的地
                 setMapBorder(mapEntrance.getBorder());
 
+                // 固定调色板
+                palette.setValue(0x9AD0);
+
                 ImageIcon imageIcon = mapImages.get(selectMap);
                 if (imageIcon == null) {
                     if (mapImages.containsKey(selectMap)) {
@@ -828,71 +980,237 @@ public class Main extends JFrame {
                     mapImages.put(selectMap, null); // 占位，表示正在加载
                     imageLoaderService.submit(() -> {
                         if (worldMapImage == null) {
-                            worldMapImage = TileSetHelper.generateWorldMapImage(metalMaxRe);
+                            // 显示正在加载
+                            // 不显示图标
+                            mapImage.setText("正在加载...");
+                            mapImage.setIcon(null);
+
+                            // 生成世界地图
+                            IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
+                            // 复制一份
+                            byte[][] map = Arrays.copyOfRange(worldMapEditor.getMap(), 0x00, worldMapEditor.getMap().length);
+                            for (int y = 0; y < map.length; y++) {
+                                map[y] = Arrays.copyOfRange(map[y], 0x00, map[y].length);
+                            }
+
+                            // 连续山脉
+                            {
+                                // 连续山脉的计数器
+                                int continuous = 0;
+                                for (int index = 0; index < (0x100 * 0x100); index++) {
+                                    int x = index % 0x100;
+                                    int y = index / 0x100;
+
+//                                int tile = map[y][x] & 0xFF;
+
+                                    int offset = (y & 1) == 1 ? 0 : 1;
+
+                                    // 在新行中，如果上一行的山脉未结束，立即结束并重置连续山脉计数器
+                                    if (x == 0x00) {
+                                        if (continuous > 1) {
+                                            // 上一行未结束，立即结束山脉
+                                            map[(index - 1) / 0x100][(index - 1) % 0x100] = 0x0B;
+                                        }
+                                        // 重置连续山脉计数器
+                                        continuous = 0x00;
+                                    }
+
+                                    // 获取当前图块是否为山脉
+                                    // 如果山脉刚开始计数，设置山脉起始
+                                    // 否则判断山脉是否结束，设置山脉结束
+                                    if (map[y][x] == 0x02) {
+                                        if (continuous == 0x00) {
+                                            // 设置山脉起始
+                                            map[y][x] = 0x0A;
+                                        } else {
+                                            map[y][x] = (byte) (0x02 + ((x + offset) % 2));
+                                        }
+                                        continuous++;
+                                    } else {
+                                        if (continuous <= 1) {
+                                            continue;
+                                        }
+                                        // 设置山脉结束
+                                        map[(index - 1) / 0x100][(index - 1) % 0x100] = 0x0B;
+                                        continuous = 0;
+                                    }
+                                }
+                            }
+
+                            Map<Integer, List<BufferedImage>> tileSetMap = WorldMapEditorImpl.DEFAULT_PIECES.values().parallelStream().distinct().map(integer -> {
+                                        BufferedImage bufferedImage = BufferedImageUtils.fromColors(TileSetHelper.generateWorldTileSet(metalMaxRe, integer));
+                                        return Map.entry(integer, TileSetHelper.diced(bufferedImage));
+                                    })
+                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                            worldMapImage = new BufferedImage(0x100 * 0x10, 0x100 * 0x10, BufferedImage.TYPE_INT_ARGB);
+
+                            Graphics graphics = worldMapImage.getGraphics();
+
+                            WorldMapEditorImpl.DEFAULT_PIECES.entrySet().parallelStream().forEach(entry -> {
+                                Rectangle rectangle = entry.getKey();
+                                List<BufferedImage> tileSets = tileSetMap.get(entry.getValue());
+                                int x = (int) rectangle.getX();
+                                int y = (int) rectangle.getY();
+                                int width = (int) rectangle.getWidth();
+                                int height = (int) rectangle.getHeight();
+
+                                for (int offsetY = 0; offsetY < height; offsetY++) {
+                                    for (int offsetX = 0; offsetX < width; offsetX++) {
+                                        int mapX = x + offsetX;
+                                        int mapY = y + offsetY;
+
+                                        // 绘制16*16的tile
+                                        int tile = map[mapY][mapX] & 0xFF;
+                                        graphics.drawImage(tileSets.get(tile), mapX * 0x10, mapY * 0x10, null);
+                                    }
+                                }
+                            });
+                            graphics.dispose();
                         }
                         if (mapSelectListModel.getSelectedMap() == 0x00) {
                             BufferedImage bufferedImage = new BufferedImage(worldMapImage.getWidth(), worldMapImage.getHeight(), worldMapImage.getType());
                             Graphics2D graphics = bufferedImage.createGraphics();
 
                             graphics.drawImage(worldMapImage, 0x00, 0x00, null);
-                            boxMovable(graphics, mapProperties);
-                            if (showEntrances.isSelected()) {
-                                boxEntrances(graphics, mapProperties, mapEntrance.getEntrances());
-                            }
-//                            if (showSprites.isSelected()) {
-//                                ISpriteEditor spriteEditor = metalMaxRe.getEditorManager().getEditor(ISpriteEditor.class);
-//
-//                                SingleMapEntry<BufferedImage, List<BufferedImage>> spriteTileSets = this.spriteTileSets.get(mapProperties.spriteIndex);
-//                                if (spriteTileSet == null) {
-//                                    spriteTileSet = BufferedImageUtils.fromColors(TileSetHelper.generateSpriteTileSet(metalMaxRe, mapProperties.spriteIndex));
-//                                    spriteTileSets.put(mapProperties.spriteIndex, spriteTileSet);
-//                                    spriteTileSetImage.setIcon(new ImageIcon(spriteTileSet));
-//                                }
-//                                boxSprites(graphics, mapProperties, spriteEditor.getSprites().get(selectMap), spriteTileSets);
-//                            }
-//                             显示动态图块
-                            if (showEvents.isSelected()) {
+                            // 显示事件图块
+                            {
                                 IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
                                 IEventTilesEditor eventTilesEditor = metalMaxRe.getEditorManager().getEditor(IEventTilesEditor.class);
+                                // 获取世界地图的事件图块
                                 Map<Integer, List<EventTile>> worldEventTile = eventTilesEditor.getWorldEventTile();
-
+                                // 生成图块集
                                 Map<Rectangle, BufferedImage> tileSetMap = WorldMapEditorImpl.DEFAULT_PIECES.entrySet().parallelStream()
                                         .distinct()
                                         .map(entry -> Map.entry(entry, BufferedImageUtils.fromColors(TileSetHelper.generateWorldTileSet(metalMaxRe, entry.getValue()))))
                                         .collect(Collectors.toMap(t -> t.getKey().getKey(), Map.Entry::getValue));
 
+                                // 将图块集切割为0x10*0x10的小块
                                 Map<Rectangle, List<BufferedImage>> tileSetMaps = tileSetMap.entrySet().parallelStream()
-                                        .map(tsm -> Map.entry(tsm.getKey(), diced(tsm.getValue())))
+                                        .map(tsm -> Map.entry(tsm.getKey(), TileSetHelper.diced(tsm.getValue())))
                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-
+                                Color selected = Color.MAGENTA;
+                                Color unselected = new Color(0x9932CD);
                                 Collection<List<EventTile>> events = worldEventTile.values();
                                 for (Map.Entry<Rectangle, List<BufferedImage>> entry : tileSetMaps.entrySet()) {
                                     for (List<EventTile> event : events) {
                                         for (EventTile tile : event) {
-                                            if (entry.getKey().contains(tile.intX(), tile.intY())) {
-                                                BufferedImage event4x4TileImage = new BufferedImage(0x10 * 0x04, 0x10 * 0x04, BufferedImage.TYPE_INT_ARGB);
-                                                Graphics2D eventTileGraphics = event4x4TileImage.createGraphics();
-                                                byte[] tiles = worldMapEditor.getIndexA()[0x200 + tile.intTile()];
-                                                for (int i = 0; i < tiles.length; i++) {
-                                                    int x = i % 4;
-                                                    int y = i / 4;
-                                                    BufferedImage eventTileImage = entry.getValue().get(tiles[i] & 0xFF);
-                                                    eventTileGraphics.drawImage(eventTileImage, x * 0x10, y * 0x10, null);
-                                                }
-                                                eventTileGraphics.dispose();
+                                            if (entry.getKey().contains(tile.intX() * 0x04, tile.intY() * 0x04)) {
+                                                // 框出事件图块
+                                                // 根据显示与否设置不同颜色
+                                                if (showEvents.isSelected()) {
+                                                    BufferedImage event4x4TileImage = new BufferedImage(0x10 * 0x04, 0x10 * 0x04, BufferedImage.TYPE_INT_ARGB);
+                                                    Graphics2D eventTileGraphics = event4x4TileImage.createGraphics();
+                                                    // 获取动态4*4tiles
+                                                    byte[] tiles = worldMapEditor.getIndex(tile.intX(), tile.intY(), tile.intTile());
+                                                    for (int i = 0; i < tiles.length; i++) {
+                                                        int x = i % 4;
+                                                        int y = i / 4;
+                                                        int t = tiles[i] & 0xFF;
+                                                        if (t == 0x02) {
+                                                            // 山脉暂时不绘制，后面需要格式化
+                                                            continue;
+                                                        }
+                                                        BufferedImage eventTileImage = entry.getValue().get(t);
+                                                        eventTileGraphics.drawImage(eventTileImage, x * 0x10, y * 0x10, null);
+                                                    }
+                                                    eventTileGraphics.dispose();
 
-                                                graphics.drawImage(event4x4TileImage, tile.intX() * 0x10 * 0x04, tile.intY() * 0x10 * 0x04, null);
+                                                    graphics.drawImage(event4x4TileImage, tile.intX() * 0x10 * 0x04, tile.intY() * 0x10 * 0x04, null);
+
+                                                    if (!showEvents.isIndeterminate()) {
+                                                        // 选中为深紫色
+                                                        // 未选中为紫色
+                                                        graphics.setColor(showEvents.isSelected() ? selected : unselected);
+                                                        graphics.drawRect(tile.intX() * 0x10 * 0x04, tile.intY() * 0x10 * 0x04, 0x10 * 0x04 - 1, 0x10 * 0x04 - 1);
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-
+                            // 显示可移动区域
+                            boxMovable(graphics, mapProperties);
+                            if (showEntrances.isSelected()) {
+                                boxEntrances(graphics, mapProperties, mapEntrance.getEntrances());
+                            }
+                            // 显示精灵
+                            if (showSprites.isSelected()) {
+                                ISpriteEditor spriteEditor = metalMaxRe.getEditorManager().getEditor(ISpriteEditor.class);
+                                SingleMapEntry<BufferedImage, List<BufferedImage>> spriteTileSets = this.spriteTileSets.get((byte) 0x94);
+                                if (spriteTileSets == null) {
+                                    BufferedImage key = BufferedImageUtils.fromColors(TileSetHelper.generateSpriteTileSet(metalMaxRe, 0x94));
+                                    List<BufferedImage> value = TileSetHelper.diced(key);
+                                    spriteTileSets = SingleMapEntry.create(key, value);
+                                    this.spriteTileSets.put(mapProperties.spriteIndex, spriteTileSets);
+                                    spriteTileSetImage.setIcon(new ImageIcon(key));
+                                }
+                                boxSprites(graphics, mapProperties, spriteEditor.getSprites().get(selectMap), spriteTileSets);
+                            }
                             // 显示宝藏
                             if (showTreasures.isSelected()) {
                                 ITreasureEditor treasureEditor = metalMaxRe.getEditorManager().getEditor(ITreasureEditor.class);
-                                boxTreasures(graphics, treasureEditor.getTreasures().stream().filter(treasure -> treasure.intMap() == selectMap).toList(), null);
+                                boxTreasures(graphics, showTreasures.isIndeterminate(), treasureEditor.getTreasures().stream().filter(treasure -> treasure.intMap() == selectMap).toList(), null);
+                            }
+
+                            // 显示坦克，无法加载世界地图
+                            if (showTanks.isSelected()) {
+                                SingleMapEntry<BufferedImage, List<BufferedImage>> spriteTileSets = this.spriteTileSets.get((byte) 0x94);
+
+                                ITankEditor tankEditor = metalMaxRe.getEditorManager().getEditor(ITankEditor.class);
+                                boxTanks(graphics, 0x00, tankEditor.getTankInitAttributes(), spriteTileSets);
+                            }
+
+                            // 显示航线
+                            if (showLines.isSelected()) {
+                                // 出航路线
+                                int lineX = 0x6B * 0x10;
+                                int lineY = 0x47 * 0x10;
+                                IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
+                                for (MapPoint linePoint : worldMapEditor.getShippingLineBack().getKey()) {
+                                    int tmpLineX = lineX + (((int) linePoint.getX()) * 0x10);
+                                    int tmpLineY = lineY + (((int) linePoint.getY()) * 0x10);
+
+                                    int dir = 0;
+                                    // X或Y等于0，就是另一个的方向
+                                    if (linePoint.getX() == 0x00) {
+                                        // 上或下移动
+                                        if ((linePoint.getY() & 0B1000_0000) == 0x00) {
+                                            // 不是负数，下方移动
+                                            dir = 0x10;
+                                        } else {
+                                            // 是负数，上方移动
+                                            dir = -0x10;
+                                        }
+                                        // 得到正数的移动格数
+                                        for (int i = 0; i < Math.abs(linePoint.getY()); i++) {
+                                            graphics.fillRect(lineX, lineY += dir, 0x10 - 1, 0x10 - 1);
+                                        }
+                                    } else {
+                                        // 左或右移动
+                                        if ((linePoint.getX() & 0B1000_0000) == 0x00) {
+                                            // 不是负数，下方移动
+                                            dir = 0x10;
+                                        } else {
+                                            // 是负数，上方移动
+                                            dir = -0x10;
+                                        }
+                                        // 得到正数的移动格数
+                                        for (int i = 0; i < Math.abs(linePoint.getX()); i++) {
+                                            graphics.fillRect(lineX += dir, lineY, 0x10 - 1, 0x10 - 1);
+                                        }
+                                    }
+                                    lineX = tmpLineX;
+                                    lineY = tmpLineY;
+                                }
+
+                                // 归航路线
+                                lineX = 0x6B * 0x10;
+                                lineY = 0x47 * 0x10;
+
+
                             }
 
                             graphics.dispose();
@@ -901,12 +1219,14 @@ public class Main extends JFrame {
 
                             mapImage.setText(null);
                             mapImage.setIcon(icon);
+                            SwingUtilities.invokeLater(() -> mapImage.scrollRectToVisible(mapImageScrollPoint));
                         }
                     });
                     return;
                 }
                 mapImage.setText(null);
                 mapImage.setIcon(imageIcon);
+                SwingUtilities.invokeLater(() -> mapImage.scrollRectToVisible(mapImageScrollPoint));
                 return;
             }
 
@@ -949,6 +1269,16 @@ public class Main extends JFrame {
             mapHeadDyTile.setSelected(mapProperties.hasDyTile());
             if (mapProperties.hasEventTile()) {
                 eventTilesIndex.setValue(mapProperties.eventTilesIndex & 0xFFFF);
+
+                // 自定义
+                sharedEventTilesIndex.setSelectedIndex(0);
+                for (int i = 0; i < selectMap; i++) {
+                    if (mapPropertiesEditor.getMapProperties(i).eventTilesIndex == mapProperties.eventTilesIndex) {
+                        // 共享
+                        sharedEventTilesIndex.setSelectedIndex(i);
+                        break;
+                    }
+                }
             }
             if (mapProperties.hasDyTile()) {
                 dyDataA.setSelectedItem(String.format("%02X", mapProperties.dyTileSpeed));
@@ -1019,6 +1349,10 @@ public class Main extends JFrame {
                 }
                 mapImages.put(selectMap, null); // 占位，表示正在加载
                 imageLoaderService.submit(() -> {
+                    // 显示正在加载
+                    // 不显示图标
+                    mapImage.setText("正在加载...");
+                    mapImage.setIcon(null);
                     MapBuilder mapBuilder = mapEditor.getMap(selectMap);
 
                     int width = mapProperties.intWidth();
@@ -1042,7 +1376,7 @@ public class Main extends JFrame {
                     SingleMapEntry<BufferedImage, List<BufferedImage>> mapTileSets = this.mapTileSets.get(mapTileSetKey);
                     if (mapTileSets == null) {
                         BufferedImage key = BufferedImageUtils.fromColors(TileSetHelper.generateTileSet(metalMaxRe, mapProperties, null));
-                        List<BufferedImage> value = diced(key);
+                        List<BufferedImage> value = TileSetHelper.diced(key);
                         mapTileSets = SingleMapEntry.create(key, value);
                         this.mapTileSets.put(mapTileSetKey, mapTileSets);
                         mapTileSetImage.setIcon(new ImageIcon(key));
@@ -1062,15 +1396,33 @@ public class Main extends JFrame {
                     }
 
                     // 显示动态图块
-                    if (showEvents.isSelected() && mapProperties.hasEventTile()) {
+                    if (mapProperties.hasEventTile()) {
                         IEventTilesEditor eventTilesEditor = metalMaxRe.getEditorManager().getEditor(IEventTilesEditor.class);
-                        boxEventTile(graphics, eventTilesEditor.getEventTile(selectMap), mapTileSets);
+
+                        Color selected = Color.MAGENTA;
+                        // 小地图事件图块未选中时透明一些，否则看着很密集
+                        Color unselected = new Color(0x809932CD, true);
+                        for (Map.Entry<Integer, List<EventTile>> entry : eventTilesEditor.getEventTile(selectMap).entrySet()) {
+                            for (EventTile eventTile : entry.getValue()) {
+                                if (showEvents.isSelected()) {
+                                    BufferedImage eventTileImage = mapTileSets.getValue().get(eventTile.intTile());
+                                    graphics.drawImage(eventTileImage, eventTile.intX() * 0x10, eventTile.intY() * 0x10, null);
+
+                                    if (!showEvents.isIndeterminate()) {
+                                        // 选中为深紫色
+                                        // 未选中为紫色
+                                        graphics.setColor(showEvents.isSelected() ? selected : unselected);
+                                        graphics.drawRect(eventTile.intX() * 0x10, eventTile.intY() * 0x10, 0x10 - 1, 0x10 - 1);
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     // 显示宝藏
                     if (showTreasures.isSelected()) {
                         ITreasureEditor treasureEditor = metalMaxRe.getEditorManager().getEditor(ITreasureEditor.class);
-                        boxTreasures(graphics, treasureEditor.getTreasures().stream().filter(treasure -> treasure.intMap() == selectMap).toList(), mapTileSets);
+                        boxTreasures(graphics, showTreasures.isIndeterminate(), treasureEditor.getTreasures().stream().filter(treasure -> treasure.intMap() == selectMap).toList(), mapTileSets);
                     }
 
                     // 显示精灵
@@ -1080,13 +1432,22 @@ public class Main extends JFrame {
                         SingleMapEntry<BufferedImage, List<BufferedImage>> spriteTileSets = this.spriteTileSets.get(mapProperties.spriteIndex);
                         if (spriteTileSets == null) {
                             BufferedImage key = BufferedImageUtils.fromColors(TileSetHelper.generateSpriteTileSet(metalMaxRe, mapProperties.spriteIndex));
-                            List<BufferedImage> value = diced(key);
+                            List<BufferedImage> value = TileSetHelper.diced(key);
                             spriteTileSets = SingleMapEntry.create(key, value);
                             this.spriteTileSets.put(mapProperties.spriteIndex, spriteTileSets);
                             spriteTileSetImage.setIcon(new ImageIcon(key));
                         }
                         boxSprites(graphics, mapProperties, spriteEditor.getSprites().get(selectMap), spriteTileSets);
                     }
+
+                    // 显示坦克
+                    if (showTanks.isSelected()) {
+                        SingleMapEntry<BufferedImage, List<BufferedImage>> spriteTileSets = this.spriteTileSets.values().stream().findAny().get();
+
+                        ITankEditor tankEditor = metalMaxRe.getEditorManager().getEditor(ITankEditor.class);
+                        boxTanks(graphics, selectMap, tankEditor.getTankInitAttributes(), spriteTileSets);
+                    }
+
                     // 显示可移动区域
                     boxMovable(graphics, mapProperties);
                     // 显示入口
@@ -1137,6 +1498,7 @@ public class Main extends JFrame {
                         mapImage.setText(null);
                         // 如果还是选择了这个地图，更新图片
                         mapImage.setIcon(icon);
+                        SwingUtilities.invokeLater(() -> mapImage.scrollRectToVisible(mapImageScrollPoint));
                         // 设置填充图块到按钮
                         mapFillTile.setIcon(new ImageIcon(fillTile));
                         // 设置隐藏图块到按钮
@@ -1147,14 +1509,28 @@ public class Main extends JFrame {
             }
             mapImage.setText(null);
             mapImage.setIcon(imageIcon);
+            SwingUtilities.invokeLater(() -> mapImage.scrollRectToVisible(mapImageScrollPoint));
         });
 
+        gotoPoint.addActionListener(e -> {
+            // Ctrl + G
+            JViewport viewPort = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, mapImage);
+            if (viewPort != null) {
+                int deltaX = ((Number) mapImageSelectedPointX.getValue()).intValue() * 0x10;
+                int deltaY = ((Number) mapImageSelectedPointY.getValue()).intValue() * 0x10;
+
+                Rectangle view = viewPort.getViewRect();
+                view.x = deltaX;
+                view.y = deltaY;
+
+                mapImage.scrollRectToVisible(view);
+            }
+        });
         MiddleMoveMouseAdapter middleMoveMouseAdapter = new MiddleMoveMouseAdapter(mapImage);
         mapImage.addMouseListener(middleMoveMouseAdapter);
         mapImage.addMouseMotionListener(middleMoveMouseAdapter);
 
-        BoxSelectedAdapter mapSelectedTileBox = new BoxSelectedAdapter(mapImage);
-        mapSelectedTileBox.addListener(new BoxSelectedAdapter.SelectListener() {
+        selectListeners.add(new BoxSelectedAdapter.SelectListener() {
             @Override
             public void select(int x, int y) {
                 int width = mapImage.getIcon().getIconWidth() / 0x10;
@@ -1167,18 +1543,54 @@ public class Main extends JFrame {
 
                         width -= 0x06;
                         height -= 0x06;
+                    } else {
+                        // 世界地图，根据鼠标位置右边显示不同的tiles
+                        for (Map.Entry<Rectangle, Integer> entry : WorldMapEditorImpl.DEFAULT_PIECES.entrySet()) {
+                            if (entry.getKey().contains(x, y)) {
+                                X00.setValue(NumberR.at(entry.getValue(), 3) & 0xFF);
+                                X40.setValue(NumberR.at(entry.getValue(), 2) & 0xFF);
+                                X80.setValue(NumberR.at(entry.getValue(), 1) & 0xFF);
+                                XC0.setValue(NumberR.at(entry.getValue(), 0) & 0xFF);
+
+                                final long mapTileSetKey = ((long) entry.getValue() << 16) + 0x9AD0;
+                                SingleMapEntry<BufferedImage, List<BufferedImage>> worldTileSets = mapTileSets.get(mapTileSetKey);
+                                if (worldTileSets == null) {
+                                    BufferedImage worldTileSet = BufferedImageUtils.fromColors(TileSetHelper.generateWorldTileSet(multipleMetalMaxRe.current(), entry.getValue()));
+                                    List<BufferedImage> value = TileSetHelper.diced(worldTileSet);
+                                    mapTileSets.put(mapTileSetKey, SingleMapEntry.create(worldTileSet, value));
+                                    mapTileSetImage.setIcon(new ImageIcon(worldTileSet));
+                                } else {
+                                    mapTileSetImage.setIcon(new ImageIcon(worldTileSets.getKey()));
+                                }
+
+                                break;
+                            }
+                        }
                     }
                 }
-                if (x < 0 || x >= width || y < 0 || y >= height) {
-                    mapImageSelectedPoint.setText("-- --");
-                } else {
-                    mapImageSelectedPoint.setText(String.format("%02X %02X", x, y));
+//                if (x < 0 || x >= width || y < 0 || y >= height) {
+//                    mapImageSelectedPoint.setText("-- --");
+//                } else {
+//                    mapImageSelectedPoint.setText(String.format("%02X %02X", x, y));
+//                }
+                mapImageSelectedPointX.setValue(x);
+                mapImageSelectedPointY.setValue(y);
+            }
+        });
+        BoxSelectedAdapter mapSelectedTileBox = new BoxSelectedAdapter(mapImage);
+        mapSelectedTileBox.addListener(new BoxSelectedAdapter.SelectListener() {
+            @Override
+            public void selected(int x, int y) {
+                for (BoxSelectedAdapter.SelectListener selectListener : new ArrayList<>(selectListeners)) {
+                    selectListener.selected(x, y);
                 }
             }
 
             @Override
-            public void selected(int x, int y) {
-
+            public void select(int x, int y) {
+                for (BoxSelectedAdapter.SelectListener selectListener : new ArrayList<>(selectListeners)) {
+                    selectListener.select(x, y);
+                }
             }
         });
         mapImage.addMouseListener(mapSelectedTileBox);
@@ -1189,11 +1601,11 @@ public class Main extends JFrame {
 
             @Override
             public void dragEnter(DropTargetDragEvent dtde) {
-                if (mapSelectListModel.getSelectedMap() <= 0x00) {
-                    // 拒绝世界地图
-                    dtde.rejectDrag();
-                    return;
-                }
+//                if (mapSelectListModel.getSelectedMap() <= 0x00) {
+//                    // 拒绝世界地图
+//                    dtde.rejectDrag();
+//                    return;
+//                }
                 // 每次只接收一个
                 if (dtde.getCurrentDataFlavors().length == 1) {
                     DataFlavor currentDataFlavor = dtde.getCurrentDataFlavors()[0];
@@ -1234,10 +1646,35 @@ public class Main extends JFrame {
                     return;
                 }
                 MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
+                int selectMap = mapSelectListModel.getSelectedMap();
+
+                if (selectMap == 0x00) {
+                    // 导入世界地图
+                    int option = JOptionPane.showConfirmDialog(null, "请确认这是世界地图！\n导入世界地图会覆盖现有的世界地图数据！", "导入确认", JOptionPane.YES_NO_OPTION);
+                    if (option == JOptionPane.YES_OPTION) {
+                        // 已确认
+                        try {
+                            TMXMapReader tmxMapReader = new TMXMapReader();
+                            TiledMapUtils.importWorldMap(multipleMetalMaxRe.current(), tmxMapReader.readMap(targetFile.getAbsolutePath()));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            ByteArrayOutputStream out = new ByteArrayOutputStream();
+                            PrintWriter printWriter = new PrintWriter(out);
+                            ex.printStackTrace(printWriter);
+                            JOptionPane.showMessageDialog(null, String.format("导入世界地图失败。\n%s", out));
+                        }
+                        System.out.printf("导入世界地图：%s.\n", targetFile);
+                        worldMapImage = null;
+                        mapImages.remove(0x00);
+                        mapList.removeSelectionInterval(0, 0);
+                        mapList.setSelectedIndex(0);
+                    }
+                    return;
+                }
+
                 try {
                     TMXMapReader tmxMapReader = new TMXMapReader();
                     org.mapeditor.core.Map map = tmxMapReader.readMap(targetFile.toString());
-                    int selectMap = mapSelectListModel.getSelectedMap();
                     TiledMapUtils.importMap(metalMaxRe, selectMap, map);
 
                     if (mapImages.containsKey(selectMap) && mapImages.get(selectMap) != null) {
@@ -1248,6 +1685,10 @@ public class Main extends JFrame {
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    PrintWriter printWriter = new PrintWriter(out);
+                    ex.printStackTrace(printWriter);
+                    JOptionPane.showMessageDialog(null, String.format("导入地图%02X失败。\n%s", selectMap, out));
                 }
             }
         }));
@@ -1276,10 +1717,12 @@ public class Main extends JFrame {
         showComputers.addItemListener(showItemListener);
         showEvents.addItemListener(showItemListener);
         showTreasures.addItemListener(showItemListener);
-
+        showTanks.addItemListener(showItemListener);
+        showLines.addItemListener(showItemListener);
 
         // 对JSpinner添加十六进制编辑器和鼠标滚轮切换数值
         for (JSpinner spinner : new JSpinner[]{
+                mapImageSelectedPointX, mapImageSelectedPointY,
                 mapHideTileValue, mapFillTileValue,
                 mapWidth, mapHeight, mapMovableWidthOffset, mapMovableHeightOffset, mapMovableWidth, mapMovableHeight,
                 borderLocation00, borderLocation01, borderLocation02,
@@ -1299,7 +1742,7 @@ public class Main extends JFrame {
                 eventTilesIndex,
                 palette, mapDataIndex, mapPropertiesIndex
         }) {
-            spinner.setEditor(new HexJSpinnerEditor(spinner, true));
+            spinner.setEditor(new HexJSpinnerEditor(spinner, TwoHexFormatter.getInstance()));
             spinner.addMouseWheelListener(ValueMouseWheelListener.getInstance());
         }
 
@@ -1333,8 +1776,28 @@ public class Main extends JFrame {
         mapHeadEventTile.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 eventTilesIndex.setEnabled(true);
+                sharedEventTilesIndex.setEnabled(true);
             } else if (e.getStateChange() == ItemEvent.DESELECTED) {
                 eventTilesIndex.setEnabled(false);
+                sharedEventTilesIndex.setEnabled(false);
+            }
+        });
+
+        // 共享事件
+        sharedEventTilesIndex.addItemListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+            MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
+            IMapPropertiesEditor mapPropertiesEditor = metalMaxRe.getEditorManager().getEditor(IMapPropertiesEditor.class);
+
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                if (sharedEventTilesIndex.getSelectedIndex() == 0x00) {
+                    // 读取读取
+                    eventTilesIndex.setValue(mapPropertiesEditor.getMapProperties(mapSelectListModel.getSelectedMap()).eventTilesIndex & 0xFFFF);
+                } else {
+                    eventTilesIndex.setValue(mapPropertiesEditor.getMapProperties(sharedEventTilesIndex.getSelectedIndex()).eventTilesIndex & 0xFFFF);
+                }
             }
         });
         mapHeadDyTile.addItemListener(e -> {
@@ -1616,6 +2079,16 @@ public class Main extends JFrame {
                     mapList.setSelectedIndex(selectMap);
                 }
 
+
+                IMapEditor mapEditor = metalMaxRe.getEditorManager().getEditor(IMapEditor.class);
+                String[] maps = new String[mapEditor.getMapMaxCount()];
+                maps[0] = "自定义";
+                for (int i = 1; i < maps.length; i++) {
+                    maps[i] = String.format("%02X", i);
+                }
+
+                sharedEventTilesIndex.setModel(new DefaultComboBoxModel<>(maps));
+
                 // 加载完毕，关闭窗口
                 SwingUtilities.invokeLater(() -> {
                     dialog.dispose();
@@ -1682,18 +2155,20 @@ public class Main extends JFrame {
         }
     }
 
-    private static List<BufferedImage> diced(BufferedImage bufferedImage) {
-        List<BufferedImage> value = new ArrayList<>();
-        int w = bufferedImage.getWidth() / 0x10;
-        int h = bufferedImage.getHeight() / 0x10;
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                value.add(bufferedImage.getSubimage(x * 0x10, y * 0x10, 0x10, 0x10));
-            }
-        }
-        return value;
+    public int getSelectedMap() {
+        return mapSelectListModel.getSelectedMap();
     }
 
+    public List<BoxSelectedAdapter.SelectListener> getSelectListeners() {
+        return selectListeners;
+    }
+
+    public void gotoPoint(int map, int x, int y) {
+        mapList.setSelectedIndex(map);
+        mapImageSelectedPointX.setValue(x);
+        mapImageSelectedPointY.setValue(y);
+        gotoPoint.doClick();
+    }
 
     private static void boxMovable(Graphics graphics, MapProperties mapProperties) {
         // 使用空心矩形显示可移动区域
@@ -1741,27 +2216,71 @@ public class Main extends JFrame {
         }
     }
 
-    private static void boxEventTile(Graphics graphics, Map<Integer, List<EventTile>> eventTiles, SingleMapEntry<BufferedImage, List<BufferedImage>> mapTileSets) {
-        // 显示动态图块
-        for (Map.Entry<Integer, List<EventTile>> entry : eventTiles.entrySet()) {
-            for (EventTile eventTile : entry.getValue()) {
-                BufferedImage eventTileImage = mapTileSets.getValue().get(eventTile.intTile());
-                graphics.drawImage(eventTileImage, eventTile.intX() * 0x10, eventTile.intY() * 0x10, null);
+    private static void boxTreasures(Graphics graphics, boolean showBox, List<Treasure> treasures, SingleMapEntry<BufferedImage, List<BufferedImage>> mapTileSets) {
+        // 显示宝藏
+        for (Treasure treasure : treasures) {
+            if (mapTileSets != null || treasure.intMap() != 0x00) {
+                // 世界地图不显示宝藏
+                BufferedImage treasureImage = mapTileSets.getValue().get(0x01);
+                graphics.drawImage(treasureImage, treasure.intX() * 0x10, treasure.intY() * 0x10, null);
+            }
+            if (showBox || mapTileSets == null || treasure.intMap() == 0x00) {
+                // 画一个黄框
+                graphics.setColor(Color.YELLOW);
+                graphics.drawRect(treasure.intX() * 0x10, treasure.intY() * 0x10, 16 - 1, 16 - 1);
             }
         }
     }
 
-    private static void boxTreasures(Graphics graphics, List<Treasure> treasures, SingleMapEntry<BufferedImage, List<BufferedImage>> mapTileSets) {
-        // 显示宝藏
-        for (Treasure treasure : treasures) {
-            if (mapTileSets == null || treasure.intMap() == 0x00) {
-                // 世界地图画一个黄框
-                graphics.setColor(Color.YELLOW);
-                graphics.drawRect(treasure.intX() * 0x10, treasure.intY() * 0x10, 16 - 1, 16 - 1);
-            } else {
-                BufferedImage treasureImage = mapTileSets.getValue().get(0x01);
-                graphics.drawImage(treasureImage, treasure.intX() * 0x10, treasure.intY() * 0x10, null);
+    private static void boxTanks(Graphics graphics, int mapId, EnumMap<Tank, TankInitialAttribute> tanks, SingleMapEntry<BufferedImage, List<BufferedImage>> spriteTileSets) {
+        // 显示坦克
+        for (Map.Entry<Tank, TankInitialAttribute> entry : tanks.entrySet()) {
+            TankInitialAttribute tankInitialAttribute = entry.getValue();
+            if (tankInitialAttribute.intMap() != mapId || entry.getKey().getId() >= Tank.TAX_1.getId()) {
+                // 不在这个地图或出租坦克不显示
+                continue;
             }
+
+            BufferedImage treasureImage = spriteTileSets.getValue().get((entry.getKey().getId() + 1) * 0x04);
+            graphics.drawImage(treasureImage, tankInitialAttribute.intX() * 0x10, tankInitialAttribute.intY() * 0x10, null);
+        }
+    }
+
+    private void itemStateChanged(ItemEvent e) {
+        if (!multipleMetalMaxRe.hasInstance()) {
+            return;
+        }
+
+        MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
+
+        IMapEditor mapEditor = metalMaxRe.getEditorManager().getEditor(IMapEditor.class);
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            // 使用特殊地图编辑器
+            if (mapEditor instanceof me.afoolslove.metalmaxre.desktop.editors.map.MapEditorImpl) {
+                return;
+            } else {
+                metalMaxRe.getEditorManager().unregister(IMapEditor.class);
+                metalMaxRe.getEditorManager().register(IMapEditor.class, me.afoolslove.metalmaxre.desktop.editors.map.MapEditorImpl::new);
+            }
+        } else if (e.getStateChange() == ItemEvent.DESELECTED) {
+            // 使用默认地图编辑器
+            if (mapEditor instanceof MapEditorImpl) {
+                return;
+            } else {
+                metalMaxRe.getEditorManager().unregister(IMapEditor.class);
+                metalMaxRe.getEditorManager().register(IMapEditor.class, MapEditorImpl::new);
+            }
+        }
+        try {
+            ((Future<?>) metalMaxRe.getEditorManager().loadEditor(IMapEditor.class)).get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new RuntimeException(ex);
+        }
+        mapImages.entrySet().removeIf(entry -> entry.getKey() >= 0xC3);
+        int selectMap = mapSelectListModel.getSelectedMap();
+        if (selectMap >= 0xC3) {
+            mapList.removeSelectionInterval(selectMap, selectMap);
+            mapList.setSelectedIndex(selectMap);
         }
     }
 }

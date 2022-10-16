@@ -72,6 +72,15 @@ public class MultipleMetalMaxRe {
     }
 
     /**
+     * 移除一个实例
+     *
+     * @param metalMaxRe 被移除的实例
+     */
+    public void remove(@Nullable MetalMaxRe metalMaxRe) {
+        metalMaxRes.remove(metalMaxRe);
+    }
+
+    /**
      * @return 是否存在一个或多个实例
      */
     public boolean hasInstance() {

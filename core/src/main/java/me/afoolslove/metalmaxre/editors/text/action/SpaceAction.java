@@ -49,6 +49,11 @@ public class SpaceAction implements IBaseText {
     }
 
     @Override
+    public int length() {
+        return 2;
+    }
+
+    @Override
     public String toString() {
         return String.format("Space %02X", getSpace());
     }

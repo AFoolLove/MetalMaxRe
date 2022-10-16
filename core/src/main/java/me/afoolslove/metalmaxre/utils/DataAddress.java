@@ -217,6 +217,10 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
         return new DataAddress(Type.PRG, start, null);
     }
 
+    public static DataAddress fromPRGLength(int start, int length) {
+        return new DataAddress(Type.PRG, start, start + length);
+    }
+
     public static DataAddress fromPRG(int start, int end) {
         if (end < start) {
             return new DataAddress(Type.PRG, end, start);
@@ -233,6 +237,11 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
 
     public static DataAddress fromCHR(int start) {
         return new DataAddress(Type.CHR, start, null);
+    }
+
+
+    public static DataAddress fromCHRLength(int start, int length) {
+        return new DataAddress(Type.CHR, start, start + length);
     }
 
     public static DataAddress from(int start, int end) {

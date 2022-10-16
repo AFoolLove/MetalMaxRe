@@ -88,4 +88,16 @@ public enum Tank {
         // 暂时直接显示枚举名称
         return this.name();
     }
+
+    /**
+     * 通过id获取枚举
+     */
+    public static Tank fromId(int tankId) {
+        for (Tank value : values()) {
+            if (value.getId() == tankId) {
+                return value;
+            }
+        }
+        return null;
+    }
 }

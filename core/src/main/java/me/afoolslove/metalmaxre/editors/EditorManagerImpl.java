@@ -19,6 +19,7 @@ import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
 import me.afoolslove.metalmaxre.editors.monster.IMonsterEditor;
 import me.afoolslove.metalmaxre.editors.monster.MonsterEditorImpl;
+import me.afoolslove.metalmaxre.editors.monster.MonsterModelImpl;
 import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
 import me.afoolslove.metalmaxre.editors.palette.PaletteEditorImpl;
 import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
@@ -98,6 +99,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(ITileSetEditor.class, TileSetEditorImpl::new);
         register(ITextEditor.class, TextEditorImpl.class);
         register(IMonsterEditor.class, MonsterEditorImpl::new);
+        register(MonsterModelImpl.class, MonsterModelImpl::new);
     }
 
 

@@ -83,6 +83,11 @@ public class SelectAction implements IBaseText {
     }
 
     @Override
+    public int length() {
+        return 3;
+    }
+
+    @Override
     public String toString() {
         return String.format("yes=%02X,no=%02X", getYes(), getNo());
     }

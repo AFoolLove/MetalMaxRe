@@ -56,6 +56,11 @@ public class WaitTimeAction implements IBaseText {
     }
 
     @Override
+    public int length() {
+        return 2;
+    }
+
+    @Override
     public String toString() {
         return String.format("WaitTIme %02X", getTime());
     }

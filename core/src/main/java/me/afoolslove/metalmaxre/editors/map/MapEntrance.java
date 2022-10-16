@@ -60,6 +60,22 @@ public class MapEntrance {
         this.border = border;
     }
 
+    /**
+     * 复制一个与当前数据一样的对象
+     */
+    public MapEntrance copy() {
+        MapBorder mapBorder = new MapBorder(getBorder().getType());
+        for (MapPoint mapPoint : getBorder()) {
+            mapBorder.add(new MapPoint(mapPoint));
+        }
+
+        MapEntrance mapEntrance = new MapEntrance(mapBorder);
+        for (Map.Entry<MapPoint, MapPoint> pointEntry : mapEntrance.getEntrances().entrySet()) {
+            mapEntrance.getEntrances().put(new MapPoint(pointEntry.getKey()), new MapPoint(pointEntry.getValue()));
+        }
+        return mapEntrance;
+    }
+
     public byte[] toByteArray() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         // 写入边界数据

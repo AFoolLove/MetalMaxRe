@@ -44,7 +44,8 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
     public PaletteEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x1DAE0 - 0x10, 0x1DCCE - 0x10),
-                DataAddress.fromPRG(0x7D737 - 0x10, 0x7D746 - 0x10),
+//                DataAddress.fromPRG(0x7D737 - 0x10, 0x7D746 - 0x10),
+                DataAddress.fromPRG(metalMaxRe.getBuffer().getHeader().getLastPrgRomLength() + 0x01737 - 0x10),
                 DataAddress.fromPRG(0x22B66 - 0x10, 0x22B71 - 0x10));
     }
 

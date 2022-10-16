@@ -47,6 +47,11 @@ public class TextSpeedAction implements IBaseText {
     }
 
     @Override
+    public int length() {
+        return 2;
+    }
+
+    @Override
     public String toString() {
         return String.format("TextSpeed %02X", getSpeed());
     }

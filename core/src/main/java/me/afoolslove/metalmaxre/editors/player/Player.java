@@ -35,4 +35,16 @@ public enum Player {
         // 暂时使用枚举名称
         return this.name();
     }
+
+    /**
+     * 通过id获取枚举
+     */
+    public static Player formId(int id) {
+        for (Player value : values()) {
+            if (value.getId() == id) {
+                return value;
+            }
+        }
+        return null;
+    }
 }

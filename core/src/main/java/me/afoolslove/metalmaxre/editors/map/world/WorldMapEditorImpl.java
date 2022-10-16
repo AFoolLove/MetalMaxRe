@@ -8,8 +8,8 @@ import me.afoolslove.metalmaxre.editors.map.MapPoint;
 import me.afoolslove.metalmaxre.editors.map.events.EventTile;
 import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
 import me.afoolslove.metalmaxre.editors.map.events.WorldEventTile;
-import me.afoolslove.metalmaxre.editors.map.events.WorldMapInteractiveEvent;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -24,9 +24,7 @@ import java.util.*;
 public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implements IWorldMapEditor {
     private final DataAddress worldMapTilesIndexAddress;
     private final DataAddress worldMapX00410Address;
-    private final DataAddress worldMapIndexAAddress;
-    private final DataAddress worldMapIndexBAddress;
-    private final DataAddress worldMapIndexCAddress;
+    private final List<DataAddress> worldMapIndexesAddress;
     private final DataAddress worldMapIndexAddress;
     private final DataAddress worldMapMinesAddress;
     private final DataAddress worldMapOutLineAddress;
@@ -36,16 +34,16 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
      * 图块集组合矩形化
      */
     public static final Map<Rectangle, Integer> DEFAULT_PIECES = Map.ofEntries(
-            Map.entry(new Rectangle(0x88, 0x08, 0x78, 0x60), 0x84858889),
+            Map.entry(new Rectangle(0x88, 0x07, 0x78, 0x61), 0x84858889),
             Map.entry(new Rectangle(0x88, 0x68, 0x78, 0x98), 0x84858687),
-            Map.entry(new Rectangle(0x08, 0x08, 0x80, 0x90), 0x848C8D8E),
+            Map.entry(new Rectangle(0x08, 0x07, 0x80, 0x91), 0x848C8D8E),
             Map.entry(new Rectangle(0x08, 0x98, 0x60, 0x68), 0x84858A8B),
             Map.entry(new Rectangle(0x68, 0x98, 0x20, 0x68), 0x84858687),
-            Map.entry(new Rectangle(0x88, 0x00, 0x78, 0x08), 0x84858687),
-            Map.entry(new Rectangle(0x08, 0x00, 0x60, 0x08), 0x84858A8B),
-            Map.entry(new Rectangle(0x68, 0x00, 0x20, 0x08), 0x84858687),
-            Map.entry(new Rectangle(0x00, 0x00, 0x08, 0x08), 0x84858687),
-            Map.entry(new Rectangle(0x00, 0x08, 0x08, 0x60), 0x84858889),
+            Map.entry(new Rectangle(0x88, 0x00, 0x78, 0x07), 0x84858687),
+            Map.entry(new Rectangle(0x08, 0x00, 0x60, 0x07), 0x84858A8B),
+            Map.entry(new Rectangle(0x68, 0x00, 0x20, 0x07), 0x84858687),
+            Map.entry(new Rectangle(0x00, 0x00, 0x08, 0x07), 0x84858687),
+            Map.entry(new Rectangle(0x00, 0x07, 0x08, 0x61), 0x84858889),
             Map.entry(new Rectangle(0x00, 0x68, 0x08, 0x98), 0x84858687)
     );
 
@@ -57,12 +55,13 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
      * index与x00410的比例是 8byte：1bit
      */
     public byte[] x00410 = new byte[0x200]; // WORLD_MAP_X00410_END - WORLD_MAP_X00410_START + 1
-    /**
-     * 注：虽然写着0x03*0x100*0x10，但实际上只有 2.5*0x100*0x10
-     */
-    public byte[][] indexA = new byte[0x250][0x10]; // WORLD_MAP_INDEX_A_END - WORLD_MAP_INDEX_A_START + 1
-    public byte[][] indexB = new byte[0x400][0x10]; // WORLD_MAP_INDEX_B_END - WORLD_MAP_INDEX_B_START + 1
-    public byte[][] indexC = new byte[0x400][0x10]; // WORLD_MAP_INDEX_C_END - WORLD_MAP_INDEX_C_START + 1
+
+    public byte[][][] indexes = {
+            new byte[0x200][0x10], // WORLD_MAP_INDEX_A_END - WORLD_MAP_INDEX_A_START + 1
+            new byte[0x200][0x10], // WORLD_MAP_INDEX_B_END - WORLD_MAP_INDEX_B_START + 1
+            new byte[0x200][0x10], // WORLD_MAP_INDEX_C_END - WORLD_MAP_INDEX_C_START + 1
+            new byte[0x200][0x10]  // WORLD_MAP_INDEX_D_END - WORLD_MAP_INDEX_D_START + 1
+    };
     public byte[] index = new byte[0x1000]; // WORLD_MAP_INDEX_END - WORLD_MAP_INDEX_START + 1
 
     /**
@@ -92,9 +91,6 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         this(metalMaxRe,
                 DataAddress.fromPRG(0x00010 - 0x10, 0x0040F - 0x10),
                 DataAddress.fromPRG(0x00410 - 0x10, 0x0060F - 0x10),
-                DataAddress.fromPRG(0x0C010 - 0x10, 0x00E50F - 0x10),
-                DataAddress.fromPRG(0x2A010 - 0x10, 0x2E00F - 0x10),
-                DataAddress.fromPRG(0x50510 - 0x10),
                 DataAddress.fromCHR(0x3A010 - 0x10, 0x3B00F - 0x10),
                 DataAddress.fromPRG(0x35EC1 - 0x10),
                 DataAddress.fromPRG(0x258C6 - 0x10),
@@ -104,9 +100,24 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     public WorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                               DataAddress worldMapTilesIndexAddress,
                               DataAddress worldMapX00410Address,
-                              DataAddress worldMapIndexAAddress,
-                              DataAddress worldMapIndexBAddress,
-                              DataAddress worldMapIndexCAddress,
+                              DataAddress worldMapIndexAddress,
+                              DataAddress worldMapMinesAddress,
+                              DataAddress worldMapOutLineAddress,
+                              DataAddress worldMapBackLineAddress,
+                              List<DataAddress> worldMapIndexesAddress) {
+        super(metalMaxRe);
+        this.worldMapTilesIndexAddress = worldMapTilesIndexAddress;
+        this.worldMapX00410Address = worldMapX00410Address;
+        this.worldMapIndexAddress = worldMapIndexAddress;
+        this.worldMapMinesAddress = worldMapMinesAddress;
+        this.worldMapOutLineAddress = worldMapOutLineAddress;
+        this.worldMapBackLineAddress = worldMapBackLineAddress;
+        this.worldMapIndexesAddress = worldMapIndexesAddress;
+    }
+
+    public WorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                              DataAddress worldMapTilesIndexAddress,
+                              DataAddress worldMapX00410Address,
                               DataAddress worldMapIndexAddress,
                               DataAddress worldMapMinesAddress,
                               DataAddress worldMapOutLineAddress,
@@ -114,13 +125,18 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         super(metalMaxRe);
         this.worldMapTilesIndexAddress = worldMapTilesIndexAddress;
         this.worldMapX00410Address = worldMapX00410Address;
-        this.worldMapIndexAAddress = worldMapIndexAAddress;
-        this.worldMapIndexBAddress = worldMapIndexBAddress;
-        this.worldMapIndexCAddress = worldMapIndexCAddress;
         this.worldMapIndexAddress = worldMapIndexAddress;
         this.worldMapMinesAddress = worldMapMinesAddress;
         this.worldMapOutLineAddress = worldMapOutLineAddress;
         this.worldMapBackLineAddress = worldMapBackLineAddress;
+
+        this.worldMapIndexesAddress = new ArrayList<>();
+        int position = (metalMaxRe.getBuffer().getHeader().getLastPrgRom() * 0x4000) + 0x01E94;
+
+        worldMapIndexesAddress.add(DataAddress.fromPRG(metalMaxRe.getBuffer().getToInt(position++) * 0x2000));
+        worldMapIndexesAddress.add(DataAddress.fromPRG(metalMaxRe.getBuffer().getToInt(position++) * 0x2000));
+        worldMapIndexesAddress.add(DataAddress.fromPRG(metalMaxRe.getBuffer().getToInt(position++) * 0x2000));
+        worldMapIndexesAddress.add(DataAddress.fromPRG(metalMaxRe.getBuffer().getToInt(position) * 0x2000));
     }
 
     @Editor.Load
@@ -131,55 +147,30 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
         Arrays.fill(indexOffsets, (byte) 0x00);
         Arrays.fill(x00410, (byte) 0x00);
-        for (int i = 0; i < indexA.length; i++) {
-            if (indexA[i] == null) {
-                indexA[i] = new byte[0x10];
-            } else {
-                Arrays.fill(indexA[i], (byte) 0x00);
-            }
-        }
-        for (int i = 0; i < indexB.length; i++) {
-            if (indexB[i] == null) {
-                indexB[i] = new byte[0x10];
-            } else {
-                Arrays.fill(indexB[i], (byte) 0x00);
-            }
-        }
-        for (int i = 0; i < indexC.length; i++) {
-            if (indexC[i] == null) {
-                indexC[i] = new byte[0x10];
-            } else {
-                Arrays.fill(indexC[i], (byte) 0x00);
+        for (byte[][] bytes : indexes) {
+            for (byte[] bs : bytes) {
+                Arrays.fill(bs, (byte) 0x00);
             }
         }
         Arrays.fill(index, (byte) 0x00);
         mines.clear();
 
         // 读取世界地图图块索引偏移
-        position(getWorldMapTilesIndexAddress());
-        getBuffer().get(indexOffsets);
+        getBuffer().get(getWorldMapTilesIndexAddress(), indexOffsets);
         // 读取图块组索引
-        position(getWorldMapX00410Address());
-        getBuffer().get(x00410);
-        // 读取图块组A
-        position(getWorldMapIndexAAddress());
-        for (byte[] index : indexA) {
-            getBuffer().get(index);
-        }
-        // 读取图块组B
-        position(getWorldMapIndexBAddress());
-        for (byte[] index : indexB) {
-            getBuffer().get(index);
-        }
-        // 读取图块组C
-        position(getWorldMapIndexCAddress());
-        for (byte[] index : indexC) {
-            getBuffer().get(index);
+        getBuffer().get(getWorldMapX00410Address(), x00410);
+        // 读取图块组
+        for (int i = 0; i < getWorldMapIndexesAddress().size(); i++) {
+            position(getWorldMapIndexesAddress().get(i));
+            for (byte[] bytes : indexes[i]) {
+                getBuffer().get(bytes);
+            }
         }
         // 读取图块索引
         position(getWorldMapIndexAddress());
         getBuffer().get(index);
 
+        byte[][][] indexes = getIndexes();
         for (int i = 0; i < 0x1000; i++) {
             // 得到索引偏移，索引与indexOffsets的比例是4:1
             // 1 index = 2 bit indexOffsets
@@ -214,23 +205,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             // 得到数据偏移
             int offset = index[i] & 0xFF;
             // 判断使用图块组A还是图块组B
-            byte[][] tempIndex = x410 == 0 ? indexB : indexA;
-            offset += indexOffset * 0x100;
 
-            byte[] tiles;
-            if (offset >= tempIndex.length) {
-                // 超出安全可编辑的数据
-                if (tempIndex == indexA) {
-                    tiles = indexC[offset - tempIndex.length];
-                } else {
-                    position(getWorldMapIndexBAddress(), offset * 0x10);
-                    tiles = new byte[0x10];
-                    getBuffer().get(tiles);
-                    System.err.println("世界地图编辑器：警告！使用了安全编辑范围外的地图数据 " + Arrays.toString(tiles));
-                }
-            } else {
-                tiles = tempIndex[offset];
-            }
+            byte[][] tempIndex = indexes[x410 << 1 | indexOffset >> 1];
+            // indexOffset的D0判断是否需要*0x100，相当于offset的高位
+            offset += (indexOffset & 1) * 0x100;
+
+            byte[] tiles = tempIndex[offset];
 
             int x = i % 0x40;
             int y = i / 0x40;
@@ -317,239 +297,147 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
 
     @Editor.Apply
     public void onApply(@Editor.QuoteOnly IEventTilesEditor eventTilesEditor) {
-        // 读取世界地图，使用set记录需要保留数据
-        // 通过set设置未使用的数据为null
+        // 每个的容量
+        int[] indexesCapacity = getIndexesCapacity();
 
-        // 对indexA、indexB去重，并将重复的数据设置为null，与x200重复时保留x200的数据
+        // key  : hashCode
+        // value: 4*4tiles
+        Map<Integer, Map<Integer, byte[]>> newIndexes = Map.ofEntries(
+                Map.entry(0, new LinkedHashMap<>(indexesCapacity[0])),
+                Map.entry(1, new LinkedHashMap<>(indexesCapacity[1])),
+                Map.entry(2, new LinkedHashMap<>(indexesCapacity[2])),
+                Map.entry(3, new LinkedHashMap<>(indexesCapacity[3]))
+        );
 
-        // 将世界地图的事件和罗克东边涨潮退潮4个数据添加进 x200
-        // 储存x200，如果储存不下，移动非必须的x200数据到x200以外的地方，再次存入
-
-        // 如果还是存不下，那没救了，等死吧
-
-        // 必须存入x200的4*4tiles
-        Map<String, byte[]> x200 = new HashMap<>();
-        // 获取罗克东边涨潮退潮的4个4*4tile
-        WorldMapInteractiveEvent worldMapInteractiveEvent = eventTilesEditor.getWorldMapInteractiveEvent();
-        if (worldMapInteractiveEvent != null) {
-            x200.put(Arrays.toString(worldMapInteractiveEvent.aFalse), worldMapInteractiveEvent.aFalse);
-            x200.put(Arrays.toString(worldMapInteractiveEvent.aTrue), worldMapInteractiveEvent.aTrue);
-            x200.put(Arrays.toString(worldMapInteractiveEvent.bFalse), worldMapInteractiveEvent.bFalse);
-            x200.put(Arrays.toString(worldMapInteractiveEvent.bTrue), worldMapInteractiveEvent.bTrue);
-        }
-        x200.remove("null");
-
-        // 格式化地图数据
+        // 格式化地图数据为4*4tile
         byte[][][] mapTiles = new byte[0x40][0x40][0x10];
         for (int y = 0; y < 0x40; y++) {
             for (int x = 0; x < 0x40; x++) {
                 mapTiles[y][x] = IWorldMapEditor.getTiles4x4(map, x, y);
             }
         }
-        // 新的4*4tile
-        List<byte[]> newTiles = new ArrayList<>();
-        // 可以保留的4*4tile
-        Set<Integer> keepTilesA = new HashSet<>();
-        Set<Integer> keepTilesB = new HashSet<>();
+
+        // 储存 罗克东边涨潮退潮的4个4*4tile
+//        WorldMapInteractiveEvent worldMapInteractiveEvent = eventTilesEditor.getWorldMapInteractiveEvent();
+//        if (worldMapInteractiveEvent != null) {
+//            // 与相同的地图4*4tile一起存入
+//            if (worldMapInteractiveEvent.aPoint != null) {
+//                newIndexes.get(0).put(Arrays.hashCode(worldMapInteractiveEvent.aFalse), worldMapInteractiveEvent.aFalse);
+//                byte[] tiles = mapTiles[worldMapInteractiveEvent.aPoint.intY()][worldMapInteractiveEvent.aPoint.intX()];
+//                newIndexes.get(0).put(Arrays.hashCode(tiles), tiles);
+//
+//                newIndexes.get(0).put(Arrays.hashCode(worldMapInteractiveEvent.aTrue), worldMapInteractiveEvent.aTrue);
+//                tiles = mapTiles[worldMapInteractiveEvent.aPoint.intY()][worldMapInteractiveEvent.aPoint.intX()];
+//                newIndexes.get(0).put(Arrays.hashCode(tiles), tiles);
+//            }
+//            if (worldMapInteractiveEvent.bPoint != null) {
+//                newIndexes.get(0).put(Arrays.hashCode(worldMapInteractiveEvent.bFalse), worldMapInteractiveEvent.bFalse);
+//                byte[] tiles = mapTiles[worldMapInteractiveEvent.bPoint.intY()][worldMapInteractiveEvent.bPoint.intX()];
+//                newIndexes.get(0).put(Arrays.hashCode(tiles), tiles);
+//
+//                newIndexes.get(0).put(Arrays.hashCode(worldMapInteractiveEvent.bTrue), worldMapInteractiveEvent.bTrue);
+//                tiles = mapTiles[worldMapInteractiveEvent.bPoint.intY()][worldMapInteractiveEvent.bPoint.intX()];
+//                newIndexes.get(0).put(Arrays.hashCode(tiles), tiles);
+//            }
+//
+//        }
+
+
+        // 所有事件图块索引
+        Collection<List<EventTile>> worldEventTiles = eventTilesEditor.getWorldEventTile().values();
+
+        // 储存 事件4*4tiles
+        for (List<EventTile> eventTileList : worldEventTiles) {
+            for (EventTile eventTile : eventTileList) {
+                if (eventTile instanceof WorldEventTile worldEventTile) {
+                    // 添加事件所在的原4*4tiles
+                    byte[] tiles = mapTiles[worldEventTile.intY()][worldEventTile.intX()];
+                    newIndexes.get(0).put(Arrays.hashCode(tiles), tiles);
+                    // 添加事件的4*4tiles
+                    newIndexes.get(0).put(Arrays.hashCode(worldEventTile.getTiles()), worldEventTile.getTiles());
+                }
+            }
+        }
+        // 移除null
+        for (Map<Integer, byte[]> value : newIndexes.values()) {
+            value.entrySet().removeIf(filter -> filter.getValue() == null);
+        }
+
+
+        // 遍历世界地图 4*4tile并储存
         for (int y = 0; y < 0x40; y++) {
-            keepTilesX:
             for (int x = 0; x < 0x40; x++) {
+                // 当前位置的 4*4tile
                 byte[] tiles = mapTiles[y][x];
-                for (int i = 0; i < indexA.length; i++) {
-                    if (Arrays.equals(indexA[i], tiles)) {
-                        keepTilesA.add(i);
-                        // 读取下一个
-                        continue keepTilesX;
-                    }
-                }
-                // 没有在indexA中找到，从indexB找
-                for (int i = 0; i < indexB.length; i++) {
-                    if (Arrays.equals(indexB[i], tiles)) {
-                        keepTilesB.add(i);
-                        continue keepTilesX;
+                final int hashCode = Arrays.hashCode(tiles);
+
+                // 判断是否已经存入
+                boolean hasSave = false;
+                for (Map<Integer, byte[]> newIndex : newIndexes.values()) {
+                    if (newIndex.containsKey(hashCode)) {
+                        hasSave = true;
+                        break;
                     }
                 }
 
-                // 都没有找到，添加到newTiles中
-                // 添加之前判断是否已经添加过了
-                for (byte[] newTile : newTiles) {
-                    if (Arrays.equals(tiles, newTile)) {
-                        // 已经添加过了
-                        continue keepTilesX;
+                if (!hasSave) {
+                    // 还未存入的tiles，进行存入
+                    for (Map.Entry<Integer, Map<Integer, byte[]>> entry : newIndexes.entrySet()) {
+                        if (entry.getValue().size() >= indexesCapacity[entry.getKey()]) {
+                            // 没有空间存入了，下一个
+                            continue;
+                        }
+                        // 存入
+                        entry.getValue().put(hashCode, tiles);
+                        hasSave = true;
+                        break;
                     }
                 }
-                // 添加到newTiles
-                newTiles.add(tiles);
+
+                if (!hasSave) {
+                    // 什么？还是没存进去？等死吧！
+                    System.err.printf("世界地图编辑器：无法储存的世界地图4*4tile数据，可能会导致地图(%02X,%02X)异常：%S\n", x * 0x04, y * 0x04, NumberR.toHexString(tiles));
+                }
             }
         }
 
-        // 将keepTiles以外的数据设置为null
-        for (int index = 0; index < indexA.length; index++) {
-            if (!keepTilesA.contains(index)) {
-                // 设置为null
-                indexA[index] = null;
-            }
-        }
-        for (int index = 0; index < indexB.length; index++) {
-            if (!keepTilesB.contains(index)) {
-                // 设置为null
-                indexB[index] = null;
-            }
+        // 将Set转换为有序的List
+        List<List<byte[]>> newTiles = new ArrayList<>();
+        for (int i = 0; i < indexesCapacity.length; i++) {
+            newTiles.add(i, new ArrayList<>(newIndexes.get(i).values()));
         }
 
-        // indexA、indexB 去重，与x200重复时保留x200的数据
-        for (int i = 0, length = indexA.length + indexB.length; i < length; i++) {
-            byte[][] index = i < indexA.length ? indexA : indexB;
-            int i1 = i < indexA.length ? i : i - indexA.length;
-            if (index[i1] == null) {
+        // 填充空闲空间并计算空闲空间数量
+        final byte[] fillTiles = new byte[0x10];
+        Arrays.fill(fillTiles, (byte) 0xFF);
+
+        int fillCount = 0;
+        for (int i = 0; i < indexesCapacity.length; i++) {
+            if (newTiles.get(i).size() >= indexesCapacity[i]) {
+                // 没有空闲空间
                 continue;
             }
-            for (int j = i + 1; j < length; j++) {
-                byte[][] index1 = j < indexA.length ? indexA : indexB;
-                int j1 = j < indexA.length ? j : j - indexA.length;
-                if (index1[j1] == null) {
-                    continue;
-                }
-                if (Arrays.equals(index[i1], index1[j1])) {
-                    if (j1 >= 0x200) {
-                        // 0xC010+0x2000 的数据不变
-                        index[i1] = null;
-                    } else {
-                        index1[j1] = null;
-                    }
-                }
+            // 空闲空间数量
+            int count = indexesCapacity[i] - newTiles.get(i).size();
+            fillCount += count;
+
+            // 填充
+            for (int c = 0; c < count; c++) {
+                newTiles.get(i).add(fillTiles);
             }
         }
 
-        // 添加世界事件图块（4*4tile）到x200
-        for (List<EventTile> eventTiles : eventTilesEditor.getWorldEventTile().values()) {
-            for (EventTile eventTile : eventTiles) {
-                if (eventTile instanceof WorldEventTile worldEventTile) {
-                    x200.put(Arrays.toString(worldEventTile.getTiles()), worldEventTile.getTiles());
-                    // 将事件对应的4*4tile一并储存到x200
-                    byte[] tiles = IWorldMapEditor.getTiles4x4(map, worldEventTile.intX(), worldEventTile.intY());
-                    x200.put(Arrays.toString(tiles), tiles);
-                }
-            }
+        if (fillCount > 0x00) {
+            System.out.printf("世界地图编辑器：剩余%d个空闲4*4tile\n", fillCount);
         }
 
-        // 储存x200
-        List<byte[]> tempX200 = new ArrayList<>(x200.values());
-        Iterator<byte[]> x200Iterator = tempX200.iterator();
-        x200:
-        while (x200Iterator.hasNext()) {
-            byte[] tiles = x200Iterator.next();
-            // 判断x200是否已经存在，如果不存在就找位置添加
-            for (int index = 0x200; index < indexA.length; index++) {
-                if (Arrays.equals(indexA[index], tiles)) {
-                    // 已经存在
-                    x200Iterator.remove();
-                    continue x200;
-                }
-            }
-            // 不存在就找地方存入
-            for (int index = 0x200; index < indexA.length; index++) {
-                if (indexA[index] == null) {
-                    // 存入
-                    indexA[index] = tiles;
-                    x200Iterator.remove();
-                    continue x200;
-                }
-            }
-            // 没地方存了，跳出
-            break;
+        // 更新index
+        for (int i = 0; i < getIndexes().length; i++) {
+            byte[][] bytes = newTiles.get(i).toArray(new byte[0x00][]);
+            System.arraycopy(bytes, 0x00, getIndexes()[i], 0x00, indexesCapacity[i]);
         }
 
-        // 没能完全储存
-        // 将非必须存入x200的数据移动到其它地方
-        if (!tempX200.isEmpty()) {
-            // 需要被移动的数量
-            int count = tempX200.size();
-            x200:
-            for (int index = 0x200; index < indexA.length; index++) {
-                if (count == 0 || !x200Iterator.hasNext()) {
-                    break;
-                }
-                for (byte[] tiles : x200.values()) {
-                    if (Arrays.equals(indexA[index], tiles)) {
-                        // 跳过必须存入的4*4tile
-                        continue x200;
-                    }
-                }
-                // 非必须存入的4*4tile
-                // 移动到newTiles中
-                newTiles.add(indexA[index]);
-                // 替换
-                indexA[index] = x200Iterator.next();
-                x200Iterator.remove();
-                // 下一个
-                count--;
-            }
-        }
-
-        if (!tempX200.isEmpty()) {
-            // 什么？还没存完？解决不了，等死吧
-            for (byte[] tiles : tempX200) {
-                System.out.println("无法储存的世界地图4*4tile数据，可能会导致地图异常：" + Arrays.toString(tiles));
-            }
-        }
-
-        // 此处可能需要再次去重
-
-
-        if (!newTiles.isEmpty()) {
-            // 将剩下的新的4*4tiles找地方存入
-            Iterator<byte[]> newTilesIterator = newTiles.iterator();
-            for (int index = 0; index < indexA.length; index++) {
-                if (indexA[index] == null && newTilesIterator.hasNext()) {
-                    indexA[index] = newTilesIterator.next();
-                }
-            }
-            for (int index = 0; index < indexB.length; index++) {
-                if (indexB[index] == null && newTilesIterator.hasNext()) {
-                    indexB[index] = newTilesIterator.next();
-                }
-            }
-        }
-
-        // 因为重新排序过，所以要更新事件的tile索引
-        for (int index = 0x200; index < indexA.length; index++) {
-            byte[] tempIndexA = indexA[index];
-            final int tempIndex = index;
-            // 将所有使用该4*4tiles的事件全部更新
-            eventTilesEditor.getWorldEventTile().values().forEach(eventTiles -> {
-                for (EventTile eventTile : eventTiles) {
-                    if (eventTile instanceof WorldEventTile worldEventTile) {
-                        if (Arrays.equals(worldEventTile.getTiles(), tempIndexA)) {
-                            worldEventTile.setTile(tempIndex);
-                        }
-                    }
-                }
-            });
-        }
-
-
-        // 将indexA和indexB中值为null的数据替换为fillTiles
-        // 用来填充null的4*4tile
-        byte[] fillTiles = new byte[0x10];
-        Arrays.fill(fillTiles, (byte) 0xFF);
-        // 空闲的4*4tile数量
-        int fillCount = 0;
-        for (int i = 0; i < indexA.length; i++) {
-            if (indexA[i] == null) {
-                indexA[i] = fillTiles;
-                fillCount++;
-            }
-        }
-        for (int i = 0; i < indexB.length; i++) {
-            if (indexB[i] == null) {
-                indexB[i] = fillTiles;
-                fillCount++;
-            }
-        }
-
-        System.out.printf("世界地图编辑器：剩余%d个空闲4*4tile\n", fillCount);
-
+        // 开始写入
         for (int i = 0; i < 0x1000; i++) {
             int x = i % 0x40;
             int y = i / 0x40;
@@ -563,27 +451,24 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             // 数据偏移
             int offset = 0;
 
-
-            for (int index = indexA.length - 1; index >= 0; index--) {
-                byte[] tiles = indexA[index];
-                if (Arrays.equals(tiles, bytes)) {
-                    indexOffset = (index / 0x100) & 0B0000_0011;
-                    // 使用图块组A
-                    x410 = 0B0000_0001;
-                    offset = index % 0x100;
-                    break;
-                }
-            }
-
-            if (indexOffset == null) {
-                for (int index = indexB.length - 1; index >= 0; index--) {
-                    byte[] tiles = indexB[index];
+            findTiles:
+            for (int bankIndex = 0; bankIndex < newTiles.size(); bankIndex++) {
+                List<byte[]> bankTiles = newTiles.get(bankIndex);
+                for (int index = 0; index < bankTiles.size(); index++) {
+                    byte[] tiles = bankTiles.get(index);
                     if (Arrays.equals(tiles, bytes)) {
-                        indexOffset = (index / 0x100) & 0B0000_0011;
-                        // 使用图块组B
-                        x410 = 0B0000_0000;
+                        // 设置index为 indexA或indexC
+                        x410 = (bankIndex / 0x02) & 0B0000_0001;
+
+                        // indexA或indexC变为 indexB或indexD，并设置到D1
+                        indexOffset = (bankIndex % 0x02) & 0B0000_0001;
+                        indexOffset <<= 1;
+                        // index是否+0x100
+                        indexOffset |= (index / 0x100) & 0B0000_0001;
+
+                        // 数据偏移
                         offset = index % 0x100;
-                        break;
+                        break findTiles;
                     }
                 }
             }
@@ -605,7 +490,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             // 将目标bit置0
             indexOffsets[i / 4] &= tempBit;
             // 加入到数据中
-            indexOffsets[i / 4] |= indexOffset.byteValue();
+            indexOffsets[i / 4] |= indexOffset & 0xFF;
 
             // 图块组索引，索引与x00410的比例是8:1
             x410 <<= (7 - (i % 8));
@@ -624,20 +509,15 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
 
         // 写入世界地图图块索引偏移
-        position(getWorldMapTilesIndexAddress());
-        getBuffer().put(indexOffsets);
+        getBuffer().put(getWorldMapTilesIndexAddress(), indexOffsets);
         // 写入图块组索引
-        position(getWorldMapX00410Address());
-        getBuffer().put(x00410);
-        // 写入图块组A
-        position(getWorldMapIndexAAddress());
-        for (byte[] tiles : indexA) {
-            getBuffer().put(tiles);
-        }
-        // 写入图块组B
-        position(getWorldMapIndexBAddress());
-        for (byte[] tiles : indexB) {
-            getBuffer().put(tiles);
+        getBuffer().put(getWorldMapX00410Address(), x00410);
+        // 写入图块组
+        for (int i = 0; i < getWorldMapIndexesAddress().size(); i++) {
+            position(getWorldMapIndexesAddress().get(i));
+            for (int j = 0; j < indexesCapacity[i]; j++) {
+                getBuffer().put(getIndexes()[i][j]);
+            }
         }
         // 写入图块索引
         position(getWorldMapIndexAddress());
@@ -735,18 +615,8 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Override
-    public DataAddress getWorldMapIndexAAddress() {
-        return worldMapIndexAAddress;
-    }
-
-    @Override
-    public DataAddress getWorldMapIndexBAddress() {
-        return worldMapIndexBAddress;
-    }
-
-    @Override
-    public DataAddress getWorldMapIndexCAddress() {
-        return worldMapIndexCAddress;
+    public List<DataAddress> getWorldMapIndexesAddress() {
+        return worldMapIndexesAddress;
     }
 
     @Override
@@ -770,32 +640,31 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Override
-    public byte[][] getIndexA() {
-        return indexA;
-    }
+    public byte[] getIndex(int x, int y, int offset) {
+        int i = (y * 0x40) + x;
 
-    /**
-     * 获取索引A的图块数据
-     *
-     * @param canOut 是否可以越界获取
-     * @return indexA的4*4tile
-     * @see #getIndexA(int)
-     */
-    @Override
-    public byte[] getIndexA(int offset, boolean canOut) {
-        if (offset < indexA.length) {
-            return indexA[offset];
-        } else if (canOut) {
-            position(getWorldMapIndexAAddress(), offset * 0x10);
-            byte[] bytes = new byte[0x10];
-            getBuffer().get(bytes);
-            return bytes;
-        }
-        return null;
-    }
+        // 得到索引偏移，索引与indexOffsets的比例是4:1
+        // 1 index = 2 bit indexOffsets
+        int indexOffset = indexOffsets[i / 4] & 0xFF;
 
-    public byte[] getIndexA(int offset) {
-        return getIndexA(offset, false);
+        // 得到 indexOffset 对应的2bit
+        // i = 0
+        // 0B1011_1111 -> 0B0000_0010
+        // 0B1011_1111 >> (((4 * 2) - 2) - ((i % 4) * 2))
+        // 0B1011_1111 >> (6 - (0 * 2))
+        // 0B1011_1111 >> (6 - 0)
+        // 0B1011_1111 >> 6 = 0B0000_0010 & 0B0000_0011
+        // = 0B0000_0010
+        indexOffset >>>= (6 - ((i % 4) * 2));
+        // 只要D0和D1
+        indexOffset &= 0B0000_0011;
+        int x410 = x00410[i / 8] & 0xFF;
+        x410 >>>= (7 - (i % 8));
+        x410 &= 0B0000_0001;
+
+        byte[][] tempIndex = getIndexes()[x410 << 1 | indexOffset >> 1];
+        offset += (indexOffset & 1) * 0x100;
+        return tempIndex[offset];
     }
 
     @Override
@@ -819,28 +688,13 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Override
-    public byte[][] getIndexB() {
-        return indexB;
-    }
-
-    @Override
-    public byte[] getIndexB(int index) {
-        return indexB[index];
-    }
-
-    @Override
-    public byte[][] getIndexC() {
-        return indexC;
-    }
-
-    @Override
-    public byte[] getIndexC(int index) {
-        return indexC[index];
-    }
-
-    @Override
     public byte[] getIndex() {
         return index;
+    }
+
+    @Override
+    public byte[][][] getIndexes() {
+        return indexes;
     }
 
     @Override

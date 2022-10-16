@@ -40,6 +40,11 @@ public class Text extends AbstractBaseText {
     }
 
     @Override
+    public int length() {
+        return toByteArray().length;
+    }
+
+    @Override
     public String toString() {
         return toText();
     }

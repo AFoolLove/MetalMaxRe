@@ -18,10 +18,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TileSetHelper {
@@ -201,7 +199,7 @@ public class TileSetHelper {
     public static Color[][] generateWorldTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0,
                                                  byte[][][] combinations, byte[][] attributes,
                                                  Color[][] colors) {
-        return generate(metalMaxRe, 0x100, 0xC0, x00, x40, x80, xC0, combinations, attributes, colors);
+        return generate(metalMaxRe, 0x100, 0x100, x00, x40, x80, xC0, combinations, attributes, colors);
     }
 
     /**
@@ -218,7 +216,7 @@ public class TileSetHelper {
         int x40 = NumberR.at(xXX, 2) & 0xFF;
         int x80 = NumberR.at(xXX, 1) & 0xFF;
         int xC0 = NumberR.at(xXX, 0) & 0xFF;
-        return generate(metalMaxRe, 0x100, 0xC0, x00, x40, x80, xC0, combinations, attributes, colors);
+        return generate(metalMaxRe, 0x100, 0x100, x00, x40, x80, xC0, combinations, attributes, colors);
     }
 
     /**
@@ -243,7 +241,7 @@ public class TileSetHelper {
         colors[0x01] = palette.get(0x01).toColors(systemPalette);
         colors[0x02] = palette.get(0x02).toColors(systemPalette);
         colors[0x03] = palette.get(0x03).toColors(systemPalette);
-        return generate(metalMaxRe, 0x100, 0xC0, x00, x40, x80, xC0, tileSetEditor.getWorldCombinations(), tileSetEditor.getWorldAttributes(), colors);
+        return generate(metalMaxRe, 0x100, 0x100, x00, x40, x80, xC0, tileSetEditor.getWorldCombinations(), tileSetEditor.getWorldAttributes(), colors);
     }
 
     public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, byte sprite) {
@@ -505,6 +503,37 @@ public class TileSetHelper {
         return image;
     }
 
+    public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,
+                                     int x00, int x40, int x80, int xC0,
+                                     Color[][] colors) {
+        final Color[][] image = new Color[0x80][0x80];
+        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
+
+        byte[][][] tiles = new byte[4][0x40][0x10];
+        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
+        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
+        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
+        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
+
+        for (int i = 0; i < tiles.length; i++) { //
+            for (int j = 0; j < tiles[i].length; j++) { // 0x40 size
+                final byte[] bytes = tiles[i][j]; // 0x10 size
+                for (int b = 0; b < 0x08; b++) { // byte
+                    for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
+                        int l = (bytes[b] & d) >>> (7 - k);
+                        l += ((bytes[b + 0x08] & d) >>> (7 - k)) << 1;
+
+                        int y = (i * 0x20) + ((j / 0x10) * 0x08) + b;
+                        int x = ((j % 0x10) * 0x08) + k;
+                        image[y][x] = colors[3][l];
+                    }
+                }
+            }
+        }
+        return image;
+    }
+
+
     public static BufferedImage generateMapImage(@NotNull MetalMaxRe metalMaxRe, int mapId) {
         IMapEditor mapEditor = metalMaxRe.getEditorManager().getEditor(IMapEditor.class);
         IMapPropertiesEditor mapPropertiesEditor = metalMaxRe.getEditorManager().getEditor(IMapPropertiesEditor.class);
@@ -566,9 +595,9 @@ public class TileSetHelper {
 
         byte[][] map = worldMapEditor.getMap();
 
-        Map<Integer, BufferedImage> tileSetMap = WorldMapEditorImpl.DEFAULT_PIECES.values().parallelStream().distinct().map(integer -> {
+        Map<Integer, List<BufferedImage>> tileSetMap = WorldMapEditorImpl.DEFAULT_PIECES.values().parallelStream().distinct().map(integer -> {
                     BufferedImage bufferedImage = BufferedImageUtils.fromColors(TileSetHelper.generateWorldTileSet(metalMaxRe, integer));
-                    return Map.entry(integer, bufferedImage);
+                    return Map.entry(integer, TileSetHelper.diced(bufferedImage));
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -577,9 +606,9 @@ public class TileSetHelper {
 
         Graphics graphics = bufferedImage.getGraphics();
 
-        for (java.util.Map.Entry<Rectangle, Integer> entry : WorldMapEditorImpl.DEFAULT_PIECES.entrySet()) {
+        WorldMapEditorImpl.DEFAULT_PIECES.entrySet().parallelStream().forEach(entry -> {
             Rectangle rectangle = entry.getKey();
-            BufferedImage tileSet = tileSetMap.get(entry.getValue());
+            List<BufferedImage> tileSets = tileSetMap.get(entry.getValue());
             int x = (int) rectangle.getX();
             int y = (int) rectangle.getY();
             int width = (int) rectangle.getWidth();
@@ -592,22 +621,42 @@ public class TileSetHelper {
 
                     // 绘制16*16的tile
                     int tile = map[mapY][mapX] & 0xFF;
-                    int y2 = (tile / 0x10) * 0x10;
-                    int x2 = (tile % 0x10) * 0x10;
-
-                    for (int tileY = 0; tileY < 0x10; tileY++) {
-                        int y3 = (mapY * 0x10) + tileY;
-                        for (int tileX = 0; tileX < 0x10; tileX++) {
-                            int x3 = (mapX * 0x10) + tileX;
-                            int rgb = tileSet.getRGB(x2 + tileX, y2 + tileY);
-                            graphics.setColor(new java.awt.Color(rgb));
-                            graphics.drawLine(x3, y3, x3, y3);
-                        }
-                    }
+                    graphics.drawImage(tileSets.get(tile), mapX * 0x10, mapY * 0x10, null);
                 }
             }
-        }
+        });
         graphics.dispose();
         return bufferedImage;
     }
+
+    /**
+     * 将图片分割为数个0x10*0x10的图块
+     *
+     * @param bufferedImage 被分割的图片
+     * @return 图块
+     */
+    public static List<BufferedImage> diced(BufferedImage bufferedImage) {
+        List<BufferedImage> value = new ArrayList<>();
+        int w = bufferedImage.getWidth() / 0x10;
+        int h = bufferedImage.getHeight() / 0x10;
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                value.add(bufferedImage.getSubimage(x * 0x10, y * 0x10, 0x10, 0x10));
+            }
+        }
+        return value;
+    }
+
+    public static List<BufferedImage> diced(int w, int h, BufferedImage bufferedImage) {
+        List<BufferedImage> value = new ArrayList<>();
+        int tW = bufferedImage.getWidth() / w;
+        int tH = bufferedImage.getHeight() / h;
+        for (int y = 0; y < tH; y++) {
+            for (int x = 0; x < tW; x++) {
+                value.add(bufferedImage.getSubimage(x * w, y * h, w, h));
+            }
+        }
+        return value;
+    }
+
 }

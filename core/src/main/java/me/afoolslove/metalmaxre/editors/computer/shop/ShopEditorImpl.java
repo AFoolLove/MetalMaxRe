@@ -113,7 +113,7 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
 //        for (byte[] shopItem : shopItems) {
 //            if (position() == getShopAddress().getEndAddress() || !getShopAddress().range(position() + 0x02)) {
 //                // 至少剩余2字节
-//                System.err.printf("商品编辑器：没有多余的空间存放商品清单：%s\n", Arrays.toString(shopItem));
+//                System.err.printf("商品编辑器：没有多余的空间存放商品清单：%s\n", NumberR.toHexString(shopItem));
 //                continue;
 //            }
 //
@@ -128,7 +128,7 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
 //                // 调整数量裁剪写入
 //                shopItem[0] = (byte) (length - 1);
 //                getBuffer().put(shopItem, 0x00, length);
-//                System.err.printf("商品编辑器：商品清单部分未写入：%s\n", Arrays.toString(shopItem));
+//                System.err.printf("商品编辑器：商品清单部分未写入：%s\n", NumberR.toHexString(shopItem));
 //            }
 //        }
 
