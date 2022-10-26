@@ -17,6 +17,12 @@ public class BoxSelectedAdapter extends MouseInputAdapter {
     private int lastX = -1, lastY = -1;
     private boolean hold;
 
+    /**
+     * 锁定特效
+     */
+    private int lockX = -1, lockY = -1;
+    private int lockCount = 0;
+
     public BoxSelectedAdapter(JLabel component) {
         this.component = component;
     }
@@ -138,6 +144,9 @@ public class BoxSelectedAdapter extends MouseInputAdapter {
         return selectListeners.remove(listener);
     }
 
+    /**
+     * 选择监听器
+     */
     public interface SelectListener {
         /**
          * 鼠标指向的实时位置

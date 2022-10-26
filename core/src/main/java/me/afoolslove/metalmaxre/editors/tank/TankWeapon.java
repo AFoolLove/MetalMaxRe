@@ -118,6 +118,13 @@ public class TankWeapon extends TankEquipmentItem {
     }
 
     /**
+     * @return 攻击范围
+     */
+    public AttackRange getAttackRange() {
+        return AttackRange.fromValue(canEquipped & 0B0001_1000);
+    }
+
+    /**
      * @return 该武器的攻击范围和可装备的穴
      */
     public byte getCanEquipped() {

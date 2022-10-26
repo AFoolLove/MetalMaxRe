@@ -5,8 +5,10 @@ import me.afoolslove.metalmaxre.editors.map.*;
 import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.JXSearchField;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -16,9 +18,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class MapEntranceEditorFrame extends AbstractEditorFrame {
@@ -43,7 +44,11 @@ public class MapEntranceEditorFrame extends AbstractEditorFrame {
     private final Pattern MAP_ENTRANCE_PATTERN = Pattern.compile("^[0-9a-fA-F]{1,2}:[0-9a-fA-F]{1,2} [0-9a-fA-F]{1,2}:[0-9a-fA-F]{1,2}:[0-9a-fA-F]{1,2}$");
 
     public MapEntranceEditorFrame(@NotNull Frame frame, @NotNull MetalMaxRe metalMaxRe) {
-        super(frame, metalMaxRe);
+        this(null, frame, metalMaxRe);
+    }
+
+    public MapEntranceEditorFrame(Integer initMap, @NotNull Frame frame, @Nullable MetalMaxRe metalMaxRe) {
+        super(initMap, frame, metalMaxRe);
         init("出入口编辑器", contentPane);
     }
 
@@ -265,24 +270,43 @@ public class MapEntranceEditorFrame extends AbstractEditorFrame {
         mapList.setListData(maps);
 
         mapList.addListSelectionListener(e -> {
-            if (e.getValueIsAdjusting()) {
+            if (e.getValueIsAdjusting() || mapList.isSelectionEmpty()) {
                 return;
             }
-            int selectedMap = Integer.parseInt(mapList.getSelectedValue().toString(), 16);
-            if (selectedMap == -1) {
-                return;
-            }
+            int selectedMap = mapList.convertIndexToModel(mapList.getSelectedIndex());
+
             final MapEntrance mapEntrance = mapEntrances.get(selectedMap);
 
-            entrances.setModel(new EntranceTableModel(entrances, mapEntrance));
+            EntranceTableModel dataModel = new EntranceTableModel(mapEntrance);
+            entrances.setModel(dataModel);
+
+            dataModel.addTableModelListener(tableModelEvent -> {
+                if (tableModelEvent.getType() == TableModelEvent.UPDATE) {
+                    mapEntrance.getEntrances().clear();
+                    for (Vector vector : dataModel.getDataVector()) {
+                        int inPointX = Integer.parseInt(vector.get(0).toString(), 16);
+                        int inPointY = Integer.parseInt(vector.get(1).toString(), 16);
+                        int outPointMap = Integer.parseInt(vector.get(2).toString(), 16);
+                        int outPointX = Integer.parseInt(vector.get(3).toString(), 16);
+                        int outPointY = Integer.parseInt(vector.get(4).toString(), 16);
+                        mapEntrance.getEntrances().put(new MapPoint(selectedMap, inPointX, inPointY), new MapPoint(outPointMap, outPointX, outPointY));
+                    }
+                }
+            });
             updateHint();
         });
 
         addEntrance.addActionListener(e -> {
+            if (mapList.isSelectionEmpty()) {
+                return;
+            }
+            int selectedMap = mapList.convertIndexToModel(mapList.getSelectedIndex());
+
             MapPoint inMapPoint = new MapPoint();
             MapPoint outMapPoint = new MapPoint();
             String text;
 
+            inMapPoint.setMap(selectedMap);
             text = inX.getText();
             if (text.isEmpty()) {
                 text = "00";
@@ -313,25 +337,67 @@ public class MapEntranceEditorFrame extends AbstractEditorFrame {
             }
             outMapPoint.setY(Integer.parseInt(text, 16));
 
-            ((DefaultTableModel) entrances.getModel()).addRow(new Object[]{inMapPoint, outMapPoint});
+            ((DefaultTableModel) entrances.getModel()).addRow(new String[]{
+                    inX.getText(),
+                    inY.getText(),
+                    outMap.getText(),
+                    outX.getText(),
+                    outY.getText()
+            });
+
+            final MapEntrance mapEntrance = mapEntrances.get(selectedMap);
+            mapEntrance.getEntrances().put(inMapPoint, outMapPoint);
 
             entrances.updateUI();
-
             updateHint();
         });
 
         removeEntrance.addActionListener(e -> {
-            if (entrances.getSelectedRow() == -1) {
+            if (entrances.getSelectedRow() == -1 || mapList.isSelectionEmpty()) {
                 return;
             }
             if (entrances.isEditing()) {
                 // 如果正在编辑，取消编辑
                 entrances.getCellEditor().cancelCellEditing();
             }
+
+            int selectedMap = mapList.convertIndexToModel(mapList.getSelectedIndex());
+            final MapEntrance mapEntrance = mapEntrances.get(selectedMap);
+
             DefaultTableModel model = (DefaultTableModel) entrances.getModel();
-            model.removeRow(entrances.getSelectedRow());
+
+            int[] selectedRows = entrances.getSelectedRows();
+            for (int i = 0; i < selectedRows.length; i++) {
+                selectedRows[i] = entrances.convertRowIndexToModel(selectedRows[i]);
+            }
+            // 倒序移除，否则会影响索引
+            for (int i = selectedRows.length - 1; i >= 0; i--) {
+                Vector vector = model.getDataVector().get(selectedRows[i]);
+
+                int inPointX = Integer.parseInt(vector.get(0).toString(), 16);
+                int inPointY = Integer.parseInt(vector.get(1).toString(), 16);
+                int outPointMap = Integer.parseInt(vector.get(2).toString(), 16);
+                int outPointX = Integer.parseInt(vector.get(3).toString(), 16);
+                int outPointY = Integer.parseInt(vector.get(4).toString(), 16);
+
+                MapPoint inPoint = new MapPoint(selectedMap, inPointX, inPointY);
+                MapPoint outPoint = new MapPoint(outPointMap, outPointX, outPointY);
+
+                for (Map.Entry<MapPoint, MapPoint> pointEntry : new ArrayList<>(mapEntrance.getEntrances().entrySet())) {
+                    if (Objects.equals(pointEntry.getKey(), inPoint) && Objects.equals(pointEntry.getValue(), outPoint)) {
+                        mapEntrance.getEntrances().remove(pointEntry.getKey());
+                        break;
+                    }
+                }
+                model.removeRow(selectedRows[i]);
+            }
             updateHint();
         });
+
+        // 初始选中的地图
+        if (getInitMap() != null) {
+            mapList.setSelectedIndex(getInitMap());
+        }
     }
 
     private void updateHint() {
@@ -341,89 +407,20 @@ public class MapEntranceEditorFrame extends AbstractEditorFrame {
 
     public static class EntranceTableModel extends DefaultTableModel {
         private static final String[] COLUMN_NAMES = {"入口X", "入口Y", "出口Map", "出口X", "出口Y"};
-        private final JTable table;
-        private final MapEntrance mapEntrance;
-        private final List<Map.Entry<MapPoint, MapPoint>> entries;
 
-        public EntranceTableModel(@NotNull JTable table, @NotNull MapEntrance mapEntrance) {
-            this.table = table;
-            this.mapEntrance = mapEntrance;
-            this.entries = new ArrayList<>(mapEntrance.getEntrances().entrySet());
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            return COLUMN_NAMES[column];
-        }
-
-        @Override
-        public int getRowCount() {
-            return entries == null ? 0 : entries.size();
-        }
-
-        @Override
-        public int getColumnCount() {
-            return 5;
-        }
-
-        @Override
-        public void addRow(Object[] rowData) {
-            entries.add(Map.entry((MapPoint) rowData[0], (MapPoint) rowData[1]));
-
-            mapEntrance.getEntrances().clear();
-            for (Map.Entry<MapPoint, MapPoint> entry : entries) {
-                mapEntrance.getEntrances().put(entry.getKey(), entry.getValue());
-            }
-
-            fireTableRowsInserted(entries.size(), entries.size());
-        }
-
-        @Override
-        public void removeRow(int row) {
-            fireTableRowsDeleted(row, row);
-            entries.remove(row);
-
-            mapEntrance.getEntrances().clear();
-            for (Map.Entry<MapPoint, MapPoint> entry : entries) {
-                mapEntrance.getEntrances().put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        @Override
-        public void setValueAt(Object aValue, int row, int column) {
-            fireTableCellUpdated(row, column);
-            Map.Entry<MapPoint, MapPoint> pointEntry = entries.get(row);
-
-            MapPoint inMapPoint = pointEntry.getKey();
-            MapPoint outMapPoint = pointEntry.getValue();
-            switch (column) {
-                case 0x00 -> // inX
-                        inMapPoint.setX(Integer.parseInt(aValue.toString(), 16));
-                case 0x01 -> // inY
-                        inMapPoint.setY(Integer.parseInt(aValue.toString(), 16));
-                case 0x02 -> // ouMap
-                        outMapPoint.setMap(Integer.parseInt(aValue.toString(), 16));
-                case 0x03 -> // outY
-                        outMapPoint.setX(Integer.parseInt(aValue.toString(), 16));
-                case 0x04 -> // outY
-                        outMapPoint.setY(Integer.parseInt(aValue.toString(), 16));
-            }
-        }
-
-        @Override
-        public Object getValueAt(int row, int column) {
-            Map.Entry<MapPoint, MapPoint> pointEntry = entries.get(row);
-
-            MapPoint inMapPoint = pointEntry.getKey();
-            MapPoint outMapPoint = pointEntry.getValue();
-            return switch (column) {
-                case 0x00 -> String.format("%02X", inMapPoint.getX());
-                case 0x01 -> String.format("%02X", inMapPoint.getY());
-                case 0x02 -> String.format("%02X", outMapPoint.getMap());
-                case 0x03 -> String.format("%02X", outMapPoint.getX());
-                case 0x04 -> String.format("%02X", outMapPoint.getY());
-                default -> null;
-            };
+        public EntranceTableModel(@NotNull MapEntrance mapEntrance) {
+            super(mapEntrance.getEntrances().entrySet().stream()
+                    .map(m -> {
+                        MapPoint inMapPoint = m.getKey();
+                        MapPoint outMapPoint = m.getValue();
+                        return new String[]{
+                                String.format("%02X", inMapPoint.getX()),
+                                String.format("%02X", inMapPoint.getY()),
+                                String.format("%02X", outMapPoint.getMap()),
+                                String.format("%02X", outMapPoint.getX()),
+                                String.format("%02X", outMapPoint.getY())
+                        };
+                    }).toList().toArray(new String[0][]), COLUMN_NAMES);
         }
     }
 }

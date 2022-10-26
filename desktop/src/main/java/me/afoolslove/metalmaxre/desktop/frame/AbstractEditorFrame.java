@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.desktop.frame;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,17 +12,36 @@ public abstract class AbstractEditorFrame extends JFrame {
     private final MetalMaxRe metalMaxRe;
     private final Frame frame;
 
-    public AbstractEditorFrame(@NotNull Frame frame, @NotNull MetalMaxRe metalMaxRe) {
+    private final Integer initMap;
+
+    public AbstractEditorFrame(Integer initMap, @NotNull Frame frame, @Nullable MetalMaxRe metalMaxRe) {
+        this.initMap = initMap;
         this.metalMaxRe = metalMaxRe;
         this.frame = frame;
     }
 
-    public void init(String name, @NotNull JPanel contentPane) {
-        Path path = metalMaxRe.getBuffer().getPath();
-        if (path != null) {
-            setTitle(String.format("%s [%s] - %s", name, path.getName(path.getNameCount() - 1), path));
+    public AbstractEditorFrame(@NotNull Frame frame, @Nullable MetalMaxRe metalMaxRe) {
+        this(null, frame, metalMaxRe);
+    }
+
+    protected AbstractEditorFrame(@NotNull Frame frame) {
+        this(null, frame, null);
+    }
+
+    public Integer getInitMap() {
+        return initMap;
+    }
+
+    public void init(String title, @NotNull JPanel contentPane) {
+        if (metalMaxRe != null) {
+            Path path = metalMaxRe.getBuffer().getPath();
+            if (path != null) {
+                setTitle(String.format("%s [%s] - %s", title, path.getName(path.getNameCount() - 1), path));
+            } else {
+                setTitle(String.format("%s [%s]", title, metalMaxRe.getBuffer().getVersion().getName()));
+            }
         } else {
-            setTitle(String.format("%s [%s]", name, metalMaxRe.getBuffer().getVersion().getName()));
+            setTitle(title);
         }
         setContentPane(contentPane);
         setLocation(frame.getX(), frame.getY());
@@ -43,12 +63,8 @@ public abstract class AbstractEditorFrame extends JFrame {
     }
 
     protected void createMenu(@NotNull JMenuBar menuBar) {
-
     }
 
     protected void createLayout() {
-
     }
-
-
 }

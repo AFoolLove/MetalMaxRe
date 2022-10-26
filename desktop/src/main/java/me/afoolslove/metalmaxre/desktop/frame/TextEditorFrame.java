@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.desktop.frame;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.desktop.adapter.SearchTextDoubleClickedSelectedAdapter;
+import me.afoolslove.metalmaxre.desktop.adapter.UpdateDocumentListener;
 import me.afoolslove.metalmaxre.editors.text.ITextEditor;
 import me.afoolslove.metalmaxre.editors.text.TextBuilder;
 import me.afoolslove.metalmaxre.editors.text.WordBank;
@@ -14,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Document;
@@ -92,9 +92,16 @@ public class TextEditorFrame extends AbstractEditorFrame {
                         int index = searchTextFrame.getSearchTexts().locationToIndex(e.getPoint());
 //                    searchTexts.setSelectedIndex(index);
                         if (index != -1) {
+                            // TODO 过滤后文本选中失败
                             String text = searchTextFrame.getSearchTexts().getElementAt(index).toString();
-                            getTextPages().setSelectedIndex(Integer.parseInt(text.substring(0, 2), 16));
-                            getTextPage().setSelectedIndex(Integer.parseInt(text.substring(2, 4), 16));
+
+                            int pages = Integer.parseInt(text, 0, 2, 16);
+                            int page = Integer.parseInt(text, 2, 4, 16);
+                            pages = getTextPages().convertIndexToView(pages);
+                            page = getTextPage().convertIndexToView(page);
+
+                            getTextPages().setSelectedIndex(pages);
+                            getTextPage().setSelectedIndex(page);
 
                             // 显示选中的位置
                             getTextPages().ensureIndexIsVisible(getTextPages().getSelectedIndex());
@@ -188,26 +195,12 @@ public class TextEditorFrame extends AbstractEditorFrame {
             // 添加后自动过滤
             model.addAll(textIndexes);
         });
-        textAreaAfter.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateSpace(e);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateSpace(e);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateSpace(e);
-            }
-
+        textAreaAfter.getDocument().addDocumentListener(new UpdateDocumentListener() {
             // 红色
             private final DefaultHighlighter.DefaultHighlightPainter redHighlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.RED);
 
-            private void updateSpace(DocumentEvent e) {
+            @Override
+            public void update(UpdateDocumentListener.Type type, DocumentEvent e) {
                 if (textPages.isSelectionEmpty() || textPage.isSelectionEmpty()) {
                     // 没选中不更新
                     return;
@@ -637,8 +630,31 @@ public class TextEditorFrame extends AbstractEditorFrame {
         speakerValue.setModel(new DefaultComboBoxModel<>(speakers));
 
 
+        spriteActions.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                SpriteAction action = (SpriteAction) value;
+                if (action.getAction() == SpriteAction.MOVE_UP.getAction()) {
+                    value = "上移动一格";
+                } else if (action.getAction() == SpriteAction.MOVE_DOWN.getAction()) {
+                    value = "下移动一格";
+                } else if (action.getAction() == SpriteAction.MOVE_LEFT.getAction()) {
+                    value = "左移动一格";
+                } else if (action.getAction() == SpriteAction.MOVE_RIGHT.getAction()) {
+                    value = "右移动一格";
+                } else if (action.getAction() == SpriteAction.LOCK_UP.getAction()) {
+                    value = "朝向上";
+                } else if (action.getAction() == SpriteAction.LOCK_DOWN.getAction()) {
+                    value = "朝向下";
+                } else if (action.getAction() == SpriteAction.LOCK_LEFT.getAction()) {
+                    value = "朝向左";
+                } else if (action.getAction() == SpriteAction.LOCK_RIGHT.getAction()) {
+                    value = "朝向右";
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
         // 操作精灵
-
         DefaultListModel<SpriteAction> spriteActionsModel = (DefaultListModel<SpriteAction>) spriteActions.getModel();
         // 精灵移动一格
         spriteMoveUP.addActionListener(e -> spriteActionsModel.addElement(SpriteAction.MOVE_UP));

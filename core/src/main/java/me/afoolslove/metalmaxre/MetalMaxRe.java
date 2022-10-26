@@ -2,9 +2,12 @@ package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.IEditorManager;
+import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.palette.SystemPalette;
 import me.afoolslove.metalmaxre.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 /**
  * @author AFoolLove
@@ -55,5 +58,25 @@ public class MetalMaxRe {
 
     public SystemPalette getSystemPalette() {
         return systemPalette;
+    }
+
+
+    /**
+     * 获取编辑器实例
+     *
+     * @param editor 编辑器类型
+     * @return 编辑器
+     */
+    <E extends IRomEditor> E getEditor(Class<? extends IRomEditor> editor) {
+        return getEditorManager().getEditor(editor);
+    }
+
+    /**
+     * 获取所有编辑器实例
+     *
+     * @return 所有编辑器
+     */
+    public Map<Class<? extends IRomEditor>, IRomEditor> getEditors() {
+        return getEditorManager().getEditors();
     }
 }

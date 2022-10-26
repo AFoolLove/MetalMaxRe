@@ -55,7 +55,10 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
 
-    public TreasureEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress randomTreasureAddress, DataAddress checkPointsAddress, DataAddress treasureAddress) {
+    public TreasureEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                              DataAddress randomTreasureAddress,
+                              DataAddress checkPointsAddress,
+                              DataAddress treasureAddress) {
         super(metalMaxRe);
         this.randomTreasureAddress = randomTreasureAddress;
         this.checkPointsAddress = checkPointsAddress;

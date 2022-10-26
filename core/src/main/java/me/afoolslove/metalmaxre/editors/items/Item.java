@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editors.items;
 
+import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 /**
@@ -30,10 +32,26 @@ public class Item {
     }
 
     /**
+     * @return 是否为无价的物品
+     */
+    public boolean isPriceless() {
+        return (getPrice() & 0xFF) == 0xFE || (getPrice() & 0xFF) == 0xFF;
+    }
+
+    /**
+     * @return 是否可以丢弃
+     */
+    public boolean canDiscard() {
+        return (getPrice() & 0xFF) != 0xFF;
+    }
+
+    /**
      * @return 真实的价格
      */
-    public int getPriceValue() {
-//        return DataValues.VALUES.get(price & 0xFF);
-        return 0;
+    public int getPriceValue(@NotNull IDataValueEditor dataValueEditor) {
+        if (isPriceless()) {
+            return getPrice();
+        }
+        return dataValueEditor.getValues().get(getPrice() & 0xFF).intValue();
     }
 }

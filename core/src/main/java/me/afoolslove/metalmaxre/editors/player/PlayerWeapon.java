@@ -66,6 +66,13 @@ public class PlayerWeapon extends PlayerEquipmentItem {
     }
 
     /**
+     * @return 攻击范围
+     */
+    public AttackRange getAttackRange() {
+        return AttackRange.fromValue(canEquipped & 0B0001_1000);
+    }
+
+    /**
      * @return 指向的真实攻击力值
      * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
      */

@@ -9,6 +9,7 @@ import me.afoolslove.metalmaxre.desktop.adapter.BoxSelectedAdapter;
 import me.afoolslove.metalmaxre.desktop.adapter.MapImagePopupMenuMouseAdapter;
 import me.afoolslove.metalmaxre.desktop.adapter.MiddleMoveMouseAdapter;
 import me.afoolslove.metalmaxre.desktop.dialog.EditorEnabledDialog;
+import me.afoolslove.metalmaxre.desktop.formatter.NumberFormatter;
 import me.afoolslove.metalmaxre.desktop.frame.*;
 import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
@@ -16,6 +17,7 @@ import me.afoolslove.metalmaxre.editors.map.*;
 import me.afoolslove.metalmaxre.editors.map.events.EventTile;
 import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
+import me.afoolslove.metalmaxre.editors.map.world.LineDirection;
 import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.Sprite;
@@ -46,9 +48,7 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -141,6 +141,27 @@ public class Main extends JFrame {
     private JSpinner mapImageSelectedPointX;
     private JSpinner mapImageSelectedPointY;
     private JButton gotoPoint;
+    private JList<Map.Entry<LineDirection, Byte>> outLineList;
+    private JList<Map.Entry<LineDirection, Byte>> backLineList;
+    private JButton lineUp;
+    private JButton lineDown;
+    private JButton lineLeft;
+    private JButton lineRight;
+    private JSpinner lineMoveCount;
+    private JButton lineRemove;
+    private JRadioButton outLineSelected;
+    private JRadioButton backLineSelected;
+    private JSpinner outLineTargetMap;
+    private JSpinner outLineTargetX;
+    private JSpinner outLineTargetY;
+    private JButton outLineTarget;
+    private JButton gotoOutLineTarget;
+    private JButton saveLine;
+    private JButton gotoBackLineTarget;
+    private JSpinner backLineTargetMap;
+    private JSpinner backLineTargetX;
+    private JSpinner backLineTargetY;
+    private JButton backLineTarget;
     private ButtonGroup borderTypeGroup;
 
 
@@ -377,7 +398,6 @@ public class Main extends JFrame {
                         JOptionPane.showMessageDialog(this, "保存失败\n" + out);
                     }
                 }
-
             } // 其它皆为不不保存
         });
 
@@ -723,7 +743,13 @@ public class Main extends JFrame {
             if (!multipleMetalMaxRe.hasInstance()) {
                 return;
             }
-            MapEntranceEditorFrame mapEntranceEditorFrame = new MapEntranceEditorFrame(this, multipleMetalMaxRe.current());
+            MapEntranceEditorFrame mapEntranceEditorFrame;
+            if (mapList.isSelectionEmpty()) {
+                mapEntranceEditorFrame = new MapEntranceEditorFrame(this, multipleMetalMaxRe.current());
+            } else {
+                int map = Integer.parseInt(mapList.getSelectedValue(), 16);
+                mapEntranceEditorFrame = new MapEntranceEditorFrame(map, this, multipleMetalMaxRe.current());
+            }
             mapEntranceEditorFrame.pack();
             mapEntranceEditorFrame.setVisible(true);
         });
@@ -761,7 +787,7 @@ public class Main extends JFrame {
             tankEditorFrame.setVisible(true);
         });
 
-        JMenuItem editorMenuDogSystem = new JMenuItem("犬系统编辑器");
+        JMenuItem editorMenuDogSystem = new JMenuItem("犬系统编辑器(beta)");
         editorMenuDogSystem.addActionListener(e -> {
             if (!multipleMetalMaxRe.hasInstance()) {
                 return;
@@ -781,13 +807,18 @@ public class Main extends JFrame {
             shopEditorFrame.pack();
             shopEditorFrame.setVisible(true);
         });
-        JMenuItem editorMenuTreasure = new JMenuItem("宝藏编辑器(undone)");
+        JMenuItem editorMenuTreasure = new JMenuItem("宝藏编辑器");
         editorMenuTreasure.addActionListener(e -> {
             if (!multipleMetalMaxRe.hasInstance()) {
                 return;
             }
-
-            TreasureEditorFrame treasureEditorFrame = new TreasureEditorFrame(this, multipleMetalMaxRe.current());
+            TreasureEditorFrame treasureEditorFrame;
+            if (mapList.isSelectionEmpty()) {
+                treasureEditorFrame = new TreasureEditorFrame(this, multipleMetalMaxRe.current());
+            } else {
+                int map = Integer.parseInt(mapList.getSelectedValue(), 16);
+                treasureEditorFrame = new TreasureEditorFrame(map, this, multipleMetalMaxRe.current());
+            }
             treasureEditorFrame.pack();
             treasureEditorFrame.setVisible(true);
         });
@@ -861,6 +892,13 @@ public class Main extends JFrame {
             });
         }
 
+        JMenuItem toolsMenu = new JMenuItem("工具");
+        toolsMenu.addActionListener(e -> {
+            ToolsFrame toolsFrame = new ToolsFrame(this);
+            toolsFrame.pack();
+            toolsFrame.setVisible(true);
+        });
+
         JMenu testMenu = new JMenu("实验功能");
 
         testMenuAdvancedMap = new JCheckBoxMenuItem("使用扩容地图");
@@ -869,7 +907,6 @@ public class Main extends JFrame {
         testMenu.add(testMenuAdvancedMap);
 
         JMenu helpMenu = new JMenu("帮助");
-
         JMenuItem helpMenuGithub = new JMenuItem("Github");
         helpMenuGithub.setToolTipText("打开开源地址");
         helpMenuGithub.addActionListener(e -> {
@@ -949,6 +986,7 @@ public class Main extends JFrame {
             showLines.setEnabled(selectMap == 0x00);
 
             if (selectMap == 0x00) {
+
                 // 设置头属性
                 mapHeadUnderground.setSelected(mapProperties.isUnderground());
                 mapHeadEventTile.setSelected(mapProperties.hasEventTile());
@@ -1165,51 +1203,109 @@ public class Main extends JFrame {
 
                             // 显示航线
                             if (showLines.isSelected()) {
+                                IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
+
+                                graphics.setColor(Color.GREEN);
                                 // 出航路线
                                 int lineX = 0x6B * 0x10;
                                 int lineY = 0x47 * 0x10;
-                                IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
-                                for (MapPoint linePoint : worldMapEditor.getShippingLineBack().getKey()) {
-                                    int tmpLineX = lineX + (((int) linePoint.getX()) * 0x10);
-                                    int tmpLineY = lineY + (((int) linePoint.getY()) * 0x10);
+                                graphics.fillRect(lineX + 0x02, lineY + 6, 0x04, 0x04);
+                                List<Map.Entry<LineDirection, Byte>> line = new ArrayList<>(worldMapEditor.getShippingLineOut().getKey());
+                                if (!line.isEmpty()) {
+                                    LineDirection firstDir = line.get(0).getKey();
+                                    switch (firstDir) {
+                                        case UP -> {
 
-                                    int dir = 0;
-                                    // X或Y等于0，就是另一个的方向
-                                    if (linePoint.getX() == 0x00) {
-                                        // 上或下移动
-                                        if ((linePoint.getY() & 0B1000_0000) == 0x00) {
-                                            // 不是负数，下方移动
-                                            dir = 0x10;
-                                        } else {
-                                            // 是负数，上方移动
-                                            dir = -0x10;
                                         }
-                                        // 得到正数的移动格数
-                                        for (int i = 0; i < Math.abs(linePoint.getY()); i++) {
-                                            graphics.fillRect(lineX, lineY += dir, 0x10 - 1, 0x10 - 1);
+                                        case DOWN -> {
                                         }
-                                    } else {
-                                        // 左或右移动
-                                        if ((linePoint.getX() & 0B1000_0000) == 0x00) {
-                                            // 不是负数，下方移动
-                                            dir = 0x10;
-                                        } else {
-                                            // 是负数，上方移动
-                                            dir = -0x10;
+                                        case LEFT -> {
                                         }
-                                        // 得到正数的移动格数
-                                        for (int i = 0; i < Math.abs(linePoint.getX()); i++) {
-                                            graphics.fillRect(lineX += dir, lineY, 0x10 - 1, 0x10 - 1);
+                                        case RIGHT -> {
                                         }
                                     }
-                                    lineX = tmpLineX;
-                                    lineY = tmpLineY;
                                 }
 
-                                // 归航路线
-                                lineX = 0x6B * 0x10;
-                                lineY = 0x47 * 0x10;
 
+                                LineDirection last = null; // 上一个位置
+                                for (int i = 0; i < line.size(); i++) {
+                                    // ↑↓，左边
+                                    // ←→，上边
+                                    Map.Entry<LineDirection, Byte> lineDirection = line.get(i);
+                                    int value = lineDirection.getValue() & 0xFF;
+                                    value *= 0x10;
+
+                                    LineDirection nextDir = (i + 1) < line.size() ? line.get(i + 1).getKey() : null;
+                                    if (i == 0) {
+                                        // 起点，从上半中心开始画
+                                        if (nextDir == null) {
+                                            // 起点，也是终点
+                                            break;
+                                        }
+//                                        switch (nextDir) {
+//                                            case UP -> {
+//                                                graphics.fillRect(lineX + 0x02, lineY + 0x08, 0x02, value - 0x08);
+//                                                lineY -= value;
+//                                            }
+//                                            case DOWN -> {
+//                                                graphics.fillRect(lineX + 0x02, lineY + 0x08, 0x02, value - 0x08);
+//                                                lineY += value;
+//                                            }
+//                                            case LEFT -> {
+//                                                graphics.fillRect(lineX + 0x08, lineY + 0x02, value - 0x08, 0x02);
+//                                                lineX -= value;
+//                                            }
+//                                            case RIGHT -> {
+//                                                graphics.fillRect(lineX + 0x08, lineY + 0x02, value - 0x08, 0x02);
+//                                                lineX += value;
+//                                            }
+//                                        }
+                                    }
+//                                    switch (last == null ? lineDirection.getKey() : last) {
+//                                        case UP -> {
+//                                            graphics.fillRect(lineX + 0x02, lineY + 0x08, 0x02, value);
+//                                            lineY -= value;
+//                                        }
+//                                        case DOWN -> {
+//                                            graphics.fillRect(lineX + 0x02, lineY + 0x08, 0x02, value);
+//                                            lineY += value;
+//                                        }
+//                                        case LEFT -> {
+//                                            graphics.fillRect(lineX + 0x08, lineY + 0x02, value, 0x02);
+//                                            lineX -= value;
+//                                        }
+//                                        case RIGHT -> {
+//                                            graphics.fillRect(lineX + 0x08, lineY + 0x02, value, 0x02);
+//                                            lineX += value;
+//                                        }
+//                                    }
+//                                    last = lineDirection.getKey();
+
+                                }
+
+
+                                graphics.setColor(Color.RED);
+                                // 归航路线
+                                lineX = 0x81 * 0x10;
+                                lineY = 0x38 * 0x10;
+                                graphics.fillRect(lineX + 0x08 + 0x02, lineY + 6, 0x04, 0x04);
+
+                                line = new ArrayList<>(worldMapEditor.getShippingLineBack().getKey());
+                                last = null; // 上一个位置
+                                for (int i = 0; i < line.size(); i++) {
+                                    // ↑↓，左边
+                                    // ←→，上边
+                                    Map.Entry<LineDirection, Byte> lineDirection = line.get(i);
+                                    LineDirection nextDir = (i + 1) < line.size() ? line.get(i + 1).getKey() : null;
+                                    if (i == 0) {
+
+                                        // 起点，从上半中心开始画
+                                        if (nextDir == null) {
+                                            // 起点，也是终点
+                                            break;
+                                        }
+                                    }
+                                }
 
                             }
 
@@ -1422,7 +1518,7 @@ public class Main extends JFrame {
                     // 显示宝藏
                     if (showTreasures.isSelected()) {
                         ITreasureEditor treasureEditor = metalMaxRe.getEditorManager().getEditor(ITreasureEditor.class);
-                        boxTreasures(graphics, showTreasures.isIndeterminate(), treasureEditor.getTreasures().stream().filter(treasure -> treasure.intMap() == selectMap).toList(), mapTileSets);
+                        boxTreasures(graphics, !showTreasures.isIndeterminate(), treasureEditor.getTreasures().stream().filter(treasure -> treasure.intMap() == selectMap).toList(), mapTileSets);
                     }
 
                     // 显示精灵
@@ -1511,6 +1607,26 @@ public class Main extends JFrame {
             mapImage.setIcon(imageIcon);
             SwingUtilities.invokeLater(() -> mapImage.scrollRectToVisible(mapImageScrollPoint));
         });
+        mapList.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.isControlDown()) {
+                    if (e.getKeyCode() == KeyEvent.VK_F) {
+                        // Ctrl + F
+                        // 焦点设置到搜索里
+                        mapFilter.requestFocus();
+                    } else if (e.getKeyCode() == KeyEvent.VK_G) {
+                        // Ctrl + G
+                        // 打开窗口跳转
+                        String map = JOptionPane.showInputDialog(Main.this,
+                                null, "地图跳转",
+                                JOptionPane.INFORMATION_MESSAGE,
+                                null, null, "FF").toString();
+                        mapList.setSelectedValue(map, true);
+                    }
+                }
+            }
+        });
 
         gotoPoint.addActionListener(e -> {
             // Ctrl + G
@@ -1520,15 +1636,74 @@ public class Main extends JFrame {
                 int deltaY = ((Number) mapImageSelectedPointY.getValue()).intValue() * 0x10;
 
                 Rectangle view = viewPort.getViewRect();
-                view.x = deltaX;
-                view.y = deltaY;
+                // 居中
+                view.x = Math.min(deltaY, deltaX - (view.width / 2));
+                view.y = Math.min(deltaY, deltaY - (view.height / 2));
 
                 mapImage.scrollRectToVisible(view);
+
+
             }
         });
         MiddleMoveMouseAdapter middleMoveMouseAdapter = new MiddleMoveMouseAdapter(mapImage);
         mapImage.addMouseListener(middleMoveMouseAdapter);
         mapImage.addMouseMotionListener(middleMoveMouseAdapter);
+        mapImage.addMouseListener(new MouseAdapter() {
+            private int selectedX;
+            private int selectedY;
+
+            private Integer lastSelectedMap;
+            private Integer lastSelectedX;
+            private Integer lastSelectedY;
+            private final BoxSelectedAdapter.SelectListener selectListener = new BoxSelectedAdapter.SelectListener() {
+                @Override
+                public void select(int x, int y) {
+                    selectedX = x;
+                    selectedY = y;
+                }
+            };
+
+            {
+                getSelectListeners().add(selectListener);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == 4) {
+                    // 后退键
+                    if (lastSelectedMap != null && lastSelectedX != null && lastSelectedY != null) {
+                        gotoPoint(lastSelectedMap, lastSelectedX, lastSelectedY);
+                    }
+                    return;
+                }
+
+                if (e.isControlDown() && e.getButton() == MouseEvent.BUTTON1) {
+                    // Ctrl + 左键
+                    IMapEntranceEditor treasureEditor = multipleMetalMaxRe.current().getEditorManager().getEditor(IMapEntranceEditor.class);
+                    int selectedMap = mapSelectListModel.getSelectedMap();
+                    MapEntrance mapEntrance = treasureEditor.getMapEntrance(selectedMap);
+
+                    int x = selectedX;
+                    int y = selectedY;
+
+                    for (Map.Entry<MapPoint, MapPoint> pointEntry : mapEntrance.getEntrances().entrySet()) {
+                        MapPoint key = pointEntry.getKey();
+                        if (key.intX() == x && key.intY() == y) {
+                            // 记录跳转前的坐标
+                            lastSelectedMap = mapSelectListModel.getSelectedMap();
+                            lastSelectedX = x;
+                            lastSelectedY = y;
+
+                            // 跳转
+                            MapPoint value = pointEntry.getValue();
+                            gotoPoint(value.intMap(), value.intX(), value.intY());
+                            return;
+                        }
+                    }
+
+                }
+            }
+        });
 
         selectListeners.add(new BoxSelectedAdapter.SelectListener() {
             @Override
@@ -1537,13 +1712,7 @@ public class Main extends JFrame {
                 int height = mapImage.getIcon().getIconHeight() / 0x10;
                 if (showFillTile.isSelected()) {
                     // 世界地图没有填充块
-                    if (mapSelectListModel.getSelectedMap() != 0x00) {
-                        x -= 0x03;
-                        y -= 0x03;
-
-                        width -= 0x06;
-                        height -= 0x06;
-                    } else {
+                    if (mapSelectListModel.getSelectedMap() == 0x00) {
                         // 世界地图，根据鼠标位置右边显示不同的tiles
                         for (Map.Entry<Rectangle, Integer> entry : WorldMapEditorImpl.DEFAULT_PIECES.entrySet()) {
                             if (entry.getKey().contains(x, y)) {
@@ -1562,17 +1731,11 @@ public class Main extends JFrame {
                                 } else {
                                     mapTileSetImage.setIcon(new ImageIcon(worldTileSets.getKey()));
                                 }
-
                                 break;
                             }
                         }
                     }
                 }
-//                if (x < 0 || x >= width || y < 0 || y >= height) {
-//                    mapImageSelectedPoint.setText("-- --");
-//                } else {
-//                    mapImageSelectedPoint.setText(String.format("%02X %02X", x, y));
-//                }
                 mapImageSelectedPointX.setValue(x);
                 mapImageSelectedPointY.setValue(y);
             }
@@ -1581,6 +1744,10 @@ public class Main extends JFrame {
         mapSelectedTileBox.addListener(new BoxSelectedAdapter.SelectListener() {
             @Override
             public void selected(int x, int y) {
+                if (mapSelectListModel.getSelectedMap() != 0x00 && showFillTile.isSelected()) {
+                    x -= 0x03;
+                    y -= 0x03;
+                }
                 for (BoxSelectedAdapter.SelectListener selectListener : new ArrayList<>(selectListeners)) {
                     selectListener.selected(x, y);
                 }
@@ -1588,6 +1755,10 @@ public class Main extends JFrame {
 
             @Override
             public void select(int x, int y) {
+                if (mapSelectListModel.getSelectedMap() != 0x00 && showFillTile.isSelected()) {
+                    x -= 0x03;
+                    y -= 0x03;
+                }
                 for (BoxSelectedAdapter.SelectListener selectListener : new ArrayList<>(selectListeners)) {
                     selectListener.select(x, y);
                 }
@@ -1732,7 +1903,10 @@ public class Main extends JFrame {
                 X00, X40, X80, XC0,
                 S00, S40, S80, SC0,
                 combinationA, combinationB,
-                mapMusic, monsterGroupIndex
+                mapMusic, monsterGroupIndex,
+
+                outLineTargetMap, outLineTargetX, outLineTargetY,
+                backLineTargetMap, backLineTargetX, backLineTargetY
         }) {
             spinner.setEditor(new HexJSpinnerEditor(spinner));
             spinner.addMouseWheelListener(ValueMouseWheelListener.getInstance());
@@ -1747,6 +1921,7 @@ public class Main extends JFrame {
         }
 
         setMapPropertiesPane();
+        setLinePane();
     }
 
     /**
@@ -2018,6 +2193,208 @@ public class Main extends JFrame {
         });
     }
 
+    /**
+     * 初始化航线界面
+     */
+    private void setLinePane() {
+        // 点击list也会跟着选中相应的按钮
+        outLineList.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                outLineSelected.setSelected(true);
+            }
+        });
+        backLineList.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                backLineSelected.setSelected(true);
+            }
+        });
+
+        DefaultListCellRenderer lineListCellRenderer = new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Map.Entry<LineDirection, Byte> entry = (Map.Entry<LineDirection, Byte>) value;
+                value = String.format("%s%s %d", index > 0x10 ? "(无效) " : "",
+                        switch (entry.getKey()) {
+                            case UP -> "向上移动";
+                            case DOWN -> "向下移动";
+                            case LEFT -> "向左移动";
+                            case RIGHT -> "向右移动";
+                            case END -> "结束";
+                        }, entry.getValue());
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        };
+        outLineList.setCellRenderer(lineListCellRenderer);
+        backLineList.setCellRenderer(lineListCellRenderer);
+
+        outLineList.setModel(new DefaultListModel<>());
+        backLineList.setModel(new DefaultListModel<>());
+
+        gotoOutLineTarget.addActionListener(e -> {
+            int map = ((Number) outLineTargetMap.getValue()).intValue();
+            int x = ((Number) outLineTargetX.getValue()).intValue();
+            int y = ((Number) outLineTargetY.getValue()).intValue();
+            gotoPoint(map, x, y);
+        });
+        gotoBackLineTarget.addActionListener(e -> {
+            int map = ((Number) backLineTargetMap.getValue()).intValue();
+            int x = ((Number) backLineTargetX.getValue()).intValue();
+            int y = ((Number) backLineTargetY.getValue()).intValue();
+            gotoPoint(map, x, y);
+        });
+        outLineTarget.addActionListener(e -> {
+            JList selectedLineList = getSelectedLineList();
+            if (selectedLineList == null) {
+                return;
+            }
+
+            outLineTarget.setEnabled(false);
+            getSelectListeners().add(new BoxSelectedAdapter.SelectListener() {
+                @Override
+                public void selected(int x, int y) {
+                    getSelectListeners().remove(this);
+                    outLineTarget.setEnabled(true);
+
+                    int option = JOptionPane.showConfirmDialog(Main.this,
+                            String.format("Map:%02X X:%02X Y:%02X", mapSelectListModel.getSelectedMap(), x, y),
+                            "出航目的地设置", JOptionPane.YES_NO_OPTION);
+                    if (option == JOptionPane.YES_OPTION) {
+                        outLineTargetMap.setValue(mapSelectListModel.getSelectedMap());
+                        outLineTargetX.setValue(x);
+                        outLineTargetY.setValue(y);
+                    }
+                }
+            });
+        });
+
+        backLineTarget.addActionListener(e -> {
+            JList selectedLineList = getSelectedLineList();
+            if (selectedLineList == null) {
+                return;
+            }
+
+            backLineTarget.setEnabled(false);
+            getSelectListeners().add(new BoxSelectedAdapter.SelectListener() {
+                @Override
+                public void selected(int x, int y) {
+                    getSelectListeners().remove(this);
+                    backLineTarget.setEnabled(true);
+
+                    int option = JOptionPane.showConfirmDialog(Main.this,
+                            String.format("Map:%02X X:%02X Y:%02X", mapSelectListModel.getSelectedMap(), x, y),
+                            "归航目的地设置", JOptionPane.YES_NO_OPTION);
+                    if (option == JOptionPane.YES_OPTION) {
+                        backLineTargetMap.setValue(mapSelectListModel.getSelectedMap());
+                        backLineTargetX.setValue(x);
+                        backLineTargetY.setValue(y);
+                    }
+                }
+            });
+        });
+
+
+        lineUp.addActionListener(e -> {
+            JList selectedLineList = getSelectedLineList();
+            if (selectedLineList == null) {
+                return;
+            }
+            DefaultListModel model = (DefaultListModel) selectedLineList.getModel();
+            model.addElement(Map.entry(LineDirection.UP, ((Number) lineMoveCount.getValue()).byteValue()));
+        });
+        lineDown.addActionListener(e -> {
+            JList selectedLineList = getSelectedLineList();
+            if (selectedLineList == null) {
+                return;
+            }
+            DefaultListModel model = (DefaultListModel) selectedLineList.getModel();
+            model.addElement(Map.entry(LineDirection.DOWN, ((Number) lineMoveCount.getValue()).byteValue()));
+        });
+        lineLeft.addActionListener(e -> {
+            JList selectedLineList = getSelectedLineList();
+            if (selectedLineList == null) {
+                return;
+            }
+            DefaultListModel model = (DefaultListModel) selectedLineList.getModel();
+            model.addElement(Map.entry(LineDirection.LEFT, ((Number) lineMoveCount.getValue()).byteValue()));
+        });
+        lineRight.addActionListener(e -> {
+            JList selectedLineList = getSelectedLineList();
+            if (selectedLineList == null) {
+                return;
+            }
+            DefaultListModel model = (DefaultListModel) selectedLineList.getModel();
+            model.addElement(Map.entry(LineDirection.RIGHT, ((Number) lineMoveCount.getValue()).byteValue()));
+        });
+
+        lineRemove.addActionListener(e -> {
+            JList selectedLineList = getSelectedLineList();
+            if (selectedLineList == null) {
+                return;
+            }
+            DefaultListModel model = (DefaultListModel) selectedLineList.getModel();
+            int[] selectedIndices = selectedLineList.getSelectedIndices();
+            for (int i = selectedIndices.length - 1; i >= 0; i--) {
+                model.remove(selectedIndices[i]);
+            }
+        });
+
+        saveLine.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+            MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
+
+            IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
+            Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> shippingLineOut = worldMapEditor.getShippingLineOut();
+            Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> shippingLineBack = worldMapEditor.getShippingLineBack();
+            // 清除现有的航线
+            shippingLineOut.getKey().clear();
+            shippingLineBack.getKey().clear();
+
+            // 读取出航和归航的路线
+            DefaultListModel outLineListModel = (DefaultListModel) outLineList.getModel();
+            DefaultListModel backLineListModel = (DefaultListModel) backLineList.getModel();
+            for (Object line : outLineListModel.toArray()) {
+                shippingLineOut.getKey().add((Map.Entry<LineDirection, Byte>) line);
+            }
+            for (Object line : backLineListModel.toArray()) {
+                shippingLineBack.getKey().add((Map.Entry<LineDirection, Byte>) line);
+            }
+
+            // 设置出航目的地
+            shippingLineOut.getValue().setMap(((Number) outLineTargetMap.getValue()).intValue());
+            shippingLineOut.getValue().setX(((Number) outLineTargetX.getValue()).intValue());
+            shippingLineOut.getValue().setY(((Number) outLineTargetY.getValue()).intValue());
+            // 设置归航目的地
+            shippingLineBack.getValue().setMap(((Number) backLineTargetMap.getValue()).intValue());
+            shippingLineBack.getValue().setX(((Number) backLineTargetX.getValue()).intValue());
+            shippingLineBack.getValue().setY(((Number) backLineTargetY.getValue()).intValue());
+
+        });
+
+        // 对JSpinner添加鼠标滚轮切换数值
+        for (JSpinner spinner : new JSpinner[]{
+                lineMoveCount
+        }) {
+            spinner.setModel(new SpinnerNumberModel(0, 0x00, 0xFF, 1));
+            spinner.setEditor(new FormatterJSpinnerEditor(spinner, NumberFormatter.getInstance()));
+            spinner.addMouseWheelListener(ValueMouseWheelListener.getInstance());
+        }
+    }
+
+    private JList getSelectedLineList() {
+        JList list = null;
+        if (outLineSelected.isSelected()) {
+            list = outLineList;
+        }
+        if (list == null && backLineSelected.isSelected()) {
+            list = backLineList;
+        }
+        return list;
+    }
+
     private synchronized void showLoadingDialog(MetalMaxRe metalMaxRe) {
         JProgressBar progressBar = new JProgressBar(0, metalMaxRe.getEditorManager().getCount());
         JOptionPane jOptionPane = new JOptionPane(progressBar, JOptionPane.INFORMATION_MESSAGE);
@@ -2051,22 +2428,22 @@ public class Main extends JFrame {
                     setTitle(String.format("MetalMaxRe [%s]", metalMaxRe.getBuffer().getVersion().getName()));
                 }
 
-                JPopupMenu fileMenu = getJMenuBar().getMenu(0x00).getPopupMenu();
-                for (Component component : fileMenu.getComponents()) {
-                    if (component instanceof JMenuItem jMenuItem) {
-                        if (Objects.equals(jMenuItem.getText(), "Save")) {
-                            // 对菜单 File->Save 按钮启用或禁用
-                            if (path == null) {
-                                jMenuItem.setEnabled(false);
-                                jMenuItem.setToolTipText("打开ROM后才能储存");
-                            } else {
-                                jMenuItem.setEnabled(true);
-                                jMenuItem.setToolTipText(null);
-                            }
-                            break;
-                        }
-                    }
-                }
+//                JPopupMenu fileMenu = getJMenuBar().getMenu(0x00).getPopupMenu();
+//                for (Component component : fileMenu.getComponents()) {
+//                    if (component instanceof JMenuItem jMenuItem) {
+//                        if (Objects.equals(jMenuItem.getText(), "Save")) {
+//                            // 对菜单 File->Save 按钮启用或禁用
+//                            if (path == null) {
+//                                jMenuItem.setEnabled(false);
+//                                jMenuItem.setToolTipText("打开ROM后才能储存");
+//                            } else {
+//                                jMenuItem.setEnabled(true);
+//                                jMenuItem.setToolTipText(null);
+//                            }
+//                            break;
+//                        }
+//                    }
+//                }
 
                 worldMapImage = null;
                 mapImages.clear();
@@ -2086,8 +2463,30 @@ public class Main extends JFrame {
                 for (int i = 1; i < maps.length; i++) {
                     maps[i] = String.format("%02X", i);
                 }
-
                 sharedEventTilesIndex.setModel(new DefaultComboBoxModel<>(maps));
+
+                IWorldMapEditor worldMapEditor = metalMaxRe.getEditorManager().getEditor(IWorldMapEditor.class);
+
+                DefaultListModel<Map.Entry<LineDirection, Byte>> outLineListModel = (DefaultListModel<Map.Entry<LineDirection, Byte>>) outLineList.getModel();
+                DefaultListModel<Map.Entry<LineDirection, Byte>> backLineListModel = (DefaultListModel<Map.Entry<LineDirection, Byte>>) backLineList.getModel();
+                // 清空列表，设置新的航线
+                outLineListModel.removeAllElements();
+                backLineListModel.removeAllElements();
+
+                // 将出航和归航航线添加到列表中
+                outLineListModel.addAll(worldMapEditor.getShippingLineOut().getKey());
+                backLineListModel.addAll(worldMapEditor.getShippingLineBack().getKey());
+
+                // 设置出目的地
+                CameraMapPoint outPoint = worldMapEditor.getShippingLineBack().getValue();
+                outLineTargetMap.setValue(outPoint.intMap());
+                outLineTargetX.setValue(outPoint.intX());
+                outLineTargetY.setValue(outPoint.intY());
+                // 设置归航目的地
+                CameraMapPoint backPoint = worldMapEditor.getShippingLineBack().getValue();
+                backLineTargetMap.setValue(backPoint.intMap());
+                backLineTargetX.setValue(backPoint.intX());
+                backLineTargetY.setValue(backPoint.intY());
 
                 // 加载完毕，关闭窗口
                 SwingUtilities.invokeLater(() -> {
@@ -2163,11 +2562,13 @@ public class Main extends JFrame {
         return selectListeners;
     }
 
-    public void gotoPoint(int map, int x, int y) {
+    public synchronized void gotoPoint(int map, int x, int y) {
         mapList.setSelectedIndex(map);
-        mapImageSelectedPointX.setValue(x);
-        mapImageSelectedPointY.setValue(y);
-        gotoPoint.doClick();
+        SwingUtilities.invokeLater(() -> {
+            mapImageSelectedPointX.setValue(x);
+            mapImageSelectedPointY.setValue(y);
+            gotoPoint.doClick();
+        });
     }
 
     private static void boxMovable(Graphics graphics, MapProperties mapProperties) {
@@ -2236,8 +2637,8 @@ public class Main extends JFrame {
         // 显示坦克
         for (Map.Entry<Tank, TankInitialAttribute> entry : tanks.entrySet()) {
             TankInitialAttribute tankInitialAttribute = entry.getValue();
-            if (tankInitialAttribute.intMap() != mapId || entry.getKey().getId() >= Tank.TAX_1.getId()) {
-                // 不在这个地图或出租坦克不显示
+            if (entry.getKey().getId() >= Tank.TAX_1.getId() || tankInitialAttribute.intMap() != mapId) {
+                // 出租坦克和不在这个地图不显示
                 continue;
             }
 

@@ -12,12 +12,35 @@ import java.util.Objects;
  * @author AFoolLove
  */
 public class MapPoint extends Point2B {
-    private byte map;
+    private Byte map;
 
     public MapPoint() {
+        super();
+    }
+
+    public MapPoint(Byte map) {
+        super();
+        setMap(map);
+    }
+
+    public MapPoint(byte x, byte y) {
+        super(x, y);
+        setMap(0);
+    }
+
+    public MapPoint(Byte map, byte x, byte y) {
+        super(x, y);
+        setMap(map);
     }
 
     public MapPoint(byte map, byte x, byte y) {
+        super(x, y);
+        setMap(map);
+    }
+
+    public MapPoint(@Range(from = 0x00, to = 0xEF) Byte map,
+                    @Range(from = 0x00, to = 0xFF) int x,
+                    @Range(from = 0x00, to = 0xFF) int y) {
         super(x, y);
         setMap(map);
     }
@@ -35,30 +58,36 @@ public class MapPoint extends Point2B {
 
     public MapPoint(@NotNull MapPoint mapPoint) {
         super(mapPoint);
-        setMap(map);
+        setMap(mapPoint.getMap());
     }
 
 
     public void setMap(@Range(from = 0x00, to = 0xEF) int map) {
-        setMap((byte) (map & 0xFF));
+        setMap(Byte.valueOf((byte) (map & 0xFF)));
     }
 
-    public void setMap(byte map) {
+    public void setMap(Byte map) {
         this.map = map;
     }
 
     @Range(from = 0x00, to = 0xEF)
-    public byte getMap() {
+    public Byte getMap() {
         return map;
     }
 
     @Range(from = 0x00, to = 0xEF)
-    public int intMap() {
-        return map & 0xFF;
+    public Integer intMap() {
+        if (getMap() == null) {
+            return null;
+        } else {
+            return map & 0xFF;
+        }
     }
 
     public void offsetMap(int map) {
-        this.map += map;
+        if (this.map != null) {
+            this.map = (byte) (this.map + map);
+        }
     }
 
     public MapPoint offset(int map, int x, int y) {
@@ -91,11 +120,16 @@ public class MapPoint extends Point2B {
         if (!super.equals(o)) {
             return false;
         }
-        return getMap() == mapPoint.getMap();
+        if (mapPoint.getMap() == null) {
+            // 没有设置地图时
+            // X和Y正确就行
+            return true;
+        }
+        return Objects.equals(getMap(), mapPoint.getMap());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getMap());
+        return Objects.hash(super.hashCode(), getMap() == null ? 0 : getMap());
     }
 }

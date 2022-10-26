@@ -6,10 +6,10 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 售货机商品编辑器
@@ -25,6 +25,7 @@ import java.util.List;
  * @author AFoolLove
  */
 public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IShopEditor {
+    private final DataAddress shopIndexAddress;
     private final DataAddress shopAddress;
     private final DataAddress vendorsAddress;
 
@@ -32,16 +33,21 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
      * 所有售货机的商品组合
      */
     private final List<VendorItemList> vendorItemLists = new ArrayList<>();
-    private final List<List<Byte>> shopLists = new ArrayList<>();
+    private final Map<Integer, List<Byte>> shopLists = new HashMap<>();
 
     public ShopEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
+                DataAddress.fromPRG(0x23CA5 - 0x10, 0x23CC4 - 0x10),
                 DataAddress.fromPRG(0x23CC5 - 0x10, 0x23EC7 - 0x10),
                 DataAddress.fromPRG(0x23EC8 - 0x10, 0x23FC4 - 0x10));
     }
 
-    public ShopEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress shopAddress, DataAddress vendorsAddress) {
+    public ShopEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                          @NotNull DataAddress shopIndexAddress,
+                          @NotNull DataAddress shopAddress,
+                          @NotNull DataAddress vendorsAddress) {
         super(metalMaxRe);
+        this.shopIndexAddress = shopIndexAddress;
         this.shopAddress = shopAddress;
         this.vendorsAddress = vendorsAddress;
     }
@@ -52,9 +58,31 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
         getShopLists().clear();
         getVendorItemLists().clear();
 
+        // 读取商店索引
+        // 不需要去重，都读取一次
+        position(getShopIndexAddress());
+        char[] shopIndexes = new char[0x10];
+        for (int i = 0; i < shopIndexes.length; i++) {
+            // 添加商品列表实例
+            ArrayList<Byte> shopItems = new ArrayList<>();
+            getShopLists().put(i, shopItems);
+
+            // 读取商品索引
+            shopIndexes[i] = getBuffer().getChar();
+            // 得到PRG索引
+            int index = getShopAddress().getStartAddress(shopIndexes[i] - 0x9CB5);
+            // 商品数量
+            int count = getBuffer().getPrgToInt(index++);
+            // 读取商店物品
+            for (int c = 0; c < count; c++, index++) {
+                shopItems.add(getBuffer().getPrg(index));
+            }
+        }
+
         // 读取商品清单
         position(getShopAddress());
-        while (getShopAddress().range(position())) {
+        List<List<Byte>> ut = new ArrayList<>();
+        while (ut.size() != 0x10) {
             // 读取商品数量
             int count = getBuffer().getToInt();
             // 读取商品
@@ -65,7 +93,7 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
             for (byte item : items) {
                 list.add(item);
             }
-            getShopLists().add(list);
+            ut.add(list);
         }
 
         byte[] items = new byte[getVendorTypeCount()];
@@ -132,60 +160,60 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
 //            }
 //        }
 
+//
+//        // 写入商品清单
+//        position(getShopAddress());
+//        ByteArrayOutputStream shopItems = new ByteArrayOutputStream(getShopAddress().length());
+//        for (List<Byte> shopList : getShopLists()) {
+//            if (shopList.isEmpty()) {
+//                // 空的清单
+//                continue;
+//            }
+//            shopItems.write(shopList.size());
+//            for (Byte aByte : shopList) {
+//                shopItems.write(aByte);
+//            }
+//        }
+//        getBuffer().put(shopItems.toByteArray(), 0, Math.min(shopItems.size(), getShopAddress().length()));
+//        if (shopItems.size() > getShopAddress().length()) {
+//            System.err.printf("商品编辑器：错误！超出了数据上限%d字节\n", getShopAddress().length() - shopItems.size());
+//        }
 
-        // 写入商品清单
-        position(getShopAddress());
-        ByteArrayOutputStream shopItems = new ByteArrayOutputStream(getShopAddress().length());
-        for (List<Byte> shopList : getShopLists()) {
-            if (shopList.isEmpty()) {
-                // 空的清单
-                continue;
-            }
-            shopItems.write(shopList.size());
-            for (Byte aByte : shopList) {
-                shopItems.write(aByte);
-            }
-        }
-        getBuffer().put(shopItems.toByteArray(), 0, Math.min(shopItems.size(), getShopAddress().length()));
-        if (shopItems.size() > getShopAddress().length()) {
-            System.err.printf("商品编辑器：错误！超出了数据上限%d字节\n", getShopAddress().length() - shopItems.size());
-        }
-
-        // 优先储存后加入的
-        byte[] items = new byte[getVendorTypeCount()];
-        byte[] counts = new byte[getVendorTypeCount()];
-        position(getVendorsAddress());
-        for (VendorItemList vendorItemList : getVendorItemLists().subList(0x00, Math.min(getVendorMaxCount(), getVendorItemLists().size()))) {
-            // 写入固定头
-            getBuffer().put(0x0D);
-            // 写入商品和数量
-            for (int i = 0; i < items.length; i++) {
-                VendorItem item = vendorItemList.get(i);
-                items[i] = item.getItem();
-                counts[i] = item.getCount();
-            }
-            getBuffer().put(items);
-            getBuffer().put(counts);
-            // 写入奖品
-            getBuffer().put(vendorItemList.getAward());
-        }
-
-        // 使用FF填充未使用的数据
-        int end = getVendorsAddress().getEndAddress(-position() + 0x10 + 1);
-        if (end >= 0) {
-            System.out.printf("售货机编辑器：剩余%d个空闲字节\n", end);
-            if (end != 0) {
-                byte[] fill = new byte[end];
-                Arrays.fill(fill, (byte) 0xFF);
-                getBuffer().put(fill);
-            }
-        } else {
-            System.err.printf("售货机编辑器：错误！超出了数据上限%d字节\n", -end);
-        }
+//        // 优先储存后加入的
+//        byte[] items = new byte[getVendorTypeCount()];
+//        byte[] counts = new byte[getVendorTypeCount()];
+//        position(getVendorsAddress());
+//        for (VendorItemList vendorItemList : getVendorItemLists().subList(0x00, Math.min(getVendorMaxCount(), getVendorItemLists().size()))) {
+//            // 写入固定头
+//            getBuffer().put(0x0D);
+//            // 写入商品和数量
+//            for (int i = 0; i < items.length; i++) {
+//                VendorItem item = vendorItemList.get(i);
+//                items[i] = item.getItem();
+//                counts[i] = item.getCount();
+//            }
+//            getBuffer().put(items);
+//            getBuffer().put(counts);
+//            // 写入奖品
+//            getBuffer().put(vendorItemList.getAward());
+//        }
+//
+//        // 使用FF填充未使用的数据
+//        int end = getVendorsAddress().getEndAddress(-position() + 0x10 + 1);
+//        if (end >= 0) {
+//            System.out.printf("售货机编辑器：剩余%d个空闲字节\n", end);
+//            if (end != 0) {
+//                byte[] fill = new byte[end];
+//                Arrays.fill(fill, (byte) 0xFF);
+//                getBuffer().put(fill);
+//            }
+//        } else {
+//            System.err.printf("售货机编辑器：错误！超出了数据上限%d字节\n", -end);
+//        }
     }
 
     @Override
-    public List<List<Byte>> getShopLists() {
+    public Map<Integer, List<Byte>> getShopLists() {
         return shopLists;
     }
 
@@ -207,5 +235,10 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
     @Override
     public DataAddress getShopAddress() {
         return shopAddress;
+    }
+
+    @Override
+    public DataAddress getShopIndexAddress() {
+        return shopIndexAddress;
     }
 }

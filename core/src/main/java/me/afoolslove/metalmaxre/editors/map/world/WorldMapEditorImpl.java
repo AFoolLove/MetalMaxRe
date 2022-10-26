@@ -79,13 +79,13 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
      * K: line<p>
      * V：目的地
      */
-    private final Map.Entry<List<MapPoint>, CameraMapPoint> shippingLineOut = Map.entry(new ArrayList<>(0x10), new CameraMapPoint());
+    private final Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> shippingLineOut = Map.entry(new ArrayList<>(0x10), new CameraMapPoint());
     /**
      * 归航的航线<p>
      * K: line<p>
      * V：目的地
      */
-    private final Map.Entry<List<MapPoint>, CameraMapPoint> shippingLineBack = Map.entry(new ArrayList<>(0x10), new CameraMapPoint());
+    private final Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> shippingLineBack = Map.entry(new ArrayList<>(0x10), new CameraMapPoint());
 
     public WorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -230,33 +230,26 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         // 读取出航航线
         position(getWorldMapOutLineAddress());
         // 坐标是相对路径，进入世界地图的坐标开始算起
-        List<MapPoint> linePoint = getShippingLineOut().getKey();
+        List<Map.Entry<LineDirection, Byte>> linePoint = getShippingLineOut().getKey();
         linePoint.clear();
 
+        // 读取0x10次方向
         while (linePoint.size() < 0x10) {
             byte action = getBuffer().get();
-            if (action == 0x5E) {
+            LineDirection direction = LineDirection.fromAction(action);
+            if (direction == null) {
+                // 航线错误
+                System.err.printf("世界地图编辑器：出航航线读取错误：未知的操作码 %02X\n", action);
+                continue;
+            }
+            if (direction == LineDirection.END) {
                 // 读取到目的地数据，立即结束
                 break;
             }
-            switch (action) {
-                case 0x50 -> { // 上
-                    // 移动格数
-                    linePoint.add(new MapPoint(0x00, 0x00, -getBuffer().getToInt()));
-                }
-                case 0x51 -> { // 下
-                    linePoint.add(new MapPoint(0x00, 0x00, getBuffer().getToInt()));
-                }
-                case 0x52 -> { // 左
-                    linePoint.add(new MapPoint(0x00, -getBuffer().getToInt(), 0x00));
-                }
-                case 0x53 -> { // 右
-                    linePoint.add(new MapPoint(0x00, getBuffer().getToInt(), 0x00));
-                }
-            }
+            linePoint.add(Map.entry(direction, getBuffer().get()));
         }
         if (linePoint.size() == 0x10) {
-            getBuffer().get(); // 所有路径点全部使用，跳过 0xE5
+            getBuffer().get(); // 所有路径点全部使用，跳过 0x5E
         }
         // 读取出航目的地
         getShippingLineOut().getValue().setCamera(getBuffer().get(), getBuffer().get(), getBuffer().get());
@@ -268,25 +261,17 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
 
         while (linePoint.size() < 0x10) {
             byte action = getBuffer().get();
-            if (action == 0x5E) {
+            LineDirection direction = LineDirection.fromAction(action);
+            if (direction == null) {
+                // 航线错误
+                System.err.printf("世界地图编辑器：归航航线读取错误：未知的操作码 %02X\n", action);
+                continue;
+            }
+            if (direction == LineDirection.END) {
                 // 读取到目的地数据，立即结束
                 break;
             }
-            switch (action) {
-                case 0x50 -> { // 上
-                    // 移动格数
-                    linePoint.add(new MapPoint(0x00, 0x00, -getBuffer().getToInt()));
-                }
-                case 0x51 -> { // 下
-                    linePoint.add(new MapPoint(0x00, 0x00, getBuffer().getToInt()));
-                }
-                case 0x52 -> { // 左
-                    linePoint.add(new MapPoint(0x00, -getBuffer().getToInt(), 0x00));
-                }
-                case 0x53 -> { // 右
-                    linePoint.add(new MapPoint(0x00, getBuffer().getToInt(), 0x00));
-                }
-            }
+            linePoint.add(Map.entry(direction, getBuffer().get()));
         }
         if (linePoint.size() == 0x10) {
             getBuffer().get(); // 所有路径点全部使用，跳过 0xE5
@@ -538,32 +523,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         // 写入出航路径点和目的地
         position(getWorldMapOutLineAddress());
         for (int i = 0, size = Math.min(0x10, getShippingLineOut().getKey().size()); i < size; i++) {
-            MapPoint linePoint = getShippingLineOut().getKey().get(i);
-            // X或Y等于0，就是另一个的方向
-            if (linePoint.getX() == 0x00) {
-                // 上或下移动
-                if ((linePoint.getY() & 0B1000_0000) == 0x00) {
-                    // 不是负数，下方移动
-                    getBuffer().put(0x51);
-                } else {
-                    // 是负数，上方移动
-                    getBuffer().put(0x50);
-                }
-                getBuffer().put(Math.abs(linePoint.getY())); // 得到正数的移动格数
-            } else {
-                // 左或右移动
-                if ((linePoint.getX() & 0B1000_0000) == 0x00) {
-                    // 不是负数，右方移动
-                    getBuffer().put(0x53);
-                } else {
-                    // 是负数，左方移动
-                    getBuffer().put(0x52);
-                }
-                getBuffer().put(Math.abs(linePoint.getX())); // 得到正数的移动格数
-            }
+            Map.Entry<LineDirection, Byte> linePoint = getShippingLineOut().getKey().get(i);
+            getBuffer().put(linePoint.getKey().getAction());
+            getBuffer().put(linePoint.getValue());
         }
         // 航线结束标志
-        getBuffer().put(0x5E);
+        getBuffer().put(LineDirection.END.getAction());
         // 写入出航目的地
         getBuffer().put(getShippingLineOut().getValue().getMap());
         getBuffer().put(getShippingLineOut().getValue().getCameraX());
@@ -572,32 +537,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         // 写入归航路径点和目的地
         position(getWorldMapBackLineAddress());
         for (int i = 0, size = Math.min(0x10, getShippingLineBack().getKey().size()); i < size; i++) {
-            MapPoint linePoint = getShippingLineBack().getKey().get(i);
-            // X或Y等于0，就是另一个的方向
-            if (linePoint.getX() == 0x00) {
-                // 上或下移动
-                if ((linePoint.getY() & 0B1000_0000) == 0x00) {
-                    // 不是负数，下方移动
-                    getBuffer().put(0x51);
-                } else {
-                    // 是负数，上方移动
-                    getBuffer().put(0x50);
-                }
-                getBuffer().put(Math.abs(linePoint.getY())); // 得到正数的移动格数
-            } else {
-                // 左或右移动
-                if ((linePoint.getX() & 0B1000_0000) == 0x00) {
-                    // 不是负数，右方移动
-                    getBuffer().put(0x53);
-                } else {
-                    // 是负数，左方移动
-                    getBuffer().put(0x52);
-                }
-                getBuffer().put(Math.abs(linePoint.getX())); // 得到正数的移动格数
-            }
+            Map.Entry<LineDirection, Byte> linePoint = getShippingLineBack().getKey().get(i);
+            getBuffer().put(linePoint.getKey().getAction());
+            getBuffer().put(linePoint.getValue());
         }
         // 航线结束标志
-        getBuffer().put(0x5E);
+        getBuffer().put(LineDirection.END.getAction());
         // 写入归航目的地
         getBuffer().put(getShippingLineBack().getValue().getMap());
         getBuffer().put(getShippingLineBack().getValue().getCameraX());
@@ -713,12 +658,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Override
-    public Map.Entry<List<MapPoint>, CameraMapPoint> getShippingLineOut() {
+    public Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineOut() {
         return shippingLineOut;
     }
 
     @Override
-    public Map.Entry<List<MapPoint>, CameraMapPoint> getShippingLineBack() {
+    public Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineBack() {
         return shippingLineBack;
     }
 }

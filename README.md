@@ -30,7 +30,7 @@
 
 | 编辑器类名                                                                                                     | 名称       | 状态          |
 |-----------------------------------------------------------------------------------------------------------|----------|-------------|
-| [IShopEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/IShopEditor.java)         | 商店编辑器    | 完成          |
+| [IShopEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/IShopEditor.java)         | 商店编辑器    | 未完成         |
 | [IComputerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/IComputerEditor.java)      | 计算机编辑器   | 完成          |
 | [IDataValueEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/data/IDataValueEditor.java)        | 数据值编辑器   | 完成          |
 | [IItemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)                 | 物品编辑器    | 完成          |

@@ -533,6 +533,65 @@ public class TileSetHelper {
         return image;
     }
 
+    public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,
+                                     int x00, int x40, int x80, int xC0,
+                                     Color[] colors) {
+        final Color[][] image = new Color[0x80][0x80];
+        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
+
+        byte[][][] tiles = new byte[4][0x40][0x10];
+        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
+        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
+        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
+        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
+
+        for (int i = 0; i < tiles.length; i++) { //
+            for (int j = 0; j < tiles[i].length; j++) { // 0x40 size
+                final byte[] bytes = tiles[i][j]; // 0x10 size
+                for (int b = 0; b < 0x08; b++) { // byte
+                    for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
+                        int l = (bytes[b] & d) >>> (7 - k);
+                        l += ((bytes[b + 0x08] & d) >>> (7 - k)) << 1;
+
+                        int y = (i * 0x20) + ((j / 0x10) * 0x08) + b;
+                        int x = ((j % 0x10) * 0x08) + k;
+                        image[y][x] = colors[l];
+                    }
+                }
+            }
+        }
+        return image;
+    }
+
+    public static byte[][] generateMonsterModel(@NotNull MetalMaxRe metalMaxRe,
+                                                int x00, int x40, int x80, int xC0) {
+        final byte[][] image = new byte[0x80][0x80];
+        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
+
+        byte[][][] tiles = new byte[4][0x40][0x10];
+        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
+        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
+        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
+        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
+
+        for (int i = 0; i < tiles.length; i++) { //
+            for (int j = 0; j < tiles[i].length; j++) { // 0x40 size
+                final byte[] bytes = tiles[i][j]; // 0x10 size
+                for (int b = 0; b < 0x08; b++) { // byte
+                    for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
+                        int l = (bytes[b] & d) >>> (7 - k);
+                        l += ((bytes[b + 0x08] & d) >>> (7 - k)) << 1;
+
+                        int y = (i * 0x20) + ((j / 0x10) * 0x08) + b;
+                        int x = ((j % 0x10) * 0x08) + k;
+                        image[y][x] = (byte) l;
+                    }
+                }
+            }
+        }
+        return image;
+    }
+
 
     public static BufferedImage generateMapImage(@NotNull MetalMaxRe metalMaxRe, int mapId) {
         IMapEditor mapEditor = metalMaxRe.getEditorManager().getEditor(IMapEditor.class);

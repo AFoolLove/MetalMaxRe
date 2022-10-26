@@ -56,12 +56,12 @@ public interface IWorldMapEditor extends IRomEditor {
     /**
      * @return 出航路径点和目的地
      */
-    Map.Entry<List<MapPoint>, CameraMapPoint> getShippingLineOut();
+    Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineOut();
 
     /**
      * @return 归航路径点和目的地
      */
-    Map.Entry<List<MapPoint>, CameraMapPoint> getShippingLineBack();
+    Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineBack();
 
     /**
      * 世界地图图块索引偏移地址

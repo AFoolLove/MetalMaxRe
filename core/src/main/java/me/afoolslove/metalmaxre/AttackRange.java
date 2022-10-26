@@ -28,4 +28,16 @@ public enum AttackRange {
     public byte getValue() {
         return value;
     }
+
+    /**
+     * 通过值获取
+     */
+    public static AttackRange fromValue(int value) {
+        for (AttackRange attackRange : values()) {
+            if ((attackRange.value & 0xFF) == value) {
+                return attackRange;
+            }
+        }
+        return null;
+    }
 }

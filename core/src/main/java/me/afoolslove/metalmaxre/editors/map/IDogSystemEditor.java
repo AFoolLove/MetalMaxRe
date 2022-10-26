@@ -67,7 +67,7 @@ public interface IDogSystemEditor extends IRomEditor {
     }
 
     /**
-     * 获取所有城镇对应地图
+     * 获取所有地图和进入地图后开启的事件代码
      * <p>
      * *list的索引为城镇索引，值为对应的地图
      *
@@ -77,27 +77,19 @@ public interface IDogSystemEditor extends IRomEditor {
     List<SingleMapEntry<Byte, Byte>> getTowns();
 
     /**
-     * 获取指定城镇对应的地图
+     * 获取指定位置的地图和进入地图后开启的事件代码
      *
-     * @param townIndex 城镇索引
-     * @return 指定城镇对应的地图
+     * @param townIndex 索引
+     * @return 指定位置的地图和进入地图后开启的事件代码
      */
     default SingleMapEntry<Byte, Byte> getTown(int townIndex) {
         return getTowns().get(townIndex);
     }
 
     /**
-     * 获取城镇的附属地图，进入城镇的附属地图相当于进入该城镇
+     * 获取地图和进入地图后开启的事件代码
      *
-     * @return 获取城镇的附属地图
-     */
-    @NotNull
-    List<SingleMapEntry<Byte, Byte>> getTownSeries();
-
-    /**
-     * 获取城镇对应的地图地址
-     *
-     * @return 城镇对应的地图地址
+     * @return 地图和进入地图的事件代码
      */
     @NotNull
     DataAddress getTownsAddress();

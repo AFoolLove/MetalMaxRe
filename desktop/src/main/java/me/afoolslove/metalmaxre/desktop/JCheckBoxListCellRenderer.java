@@ -13,6 +13,7 @@ import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
 import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.editors.monster.IMonsterEditor;
+import me.afoolslove.metalmaxre.editors.monster.MonsterModelImpl;
 import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
 import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
 import me.afoolslove.metalmaxre.editors.player.IPlayerExpEditor;
@@ -48,7 +49,8 @@ public class JCheckBoxListCellRenderer extends JCheckBox implements ListCellRend
             Map.entry(IMapEntranceEditor.class, "边界和出入口编辑器"),
             Map.entry(ITileSetEditor.class, "图块编辑器"),
             Map.entry(ITextEditor.class, "文本编辑器"),
-            Map.entry(IMonsterEditor.class, "怪物编辑器")
+            Map.entry(IMonsterEditor.class, "怪物编辑器"),
+            Map.entry(MonsterModelImpl.class, "怪物模型编辑器")
     );
 
     public JCheckBoxListCellRenderer(MultipleMetalMaxRe multipleMetalMaxRe) {

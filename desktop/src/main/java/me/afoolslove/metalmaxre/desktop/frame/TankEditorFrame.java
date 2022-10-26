@@ -6,6 +6,8 @@ import me.afoolslove.metalmaxre.desktop.HexFormatter;
 import me.afoolslove.metalmaxre.desktop.Main;
 import me.afoolslove.metalmaxre.desktop.ValueMouseWheelListener;
 import me.afoolslove.metalmaxre.desktop.adapter.BoxSelectedAdapter;
+import me.afoolslove.metalmaxre.desktop.adapter.ComboBoxEnterSelectedAdapter;
+import me.afoolslove.metalmaxre.desktop.adapter.FocusSelectAllAdapter;
 import me.afoolslove.metalmaxre.desktop.formatter.NumberFormatter;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.tank.ITankEditor;
@@ -17,7 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -239,41 +242,14 @@ public class TankEditorFrame extends AbstractEditorFrame {
             spinner.addMouseWheelListener(ValueMouseWheelListener.getInstance());
         }
 
-        // 得到焦点后全选文本
-        FocusAdapter focusSelectAll = new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (e.getComponent() instanceof JTextField textField) {
-                    textField.selectAll();
-                }
-            }
-        };
         // 为装备和道具可以输入id后直接设置
         for (JComboBox<?> comboBox : new JComboBox<?>[]{
                 equipment0, equipment1,
                 equipment2, equipment3,
                 equipment4, equipment5
         }) {
-            comboBox.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-                @Override
-                public void keyReleased(KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        // 按下回车截取前两个字符作为为十六进制转换为数字并索引到该位置
-                        String hexIndex = comboBox.getEditor().getItem().toString();
-                        hexIndex = hexIndex.trim();
-                        int index = comboBox.getSelectedIndex();
-                        try {
-                            index = Integer.parseInt(hexIndex, 16);
-                        } catch (NumberFormatException ignored) {
-                        }
-                        // 不能太小，不能太大
-                        index = Math.max(0x00, index);
-                        index = Math.min(index, comboBox.getModel().getSize() - 1);
-                        comboBox.setSelectedIndex(index);
-                    }
-                }
-            });
-            comboBox.getEditor().getEditorComponent().addFocusListener(focusSelectAll);
+            comboBox.getEditor().getEditorComponent().addKeyListener(new ComboBoxEnterSelectedAdapter(comboBox));
+            FocusSelectAllAdapter.addAdapter(comboBox.getEditor().getEditorComponent());
         }
         itemListener.itemStateChanged(new ItemEvent(tanks, 0, null, ItemEvent.SELECTED));
     }

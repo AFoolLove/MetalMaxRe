@@ -348,7 +348,7 @@
                                 </constraints>
                                 <properties>
                                   <foreground color="-4521984"/>
-                                  <text value="&lt;html&gt;注意：一定要有对话的精灵&lt;br&gt;否则会因为找不到精灵进入假死状态&lt;/html&gt;"/>
+                                  <text value="&lt;html&gt;注意：使用时一定要有对话的精灵&lt;br&gt;否则会因为找不到精灵进入假死状态&lt;/html&gt;"/>
                                 </properties>
                               </component>
                               <scrollpane id="44096">

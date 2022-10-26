@@ -34,8 +34,8 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
 
     public DataValueEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
-                DataAddress.fromPRG(0x220FA - 0x10, 0x22130 - 0x10),
-                DataAddress.fromPRG(0x22130 - 0x10, 0x22209 - 0x10),
+                DataAddress.fromPRG(0x220FA - 0x10, 0x22140 - 0x10),
+                DataAddress.fromPRG(0x22140 - 0x10, 0x22209 - 0x10),
                 DataAddress.fromPRG(0x2220A - 0x10, 0x22283 - 0x10)
         );
     }

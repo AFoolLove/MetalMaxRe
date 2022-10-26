@@ -86,29 +86,59 @@ public class MonsterModelEditorFrame extends AbstractEditorFrame {
                 xXX[0] = ts & 0xFF;
             }
 
-//            int modelPaletteIndex = monsterModel.getModelPaletteIndex()[monsterId] & 0xFF;
-//            if ((modelPaletteIndex & 0B1000_0000) != 0) {
-//                // 双调色板
-//                modelPaletteIndex &= 0x7F;
-//                byte[] palette = new byte[0x03 + 0x03];
-//                getMetalMaxRe().getBuffer().get(monsterModel.getMonsterModelPalette().getStartAddress(modelPaletteIndex * 0x03), palette);
-//                for (int i = 0; i < palette.length; i++) {
-//                    colors[i][i % 3] = SystemPalette.DEFAULT_SYSTEM_PALETTE.getColor(palette[i]);
-//                }
-//            } else {
-//                // 单调色板
-//                byte[] palette = new byte[0x03];
-//                getMetalMaxRe().getBuffer().get(monsterModel.getMonsterModelPalette().getStartAddress(modelPaletteIndex * 0x03), palette);
-//                for (int i = 0; i < palette.length; i++) {
-//                    colors[0][i] = SystemPalette.DEFAULT_SYSTEM_PALETTE.getColor(palette[i]);
+            // TODO 双调色板怪物的调色板索引在怪物图像数据末尾3字节
+            byte[][] monsterModelColor;
+            int modelPaletteIndex = monsterModel.getModelPaletteIndex()[monsterId] & 0xFF;
+            boolean isDoublePalette = (modelPaletteIndex & 0B1000_0000) != 0;
+            if (isDoublePalette) {
+                // 双调色板
+                modelPaletteIndex &= 0x7F;
+                modelPaletteIndex <<= 1;
+
+                // 双调色板索引
+                byte[] palettes = new byte[2];
+                System.arraycopy(monsterModel.getModelDoublePalette(), modelPaletteIndex, palettes, 0, palettes.length);
+
+
+                byte[] palette = new byte[0x03 + 0x03];
+                getMetalMaxRe().getBuffer().getPrg(monsterModel.getMonsterModelPalette().getStartAddress(palettes[0] * 0x03), palette, 0, 3);
+                getMetalMaxRe().getBuffer().getPrg(monsterModel.getMonsterModelPalette().getStartAddress(palettes[1] * 0x03), palette, 3, 3);
+
+                for (int y = 0; y < 2; y++) {
+                    for (int i = 0; i < 3; i++) {
+                        colors[y][1 + i] = SystemPalette.DEFAULT_SYSTEM_PALETTE.getColor(palette[i]);
+                    }
+                }
+            } else {
+                // 单调色板
+                byte[] palette = new byte[0x03];
+                getMetalMaxRe().getBuffer().getPrg(monsterModel.getMonsterModelPalette().getStartAddress(modelPaletteIndex * 0x03), palette);
+                for (int i = 0; i < palette.length; i++) {
+                    colors[0][1 + i] = SystemPalette.DEFAULT_SYSTEM_PALETTE.getColor(palette[i]);
+                }
+            }
+//            monsterModelColor = TileSetHelper.generateMonsterModel(getMetalMaxRe(), xXX[0], xXX[1], xXX[2], xXX[3]);
+//
+//            byte[][] monsterModelTile = new byte[0x100][0x40];
+//            for (int y = 0; y < 0x10; y++) {
+//                for (int x = 0; x < 0x10; x++) {
+//                    int tmpX = x * 8;
+//                    int tmpY = y * 8;
+//                    byte[] bytes = new byte[0x40];
+//                    for (int offsetY = 0; offsetY < 4; offsetY++) {
+//                        for (int offsetX = 0; offsetX < 4; offsetX++) {
+//                            bytes[(offsetY * 4) + offsetX] = monsterModelColor[tmpY + offsetY][tmpX + offsetX];
+//                        }
+//                    }
+//                    monsterModelTile[(y * 0x10) + x] = bytes;
 //                }
 //            }
-
-
-            BufferedImage bufferedImage1 = BufferedImageUtils.fromColors(TileSetHelper.generate(getMetalMaxRe(), xXX[0], xXX[1], xXX[2], xXX[3], colors));
-//            JLabel label = new JLabel(new ImageIcon(bufferedImage1));
-//            JOptionPane.showMessageDialog(this, label);
-
+            BufferedImage bufferedImage1;
+            if (isDoublePalette) {
+                bufferedImage1 = BufferedImageUtils.fromColors(TileSetHelper.generate(getMetalMaxRe(), xXX[0], xXX[1], xXX[2], xXX[3], colors));
+            } else {
+                bufferedImage1 = BufferedImageUtils.fromColors(TileSetHelper.generate(getMetalMaxRe(), xXX[0], xXX[1], xXX[2], xXX[3], colors[0]));
+            }
             java.util.List<BufferedImage> diced = TileSetHelper.diced(0x08, 0x08, bufferedImage1);
 
             if (modelIndex >= 0x48) {
@@ -162,7 +192,6 @@ public class MonsterModelEditorFrame extends AbstractEditorFrame {
             }
 
             graphics1.dispose();
-
 
             MonsterModelEditorFrame.this.monsterImage.setIcon(new ImageIcon(monsterImage));
         });

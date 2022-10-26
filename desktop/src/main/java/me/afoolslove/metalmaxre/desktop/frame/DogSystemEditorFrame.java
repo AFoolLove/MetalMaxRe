@@ -5,51 +5,54 @@ import me.afoolslove.metalmaxre.desktop.HexJSpinnerEditor;
 import me.afoolslove.metalmaxre.desktop.Main;
 import me.afoolslove.metalmaxre.desktop.ValueMouseWheelListener;
 import me.afoolslove.metalmaxre.desktop.adapter.BoxSelectedAdapter;
+import me.afoolslove.metalmaxre.desktop.adapter.ComboBoxEnterSelectedAdapter;
+import me.afoolslove.metalmaxre.desktop.adapter.FocusSelectAllAdapter;
 import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.IDogSystemEditor;
+import me.afoolslove.metalmaxre.utils.ResourceManager;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
+import org.jdesktop.swingx.JXTable;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
 public class DogSystemEditorFrame extends AbstractEditorFrame {
 
     private JPanel contentPane;
-    private JSpinner townMap00;
     private JSpinner townX00;
     private JSpinner townY00;
     private JSpinner townX01;
-    private JSpinner townMap01;
     private JSpinner townY01;
-    private JSpinner townMap02;
     private JSpinner townY02;
     private JSpinner townX02;
     private JSpinner townY03;
-    private JSpinner townMap03;
     private JSpinner townX03;
-    private JSpinner townMap04;
     private JSpinner townX04;
     private JSpinner townY04;
     private JSpinner townY05;
     private JSpinner townX05;
-    private JSpinner townMap05;
-    private JSpinner townMap06;
     private JSpinner townY06;
     private JSpinner townX06;
     private JSpinner townX07;
-    private JSpinner townMap07;
     private JSpinner townY07;
-    private JSpinner townMap08;
     private JSpinner townX08;
     private JSpinner townY08;
     private JSpinner townY09;
-    private JSpinner townMap09;
     private JSpinner townX09;
     private JSpinner townX0A;
-    private JSpinner townMap0A;
     private JSpinner townY0A;
-    private JSpinner townMap0B;
     private JSpinner townY0B;
     private JSpinner townX0B;
     private JButton gotoTown00;
@@ -117,6 +120,7 @@ public class DogSystemEditorFrame extends AbstractEditorFrame {
     private JButton gotoTeleport0B;
     private JButton gotoTeleport0C;
     private JButton save;
+    private JXTable mapEvents;
 
     public DogSystemEditorFrame(@NotNull Frame frame, @NotNull MetalMaxRe metalMaxRe) {
         super(frame, metalMaxRe);
@@ -127,6 +131,76 @@ public class DogSystemEditorFrame extends AbstractEditorFrame {
     @Override
     protected void createLayout() {
         IDogSystemEditor dogSystemEditor = getMetalMaxRe().getEditorManager().getEditor(IDogSystemEditor.class);
+
+        Map<Integer, String> codes = new HashMap<>();
+        // 读取字库
+        InputStream resourceAsStream = ResourceManager.getAsStream("/event_codes.txt");
+        if (resourceAsStream != null) {
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream, StandardCharsets.UTF_8))) {
+                bufferedReader.lines().forEach(line -> {
+                    int code = Integer.parseInt(line, 0, 2, 16);
+                    codes.put(code, line);
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        final String[] codeStrings = new String[0x100];
+        for (int i = 0; i < codeStrings.length; i++) {
+            String s = codes.get(i);
+            if (s == null) {
+                codeStrings[i] = String.format("%02X", i);
+            } else {
+                codeStrings[i] = s;
+            }
+        }
+
+        String[][] towns = new String[0x17][];
+        for (int i = 0; i < towns.length; i++) {
+            SingleMapEntry<Byte, Byte> town = dogSystemEditor.getTowns().get(i);
+            towns[i] = new String[]{
+                    String.format("%02X", town.getKey()),
+                    String.format("%02X", town.getValue())
+            };
+        }
+        mapEvents.setModel(new DefaultTableModel(towns, new String[]{
+                "地图", "事件"
+        }));
+        // 设置地图列宽度只需要64，大了没用
+
+        // 定制第二列编辑时的组件
+        mapEvents.getColumn(0x01).setCellEditor(new DefaultCellEditor(new JTextField()) {
+            private final JComboBox<String> comboBox = new JComboBox<>();
+
+            {
+                comboBox.setEditable(true);
+                comboBox.setModel(new DefaultComboBoxModel<>(codeStrings));
+                FocusSelectAllAdapter.addAdapter(comboBox.getEditor().getEditorComponent());
+                comboBox.getEditor().getEditorComponent().addKeyListener(new ComboBoxEnterSelectedAdapter(comboBox));
+            }
+
+            @Override
+            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                comboBox.setSelectedIndex(Integer.parseInt(value.toString(), 16));
+                return comboBox;
+            }
+
+            @Override
+            public Object getCellEditorValue() {
+                return String.format("%02X", comboBox.getSelectedIndex());
+            }
+        });
+        // 定制第二列控件显示时的文本
+        mapEvents.getColumn(0x01).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                value = codeStrings[Integer.parseInt(value.toString(), 16)];
+                return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            }
+        });
+        mapEvents.getColumn(0).setPreferredWidth(64);
+        mapEvents.getColumn(1).setPreferredWidth(448);
+
 
         gotoTown00.addActionListener(createGoto("设置传真城镇一坐标", null, townX00, townY00, gotoTown00));
         gotoTown01.addActionListener(createGoto("设置传真城镇二坐标", null, townX01, townY01, gotoTown01));
@@ -155,13 +229,6 @@ public class DogSystemEditorFrame extends AbstractEditorFrame {
         gotoTeleport0B.addActionListener(createGoto("设置传送机器城镇十二坐标", teleportMap0B, teleportX0B, teleportY0B, gotoTeleport0B));
         gotoTeleport0C.addActionListener(createGoto("设置传送机器传送失败坐标", teleportMap0C, teleportX0C, teleportY0C, gotoTeleport0C));
 
-
-        JSpinner[] townMapJSpinner = {
-                townMap00, townMap01, townMap02,
-                townMap03, townMap04, townMap05,
-                townMap06, townMap07, townMap08,
-                townMap09, townMap0A, townMap0B
-        };
         JSpinner[] townXJSpinner = {
                 townX00, townX01, townX02,
                 townX03, townX04, townX05,
@@ -195,24 +262,32 @@ public class DogSystemEditorFrame extends AbstractEditorFrame {
         };
 
         save.addActionListener(e -> {
+            // 保存犬系统目的地
             for (int i = 0; i < dogSystemEditor.getTownMaxCount(); i++) {
-                dogSystemEditor.getTown(i).setKey((byte) (((Number) townMapJSpinner[i].getValue()).intValue() & 0xFF));
                 CameraMapPoint townLocation = dogSystemEditor.getTownLocation(i);
-                townLocation.setX((byte) (((Number) townXJSpinner[i].getValue()).intValue() & 0xFF));
-                townLocation.setY((byte) (((Number) townYJSpinner[i].getValue()).intValue() & 0xFF));
+                townLocation.setX(((Number) townXJSpinner[i].getValue()).intValue());
+                townLocation.setY(((Number) townYJSpinner[i].getValue()).intValue());
             }
-
+            // 保存传送装置目的地
             for (int i = 0; i < (dogSystemEditor.getTeleportMaxCount() - 0x03); i++) {
                 CameraMapPoint teleportLocation = dogSystemEditor.getTeleportLocation(i);
-                teleportLocation.setMap((byte) (((Number) teleportMapJSpinner[i].getValue()).intValue() & 0xFF));
-                teleportLocation.setX((byte) (((Number) teleportXJSpinner[i].getValue()).intValue() & 0xFF));
-                teleportLocation.setY((byte) (((Number) teleportYJSpinner[i].getValue()).intValue() & 0xFF));
+                teleportLocation.setMap(((Number) teleportMapJSpinner[i].getValue()).intValue());
+                teleportLocation.setCameraX(((Number) teleportXJSpinner[i].getValue()).intValue());
+                teleportLocation.setCameraY(((Number) teleportYJSpinner[i].getValue()).intValue());
+            }
+            // 保存进入地图事件
+            DefaultTableModel tableModel = (DefaultTableModel) mapEvents.getModel();
+            Vector<Vector> dataVector = tableModel.getDataVector();
+            for (int i = 0; i < dataVector.size(); i++) {
+                Vector vector = dataVector.elementAt(i);
+                byte k = (byte) Integer.parseInt(vector.get(0).toString(), 16);
+                byte v = (byte) Integer.parseInt(vector.get(1).toString(), 16);
+                SingleMapEntry<Byte, Byte> town = dogSystemEditor.getTown(i);
+                town.set(k, v);
             }
         });
 
         for (int i = 0; i < dogSystemEditor.getTownMaxCount(); i++) {
-            townMapJSpinner[i].setValue(dogSystemEditor.getTown(i).getKey() & 0xFF);
-
             CameraMapPoint townLocation = dogSystemEditor.getTownLocation(i);
             townXJSpinner[i].setValue(townLocation.intX());
             townYJSpinner[i].setValue(townLocation.intY());
@@ -226,18 +301,18 @@ public class DogSystemEditorFrame extends AbstractEditorFrame {
 
         // 对JSpinner添加十六进制编辑器和鼠标滚轮切换数值
         for (JSpinner spinner : new JSpinner[]{
-                townMap00, townX00, townY00,
-                townMap01, townX01, townY01,
-                townMap02, townX02, townY02,
-                townMap03, townX03, townY03,
-                townMap04, townX04, townY04,
-                townMap05, townX05, townY05,
-                townMap06, townX06, townY06,
-                townMap07, townX07, townY07,
-                townMap08, townX08, townY08,
-                townMap09, townX09, townY09,
-                townMap0A, townX0A, townY0A,
-                townMap0B, townX0B, townY0B,
+                townX00, townY00,
+                townX01, townY01,
+                townX02, townY02,
+                townX03, townY03,
+                townX04, townY04,
+                townX05, townY05,
+                townX06, townY06,
+                townX07, townY07,
+                townX08, townY08,
+                townX09, townY09,
+                townX0A, townY0A,
+                townX0B, townY0B,
                 teleportMap00, teleportX00, teleportY00,
                 teleportMap01, teleportX01, teleportY01,
                 teleportMap02, teleportX02, teleportY02,

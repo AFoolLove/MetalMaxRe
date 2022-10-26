@@ -4,6 +4,7 @@ import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IShopEditor extends IRomEditor {
     /**
@@ -23,7 +24,7 @@ public interface IShopEditor extends IRomEditor {
     /**
      * @return 获取所有商店的商品列表
      */
-    List<List<Byte>> getShopLists();
+    Map<Integer, List<Byte>> getShopLists();
 
     /**
      * 通过索引获取商店的商品列表
@@ -56,6 +57,11 @@ public interface IShopEditor extends IRomEditor {
      * @return 商店数据地址
      */
     DataAddress getShopAddress();
+
+    /**
+     * @return 商店数据索引地址
+     */
+    DataAddress getShopIndexAddress();
 
     /**
      * @return 售货机数据地址

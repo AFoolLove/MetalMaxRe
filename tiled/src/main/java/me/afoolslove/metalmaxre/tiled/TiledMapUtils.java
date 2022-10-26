@@ -9,6 +9,7 @@ import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
 import me.afoolslove.metalmaxre.editors.map.events.WorldEventTile;
 import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
+import me.afoolslove.metalmaxre.editors.map.world.LineDirection;
 import me.afoolslove.metalmaxre.editors.monster.IMonsterEditor;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.Sprite;
@@ -582,22 +583,7 @@ public class TiledMapUtils {
         MapObject backLineObject = new MapObject(0x6B * 0x10, 0x47 * 0x10, 0, 0, 0);
         backLineObject.setId(nextObjectId++);
         backLineObject.setPolyline(new Polyline());
-
-        StringBuilder backLinePoints = new StringBuilder("0,0");
-        List<MapPoint> backLine = worldMapEditor.getShippingLineBack().getKey();
-        Rectangle lastOffsetLinePoint = new Rectangle();
-        for (MapPoint linePoint : backLine) {
-            // 注：& 0xFF 负数会变成正数，所以使用强制转换保留负数
-            lastOffsetLinePoint.setLocation(
-                    (int) lastOffsetLinePoint.getX() + (((int) linePoint.getX()) * 0x10),
-                    (int) lastOffsetLinePoint.getY() + (((int) linePoint.getY()) * 0x10)
-            );
-            backLinePoints.append(String.format(" %d,%d",
-                    (int) lastOffsetLinePoint.getX(),
-                    (int) lastOffsetLinePoint.getY()
-            ));
-        }
-        backLineObject.getPolyline().setPoints(backLinePoints.toString());
+        backLineObject.getPolyline().setPoints(lineToPoints(0, 0, worldMapEditor.getShippingLineBack().getKey()));
 
         MapPoint backLinePoint = worldMapEditor.getShippingLineBack().getValue();
         backLineObject.setName(String.format("%02X:%02X:%02X", backLinePoint.getMap(), backLinePoint.intX(), backLinePoint.intY()));
@@ -607,24 +593,7 @@ public class TiledMapUtils {
         MapObject outLineObject = new MapObject(0x81 * 0x10, 0x38 * 0x10, 0, 0, 0);
         outLineObject.setId(nextObjectId++);
         outLineObject.setPolyline(new Polyline());
-
-        StringBuilder outLinePoints = new StringBuilder("0,0");
-        List<MapPoint> outLine = worldMapEditor.getShippingLineOut().getKey();
-
-        lastOffsetLinePoint.setLocation(0, 0);
-        for (MapPoint linePoint : outLine) {
-            // 注：& 0xFF 负数会变成正数，所以使用强制转换保留负数
-            lastOffsetLinePoint.setLocation(
-                    (int) lastOffsetLinePoint.getX() + (((int) linePoint.getX()) * 0x10),
-                    (int) lastOffsetLinePoint.getY() + (((int) linePoint.getY()) * 0x10)
-            );
-            outLinePoints.append(String.format(" %d,%d",
-                    (int) lastOffsetLinePoint.getX(),
-                    (int) lastOffsetLinePoint.getY()
-            ));
-        }
-
-        outLineObject.getPolyline().setPoints(outLinePoints.toString());
+        outLineObject.getPolyline().setPoints(lineToPoints(0, 0, worldMapEditor.getShippingLineOut().getKey()));
 
         MapPoint outLinePoint = worldMapEditor.getShippingLineOut().getValue();
         outLineObject.setName(String.format("%02X:%02X:%02X", outLinePoint.getMap(), outLinePoint.intX(), outLinePoint.intY()));
@@ -1534,33 +1503,38 @@ public class TiledMapUtils {
                         }
                         break;
                     case "line":
-                        List<MapObject> lineObjects = objectGroup.getObjects();
+                        List<MapObject> lineObjects = new ArrayList<>(objectGroup.getObjects());
+                        // 移除隐藏的航线
+                        lineObjects.removeIf(o -> !o.isVisible());
+
                         // 因为是反的需要倒序摆正
                         Collections.reverse(lineObjects);
-                        if (lineObjects.size() > 1) {
+                        if (lineObjects.size() > 0) {
                             // 设置出航路径点和目的地
                             MapObject out = lineObjects.get(0);
                             String[] split = out.getName().split(":");
                             String[] points = out.getPolyline().getPoints().split(" ");
 
-                            List<MapPoint> outLine = worldMapEditor.getShippingLineOut().getKey();
+                            List<java.util.Map.Entry<LineDirection, Byte>> outLine = worldMapEditor.getShippingLineOut().getKey();
                             // 清除当前出航路径点
                             outLine.clear();
+                            List<MapPoint> tempOutLine = new ArrayList<>();
                             for (String point : points) {
                                 String[] split1 = point.split(",");
-                                outLine.add(new MapPoint(0x00,
+                                tempOutLine.add(new MapPoint(0x00,
                                         (byte) (Integer.parseInt(split1[0]) / 0x10),
                                         (byte) (Integer.parseInt(split1[1]) / 0x10)
                                 ));
                             }
                             // 转换为相对路径
                             for (int i = Math.min(0x10, outLine.size() - 1); i > 0; i--) {
-                                MapPoint point = outLine.get(i);
-                                MapPoint previousPoint = outLine.get(i - 1);
+                                MapPoint point = tempOutLine.get(i);
+                                MapPoint previousPoint = tempOutLine.get(i - 1);
                                 point.offset(-previousPoint.getX(), -previousPoint.getY());
                             }
                             // 第一个路径点为填充点，无效移除
-                            outLine.remove(0x00);
+                            tempOutLine.remove(0x00);
+
                             // 设置出航目的地
                             worldMapEditor.getShippingLineOut().getValue().set(
                                     Integer.parseInt(split[0], 16),
@@ -1568,37 +1542,37 @@ public class TiledMapUtils {
                                     Integer.parseInt(split[2], 16)
                             );
                         }
-                        if (lineObjects.size() > 2) {
+                        if (lineObjects.size() > 1) {
                             // 设置归航路径点和目的地
-                            MapObject back = lineObjects.get(1);
-                            String[] split = back.getName().split(":");
-                            String[] points = back.getPolyline().getPoints().split(" ");
-
-                            List<MapPoint> backLine = worldMapEditor.getShippingLineBack().getKey();
-                            // 清除当前归航路径点
-                            backLine.clear();
-                            for (String point : points) {
-                                String[] split1 = point.split(",");
-                                backLine.add(new MapPoint(0x00,
-                                        (byte) (Integer.parseInt(split1[0]) / 0x10),
-                                        (byte) (Integer.parseInt(split1[1]) / 0x10)
-                                ));
-                            }
-                            // 转换为相对路径
-                            for (int i = Math.min(0x10, backLine.size() - 1); i > 0; i--) {
-                                MapPoint point = backLine.get(i);
-                                MapPoint previousPoint = backLine.get(i - 1);
-                                point.offset(-previousPoint.getX(), -previousPoint.getY());
-                            }
-                            // 第一个路径点为填充点，无效移除
-                            backLine.remove(0x00);
-
-                            // 设置归航目的地
-                            worldMapEditor.getShippingLineBack().getValue().set(
-                                    Integer.parseInt(split[0], 16),
-                                    Integer.parseInt(split[1], 16),
-                                    Integer.parseInt(split[2], 16)
-                            );
+//                            MapObject back = lineObjects.get(1);
+//                            String[] split = back.getName().split(":");
+//                            String[] points = back.getPolyline().getPoints().split(" ");
+//
+//                            List<MapPoint> backLine = worldMapEditor.getShippingLineBack().getKey();
+//                            // 清除当前归航路径点
+//                            backLine.clear();
+//                            for (String point : points) {
+//                                String[] split1 = point.split(",");
+//                                backLine.add(new MapPoint(0x00,
+//                                        (byte) (Integer.parseInt(split1[0]) / 0x10),
+//                                        (byte) (Integer.parseInt(split1[1]) / 0x10)
+//                                ));
+//                            }
+//                            // 转换为相对路径
+//                            for (int i = Math.min(0x10, backLine.size() - 1); i > 0; i--) {
+//                                MapPoint point = backLine.get(i);
+//                                MapPoint previousPoint = backLine.get(i - 1);
+//                                point.offset(-previousPoint.getX(), -previousPoint.getY());
+//                            }
+//                            // 第一个路径点为填充点，无效移除
+//                            backLine.remove(0x00);
+//
+//                            // 设置归航目的地
+//                            worldMapEditor.getShippingLineBack().getValue().set(
+//                                    Integer.parseInt(split[0], 16),
+//                                    Integer.parseInt(split[1], 16),
+//                                    Integer.parseInt(split[2], 16)
+//                            );
 
                         }
                         break;
@@ -1688,5 +1662,109 @@ public class TiledMapUtils {
                 break;
             }
         }
+    }
+
+    /**
+     * 将tiled的线转换为可操作的对象
+     */
+    public static List<java.util.Map.Entry<LineDirection, Byte>> pointsToLine(String points) {
+        List<java.util.Map.Entry<LineDirection, Byte>> line = new ArrayList<>();
+
+        List<MapPoint> tempOutLine = new ArrayList<>();
+        for (String point : points.split(" ")) {
+            String[] split1 = point.split(",");
+            tempOutLine.add(new MapPoint(0x00,
+                    (byte) (Integer.parseInt(split1[0]) / 0x10),
+                    (byte) (Integer.parseInt(split1[1]) / 0x10)
+            ));
+        }
+
+        // 转换为相对路径
+        for (int i = Math.min(0x10, tempOutLine.size() - 1); i > 0; i--) {
+            MapPoint point = tempOutLine.get(i);
+            MapPoint previousPoint = tempOutLine.get(i - 1);
+            point.offset(-previousPoint.getX(), -previousPoint.getY());
+            int x = point.getX() - previousPoint.getX();
+            int y = point.getY() - previousPoint.getY();
+            if (x == 0 && y == 0) {
+                // 玩呢
+                continue;
+            }
+
+            LineDirection dir;
+            // X或Y等于0，就是另一个的方向
+            if (x == 0x00) {
+                // 上或下移动
+                if (y > 0) {
+                    // 不是负数，下方移动
+                    dir = LineDirection.DOWN;
+                } else {
+                    // 是负数，上方移动
+                    dir = LineDirection.UP;
+                }
+                // 得到正数的移动格数
+                line.add(java.util.Map.entry(dir, (byte) Math.abs(y)));
+            } else {
+                // 左或右移动
+                if (x > 0) {
+                    // 不是负数，下方移动
+                    dir = LineDirection.DOWN;
+                } else {
+                    // 是负数，上方移动
+                    dir = LineDirection.UP;
+                }
+                // 得到正数的移动格数
+                line.add(java.util.Map.entry(dir, ((byte) Math.abs(x))));
+            }
+        }
+        // 第一个路径点为填充点，无效移除
+        tempOutLine.remove(0x00);
+        line.remove(0x00);
+        return line;
+    }
+
+    /**
+     * 将航线转换为tiled使用的点
+     */
+    public static String lineToPoints(int x, int y, List<java.util.Map.Entry<LineDirection, Byte>> line) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(String.format("%d,%d", x, y));
+        Rectangle lastOffsetLinePoint = new Rectangle();
+        for (java.util.Map.Entry<LineDirection, Byte> linePoint : line) {
+            // 注：& 0xFF 负数会变成正数，所以使用强制转换保留负数
+            switch (linePoint.getKey()) {
+                case UP:
+                    lastOffsetLinePoint.setLocation(
+                            (int) lastOffsetLinePoint.getX(),
+                            (int) lastOffsetLinePoint.getY() + (-(linePoint.getValue() & 0xFF) * 0x10)
+                    );
+                    break;
+                case DOWN:
+                    lastOffsetLinePoint.setLocation(
+                            (int) lastOffsetLinePoint.getX(),
+                            (int) lastOffsetLinePoint.getY() + ((linePoint.getValue() & 0xFF) * 0x10)
+                    );
+                    break;
+                case LEFT:
+                    lastOffsetLinePoint.setLocation(
+                            (int) lastOffsetLinePoint.getX() + (-(linePoint.getValue() & 0xFF) * 0x10),
+                            (int) lastOffsetLinePoint.getY()
+                    );
+                    break;
+                case RIGHT:
+                    lastOffsetLinePoint.setLocation(
+                            (int) lastOffsetLinePoint.getX() + ((linePoint.getValue() & 0xFF) * 0x10),
+                            (int) lastOffsetLinePoint.getY()
+                    );
+                    break;
+                default:
+                    continue;
+            }
+            builder.append(String.format(" %d,%d",
+                    (int) lastOffsetLinePoint.getX(),
+                    (int) lastOffsetLinePoint.getY()
+            ));
+        }
+        return builder.toString();
     }
 }
