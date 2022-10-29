@@ -29,7 +29,16 @@ public class PlayerWeapon extends PlayerEquipmentItem {
      * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
      */
     public void setAttack(@Range(from = 0x00, to = 0xFF) int attack) {
-        value = (byte) (attack & 0xFF);
+        setAttack((byte) (attack & 0xFF));
+    }
+
+    /**
+     * 设置攻击力
+     *
+     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     */
+    public void setAttack(byte attack) {
+        value = attack;
     }
 
     /**

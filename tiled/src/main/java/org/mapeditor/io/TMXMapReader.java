@@ -385,9 +385,7 @@ public class TMXMapReader {
         final int visible = getAttribute(t, "visible", 1);
 
         MapObject obj = new MapObject(x, y, width, height, rotation);
-        if (visible != 1) {
-            obj.setVisible(false);
-        }
+        obj.setVisible(visible != 1);
         obj.setShape(obj.getBounds());
         if (id != 0) {
             obj.setId(id);

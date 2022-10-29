@@ -2,10 +2,9 @@ package me.afoolslove.metalmaxre.editors.items;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.player.PlayerArmor;
+import me.afoolslove.metalmaxre.editors.player.PlayerItem;
 import me.afoolslove.metalmaxre.editors.player.PlayerWeapon;
-import me.afoolslove.metalmaxre.editors.tank.TankEngine;
-import me.afoolslove.metalmaxre.editors.tank.TankEquipmentItem;
-import me.afoolslove.metalmaxre.editors.tank.TankWeapon;
+import me.afoolslove.metalmaxre.editors.tank.*;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.Range;
 
@@ -115,7 +114,7 @@ public interface IItemEditor extends IRomEditor {
      *
      * @return 玩家所有道具
      */
-    List<Item> getPlayerItems();
+    List<PlayerItem> getPlayerItems();
 
 
     /**
@@ -130,7 +129,7 @@ public interface IItemEditor extends IRomEditor {
      *
      * @return 坦克所有C装置
      */
-    List<TankEquipmentItem> getTankCUnits();
+    List<TankCUnit> getTankCUnits();
 
     /**
      * 获取坦克所有引擎
@@ -144,14 +143,14 @@ public interface IItemEditor extends IRomEditor {
      *
      * @return 坦克所有地盘
      */
-    List<Item> getTankChassis();
+    List<TankChassis> getTankChassis();
 
     /**
      * 获取坦克所有道具
      *
      * @return 坦克所有道具
      */
-    List<Item> getTankItems();
+    List<TankItem> getTankItems();
 
     /**
      * 获取所有物品

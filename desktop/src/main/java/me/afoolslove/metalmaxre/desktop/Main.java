@@ -30,11 +30,9 @@ import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
 import me.afoolslove.metalmaxre.helper.TileSetHelper;
 import me.afoolslove.metalmaxre.tiled.TiledMapUtils;
-import me.afoolslove.metalmaxre.utils.BufferedImageUtils;
-import me.afoolslove.metalmaxre.utils.NumberR;
-import me.afoolslove.metalmaxre.utils.ResourceManager;
-import me.afoolslove.metalmaxre.utils.SingleMapEntry;
+import me.afoolslove.metalmaxre.utils.*;
 import org.jdesktop.swingx.JXCollapsiblePane;
+import org.jdesktop.swingx.JXEditorPane;
 import org.mapeditor.core.TileSet;
 import org.mapeditor.io.TMXMapReader;
 import org.mapeditor.io.TMXMapWriter;
@@ -83,7 +81,7 @@ public class Main extends JFrame {
     private JSpinner borderLocation00;
     private JSpinner borderLocation01;
     private JSpinner borderLocation02;
-    private JTextArea mapDes;
+    private JXEditorPane mapDes;
     private JCheckBox mapHeadUnderground;
     private JCheckBox mapHeadEventTile;
     private JCheckBox mapHeadUnknown;
@@ -162,7 +160,6 @@ public class Main extends JFrame {
     private JSpinner backLineTargetX;
     private JSpinner backLineTargetY;
     private JButton backLineTarget;
-    private ButtonGroup borderTypeGroup;
 
 
     private final ExecutorService imageLoaderService = Executors.newCachedThreadPool();
@@ -738,6 +735,16 @@ public class Main extends JFrame {
             textEditorFrame.setVisible(true);
         });
 
+        JMenuItem editorMenuItem = new JMenuItem("物品编辑器(beta)");
+        editorMenuItem.addActionListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance()) {
+                return;
+            }
+            ItemEditorFrame itemEditorFrame = new ItemEditorFrame(this, multipleMetalMaxRe.current());
+            itemEditorFrame.pack();
+            itemEditorFrame.setVisible(true);
+        });
+
         JMenuItem editorMenuEntrances = new JMenuItem("出入口编辑器");
         editorMenuEntrances.addActionListener(e -> {
             if (!multipleMetalMaxRe.hasInstance()) {
@@ -807,7 +814,7 @@ public class Main extends JFrame {
             shopEditorFrame.pack();
             shopEditorFrame.setVisible(true);
         });
-        JMenuItem editorMenuTreasure = new JMenuItem("宝藏编辑器");
+        JMenuItem editorMenuTreasure = new JMenuItem("宝藏编辑器(beta)");
         editorMenuTreasure.addActionListener(e -> {
             if (!multipleMetalMaxRe.hasInstance()) {
                 return;
@@ -838,6 +845,7 @@ public class Main extends JFrame {
         // 编辑器
         editorMenu.add(editorMenuEnabledStates);// 启用/禁用编辑器
         editorMenu.add(editorMenuText);         // 文本编辑器
+        editorMenu.add(editorMenuItem);         // 物品编辑器
         editorMenu.add(editorMenuEntrances);    // 出入口编辑器
         editorMenu.add(editorMenuDataValue);    // 数据值编辑器
         editorMenu.add(editorMenuPlayer);       // 玩家编辑器
@@ -949,7 +957,7 @@ public class Main extends JFrame {
 //            if (!multipleMetalMaxRe.hasInstance() || mapSelectListModel.getSelectedMap() != 0x00) {
 //                return;
 //            }
-//        }, 1, 1, TimeUnit.MICROSECONDS); // 1秒一次
+//        }, 1, 1, TimeUnit.SECONDS); // 1秒一次
 
         mapSelectListModel = new MapSelectListModel(mapList, multipleMetalMaxRe, mapFilter);
         mapList.setModel(mapSelectListModel);
@@ -986,7 +994,7 @@ public class Main extends JFrame {
             showLines.setEnabled(selectMap == 0x00);
 
             if (selectMap == 0x00) {
-
+                mapDes.setText("00");
                 // 设置头属性
                 mapHeadUnderground.setSelected(mapProperties.isUnderground());
                 mapHeadEventTile.setSelected(mapProperties.hasEventTile());
@@ -1338,21 +1346,32 @@ public class Main extends JFrame {
                 mapIndexRoll[0x40 + i] = mapPropertiesEditor.getBuffer().getChar();
             }
 
-            mapPropertiesData.append(String.format("%04X:", (int) NumberR.toChar(mapIndexRoll[selectMap])));
-            for (byte b : mapProperties.toByteArray()) {
-                mapPropertiesData.append(String.format("%02X", b));
-            }
+            // 获取地图属性绝对地址
+            DataAddress mapPropertiesAddress = mapPropertiesEditor.getMapPropertiesAddress();
+            mapPropertiesAddress = DataAddress.fromPRG(mapPropertiesAddress.getStartAddress(-0x08500 + mapIndexRoll[selectMap]));
+            mapPropertiesData.append(String.format("%04X(0x%05X):", (int) NumberR.toChar(mapIndexRoll[selectMap]), mapPropertiesAddress.getAbsStartAddress(metalMaxRe.getBuffer())));
+            mapPropertiesData.append(NumberR.toPlainHexString(mapProperties.toByteArray()));
             mapPropertiesData.append('\n');
-            mapPropertiesData.append(String.format("%04X:", (int) NumberR.toChar(mapProperties.mapIndex)));
-            byte[] build = mapEditor.getMap(selectMap).build();
-            for (byte b : build) {
-                mapPropertiesData.append(String.format("%02X", b));
+
+            DataAddress mapDataAddress;
+            int mapIndex = mapProperties.mapIndex;
+            if (mapIndex >= 0xC000) {
+                // 0xBB010
+                mapDataAddress = DataAddress.fromCHR(0x2F000 + mapIndex);
+            } else {
+                // 0x00000(610)
+                mapIndex = (((mapIndex & 0xE000) >> ((8 * 2) - 3)) * 0x2000) + (mapIndex & 0x1FFF);
+                mapDataAddress = DataAddress.fromCHR(mapIndex);
             }
+            mapPropertiesData.append(String.format("%04X(0x%05X):", (int) NumberR.toChar(mapProperties.mapIndex), mapDataAddress.getAbsStartAddress(mapEditor.getBuffer())));
+
+            byte[] build = mapEditor.getMap(selectMap).build();
+            mapPropertiesData.append(NumberR.toPlainHexString(build));
 
             this.mapDes.setText(String.format("""
-                    %02X
-                    %s
-                    """, selectMap, mapPropertiesData));
+                    %02X (%d bytes)
+                    %s\
+                    """, selectMap, build.length, mapPropertiesData));
 
             // 设置隐藏图块和填充图块
             mapHideTileValue.setValue(mapProperties.intHideTile());
@@ -1628,6 +1647,36 @@ public class Main extends JFrame {
             }
         });
 
+        mapHideTileValue.addChangeListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance() || mapList.isSelectionEmpty()) {
+                return;
+            }
+            MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
+            int selectedMap = mapSelectListModel.getSelectedMap();
+            IMapPropertiesEditor mapPropertiesEditor = metalMaxRe.getEditorManager().getEditor(IMapPropertiesEditor.class);
+            MapProperties mapProperties = mapPropertiesEditor.getMapProperties(selectedMap);
+            long mapTileSetKey = ((long) mapProperties.getIntTiles() << 16) + mapProperties.palette;
+            SingleMapEntry<BufferedImage, List<BufferedImage>> entry = mapTileSets.get(mapTileSetKey);
+            if (entry != null) {
+                mapHideTile.setIcon(new ImageIcon(entry.getValue().get(((int) mapHideTileValue.getValue()) & 0x7F)));
+            }
+        });
+        mapFillTileValue.addChangeListener(e -> {
+            if (!multipleMetalMaxRe.hasInstance() || mapList.isSelectionEmpty()) {
+                return;
+            }
+            MetalMaxRe metalMaxRe = multipleMetalMaxRe.current();
+            int selectedMap = mapSelectListModel.getSelectedMap();
+            IMapPropertiesEditor mapPropertiesEditor = metalMaxRe.getEditorManager().getEditor(IMapPropertiesEditor.class);
+            MapProperties mapProperties = mapPropertiesEditor.getMapProperties(selectedMap);
+            long mapTileSetKey = ((long) mapProperties.getIntTiles() << 16) + mapProperties.palette;
+            SingleMapEntry<BufferedImage, List<BufferedImage>> entry = mapTileSets.get(mapTileSetKey);
+            if (entry != null) {
+                mapFillTile.setIcon(new ImageIcon(entry.getValue().get(((int) mapFillTileValue.getValue()) & 0x7F)));
+            }
+
+        });
+
         gotoPoint.addActionListener(e -> {
             // Ctrl + G
             JViewport viewPort = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, mapImage);
@@ -1641,8 +1690,6 @@ public class Main extends JFrame {
                 view.y = Math.min(deltaY, deltaY - (view.height / 2));
 
                 mapImage.scrollRectToVisible(view);
-
-
             }
         });
         MiddleMoveMouseAdapter middleMoveMouseAdapter = new MiddleMoveMouseAdapter(mapImage);

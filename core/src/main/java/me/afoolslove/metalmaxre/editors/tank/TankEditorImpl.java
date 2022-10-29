@@ -29,6 +29,10 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     private final DataAddress tankInitSPAddress;
     private final DataAddress tankInitLocationsAddress;
 
+    private byte defenseUpStep;
+    private byte shellsUpStep;
+    private byte maxShells;
+
     /**
      * NO.1 - NO.8 - TAX1 - TAXA 的初始属性
      */
@@ -70,6 +74,13 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
             getTankInitAttributes().put(tank, tankInitialAttributes[tank.getId() & 0xFF] = new TankInitialAttribute());
         }
 
+        // 读取坦克弹仓容量改造梯级
+        shellsUpStep = getBuffer().getPrg(0x30B1B - 0x10);
+        // 读取单体弹仓容量改造上限
+        maxShells = getBuffer().getPrg(0x30B2D - 0x10);
+        // 读取坦克防御力改造梯级
+        defenseUpStep = getBuffer().getPrg(0x30B54 - 0x10);
+
         // 读取坦克初始装备（6byte）
         position(getTankInitEquipmentsAddress());
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
@@ -83,27 +94,30 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         }
         // 读取坦克弹仓大小
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
-            tankInitialAttributes[tank].setMaxShells(getBuffer().get());
+            tankInitialAttributes[tank].setShells(getBuffer().get());
         }
         // 读取坦克底盘防御力（2byte）
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
             tankInitialAttributes[tank].setDefense(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
-
-        // 读取坦克的底盘重量
-        position(getTankInitChassisWeightsAddress());
-        for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
-            tankInitialAttributes[playerTank].setWeight(NumberR.toInt(getBuffer().get(), getBuffer().get()));
+        // 读取坦克底盘最大防御力（2byte）
+        for (int tank = 0; tank < Tank.PLAYER_TANK_COUNT; tank++) {
+            tankInitialAttributes[tank].setMaxDefense(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
-
         // 读取出租坦克的底盘重量（2byte）
-        position(getTaxTankInitChassisWeightsAddress());
+//        position(getTaxTankInitChassisWeightsAddress());
         for (int taxTank = 0; taxTank < Tank.TAX_TANK_COUNT; taxTank++) {
             tankInitialAttributes[Tank.PLAYER_TANK_COUNT + taxTank].setWeight(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
         // 读取坦克开洞状态
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
             tankInitialAttributes[tank].setSlot(getBuffer().get());
+        }
+
+        // 读取坦克的底盘重量
+        position(getTankInitChassisWeightsAddress());
+        for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
+            tankInitialAttributes[playerTank].setWeight(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
 
         // 读取坦克的初始SP
@@ -132,8 +146,14 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Editor.Apply
     public void onApply() {
-        // 写入初始属性
+        // 写入坦克弹仓容量改造梯级
+        getBuffer().putPrg(0x30B1B - 0x10, shellsUpStep);
+        // 写入单体弹仓容量改造上限
+        getBuffer().putPrg(0x30B2D - 0x10, maxShells);
+        // 写入坦克防御力改造梯级
+        getBuffer().putPrg(0x30B54 - 0x10, defenseUpStep);
 
+        // 写入初始属性
         TankInitialAttribute[] tankInitialAttributes = new TankInitialAttribute[Tank.ALL_COUNT];
         for (Map.Entry<Tank, TankInitialAttribute> entry : getTankInitAttributes().entrySet()) {
             tankInitialAttributes[entry.getKey().getId() & 0xFF] = entry.getValue();
@@ -150,27 +170,30 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         }
         // 写入坦克弹仓大小
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
-            getBuffer().put(tankInitialAttributes[tank].getMaxShells());
+            getBuffer().put(tankInitialAttributes[tank].getShells());
         }
         // 写入坦克底盘防御力（2byte）
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
             getBuffer().put(tankInitialAttributes[tank].getDefenseByteArray());
         }
-
-        // 写入坦克的底盘重量
-        position(getTankInitChassisWeightsAddress());
-        for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
-            getBuffer().put(tankInitialAttributes[playerTank].getWeightByteArray());
+        // 写入坦克底盘改造最大防御力（2byte）
+        for (int tank = 0; tank < Tank.PLAYER_TANK_COUNT; tank++) {
+            getBuffer().put(tankInitialAttributes[tank].getMaxDefenseByteArray());
         }
-
         // 写入出租坦克的底盘重量（2byte）
-        position(getTaxTankInitChassisWeightsAddress());
+//        position(getTaxTankInitChassisWeightsAddress());
         for (int taxTank = 0; taxTank < Tank.TAX_TANK_COUNT; taxTank++) {
             getBuffer().put(tankInitialAttributes[Tank.PLAYER_TANK_COUNT + taxTank].getWeightByteArray());
         }
         // 写入坦克开洞状态
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
             getBuffer().put(tankInitialAttributes[tank].getSlot());
+        }
+
+        // 写入坦克的底盘重量
+        position(getTankInitChassisWeightsAddress());
+        for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
+            getBuffer().put(tankInitialAttributes[playerTank].getWeightByteArray());
         }
 
         // 写入坦克的初始SP
@@ -196,6 +219,36 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         getBuffer().put(maps);
         getBuffer().put(xs);
         getBuffer().put(ys);
+    }
+
+    @Override
+    public void setDefenseUpStep(int defenseUpStep) {
+        this.defenseUpStep = (byte) (defenseUpStep & 0xFF);
+    }
+
+    @Override
+    public void setShellsUpStep(int shellsUpStep) {
+        this.shellsUpStep = (byte) (shellsUpStep & 0xFF);
+    }
+
+    @Override
+    public void setMaxShells(int maxShells) {
+        this.maxShells = (byte) (maxShells & 0xFF);
+    }
+
+    @Override
+    public byte getDefenseUpStep() {
+        return defenseUpStep;
+    }
+
+    @Override
+    public byte getShellsUpStep() {
+        return shellsUpStep;
+    }
+
+    @Override
+    public byte getMaxShells() {
+        return maxShells;
     }
 
     @Override

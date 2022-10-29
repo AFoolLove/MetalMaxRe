@@ -17,7 +17,16 @@ public class PlayerArmor extends PlayerEquipmentItem {
      * @see IDataValueEditor#get2ByteValues()
      */
     public void setDefense(@Range(from = 0x00, to = 0xFF) int defense) {
-        value = (byte) (defense & 0xFF);
+        setDefense((byte) (defense & 0xFF));
+    }
+
+    /**
+     * 设置防御力
+     *
+     * @see IDataValueEditor#get2ByteValues()
+     */
+    public void setDefense(byte defense) {
+        value = defense;
     }
 
     /**

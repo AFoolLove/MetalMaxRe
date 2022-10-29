@@ -21,7 +21,14 @@ public class Item {
      * 设置价格
      */
     public void setPrice(@Range(from = 0x00, to = 0xFF) int price) {
-        this.price = (byte) (price & 0xFF);
+        setPrice((byte) (price & 0xFF));
+    }
+
+    /**
+     * 设置价格
+     */
+    public void setPrice(byte price) {
+        this.price = price;
     }
 
     /**

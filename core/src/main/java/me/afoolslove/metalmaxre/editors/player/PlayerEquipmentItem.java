@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editors.player;
 
+import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.editors.items.Item;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -14,7 +15,7 @@ public class PlayerEquipmentItem extends Item {
     /**
      * 值
      *
-     * @see IDataValues#get2ByteValue()
+     * @see IDataValueEditor#get1ByteValues()
      */
     public byte value;
 
@@ -40,20 +41,31 @@ public class PlayerEquipmentItem extends Item {
             canEquipped &= 0B0001_1111;
             return;
         }
-        int length = Math.min(3, players.length);
-        for (int i = 0; i < length; i++) {
-            switch (players[i]) {
-                case PLAYER_0:
-                    canEquipped |= (byte) 0B1000_0000;
-                    break;
-                case PLAYER_1:
-                    canEquipped |= (byte) 0B0100_0000;
-                    break;
-                case PLAYER_2:
-                    canEquipped |= (byte) 0B0010_0000;
-                    break;
-                default:
-                    break;
+        addCanEquipped(players);
+    }
+
+    /**
+     * 添加可装备改装备的玩家
+     */
+    public void addCanEquipped(@NotNull Player... players) {
+        for (Player player : players) {
+            switch (player) {
+                case PLAYER_0 -> canEquipped |= (byte) 0B1000_0000;
+                case PLAYER_1 -> canEquipped |= (byte) 0B0100_0000;
+                case PLAYER_2 -> canEquipped |= (byte) 0B0010_0000;
+            }
+        }
+    }
+
+    /**
+     * 移除可装备改装备的玩家
+     */
+    public void removeCanEquipped(@NotNull Player... players) {
+        for (Player player : players) {
+            switch (player) {
+                case PLAYER_0 -> canEquipped |= (byte) 0B0111_1111;
+                case PLAYER_1 -> canEquipped |= (byte) 0B1011_1111;
+                case PLAYER_2 -> canEquipped |= (byte) 0B1101_1111;
             }
         }
     }
@@ -62,6 +74,13 @@ public class PlayerEquipmentItem extends Item {
      * @return 玩家是否可以装备该装备
      */
     public boolean hasEquipped(@NotNull Player player) {
+        return hasEquipped(getCanEquipped(), player);
+    }
+
+    /**
+     * @return 玩家是否可以装备该装备
+     */
+    public static boolean hasEquipped(byte canEquipped, @NotNull Player player) {
         switch (player) {
             case PLAYER_0:
                 return (canEquipped & 0B1000_0000) != 0;

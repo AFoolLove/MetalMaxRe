@@ -31,4 +31,9 @@ public enum TankShellCapacity {
     public byte getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return name();
+    }
 }

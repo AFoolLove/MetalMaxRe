@@ -36,7 +36,15 @@ public class TankEquipmentItem extends Item {
      * 1:0.1t
      */
     public void setWeight(@Range(from = 0x00, to = 0xFF) int weight) {
-        this.weight = (byte) (weight & 0xFF);
+        setWeight((byte) (weight & 0xFF));
+    }
+
+    /**
+     * 设置装备的重量
+     * 1:0.1t
+     */
+    public void setWeight(byte weight) {
+        this.weight = weight;
     }
 
     /**
@@ -45,7 +53,16 @@ public class TankEquipmentItem extends Item {
      * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
      */
     public void setDefense(@Range(from = 0x00, to = 0xFF) int defense) {
-        this.defense = (byte) (defense & 0xFF);
+        setDefense((byte) (defense & 0xFF));
+    }
+
+    /**
+     * 设置防御力
+     *
+     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     */
+    public void setDefense(byte defense) {
+        this.defense = defense;
     }
 
     /**

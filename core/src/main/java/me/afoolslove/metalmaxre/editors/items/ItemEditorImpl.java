@@ -4,10 +4,9 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.editors.player.PlayerArmor;
+import me.afoolslove.metalmaxre.editors.player.PlayerItem;
 import me.afoolslove.metalmaxre.editors.player.PlayerWeapon;
-import me.afoolslove.metalmaxre.editors.tank.TankEngine;
-import me.afoolslove.metalmaxre.editors.tank.TankEquipmentItem;
-import me.afoolslove.metalmaxre.editors.tank.TankWeapon;
+import me.afoolslove.metalmaxre.editors.tank.*;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -26,13 +25,13 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
 
     private final List<PlayerArmor> playerArmors = new ArrayList<>(getPlayerArmorMaxCount());
     private final List<PlayerWeapon> playerWeapons = new ArrayList<>(getPlayerWeaponMaxCount());
-    private final List<Item> playerItems = new ArrayList<>(getPlayerItemsMaxCount());
+    private final List<PlayerItem> playerItems = new ArrayList<>(getPlayerItemsMaxCount());
 
     private final List<TankWeapon> tankWeapons = new ArrayList<>(getTankWeaponMaxCount());
-    private final List<TankEquipmentItem> tankCUnits = new ArrayList<>(getTankCUnitMaxCount());
+    private final List<TankCUnit> tankCUnits = new ArrayList<>(getTankCUnitMaxCount());
     private final List<TankEngine> tankEngines = new ArrayList<>(getTankEngineMaxCount());
-    private final List<Item> tankChassis = new ArrayList<>(getTankChassisMaxCount());
-    private final List<Item> tankItems = new ArrayList<>(getTankItemsMaxCount());
+    private final List<TankChassis> tankChassis = new ArrayList<>(getTankChassisMaxCount());
+    private final List<TankItem> tankItems = new ArrayList<>(getTankItemsMaxCount());
 
     /**
      * 道具类型
@@ -89,7 +88,7 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         }
         // 初始化坦克C装置
         for (int i = 0; i < getTankCUnitMaxCount(); i++) {
-            getTankCUnits().add(new TankEquipmentItem());
+            getTankCUnits().add(new TankCUnit());
         }
         // 初始化坦克引擎
         for (int i = 0; i < getTankEngineMaxCount(); i++) {
@@ -97,15 +96,15 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         }
         // 初始化坦克底盘
         for (int i = 0; i < getTankChassisMaxCount(); i++) {
-            getTankChassis().add(new Item());
+            getTankChassis().add(new TankChassis());
         }
         // 初始化玩家道具
         for (int i = 0; i < getPlayerItemsMaxCount(); i++) {
-            getPlayerItems().add(new Item());
+            getPlayerItems().add(new PlayerItem());
         }
         // 初始化坦克道具
         for (int i = 0; i < getTankItemsMaxCount(); i++) {
-            getTankItems().add(new Item());
+            getTankItems().add(new TankItem());
         }
 
         // 读取坦克引擎的最大载重
@@ -363,7 +362,7 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         items.addAll(getTankWeapons());
         items.addAll(getTankCUnits());
         items.addAll(getTankEngines());
-        items.addAll(getTankCUnits());
+        items.addAll(getTankChassis());
         items.addAll(getPlayerItems());
         items.addAll(getTankItems());
         return items;
@@ -380,7 +379,7 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     }
 
     @Override
-    public List<Item> getPlayerItems() {
+    public List<PlayerItem> getPlayerItems() {
         return playerItems;
     }
 
@@ -390,7 +389,7 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     }
 
     @Override
-    public List<TankEquipmentItem> getTankCUnits() {
+    public List<TankCUnit> getTankCUnits() {
         return tankCUnits;
     }
 
@@ -400,12 +399,12 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     }
 
     @Override
-    public List<Item> getTankChassis() {
+    public List<TankChassis> getTankChassis() {
         return tankChassis;
     }
 
     @Override
-    public List<Item> getTankItems() {
+    public List<TankItem> getTankItems() {
         return tankItems;
     }
 }

@@ -115,7 +115,6 @@ public class WordBank {
         FONTS_SINGLE_REPEATED.put('z', (byte) 0x8D);
 
 
-        // 对话时按键确认后带名称换行
         OPCODES.put((byte) 0x33, 1);  // 不显示精灵和上半部分，第二字节未知
         OPCODES.put((byte) 0x42, 0);  // 忽略字符
         OPCODES.put((byte) 0xE2, 0);
@@ -146,7 +145,7 @@ public class WordBank {
         OPCODES.put((byte) 0xFB, 1);  // 引用文本，动态文本？未知
         OPCODES.put((byte) 0xFC, 1);  //
         OPCODES.put((byte) 0xFD, 1);  // 玩家名称
-        OPCODES.put((byte) 0xFE, 0);
+        OPCODES.put((byte) 0xFE, 0);  // 对话时按键确认后带名称换行
         // E3 + 1byte = 进行选择，选择 是 空操作，选择 否 读取第一个字节文本?
         // EB + 2byte = 进行选择，选择 是 读取第一个字节的文本索引，选择 否 读取第二个字节的文本索引，用在当前文本结尾处
         // ED + 1byte = 空白占位，第一个字节为需要用空白占位的字符数量
@@ -169,7 +168,6 @@ public class WordBank {
         // FC + 07 = 强度中，玩家的名称
         // FC + 3F = 玩家存档 1 名称
         // FC + 40 = 玩家存档 2 名称
-        // FE      = 对话时按键确认后带名称换行
 
         // 读取字库
         InputStream resourceAsStream = ResourceManager.getAsStream("/fonts.txt");

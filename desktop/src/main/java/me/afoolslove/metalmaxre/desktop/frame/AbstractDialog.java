@@ -2,34 +2,22 @@ package me.afoolslove.metalmaxre.desktop.frame;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.nio.file.Path;
 
-public abstract class AbstractEditorFrame extends JFrame {
-    private final MetalMaxRe metalMaxRe;
+public class AbstractDialog extends JDialog {
     private final Frame frame;
+    private final MetalMaxRe metalMaxRe;
 
-    private final Integer initMap;
-
-    public AbstractEditorFrame(Integer initMap, @NotNull Frame frame, @Nullable MetalMaxRe metalMaxRe) {
-        this.initMap = initMap;
-        this.metalMaxRe = metalMaxRe;
+    public AbstractDialog(Frame frame, MetalMaxRe metalMaxRe) {
         this.frame = frame;
+        this.metalMaxRe = metalMaxRe;
     }
 
-    public AbstractEditorFrame(@NotNull Frame frame, @Nullable MetalMaxRe metalMaxRe) {
-        this(null, frame, metalMaxRe);
-    }
-
-    protected AbstractEditorFrame(@NotNull Frame frame) {
-        this(null, frame, null);
-    }
-
-    public Integer getInitMap() {
-        return initMap;
+    public AbstractDialog(Frame frame) {
+        this(frame, null);
     }
 
     public void init(String title, @NotNull JPanel contentPane) {
@@ -56,17 +44,9 @@ public abstract class AbstractEditorFrame extends JFrame {
         createLayout();
     }
 
-    public MetalMaxRe getMetalMaxRe() {
-        return metalMaxRe;
+    public void createMenu(JMenuBar menuBar) {
     }
 
-    public Frame getFrame() {
-        return frame;
-    }
-
-    protected void createMenu(@NotNull JMenuBar menuBar) {
-    }
-
-    protected void createLayout() {
+    public void createLayout() {
     }
 }

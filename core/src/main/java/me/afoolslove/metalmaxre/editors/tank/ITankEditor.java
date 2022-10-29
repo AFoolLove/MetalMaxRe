@@ -8,6 +8,36 @@ import java.util.EnumMap;
 
 public interface ITankEditor extends IRomEditor {
     /**
+     * 设置改造防御力梯级
+     */
+    void setDefenseUpStep(int defenseUpStep);
+
+    /**
+     * 设置改造弹仓容量梯级
+     */
+    void setShellsUpStep(int shellsUpStep);
+
+    /**
+     * 设置改造弹仓最大容量
+     */
+    void setMaxShells(int maxShells);
+
+    /**
+     * @return 获取防御力改造梯级，每次改造增加的防御力
+     */
+    byte getDefenseUpStep();
+
+    /**
+     * @return 获取弹仓容量改造梯级，每次改造增加的弹仓容量
+     */
+    byte getShellsUpStep();
+
+    /**
+     * @return 获取弹仓容量改造上限
+     */
+    byte getMaxShells();
+
+    /**
      * 获取所有坦克的初始属性
      *
      * @return 所有坦克的初始属性

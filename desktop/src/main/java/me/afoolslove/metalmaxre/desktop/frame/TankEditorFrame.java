@@ -44,7 +44,7 @@ public class TankEditorFrame extends AbstractEditorFrame {
     private JCheckBox slotSpecialEquipment;
     private JSpinner weight;
     private JSpinner defense;
-    private JSpinner maxShells;
+    private JSpinner shells;
     private JButton save;
     private JCheckBox slotMainGun;
     private JSpinner defenseUpStep;
@@ -54,6 +54,8 @@ public class TankEditorFrame extends AbstractEditorFrame {
     private JSpinner initY;
     private JButton selectPoint;
     private JButton gotoPoint;
+    private JSpinner maxDefense;
+    private JSpinner maxShells;
 
     public TankEditorFrame(@NotNull Frame frame, @NotNull MetalMaxRe metalMaxRe) {
         super(frame, metalMaxRe);
@@ -62,21 +64,31 @@ public class TankEditorFrame extends AbstractEditorFrame {
 
     @Override
     protected void createLayout() {
+        ITankEditor tankEditor = getMetalMaxRe().getEditorManager().getEditor(ITankEditor.class);
+
         ItemListener itemListener = e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                ITankEditor tankEditor = getMetalMaxRe().getEditorManager().getEditor(ITankEditor.class);
-
                 TankInitialAttribute initialAttributes = tankEditor.getTankInitAttribute(tanks.getSelectedIndex());
                 // 初始坐标
                 initMap.setValue(initialAttributes.intMap());
                 initX.setValue(initialAttributes.intX());
                 initY.setValue(initialAttributes.intY());
                 // 底盘重量
-                weight.setValue(initialAttributes.getWeight() & 0xFFFF);
+                weight.setValue(initialAttributes.intWeight());
                 // 底盘防御
-                defense.setValue(initialAttributes.getDefense() & 0xFFFF);
-                // 弹仓上限
-                maxShells.setValue(initialAttributes.getMaxShells() & 0xFF);
+                defense.setValue(initialAttributes.intDefense());
+                // 底盘防御力改造上限
+                maxDefense.setValue(initialAttributes.intMaxDefense());
+                // 弹仓容量
+                shells.setValue(initialAttributes.intShells());
+
+                // 底盘防御力改造梯级
+                defenseUpStep.setValue(tankEditor.getDefenseUpStep() & 0xFF);
+                // 弹仓容量改造上限
+                maxShells.setValue(tankEditor.getMaxShells() & 0xFF);
+                // 弹仓容量改造梯级
+                shellsUpStep.setValue(tankEditor.getShellsUpStep() & 0xFF);
+
                 // 开洞状态
                 slotMainGun.setSelected((initialAttributes.getSlot() & TankWeaponSlot.MAIN_GUN.getSlot()) != 0x00);
                 slotSecondaryGun.setSelected((initialAttributes.getSlot() & TankWeaponSlot.SECONDARY_GUN.getSlot()) != 0x00);
@@ -110,7 +122,6 @@ public class TankEditorFrame extends AbstractEditorFrame {
             Main frame = (Main) getFrame();
             frame.gotoPoint(map, x, y);
         });
-
 
         selectPoint.addActionListener(e -> {
             selectPoint.setEnabled(false);
@@ -146,18 +157,29 @@ public class TankEditorFrame extends AbstractEditorFrame {
             }
         });
         save.addActionListener(e -> {
-            ITankEditor tankEditor = getMetalMaxRe().getEditorManager().getEditor(ITankEditor.class);
+            // 设置底盘防御力改造梯级
+            tankEditor.setDefenseUpStep(((Number) defenseUpStep.getValue()).intValue() & 0xFF);
+            // 设置弹仓容量改造上限
+            tankEditor.setMaxShells(((Number) maxShells.getValue()).intValue() & 0xFF);
+            // 设置弹仓容量改造梯级
+            tankEditor.setShellsUpStep(((Number) shellsUpStep.getValue()).intValue() & 0xFF);
+
             TankInitialAttribute initialAttributes = tankEditor.getTankInitAttribute(tanks.getSelectedIndex());
             // 设置初始坐标
             initialAttributes.setMap(((Number) initMap.getValue()).intValue());
             initialAttributes.setX(((Number) initX.getValue()).intValue());
             initialAttributes.setY(((Number) initY.getValue()).intValue());
+            // 初始底盘防御力
+            initialAttributes.setDefense(((Number) defense.getValue()).intValue());
+            // 底盘防御力改造上限
+            initialAttributes.setMaxDefense(((Number) maxDefense.getValue()).intValue());
+
             // 初始地盘重量
             initialAttributes.setWeight(((Number) weight.getValue()).intValue());
             // 初始防御力
             initialAttributes.setDefense(((Number) defense.getValue()).intValue());
             // 初始弹仓上限
-            initialAttributes.setMaxShells(((Number) maxShells.getValue()).intValue());
+            initialAttributes.setShells(((Number) shells.getValue()).intValue());
             // 设置初始装备
             initialAttributes.setEquipment(0, equipment0.getSelectedIndex());
             initialAttributes.setEquipment(1, equipment1.getSelectedIndex());
@@ -217,9 +239,9 @@ public class TankEditorFrame extends AbstractEditorFrame {
         equipment3.setModel(new DefaultComboBoxModel<>(itemsObj));
         equipment4.setModel(new DefaultComboBoxModel<>(itemsObj));
         equipment5.setModel(new DefaultComboBoxModel<>(itemsObj));
-        // 对JSpinner添加十六进制编辑器和鼠标滚轮切换数值
+        // 对JSpinner添加十进制编辑器和鼠标滚轮切换数值
         for (JSpinner spinner : new JSpinner[]{
-                maxShells,
+                shells,
                 defenseUpStep, shellsUpStep
         }) {
             spinner.setModel(new SpinnerNumberModel(0, 0x00, 0xFF, 1));
@@ -233,9 +255,9 @@ public class TankEditorFrame extends AbstractEditorFrame {
             spinner.setEditor(new FormatterJSpinnerEditor(spinner, HexFormatter.getInstance()));
             spinner.addMouseWheelListener(ValueMouseWheelListener.getInstance());
         }
-        // 对JSpinner添加两个十六进制编辑器和鼠标滚轮切换数值
+        // 对JSpinner添加两个十进制编辑器和鼠标滚轮切换数值
         for (JSpinner spinner : new JSpinner[]{
-                weight, defense
+                weight, defense, maxDefense, shells, maxShells
         }) {
             spinner.setModel(new SpinnerNumberModel(0, 0x00, 0xFFFF, 1));
             spinner.setEditor(new FormatterJSpinnerEditor(spinner, NumberFormatter.getInstance()));

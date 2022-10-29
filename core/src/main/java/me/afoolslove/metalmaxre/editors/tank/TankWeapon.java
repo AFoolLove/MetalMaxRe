@@ -35,7 +35,16 @@ public class TankWeapon extends TankEquipmentItem {
      * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
      */
     public void setAttack(@Range(from = 0x00, to = 0xFF) int attack) {
-        value = (byte) (attack & 0xFF);
+        setAttack((byte) (attack & 0xFF));
+    }
+
+    /**
+     * 设置攻击力
+     *
+     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     */
+    public void setAttack(byte attack) {
+        value = attack;
     }
 
     /**
@@ -75,20 +84,37 @@ public class TankWeapon extends TankEquipmentItem {
             // 为空可还行
             return;
         }
-        int length = Math.min(3, tankWeaponSlots.length);
-        for (int i = 0; i < length; i++) {
-            switch (tankWeaponSlots[i]) {
-                case MAIN_GUN:
-                    canEquipped |= (byte) 0B1000_0000;
-                    break;
-                case SECONDARY_GUN:
-                    canEquipped |= (byte) 0B0100_0000;
-                    break;
-                case SPECIAL_EQUIPMENT:
-                    canEquipped |= (byte) 0B0010_0000;
-                    break;
-                default:
-                    break;
+        for (TankWeaponSlot tankWeaponSlot : tankWeaponSlots) {
+            switch (tankWeaponSlot) {
+                case MAIN_GUN -> canEquipped |= (byte) 0B1000_0000;
+                case SECONDARY_GUN -> canEquipped |= (byte) 0B0100_0000;
+                case SPECIAL_EQUIPMENT -> canEquipped |= (byte) 0B0010_0000;
+            }
+        }
+    }
+
+    /**
+     * 添加可装备此装备的穴
+     */
+    public void addCanEquipped(@NotNull TankWeaponSlot... tankWeaponSlots) {
+        for (TankWeaponSlot tankWeaponSlot : tankWeaponSlots) {
+            switch (tankWeaponSlot) {
+                case MAIN_GUN -> canEquipped |= (byte) 0B1000_0000;
+                case SECONDARY_GUN -> canEquipped |= (byte) 0B0100_0000;
+                case SPECIAL_EQUIPMENT -> canEquipped |= (byte) 0B0010_0000;
+            }
+        }
+    }
+
+    /**
+     * 移除可装备此装备的穴
+     */
+    public void removeCanEquipped(@NotNull TankWeaponSlot... tankWeaponSlots) {
+        for (TankWeaponSlot tankWeaponSlot : tankWeaponSlots) {
+            switch (tankWeaponSlot) {
+                case MAIN_GUN -> canEquipped |= (byte) 0B0111_1111;
+                case SECONDARY_GUN -> canEquipped |= (byte) 0B1011_1111;
+                case SPECIAL_EQUIPMENT -> canEquipped |= (byte) 0B1101_1111;
             }
         }
     }

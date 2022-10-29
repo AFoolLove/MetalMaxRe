@@ -10,15 +10,26 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DataValueEditorFrame extends AbstractEditorFrame {
     private JPanel contentPane;
     private JXTable dataValueTable;
     private JXSearchField dataValueFilter;
 
+    private final List<SelectListener> selectListeners = new ArrayList<>();
+
     public DataValueEditorFrame(@NotNull Frame frame, @NotNull MetalMaxRe metalMaxRe) {
         super(frame, metalMaxRe);
         init("数据值编辑器", contentPane);
+    }
+
+    public DataValueEditorFrame(@NotNull String tile, @NotNull Frame frame, @NotNull MetalMaxRe metalMaxRe) {
+        super(frame, metalMaxRe);
+        init(tile, contentPane);
     }
 
     @Override
@@ -73,7 +84,7 @@ public class DataValueEditorFrame extends AbstractEditorFrame {
 
             @Override
             public int getRowCount() {
-                return rowCount;
+                return rowCount + 0x02;
             }
 
             @Override
@@ -92,7 +103,19 @@ public class DataValueEditorFrame extends AbstractEditorFrame {
             public Object getValueAt(int row, int column) {
                 if (column == 0x00) {
                     // 索引
-                    return String.format("%02X", row);
+                    if (row == getRowCount() - 1) {
+                        return "FF";
+                    } else if (row == getRowCount() - 2) {
+                        return "FE";
+                    } else {
+                        return String.format("%02X", row);
+                    }
+                } else {
+                    if (row == getRowCount() - 1) {
+                        return "无价，无法丢弃";
+                    } else if (row == getRowCount() - 2) {
+                        return "无价，可以丢弃";
+                    }
                 }
 
                 if (row < dataValueEditor.get1ByteMaxCount()) {
@@ -125,19 +148,49 @@ public class DataValueEditorFrame extends AbstractEditorFrame {
                 return -1;
             }
         });
-//        dataValueTable.getModel().addTableModelListener(e -> {
-//            if (e.getType() == TableModelEvent.UPDATE) {
-//                if (e.getColumn() == 0x00 || e.getColumn() == 0x01) {
-//                    // 忽略索引和数据更新
-//                    return;
-//                }
-//
-//                if (e.getColumn() == 0x02) {
-//                    // 数值更新（int）
-//                    Object valueAt = dataValueTable.getValueAt(e.getLastRow(), 0x02);
-//                    System.out.println();
-//                }
-//            }
-//        });
+        dataValueTable.addMouseListener(new MouseAdapter() {
+            private final IDataValueEditor dataValueEditor = getMetalMaxRe().getEditorManager().getEditor(IDataValueEditor.class);
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && !selectListeners.isEmpty()) {
+                    // 双击
+                    Point point = e.getPoint();
+                    int column = dataValueTable.convertColumnIndexToModel(dataValueTable.columnAtPoint(point));
+                    if (column == 0x00) {
+                        int index = dataValueTable.convertRowIndexToModel(dataValueTable.rowAtPoint(point));
+                        int value;
+
+                        int rowCount = dataValueTable.getModel().getRowCount();
+                        if (index == rowCount - 1) {
+                            // 无价，不可丢弃
+                            index = -1;
+                            value = -1;
+                        } else if (index == rowCount - 2) {
+                            // 无价可以丢弃
+                            index = -2;
+                            value = -2;
+                        } else {
+                            value = dataValueEditor.getValues().get(index).intValue();
+                        }
+                        // 双击索引触发选择事件
+                        for (SelectListener selectListener : new ArrayList<>(selectListeners)) {
+                            selectListener.selected(index, value);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    public List<SelectListener> getSelectListeners() {
+        return selectListeners;
+    }
+
+    /**
+     * 数据值选着监听器
+     */
+    public interface SelectListener {
+        void selected(int index, int value);
     }
 }

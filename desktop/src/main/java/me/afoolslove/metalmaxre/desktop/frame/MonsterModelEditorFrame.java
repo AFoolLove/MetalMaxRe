@@ -6,6 +6,7 @@ import me.afoolslove.metalmaxre.editors.palette.SystemPalette;
 import me.afoolslove.metalmaxre.editors.text.ITextEditor;
 import me.afoolslove.metalmaxre.helper.TileSetHelper;
 import me.afoolslove.metalmaxre.utils.BufferedImageUtils;
+import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.JXSearchField;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +53,7 @@ public class MonsterModelEditorFrame extends AbstractEditorFrame {
         monsters.setListData(monsterIDs);
 
         monsters.addListSelectionListener(e -> {
-            if (monsters.getSelectedIndex() == -1) {
+            if (e.getValueIsAdjusting() || monsters.getSelectedIndex() == -1) {
                 return;
             }
             SystemPalette systemPalette = getMetalMaxRe().getSystemPalette();
@@ -117,22 +118,22 @@ public class MonsterModelEditorFrame extends AbstractEditorFrame {
                     colors[0][1 + i] = SystemPalette.DEFAULT_SYSTEM_PALETTE.getColor(palette[i]);
                 }
             }
-//            monsterModelColor = TileSetHelper.generateMonsterModel(getMetalMaxRe(), xXX[0], xXX[1], xXX[2], xXX[3]);
-//
-//            byte[][] monsterModelTile = new byte[0x100][0x40];
-//            for (int y = 0; y < 0x10; y++) {
-//                for (int x = 0; x < 0x10; x++) {
-//                    int tmpX = x * 8;
-//                    int tmpY = y * 8;
-//                    byte[] bytes = new byte[0x40];
-//                    for (int offsetY = 0; offsetY < 4; offsetY++) {
-//                        for (int offsetX = 0; offsetX < 4; offsetX++) {
-//                            bytes[(offsetY * 4) + offsetX] = monsterModelColor[tmpY + offsetY][tmpX + offsetX];
-//                        }
-//                    }
-//                    monsterModelTile[(y * 0x10) + x] = bytes;
-//                }
-//            }
+
+            monsterModelColor = TileSetHelper.generateMonsterModel(getMetalMaxRe(), xXX[0], xXX[1], xXX[2], xXX[3]);
+            byte[][] monsterModelTile = new byte[0x100][0x40];
+            for (int y = 0; y < 0x10; y++) {
+                for (int x = 0; x < 0x10; x++) {
+                    int tmpX = x * 8;
+                    int tmpY = y * 8;
+                    byte[] bytes = new byte[0x40];
+                    for (int offsetY = 0; offsetY < 4; offsetY++) {
+                        for (int offsetX = 0; offsetX < 4; offsetX++) {
+                            bytes[(offsetY * 4) + offsetX] = monsterModelColor[tmpY + offsetY][tmpX + offsetX];
+                        }
+                    }
+                    monsterModelTile[(y * 0x10) + x] = bytes;
+                }
+            }
             BufferedImage bufferedImage1;
             if (isDoublePalette) {
                 bufferedImage1 = BufferedImageUtils.fromColors(TileSetHelper.generate(getMetalMaxRe(), xXX[0], xXX[1], xXX[2], xXX[3], colors));
@@ -140,6 +141,9 @@ public class MonsterModelEditorFrame extends AbstractEditorFrame {
                 bufferedImage1 = BufferedImageUtils.fromColors(TileSetHelper.generate(getMetalMaxRe(), xXX[0], xXX[1], xXX[2], xXX[3], colors[0]));
             }
             java.util.List<BufferedImage> diced = TileSetHelper.diced(0x08, 0x08, bufferedImage1);
+
+            byte[] paletteIndex = new byte[0x6B];
+            getMetalMaxRe().getBuffer().getPrg(0x22BB6, paletteIndex);
 
             if (modelIndex >= 0x48) {
                 byte[] model = new byte[monsterImage.getWidth() * monsterImage.getHeight()];
@@ -157,7 +161,10 @@ public class MonsterModelEditorFrame extends AbstractEditorFrame {
 
                 byte[] model = new byte[(int) Math.ceil((w * h) / 8.0)];
                 getMetalMaxRe().getBuffer().getPrg(modelLayoutIndex + 1, model);
-
+                byte[] paletteBytes = new byte[0x03];
+                System.arraycopy(paletteIndex, modelIndex, paletteBytes, 0, paletteBytes.length);
+                int palette = NumberR.toInt(true, paletteBytes);
+                palette <<= 0x08;
 
                 byte tileIndex = monsterModel.getModelLayout2()[modelIndex];
                 tileIndex++;
@@ -165,6 +172,7 @@ public class MonsterModelEditorFrame extends AbstractEditorFrame {
                 List<BufferedImage> tiles = new ArrayList<>();
 
 
+                // 根据bit是否显示当前图块
                 for (int i = 0; i < model.length; i++) {
                     for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
                         int l = (model[i] & d) >>> (7 - k);
@@ -173,7 +181,21 @@ public class MonsterModelEditorFrame extends AbstractEditorFrame {
                             tiles.add(null);
                             continue;
                         }
-
+//                        byte[] bytes = monsterModelTile[tileIndex & 0xFF];
+//                        me.afoolslove.metalmaxre.editors.palette.Color[] color = colors[palette >>> 30];
+//                        palette <<= 0x02;
+//
+//                        BufferedImage tile = new BufferedImage(0x08, 0x08, BufferedImage.TYPE_INT_ARGB);
+//                        Graphics2D graphics = tile.createGraphics();
+//                        for (int y = 0; y < 0x08; y++) {
+//                            for (int x = 0; x < 0x08; x++) {
+//                                graphics.setColor(color[bytes[(y * 0x08) + x]].toAwtColor());
+//                                graphics.fillRect(x, y, 1, 1);
+//                            }
+//                        }
+//
+//                        graphics.dispose();
+//                        tiles.add(tile);
                         tiles.add(diced.get(tileIndex & 0xFF));
                         tileIndex++;
                     }
