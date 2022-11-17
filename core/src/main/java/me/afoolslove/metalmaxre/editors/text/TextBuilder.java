@@ -361,6 +361,9 @@ public class TextBuilder implements IBaseText {
         return textBuilders;
     }
 
+    /**
+     * 在数组中查找是否存在指定的数组
+     */
     private static boolean bytesStartsWith(byte[] bytes, int index, byte[] data) {
         if ((bytes.length - 1) - index < data.length) {
             // bytes里的数据，不够验证data

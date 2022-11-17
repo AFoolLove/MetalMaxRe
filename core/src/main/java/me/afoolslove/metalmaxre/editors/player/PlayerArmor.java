@@ -38,6 +38,14 @@ public class PlayerArmor extends PlayerEquipmentItem {
     }
 
     /**
+     * @return 防御力
+     * @see IDataValueEditor#get2ByteValues()
+     */
+    public int intDefense() {
+        return getDefense() & 0xFF;
+    }
+
+    /**
      * @return 指向的真实防御力值
      * @see IDataValueEditor#get2ByteValues()
      */

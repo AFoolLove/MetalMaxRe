@@ -22,7 +22,7 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
 
     private final byte[] modelIndex = new byte[0x83];
     private final byte[] modelPaletteIndex = new byte[0x83];
-    private final byte[] modelDoublePalette = new byte[0x1B];
+    private final byte[] modelDoublePalette = new byte[0x1B * 0x02];
     //    private final byte[] modelPalette = new byte[];
     private final byte[] modelTileSet = new byte[0x4F];
     private final byte[] modelSize = new byte[0x4F];

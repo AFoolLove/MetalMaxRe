@@ -1,6 +1,11 @@
+.idea
 /.gradle
 /build/
 /out/
+
+/desktop
+/web
+/tiled
 
 /core/.gradle
 /core/build

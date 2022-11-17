@@ -8,13 +8,13 @@ package me.afoolslove.metalmaxre.editors.monster;
 
 public enum MonsterType {
     /**
-     * 仿生类
-     */
-    BIONIC((byte) 0B0100_0000),
-    /**
      * 电子类
      */
     CYBERNETIC((byte) 0B0000_0000),
+    /**
+     * 仿生类
+     */
+    BIONIC((byte) 0B0100_0000),
     /**
      * 坦克类
      */

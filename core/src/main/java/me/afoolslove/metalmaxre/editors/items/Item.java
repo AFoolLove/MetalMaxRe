@@ -39,6 +39,13 @@ public class Item {
     }
 
     /**
+     * @return 价格数据
+     */
+    public int intPrice() {
+        return getPrice() & 0xFF;
+    }
+
+    /**
      * @return 是否为无价的物品
      */
     public boolean isPriceless() {

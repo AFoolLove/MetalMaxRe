@@ -14,6 +14,10 @@ public class Text extends AbstractBaseText {
         append(text);
     }
 
+    public Text(CharSequence text) {
+        append(text.toString());
+    }
+
     public Text(String text) {
         append(text);
     }

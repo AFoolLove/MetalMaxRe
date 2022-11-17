@@ -32,7 +32,7 @@ public class TankWeapon extends TankEquipmentItem {
     /**
      * 设置攻击力
      *
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public void setAttack(@Range(from = 0x00, to = 0xFF) int attack) {
         setAttack((byte) (attack & 0xFF));
@@ -41,7 +41,7 @@ public class TankWeapon extends TankEquipmentItem {
     /**
      * 设置攻击力
      *
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public void setAttack(byte attack) {
         value = attack;
@@ -144,6 +144,13 @@ public class TankWeapon extends TankEquipmentItem {
     }
 
     /**
+     * @return 攻击动画
+     */
+    public int intAttackAnim() {
+        return getAttackAnim() & 0xFF;
+    }
+
+    /**
      * @return 攻击范围
      */
     public AttackRange getAttackRange() {
@@ -159,15 +166,23 @@ public class TankWeapon extends TankEquipmentItem {
 
     /**
      * @return 攻击力
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public byte getAttack() {
         return value;
     }
 
     /**
+     * @return 攻击力
+     * @see IDataValueEditor#get2ByteValues()
+     */
+    public int intAttack() {
+        return getAttack() & 0xFF;
+    }
+
+    /**
      * @return 指向的真实攻击力值
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public int getAttackValue(@NotNull IDataValueEditor dataValues) {
         return dataValues.getValues().get(value & 0xFF).intValue();

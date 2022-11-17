@@ -254,6 +254,16 @@ public class Monster {
     }
 
     /**
+     * @return 怪物的真实生命值
+     */
+    public int getHealthValue() {
+        if (getType() == MonsterType.CYBERNETIC) {
+            return intHealth() << 2;
+        }
+        return intHealth();
+    }
+
+    /**
      * @return 怪物的护甲值
      */
     public byte getArmor() {

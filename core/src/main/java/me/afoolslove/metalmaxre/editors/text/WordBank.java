@@ -141,9 +141,9 @@ public class WordBank {
         OPCODES.put((byte) 0xF7, 2);  // 跨文本集引用文本段，第一字节为第几段文本，第二字节为哪一页的文本集
         OPCODES.put((byte) 0xF8, 2);  // 读取1-3个字节，变更为文本，向右对齐
         OPCODES.put((byte) 0xF9, 2);  // 读取1-3个字节，变更为文本，向左对齐
-        OPCODES.put((byte) 0xFA, 1);  // 动态的文本段
+        OPCODES.put((byte) 0xFA, 1);  // 引用目标地址的文本
         OPCODES.put((byte) 0xFB, 1);  // 引用文本，动态文本？未知
-        OPCODES.put((byte) 0xFC, 1);  //
+        OPCODES.put((byte) 0xFC, 1);  // 引用数据
         OPCODES.put((byte) 0xFD, 1);  // 玩家名称
         OPCODES.put((byte) 0xFE, 0);  // 对话时按键确认后带名称换行
         // E3 + 1byte = 进行选择，选择 是 空操作，选择 否 读取第一个字节文本?
@@ -153,7 +153,8 @@ public class WordBank {
         // F0 + 1byte = 对话时，第一个字节为选择另一个人换行进行说话
         // F1 + 1byte = 对话sleep一段时间，第一个字节为sleep时间，时间单位未知，多数为 0x3C
         // F3 + 1byte = 战斗时为当前进行操作的 怪物/玩家 名称
-        // F8 + 2byte = 读取0x33CBA的两个字节目标内存地址，第一个为索引，第二个为显示几个字节，最大为2，3个字节
+        // F8 + 2byte = 读取0x33CBA的两个字节目标内存地址，第一个为索引，第二个为显示几个字节，最大为2(3个字节)
+        // F9 + 2byte = 读取0x33CBA的两个字节目标内存地址，第一个为索引，第二个为显示几个字节，最大为2(3个字节)
         // FB + 1byte = ?
         // F5 + 0C = NPC对话时朝上，对话结束后恢复，一定要NPC！！！
         // F5 + 0D = NPC对话时朝下，对话结束后恢复，一定要NPC！！！
@@ -165,6 +166,8 @@ public class WordBank {
         // F5 + 15 = NPC对话时向右走一步
         // F5 + 16 = NPC对话时向右走一步
         // F5 + 17 = NPC对话时向玩家走一步
+        // FA + 1byte = 读取0x33CBA的两个字节目标内存地址，将目标2byte内存值作为文本段和文本索引使用
+        // FC + 1byte = 读取0x33CBA的两个字节目标内存地址
         // FC + 07 = 强度中，玩家的名称
         // FC + 3F = 玩家存档 1 名称
         // FC + 40 = 玩家存档 2 名称

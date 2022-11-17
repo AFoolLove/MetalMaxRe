@@ -26,7 +26,7 @@ public class PlayerWeapon extends PlayerEquipmentItem {
     /**
      * 设置攻击力
      *
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public void setAttack(@Range(from = 0x00, to = 0xFF) int attack) {
         setAttack((byte) (attack & 0xFF));
@@ -35,7 +35,7 @@ public class PlayerWeapon extends PlayerEquipmentItem {
     /**
      * 设置攻击力
      *
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public void setAttack(byte attack) {
         value = attack;
@@ -59,6 +59,13 @@ public class PlayerWeapon extends PlayerEquipmentItem {
     }
 
     /**
+     * @return 攻击动画
+     */
+    public int intAttackAnim() {
+        return getAttackAnim() & 0xFF;
+    }
+
+    /**
      * @return 该武器的攻击范围和可装备的玩家
      */
     @Override
@@ -68,10 +75,18 @@ public class PlayerWeapon extends PlayerEquipmentItem {
 
     /**
      * @return 攻击力
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public byte getAttack() {
         return value;
+    }
+
+    /**
+     * @return 攻击力
+     * @see IDataValueEditor#get2ByteValues()
+     */
+    public int intAttack() {
+        return getAttack() & 0xFF;
     }
 
     /**
@@ -83,9 +98,9 @@ public class PlayerWeapon extends PlayerEquipmentItem {
 
     /**
      * @return 指向的真实攻击力值
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public int getAttackValue(@NotNull IDataValueEditor dataValues) {
-        return dataValues.getValues().get(value & 0xFF).intValue();
+        return dataValues.getValues().get(intAttack()).intValue();
     }
 }

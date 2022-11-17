@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * 二进制输出流
@@ -124,6 +125,23 @@ public class BitOutputStream extends ByteArrayOutputStream {
     @NotNull
     @Override
     public synchronized byte[] toByteArray() {
+        if (count != 0 && nextBitIndex == 0x00) {
+            // 多余的字节
+            return Arrays.copyOf(buf, count - 1);
+        }
         return super.toByteArray();
+    }
+
+    public static void main(String[] args) {
+        BitOutputStream outputStream = new BitOutputStream();
+        outputStream.writeBit(false);
+        outputStream.writeBit(false);
+        outputStream.writeBit(false);
+        outputStream.writeBit(false);
+        outputStream.writeBit(true);
+        outputStream.writeBit(true);
+        outputStream.writeBit(false);
+        outputStream.writeBit(false);
+        System.out.println(outputStream);
     }
 }

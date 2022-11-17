@@ -15,7 +15,7 @@ public class TankEquipmentItem extends Item {
     /**
      * 值
      *
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public byte value;
 
@@ -50,7 +50,7 @@ public class TankEquipmentItem extends Item {
     /**
      * 设置防御力
      *
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public void setDefense(@Range(from = 0x00, to = 0xFF) int defense) {
         setDefense((byte) (defense & 0xFF));
@@ -59,7 +59,7 @@ public class TankEquipmentItem extends Item {
     /**
      * 设置防御力
      *
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public void setDefense(byte defense) {
         this.defense = defense;
@@ -73,16 +73,31 @@ public class TankEquipmentItem extends Item {
     }
 
     /**
+     * @return 装备的重量，1:0.1t
+     */
+    public int intWeight() {
+        return getWeight() & 0xFF;
+    }
+
+    /**
      * @return 防御力
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public byte getDefense() {
         return defense;
     }
 
     /**
+     * @return 防御力
+     * @see IDataValueEditor#get2ByteValues()
+     */
+    public int intDefense() {
+        return getDefense() & 0xFF;
+    }
+
+    /**
      * @return 指向的真实防御力值
-     * @see me.afoolslove.metalmaxre.editors.data.IDataValueEditor#get2ByteValues()
+     * @see IDataValueEditor#get2ByteValues()
      */
     public int getDefenseValue(@NotNull IDataValueEditor dataValues) {
         return dataValues.getValues().get(defense & 0xFF).intValue();

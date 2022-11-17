@@ -14,7 +14,6 @@ import java.util.Map;
 public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements IMonsterEditor {
     private final DataAddress monsterDropItemsAddress;
     private final DataAddress monsterAttributesAddress;
-
     private final DataAddress monsterResistanceAddress;
     private final DataAddress monsterArmorsAddress;
     private final DataAddress monsterHasArmorsAddress;
@@ -23,7 +22,6 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     private final DataAddress monsterHitRatesAddress;
     private final DataAddress monsterBattleLevelAddress;
     private final DataAddress monsterBattleExperienceAddress;
-
     private final DataAddress monsterBattleGoldAddress;
     private final DataAddress monsterGroupAddress;
     private final DataAddress specialMonsterGroupAddress;
