@@ -398,80 +398,76 @@ public class WordBank {
             }
             text.append(String.format("%02X", copy[i]));
             if (opcodeValue != null) {
-                switch (copy[i] & 0xFF) {
-                    case 0xF6: // 读取到 0x9F 或 0x63 后结束
-                        // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
-                        // 0x63             (结束)
-                        // 0x8C + 2byte     (填充数量，填充字符)
-                        // 0x43 ???
-                        whileF6:
-                        while (true) {
-                            if (++i >= copy.length) {
-                                // 读取数据完毕
-                                text.append(']');
-                                return text.toString();
-                            }
+                if ((copy[i] & 0xFF) == 0xF6) { // 读取到 0x9F 或 0x63 后结束
+                    // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
+                    // 0x63             (结束)
+                    // 0x8C + 2byte     (填充数量，填充字符)
+                    // 0x43 ???
+                    whileF6:
+                    while (true) {
+                        if (++i >= copy.length) {
+                            // 读取数据完毕
+                            text.append(']');
+                            return text.toString();
+                        }
 
-                            switch (copy[i] & 0xFF) {
-                                case 0x9E: // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
-                                    // 写入 9E
-                                    text.append(" 9E");
-                                    // 空格填充
-                                    if (++i >= copy.length) {
-                                        // 读取完毕
-                                        // 没有数量，直接结束
-                                        text.append(']');
-                                        return text.toString();
-                                    }
-                                    // 填充数量
-                                    text.append(String.format("%02X ", copy[i]));
-                                    break;
-                                case 0x63: // 0x63             (结束)
-                                    // 0xF6 的结束符
-                                    text.append(" 63]");
-                                    continue maps;
-                                case 0x8C: // 0x8C + 2byte     (填充数量，填充字符)
-                                    text.append(" 8C");
-                                    // 使用指定字符填充指定数量
-                                    if (++i >= copy.length) {
-                                        // 读取完毕
-                                        // 没有字符，也没有数量，直接结束
-                                        text.append(']');
-                                        return text.toString();
-                                    }
-                                    // 填充数量
-                                    text.append(String.format("%02X", copy[i]));
-                                    if (++i >= copy.length) {
-                                        // 读取完毕
-                                        // 没有字符，直接结束
-                                        text.append(']');
-                                        return text.toString();
-                                    }
-                                    // 填充字符
-                                    text.append(String.format("%02X ", copy[i]));
-                                    break;
-                                case 0x9F:
-                                    // 文本段结束，另一个的开始
-                                    text.append("]\n");
-                                    // emm？要不要结束？
-                                    break whileF6;
-                                default:
-                                    // 写入不认识的字节
-                                    text.append(String.format("%02X", copy[i]));
-                                    break;
-                            }
+                        switch (copy[i] & 0xFF) {
+                            case 0x9E: // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
+                                // 写入 9E
+                                text.append(" 9E");
+                                // 空格填充
+                                if (++i >= copy.length) {
+                                    // 读取完毕
+                                    // 没有数量，直接结束
+                                    text.append(']');
+                                    return text.toString();
+                                }
+                                // 填充数量
+                                text.append(String.format("%02X ", copy[i]));
+                                break;
+                            case 0x63: // 0x63             (结束)
+                                // 0xF6 的结束符
+                                text.append(" 63]");
+                                continue maps;
+                            case 0x8C: // 0x8C + 2byte     (填充数量，填充字符)
+                                text.append(" 8C");
+                                // 使用指定字符填充指定数量
+                                if (++i >= copy.length) {
+                                    // 读取完毕
+                                    // 没有字符，也没有数量，直接结束
+                                    text.append(']');
+                                    return text.toString();
+                                }
+                                // 填充数量
+                                text.append(String.format("%02X", copy[i]));
+                                if (++i >= copy.length) {
+                                    // 读取完毕
+                                    // 没有字符，直接结束
+                                    text.append(']');
+                                    return text.toString();
+                                }
+                                // 填充字符
+                                text.append(String.format("%02X ", copy[i]));
+                                break;
+                            case 0x9F:
+                                // 文本段结束，另一个的开始
+                                text.append("]\n");
+                                // emm？要不要结束？
+                                break whileF6;
+                            default:
+                                // 写入不认识的字节
+                                text.append(String.format("%02X", copy[i]));
+                                break;
                         }
-                        break;
-                    default:
-                        // 其余的直接读取相应的字节数量
-                        int len = Math.min(copy.length - i - 1, opcodeValue);
-                        for (int j = 0; j < len; j++) {
-                            text.append(String.format("%02X", copy[i + j + 1]));
-                        }
-                        i += len;
-                        // 读取结束
-                        text.append(']');
-                        break;
+                    }
+                } else {// 其余的直接读取相应的字节数量
+                    int len = Math.min(copy.length - i - 1, opcodeValue);
+                    for (int j = 0; j < len; j++) {
+                        text.append(String.format("%02X", copy[i + j + 1]));
+                    }
+                    i += len;
+                    // 读取结束
+                    text.append(']');
                 }
             } else {
                 // 能到这里的只有纯字节

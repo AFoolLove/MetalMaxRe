@@ -24,4 +24,11 @@ public class TankEngine extends TankEquipmentItem {
     public byte getCapacity() {
         return value;
     }
+
+    /**
+     * @return 引擎的最大载重量
+     */
+    public int intCapacity() {
+        return getCapacity() & 0xFF;
+    }
 }

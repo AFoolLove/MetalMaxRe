@@ -32,6 +32,16 @@ public enum TankShellCapacity {
         return value;
     }
 
+    public static TankShellCapacity fromValue(int value) {
+        byte v = (byte) (value & 0B0000_0111);
+        for (TankShellCapacity shellCapacity : values()) {
+            if (shellCapacity.getValue() == v) {
+                return shellCapacity;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return name();

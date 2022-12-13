@@ -192,6 +192,6 @@ public class TankWeapon extends TankEquipmentItem {
      * @return 炮弹容量
      */
     public TankShellCapacity getShellCapacity() {
-        return TankShellCapacity.values()[(canEquipped & 0B0000_0111)];
+        return TankShellCapacity.fromValue(canEquipped);
     }
 }

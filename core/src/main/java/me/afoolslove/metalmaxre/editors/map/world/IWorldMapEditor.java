@@ -120,9 +120,7 @@ public interface IWorldMapEditor extends IRomEditor {
         x *= 4;
         y *= 4;
         for (int offsetY = 0; offsetY < 4; offsetY++) {
-            for (int offsetX = 0; offsetX < 4; offsetX++) {
-                map[y + offsetY][offsetX + x] = bytes[offsetY * 4 + offsetX];
-            }
+            System.arraycopy(bytes, offsetY * 4 + 0, map[y + offsetY], 0 + x, 4);
         }
     }
 
@@ -141,9 +139,7 @@ public interface IWorldMapEditor extends IRomEditor {
         y *= 4;
         byte[] bytes = new byte[0x10];
         for (int offsetY = 0; offsetY < 4; offsetY++) {
-            for (int offsetX = 0; offsetX < 4; offsetX++) {
-                bytes[(offsetY * 4) + offsetX] = map[y + offsetY][x + offsetX];
-            }
+            System.arraycopy(map[y + offsetY], x + 0, bytes, (offsetY * 4) + 0, 4);
         }
         return bytes;
     }

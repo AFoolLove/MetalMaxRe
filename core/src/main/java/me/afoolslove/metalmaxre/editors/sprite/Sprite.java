@@ -59,7 +59,7 @@ public class Sprite extends Point2B {
     }
 
     public Sprite(@NotNull Sprite sprite) {
-        super((Point2B) sprite);
+        super(sprite);
         this.type = sprite.type;
         this.talk1 = sprite.talk1;
         this.talk2 = sprite.talk2;
@@ -218,26 +218,26 @@ public class Sprite extends Point2B {
      * 设置是否始终朝向初始的方向
      */
     public void lockDirection(boolean enable) {
-        int y = getRawY();
+        int x = getRawX();
         if (enable) {
-            y |= FLAG_LOCK_DIRECTION;
+            x |= FLAG_LOCK_DIRECTION;
         } else {
-            y &= (0B1100_0000 ^ FLAG_LOCK_DIRECTION);
+            x &= (0B1100_0000 ^ FLAG_LOCK_DIRECTION);
         }
-        setY(y);
+        setX(x);
     }
 
     /**
      * 设置移动时是否禁用移动动画
      */
     public void disableMovingAnim(boolean enable) {
-        int y = getRawY();
+        int x = getRawX();
         if (enable) {
-            y |= FLAG_DISABLE_MOVING_ANIM;
+            x |= FLAG_DISABLE_MOVING_ANIM;
         } else {
-            y &= (0B1100_0000 ^ FLAG_DISABLE_MOVING_ANIM);
+            x &= (0B1100_0000 ^ FLAG_DISABLE_MOVING_ANIM);
         }
-        setY(y);
+        setX(x);
     }
 
     /**
