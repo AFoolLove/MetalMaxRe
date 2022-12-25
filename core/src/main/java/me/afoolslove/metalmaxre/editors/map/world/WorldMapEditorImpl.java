@@ -21,6 +21,7 @@ import java.util.*;
  *
  * @author AFoolLove
  */
+@Editor.TargetVersions
 public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implements IWorldMapEditor {
     private final DataAddress worldMapTilesIndexAddress;
     private final DataAddress worldMapX00410Address;
@@ -665,5 +666,55 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     @Override
     public Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineBack() {
         return shippingLineBack;
+    }
+
+    /**
+     * 兼容SH和SHG版本
+     */
+    @Editor.TargetVersion({"super_hack", "super_hack_general"})
+    public static class SHWorldMapEditorImpl extends WorldMapEditorImpl {
+
+        public SHWorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+            this(metalMaxRe,
+                    DataAddress.fromPRG(0x00010 - 0x10, 0x0040F - 0x10),
+                    DataAddress.fromPRG(0x00410 - 0x10, 0x0060F - 0x10),
+                    DataAddress.fromCHR(0x3A010 - 0x10, 0x3B00F - 0x10),
+                    DataAddress.fromPRG(0x35EC1 - 0x10),
+                    DataAddress.fromPRG(0x25C10 - 0x10),
+                    DataAddress.fromPRG(0x25C34 - 0x10));
+        }
+
+        public SHWorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                                    DataAddress worldMapTilesIndexAddress,
+                                    DataAddress worldMapX00410Address,
+                                    DataAddress worldMapIndexAddress,
+                                    DataAddress worldMapMinesAddress,
+                                    DataAddress worldMapOutLineAddress,
+                                    DataAddress worldMapBackLineAddress,
+                                    List<DataAddress> worldMapIndexesAddress) {
+            super(metalMaxRe, worldMapTilesIndexAddress, worldMapX00410Address, worldMapIndexAddress, worldMapMinesAddress, worldMapOutLineAddress, worldMapBackLineAddress, worldMapIndexesAddress);
+        }
+
+        public SHWorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                                    DataAddress worldMapTilesIndexAddress,
+                                    DataAddress worldMapX00410Address,
+                                    DataAddress worldMapIndexAddress,
+                                    DataAddress worldMapMinesAddress,
+                                    DataAddress worldMapOutLineAddress,
+                                    DataAddress worldMapBackLineAddress) {
+            super(metalMaxRe, worldMapTilesIndexAddress, worldMapX00410Address, worldMapIndexAddress, worldMapMinesAddress, worldMapOutLineAddress, worldMapBackLineAddress);
+        }
+
+        @Override
+        @Editor.Load
+        public void onLoad() {
+            super.onLoad();
+        }
+
+        @Override
+        @Editor.Apply
+        public void onApply(IEventTilesEditor eventTilesEditor) {
+            super.onApply(eventTilesEditor);
+        }
     }
 }

@@ -94,7 +94,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(IMapEditor.class, MapEditorImpl::new);
         register(IMapPropertiesEditor.class, MapPropertiesEditorImpl.class);
         register(IEventTilesEditor.class, EventTilesEditorImpl::new);
-        register(IWorldMapEditor.class, WorldMapEditorImpl::new);
+        register(IWorldMapEditor.class, WorldMapEditorImpl.class);
         register(IMapEntranceEditor.class, MapEntranceEditorImpl.class);
         register(ITileSetEditor.class, TileSetEditorImpl::new);
         register(ITextEditor.class, TextEditorImpl.class);
