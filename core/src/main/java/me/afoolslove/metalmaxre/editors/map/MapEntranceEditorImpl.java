@@ -43,7 +43,6 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
     public void onLoad(IMapPropertiesEditor mapPropertiesEditor) {
         // 读取前清空数据
         getMapEntrances().clear();
-        int p = 0;
 
         for (int mapId = 0, maxMapCount = mapPropertiesEditor.getMapProperties().size(); mapId < maxMapCount; mapId++) {
             MapProperties mapProperties = mapPropertiesEditor.getMapProperties(mapId);
@@ -66,9 +65,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                         // 添加该地图的边界和出入口数据
                         getMapEntrances().put(entry.getKey(), mapEntrance);
                     });
-            p = Math.max(p, position());
         }
-        System.out.println();
     }
 
     @Editor.Apply

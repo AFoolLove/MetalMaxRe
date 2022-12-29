@@ -196,7 +196,7 @@ public class Sprite extends Point2B {
         if (enable) {
             y |= FLAG_CAN_PUSHED;
         } else {
-            y &= (0B1100_0000 ^ FLAG_CAN_PUSHED);
+            y &= (0B1111_1111 ^ FLAG_CAN_PUSHED);
         }
         setY(y);
     }
@@ -209,7 +209,7 @@ public class Sprite extends Point2B {
         if (enable) {
             y |= FLAG_IGNORE_TERRAIN;
         } else {
-            y &= (0B1100_0000 ^ FLAG_IGNORE_TERRAIN);
+            y &= (0B1111_1111 ^ FLAG_IGNORE_TERRAIN);
         }
         setY(y);
     }
@@ -222,7 +222,7 @@ public class Sprite extends Point2B {
         if (enable) {
             x |= FLAG_LOCK_DIRECTION;
         } else {
-            x &= (0B1100_0000 ^ FLAG_LOCK_DIRECTION);
+            x &= (0B1111_1111 ^ FLAG_LOCK_DIRECTION);
         }
         setX(x);
     }
@@ -235,7 +235,7 @@ public class Sprite extends Point2B {
         if (enable) {
             x |= FLAG_DISABLE_MOVING_ANIM;
         } else {
-            x &= (0B1100_0000 ^ FLAG_DISABLE_MOVING_ANIM);
+            x &= (0B1111_1111 ^ FLAG_DISABLE_MOVING_ANIM);
         }
         setX(x);
     }
