@@ -37,8 +37,15 @@ editorManager.loadEditors();
 
 ## 应用编辑器修改和保存修改
 
+***索引类数据在应用才会生成有效的索引数据**
+
+### 应用
+
 * 使用`IEditorManager.applyEditor(@NotNull Class<IRomEditor>)`应用指定编辑器的修改
 * 使用`IEditorManager.applyEditors()`应用所有编辑器的修改
+
+### 保存
+
 * 使用`RomBuffer.save(@NotNull Path)`保存到指定路径
 * 使用`RomBuffer.save(@NotNull OutputStream)`保存到输出流
 * 使用`RomBuffer.toArrayByte()`将ROM转换为字节数组
@@ -51,21 +58,21 @@ metalMaxRe.useDefault(); // 使用默认提供的编辑器管理器实现类
 EditorManagerImpl editorManager = metalMaxRe.getEditorManager();
 editorManager.registerDefaultEditors();
 // ---------------- 加载所有编辑器
-editorManager.loadEditors();
-// editorManager.loadEditors().get(); // 等待加载完毕
-// ---------------- 编辑
+editorManager.loadEditors(); // 加载数据，非阻塞
+// editorManager.loadEditors().get(); // 阻塞当前线程至加载完毕
+// ---------------- 编辑等操作...
 // code... 对编辑器的所有操作
 // ---------------- 应用编辑器的修改和保存
-editorManager.applyEditors();
-// editorManager.applyEditors().get(); // 等待应用完毕
-editorManager.save(Path);
+editorManager.applyEditors(); // 应用修改，非阻塞
+// editorManager.applyEditors().get(); // 阻塞当前线程至应用完毕
+editorManager.save(Path); // 保存修改到指定文件路径
 
 ~~~
 
 ## 继承一个编辑器
 
 如果你只是想在已有的编辑器上添加一些功能  
-需要重写定义 ```@Editor.Load``` 和 ```@Editor.Apply```注解到相应的方法中
+需要重写定义 ```@Editor.Load``` 和 ```@Editor.Apply```注解到相应的方法中，否则编辑器会不进行任何操作
 
 ## 创建一个编辑器
 

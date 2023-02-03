@@ -54,16 +54,15 @@
 
 ### [IShopEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/IShopEditor.java)（售货机商品编辑器）
 
-实现类：[ShopEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/ShopEditorImpl.java)
+实现类：[ShopEditorImplImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/ShopEditorImpl.java)
 
 不支持世界地图，世界地图也不支持使用售货机
 
-*
-售货机的商品、商品数量和所在地图，修改商品价格请使用 [`IItemEditor`](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)
+* 售货机的商品、商品数量和所在地图，修改商品价格请使用 [`IItemEditor`](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)
 
 ### [IComputerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/IComputerEditor.java)（计算机编辑器）
 
-实现类：[ComputerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/ComputerEditorImpl.java)
+实现类：[ComputerEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/ComputerEditorImpl.java)
 
 不支持世界地图，世界地图也不支持使用计算机  
 计算机包含：售货机、游戏机、计算机等
@@ -72,22 +71,21 @@
 
 ### [IDataValueEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/data/IDataValueEditor.java)（数据值编辑器）
 
-实现类：[DataValueEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/data/DataValueEditorImpl.java)
+实现类：[DataValueEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/data/DataValueEditorImpl.java)
 
 ### [IItemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)（物品编辑器）
 
-实现类：[ItemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/items/ItemEditorImpl.java)
+实现类：[ItemEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/items/ItemEditorImpl.java)
 
 * 物品的价格
 * 玩家的防具属性 [`PlayerArmor`](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerArmor.java)
 * 玩家的武器属性 [`PlayerWeapon`](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerWeapon.java)
-*
-坦克的装备属性 [`TankEquipmentItem`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEquipmentItem.java) [`TankEngine`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEngine.java)
+* 坦克的装备属性 [`TankEquipmentItem`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEquipmentItem.java) [`TankEngine`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEngine.java)
 * 坦克的武器属性 [`TankWeapon`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankWeapon.java)
 
 ### [IEventEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/events/IEventTilesEditor.java)（事件编辑器）
 
-实现类：[EventEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/events/EventTilesEditorImpl.java)
+实现类：[EventEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/events/EventTilesEditorImpl.java)
 
 支持世界地图  
 地图的比例为：1:1tile  
@@ -95,21 +93,21 @@
 
 ### [ITileSetEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/tileset/ITileSetEditor.java)（图块编辑器）
 
-实现类：[TileSetEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/tileset/TileSetEditorImpl.java)
+实现类：[TileSetEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/tileset/TileSetEditorImpl.java)
 
 * 地图的图块和图块组合数据
 * 地图的图块属性
 
 ### [IWorldMapEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/IWorldMapEditor.java)（世界地图编辑器）
 
-实现类：[WorldMapEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/WorldMapEditorImpl.java)
+实现类：[WorldMapEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/WorldMapEditorImpl.java)
 
 * 编辑世界地图
 * 修改出航/归航的航线，出航/归航航线的路径点各最大16条
 
 ### [IDogSystemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IDogSystemEditor.java)（犬系统编辑器）
 
-实现类：[DogSystemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/DogSystemEditorImpl.java)
+实现类：[DogSystemEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/DogSystemEditorImpl.java)
 
 * 将某个地图设置为城镇
 * ~~某个地图作为附属城镇（进入附属城镇相当于进入城镇）~~
@@ -118,7 +116,7 @@
 
 ### [IMapEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapEditor.java)（地图编辑器）
 
-实现类：[MapEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapEditorImpl.java)
+实现类：[MapEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapEditorImpl.java)
 
 不支持世界地图，世界地图请使用 [`WorldMapEditor`](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/WorldMapEditor.java)
 
@@ -128,7 +126,7 @@
 
 ### [IMapEntranceEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapEntranceEditor.java)（地图出入口编辑器）
 
-实现类：[MapEntranceEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapEntranceEditorImpl.java)
+实现类：[MapEntranceEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapEntranceEditorImpl.java)
 
 支持世界地图
 
@@ -137,7 +135,7 @@
 
 ### [IMapPropertiesEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapPropertiesEditor.java)（地图属性编辑器）
 
-实现类：[MapPropertiesEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapPropertiesEditorImpl.java)
+实现类：[MapPropertiesEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapPropertiesEditorImpl.java)
 
 支持编辑世界地图的部分属性 [`WorldMapProperties`](core/src/main/java/me/afoolslove/metalmaxre/editors/map/WorldMapProperties.java)
 
@@ -150,7 +148,7 @@
 
 ### [IMonsterEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/IMonsterEditor.java)（怪物编辑器）
 
-实现类：[MonsterEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterEditorImpl.java)
+实现类：[MonsterEditorImplImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterEditorImpl.java)
 
 未完成
 
@@ -163,13 +161,13 @@
 
 ### [IPaletteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/palette/IPaletteEditor.java)（调色板编辑器）
 
-实现类：[PaletteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/palette/PaletteEditorImpl.java)
+实现类：[PaletteEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/palette/PaletteEditorImpl.java)
 
 全局调色板、精灵调色板、战斗时和非战斗时的调色板
 
 ### [IPlayerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerEditor.java)（玩家编辑器）
 
-实现类：[PlayerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerEditorImpl.java)
+实现类：[PlayerEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerEditorImpl.java)
 
 * 玩家的初始金钱
 * 玩家的初始属性
@@ -178,7 +176,7 @@
 
 ### [IPlayerExpEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerExpEditor.java)（玩家经验值编辑器）
 
-实现类：[PlayerExpEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerExpEditorImpl.java)
+实现类：[PlayerExpEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerExpEditorImpl.java)
 
 * 玩家到达某一等级所需的经验（不是差值）
 
@@ -186,14 +184,14 @@
 
 ### [ISpriteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteEditor.java)（精灵编辑器）
 
-实现类：[SpriteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/SpriteEditorImpl.java)
+实现类：[SpriteEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/SpriteEditorImpl.java)
 
 * 精灵的类型、坐标、对话和行动方式
 * 特殊属性：可被推动、无视地形移动、锁定朝向、移动时不播放移动动画（平移）
 
 ### [ITankEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/ITankEditor.java)（坦克编辑器）
 
-实现类：[TankEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEditorImpl.java)
+实现类：[TankEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEditorImpl.java)
 
 包含出租坦克
 
@@ -204,7 +202,7 @@
 
 ### [ITextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/ITextEditor.java)（文本编辑器）
 
-实现类：[TextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/TextEditorImpl.java)
+实现类：[TextEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/text/TextEditorImpl.java)
 
 所有已知的文本
 
@@ -217,7 +215,7 @@
 
 ### [ITreasureEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/ITreasureEditor.java)（宝藏编辑器）
 
-实现类：[TreasureEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/TreasureEditorImpl.java)
+实现类：[TreasureEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/TreasureEditorImpl.java)
 
 支持世界地图
 

@@ -187,6 +187,20 @@ public interface IMonsterEditor extends IRomEditor {
     DataAddress getMonsterHealthsAddress();
 
     /**
+     * 怪物的攻击力地址
+     * <p>
+     * *攻击力根据命中率D7变化
+     */
+    DataAddress getMonsterAttacksAddress();
+
+    /**
+     * 怪物的防御力地址
+     * <p>
+     * *攻击力根据战斗等级D7变化
+     */
+    DataAddress getMonsterDefensesAddress();
+
+    /**
      * 怪物的出手速度地址
      */
     DataAddress getMonsterSpeedsAddress();

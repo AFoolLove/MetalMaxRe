@@ -16,17 +16,17 @@ public class Monster {
     /**
      * 攻击力
      */
-    public char attack;
+    public byte attack;
     /**
      * 防御力
      */
-    public char defense;
+    public byte defense;
     /**
      * 护甲
      * <p>
      * 可能没有
      */
-    public byte armor;
+    public Byte armor;
     /**
      * 速度
      */
@@ -92,12 +92,39 @@ public class Monster {
         this.health = (byte) (health & 0xFF);
     }
 
+
+    /**
+     * 设置怪物的攻击力，实际攻击力会根据命中率的D7变化
+     *
+     * @param attack 攻击力
+     */
+    public void setAttack(byte attack) {
+        this.attack = attack;
+    }
+
+    public void setAttack(@Range(from = 0x00, to = 0xFF) int attack) {
+        setAttack((byte) (attack & 0xFF));
+    }
+
+    /**
+     * 设置怪物的防御力，实际防御力会根据战斗等级D7变化
+     *
+     * @param defense 防御力
+     */
+    public void setDefense(byte defense) {
+        this.defense = defense;
+    }
+
+    public void setDefense(@Range(from = 0x00, to = 0xFF) int defense) {
+        setDefense((byte) defense);
+    }
+
     /**
      * 设置怪物的护甲
      *
      * @param armor 护甲值
      */
-    public void setArmor(byte armor) {
+    public void setArmor(Byte armor) {
         this.armor = armor;
     }
 
@@ -264,14 +291,63 @@ public class Monster {
     }
 
     /**
+     * @return 怪物的攻击力
+     */
+    public byte getAttack() {
+        return attack;
+    }
+
+    public int intAttack() {
+        return getAttack() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的真实攻击力
+     */
+    public int getAttackValue() {
+        if ((getRawHitRate() & 0B1000_0000) != 0x00) {
+            return intAttack() << 2;
+        }
+        return intAttack();
+    }
+
+    /**
+     * @return 怪物的防御力
+     */
+    public byte getDefense() {
+        return defense;
+    }
+
+    public int intDefense() {
+        return getDefense() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的真实防御力
+     */
+    public int getDefenseValue() {
+        if ((getBattleLevel() & 0B1000_0000) != 0x00) {
+            return intDefense() << 2;
+        }
+        return intDefense();
+    }
+
+    /**
      * @return 怪物的护甲值
      */
-    public byte getArmor() {
+    public Byte getArmor() {
         return armor;
     }
 
     public int intArmor() {
         return getArmor() & 0xFF;
+    }
+
+    /**
+     * @return 是否拥有护甲值
+     */
+    public boolean hasArmor() {
+        return getArmor() != null;
     }
 
     /**
@@ -287,15 +363,27 @@ public class Monster {
     }
 
     /**
-     * @return 怪物的命中率
+     * @return 怪物的命中率（全
      */
-    public byte getHitRate() {
+    public byte getRawHitRate() {
         return hitRate;
     }
 
-    @Range(from = 0x00, to = 0xFF)
+    /**
+     * @return 怪物的命中率（仅
+     */
+    public byte getHitRate() {
+        return (byte) (hitRate & 0x7F);
+    }
+
+    @Range(from = 0x00, to = 0x7F)
     public int intHitRate() {
-        return getHitRate() & 0xFF;
+        return getHitRate() & 0x7F;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intRawHitRate() {
+        return getRawHitRate() & 0xFF;
     }
 
     /**
@@ -342,14 +430,14 @@ public class Monster {
      * @return 怪物的金钱是否*100
      */
     public boolean isHundredfoldGold() {
-        return (this.attribute & 0B1110_1111) != 0x00;
+        return (this.attribute & 0B0001_0000) != 0x00;
     }
 
     /**
      * @return 怪物的经验值是否*100
      */
     public boolean isHundredfoldExp() {
-        return (this.attribute & 0B1101_1111) != 0x00;
+        return (this.attribute & 0B0010_0000) != 0x00;
     }
 
     /**

@@ -267,9 +267,9 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // 写入宽度、高度
         getBuffer().putPrg(0x28A87 - 0x10, worldMapProperties.getWidth());
         // 写入可移动区域偏移量，同上
-        getBuffer().putPrg(0x28A8D - 0x10, worldMapProperties.movableWidthOffset);
+        getBuffer().putPrg(0x28A8D - 0x10, worldMapProperties.getMovableWidthOffset());
         // 写入可移动区域，同上
-        getBuffer().putPrg(0x28A95 - 0x10, worldMapProperties.movableWidth);
+        getBuffer().putPrg(0x28A95 - 0x10, worldMapProperties.getMovableWidth());
         // 写入出入口初始地址
         getBuffer().putPrg(0x28ABB - 0x10, NumberR.at(worldMapProperties.entrance, 0)); // 默认 0x80
         getBuffer().putPrg(0x28ABF - 0x10, NumberR.at(worldMapProperties.entrance, 1)); // 默认 0x89

@@ -127,6 +127,26 @@ public class MapProperties {
         return NumberR.toInt(tilesIndexD, tilesIndexC, tilesIndexB, tilesIndexA);
     }
 
+    public byte getIntTile(int index) {
+        return switch (index) {
+            case 0x00 -> tilesIndexA;
+            case 0x40 -> tilesIndexB;
+            case 0x80 -> tilesIndexC;
+            case 0xC0 -> tilesIndexD;
+            default -> 0x00;
+        };
+    }
+
+    public int intIntTile(int index) {
+        return switch (index) {
+            case 0x00 -> tilesIndexA & 0xFF;
+            case 0x40 -> tilesIndexB & 0xFF;
+            case 0x80 -> tilesIndexC & 0xFF;
+            case 0xC0 -> tilesIndexD & 0xFF;
+            default -> 0x00;
+        };
+    }
+
     /**
      * 将int分为4个byte，并设置到tilesIndexA、tilesIndexB、tilesIndexC、tilesIndexD
      */
@@ -179,6 +199,59 @@ public class MapProperties {
     public void setHeight(@Range(from = 0x00, to = 0xFF) int height) {
         setHeight((byte) (height & 0xFF));
     }
+
+    /**
+     * 设置可移动区域X轴偏移
+     *
+     * @param movableWidthOffset 偏移
+     */
+    public void setMovableWidthOffset(byte movableWidthOffset) {
+        this.movableWidthOffset = movableWidthOffset;
+    }
+
+    public void setMovableWidthOffset(@Range(from = 0x00, to = 0xFF) int movableWidthOffset) {
+        setMovableWidthOffset((byte) (movableWidthOffset & 0xFF));
+    }
+
+    /**
+     * 设置可移动区域宽度
+     *
+     * @param movableWidth 可移动区域的宽度
+     */
+    public void setMovableWidth(byte movableWidth) {
+        this.movableWidth = movableWidth;
+    }
+
+    public void setMovableWidth(@Range(from = 0x00, to = 0xFF) int movableWidth) {
+        setMovableWidth((byte) (movableWidth & 0xFF));
+    }
+
+    /**
+     * 设置可移动区域Y轴偏移
+     *
+     * @param movableHeightOffset 偏移
+     */
+    public void setMovableHeightOffset(byte movableHeightOffset) {
+        this.movableHeightOffset = movableHeightOffset;
+    }
+
+    public void setMovableHeightOffset(@Range(from = 0x00, to = 0xFF) int movableHeightOffset) {
+        setMovableHeightOffset((byte) (movableHeightOffset & 0xFF));
+    }
+
+    /**
+     * 设置可移动区域高度
+     *
+     * @param movableHeight 可移动区域的高度
+     */
+    public void setMovableHeight(byte movableHeight) {
+        this.movableHeight = movableHeight;
+    }
+
+    public void setMovableHeight(@Range(from = 0x00, to = 0xFF) int movableHeight) {
+        setMovableHeight((byte) (movableHeight & 0xFF));
+    }
+
 
     /**
      * 设置地图的填充图块
@@ -246,6 +319,55 @@ public class MapProperties {
     @Range(from = 0x00, to = 0xFF)
     public int intHeight() {
         return getHeight() & 0xFF;
+    }
+
+
+    /**
+     * @return 可移动区域宽度
+     */
+    public byte getMovableWidth() {
+        return movableWidth;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intMovableWidth() {
+        return getMovableWidth() & 0xFF;
+    }
+
+    /**
+     * @return 可移动区域X轴偏移
+     */
+    public byte getMovableWidthOffset() {
+        return movableWidthOffset;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intMovableWidthOffset() {
+        return getMovableWidthOffset() & 0xFF;
+    }
+
+    /**
+     * @return 可移动区域高度
+     */
+    public byte getMovableHeight() {
+        return movableHeight;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intMovableHeight() {
+        return getMovableHeight() & 0xFF;
+    }
+
+    /**
+     * @return 可移动区域Y轴偏移
+     */
+    public byte getMovableHeightOffset() {
+        return movableHeightOffset;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intMovableHeightOffset() {
+        return getMovableHeightOffset() & 0xFF;
     }
 
     /**

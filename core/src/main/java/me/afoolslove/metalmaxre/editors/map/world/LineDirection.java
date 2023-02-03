@@ -23,6 +23,10 @@ public enum LineDirection {
         return action;
     }
 
+    public int intAction() {
+        return getAction() & 0xFF;
+    }
+
     /**
      * @return 通过代码得到实例
      */
