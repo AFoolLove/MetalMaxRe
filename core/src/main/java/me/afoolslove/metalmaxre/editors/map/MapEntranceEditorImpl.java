@@ -5,6 +5,7 @@ import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
@@ -90,17 +91,20 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 // 写入地图出入口数据
 
                 // 重新排序，需要顺序写入 出入口的坐标
-                LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(entry.getValue().getEntrances());
+                List<SingleMapEntry<MapPoint, MapPoint>> list = entry.getValue().getEntrances().entrySet().stream()
+                        .map(SingleMapEntry::create)
+                        .toList();
+
                 // 写入入口 X、Y
-                for (MapPoint mapPoint : linkedEntrances.keySet()) {
-                    outputStream.write(mapPoint.getX());
-                    outputStream.write(mapPoint.getY());
+                for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                    outputStream.write(mapEntry.getKey().getX());
+                    outputStream.write(mapEntry.getKey().getY());
                 }
                 // 写入出口 Map、X、Y
-                for (MapPoint mapPoint : linkedEntrances.values()) {
-                    outputStream.write(mapPoint.getMap());
-                    outputStream.write(mapPoint.getX());
-                    outputStream.write(mapPoint.getY());
+                for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                    outputStream.write(mapEntry.getValue().getMap());
+                    outputStream.write(mapEntry.getValue().getX());
+                    outputStream.write(mapEntry.getValue().getY());
                 }
             }
             mapEntrances[entry.getKey()] = outputStream.toByteArray();
@@ -120,11 +124,11 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             }
 
             if (mapEntranceIndex == endMapEntranceIndex
-                || (endMapEntranceIndex - mapEntranceIndex) < mapEntrance.length) {
+                || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
                 // 必须保证地图边界和出入口数据的完整性，不能写入部分
                 mapEntranceIndex = endMapEntranceIndex;
 
-                System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
+                System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入地图%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
                 continue;
             }
 
@@ -144,7 +148,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     continue;
                 }
 
-                mapPropertiesEditor.getMapProperties(mapId).entrance = mapEntranceIndex;
+                mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
                 mapEntrances[afterMapId] = null;
                 if (afterMapId != mapId) {
                     System.out.printf("地图边界和出入口编辑器：地图%02X与%02X使用相同边界和出入口\n", afterMapId, mapId);
@@ -278,17 +282,20 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     // 写入地图出入口数据
 
                     // 重新排序，需要顺序写入 出入口的坐标
-                    LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(entry.getValue().getEntrances());
+                    List<SingleMapEntry<MapPoint, MapPoint>> list = entry.getValue().getEntrances().entrySet().stream()
+                            .map(SingleMapEntry::create)
+                            .toList();
+
                     // 写入入口 X、Y
-                    for (MapPoint mapPoint : linkedEntrances.keySet()) {
-                        outputStream.write(mapPoint.getX());
-                        outputStream.write(mapPoint.getY());
+                    for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                        outputStream.write(mapEntry.getKey().getX());
+                        outputStream.write(mapEntry.getKey().getY());
                     }
                     // 写入出口 Map、X、Y
-                    for (MapPoint mapPoint : linkedEntrances.values()) {
-                        outputStream.write(mapPoint.getMap());
-                        outputStream.write(mapPoint.getX());
-                        outputStream.write(mapPoint.getY());
+                    for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                        outputStream.write(mapEntry.getValue().getMap());
+                        outputStream.write(mapEntry.getValue().getX());
+                        outputStream.write(mapEntry.getValue().getY());
                     }
                 }
                 mapEntrances[entry.getKey()] = outputStream.toByteArray();
@@ -315,11 +322,11 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 }
 
                 if (mapEntranceIndex == endMapEntranceIndex
-                    || (endMapEntranceIndex - mapEntranceIndex) < mapEntrance.length) {
+                    || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
                     // 必须保证地图边界和出入口数据的完整性，不能写入部分
                     mapEntranceIndex = endMapEntranceIndex;
 
-                    System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
+                    System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入地图%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
                     continue;
                 }
 
@@ -339,7 +346,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                         continue;
                     }
 
-                    mapPropertiesEditor.getMapProperties(mapId).entrance = mapEntranceIndex;
+                    mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
                     mapEntrances[afterMapId] = null;
                     if (afterMapId != mapId) {
                         System.out.printf("地图边界和出入口编辑器：地图%02X与%02X使用相同边界和出入口\n", afterMapId, mapId);
@@ -430,17 +437,20 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     // 写入地图出入口数据
 
                     // 重新排序，需要顺序写入 出入口的坐标
-                    LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(entry.getValue().getEntrances());
+                    List<SingleMapEntry<MapPoint, MapPoint>> list = entry.getValue().getEntrances().entrySet().stream()
+                            .map(SingleMapEntry::create)
+                            .toList();
+
                     // 写入入口 X、Y
-                    for (MapPoint mapPoint : linkedEntrances.keySet()) {
-                        outputStream.write(mapPoint.getX());
-                        outputStream.write(mapPoint.getY());
+                    for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                        outputStream.write(mapEntry.getKey().getX());
+                        outputStream.write(mapEntry.getKey().getY());
                     }
                     // 写入出口 Map、X、Y
-                    for (MapPoint mapPoint : linkedEntrances.values()) {
-                        outputStream.write(mapPoint.getMap());
-                        outputStream.write(mapPoint.getX());
-                        outputStream.write(mapPoint.getY());
+                    for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                        outputStream.write(mapEntry.getValue().getMap());
+                        outputStream.write(mapEntry.getValue().getX());
+                        outputStream.write(mapEntry.getValue().getY());
                     }
                 }
                 mapEntrances[entry.getKey()] = outputStream.toByteArray();
@@ -467,11 +477,11 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 }
 
                 if (mapEntranceIndex == endMapEntranceIndex
-                    || (endMapEntranceIndex - mapEntranceIndex) < mapEntrance.length) {
+                    || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
                     // 必须保证地图边界和出入口数据的完整性，不能写入部分
                     mapEntranceIndex = endMapEntranceIndex;
 
-                    System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
+                    System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入地图%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
                     continue;
                 }
 
@@ -491,7 +501,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                         continue;
                     }
 
-                    mapPropertiesEditor.getMapProperties(mapId).entrance = mapEntranceIndex;
+                    mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
                     mapEntrances[afterMapId] = null;
                     if (afterMapId != mapId) {
                         System.out.printf("地图边界和出入口编辑器：地图%02X与%02X使用相同边界和出入口\n", afterMapId, mapId);
