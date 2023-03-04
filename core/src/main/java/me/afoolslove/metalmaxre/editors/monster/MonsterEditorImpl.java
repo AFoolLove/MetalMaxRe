@@ -15,6 +15,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     private final DataAddress monsterDropItemsAddress;
     private final DataAddress monsterAttributesAddress;
     private final DataAddress monsterResistanceAddress;
+    private final DataAddress monsterAbilityAddress;
     private final DataAddress monsterArmorsAddress;
     private final DataAddress monsterHasArmorsAddress;
     private final DataAddress monsterHealthsAddress;
@@ -56,6 +57,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                 DataAddress.fromPRG(0x2253F - 0x10, 0x225AA - 0x10),
                 DataAddress.fromPRG(0x3886E - 0x10, 0x388EF - 0x10),
                 DataAddress.fromPRG(0x388F1 - 0x10, 0x38973 - 0x10),
+                DataAddress.fromPRG(0x38974 - 0x10, 0x389F6 - 0x10),
                 DataAddress.fromPRG(0x389F9 - 0x10, 0x38A07 - 0x10),
                 DataAddress.fromPRG(0x38A08 - 0x10, 0x38A16 - 0x10),
                 DataAddress.fromPRG(0x38A17 - 0x10, 0x38A99 - 0x10),
@@ -78,6 +80,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                              DataAddress monsterDropItemsAddress,
                              DataAddress monsterAttributesAddress,
                              DataAddress monsterResistanceAddress,
+                             DataAddress monsterAbilityAddress,
                              DataAddress monsterArmorsAddress,
                              DataAddress monsterHasArmorsAddress,
                              DataAddress monsterHealthsAddress,
@@ -96,6 +99,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         this.monsterDropItemsAddress = monsterDropItemsAddress;
         this.monsterAttributesAddress = monsterAttributesAddress;
         this.monsterResistanceAddress = monsterResistanceAddress;
+        this.monsterAbilityAddress = monsterAbilityAddress;
         this.monsterArmorsAddress = monsterArmorsAddress;
         this.monsterHasArmorsAddress = monsterHasArmorsAddress;
         this.monsterHealthsAddress = monsterHealthsAddress;
@@ -120,6 +124,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         byte[] attributes = new byte[getMonsterMaxCount()];
         byte[] resistances = new byte[getMonsterMaxCount()];
+        byte[] abilities = new byte[getMonsterMaxCount()];
         byte[] armors = new byte[getMonsterHasArmorMaxCount()];
         byte[] hasArmorMonsters = new byte[getMonsterHasArmorMaxCount()];
         byte[] healths = new byte[getMonsterMaxCount()];
@@ -138,6 +143,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         // 读取怪物的抗性和自动恢复HP
         getBuffer().get(getMonsterResistanceAddress(), resistances);
+        // 读取怪物的特殊能力
+        getBuffer().get(getMonsterAbilityAddress(), abilities);
 
         // 读取怪物的护甲值
         getBuffer().get(getMonsterArmorsAddress(), armors);
@@ -184,6 +191,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             monster.setAttribute(attributes[monsterId]);
             // 设置抗性和自动恢复HP
             monster.setResistance(resistances[monsterId]);
+            // 设置怪物的特殊能力
+            monster.setAbility(abilities[monsterId]);
             // 设置护甲
             for (int index = 0; index < hasArmorMonsters.length; index++) {
                 if (hasArmorMonsters[index] == monsterId) {
@@ -243,6 +252,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     public void onApply() {
         byte[] attributes = new byte[getMonsterMaxCount()];
         byte[] resistances = new byte[getMonsterMaxCount()];
+        byte[] abilities = new byte[getMonsterMaxCount()];
         byte[] healths = new byte[getMonsterMaxCount()];
         byte[] attacks = new byte[getMonsterMaxCount()];
         byte[] defenses = new byte[getMonsterMaxCount()];
@@ -259,6 +269,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             Monster monster = entry.getValue();
             int monsterId = entry.getKey();
             resistances[monsterId] = monster.resistance;
+            abilities[monsterId] = monster.ability;
             healths[monsterId] = monster.health;
             attacks[monsterId] = monster.attack;
             defenses[monsterId] = monster.defense;
@@ -283,6 +294,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         // 写入怪物的抗性和自动恢复HP
         getBuffer().put(getMonsterResistanceAddress(), resistances);
+        // 写入怪物的特殊能力
+        getBuffer().put(getMonsterAbilityAddress(), abilities);
 
         // 写入怪物的生命值
         getBuffer().put(getMonsterHealthsAddress(), healths);
@@ -365,6 +378,11 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Override
     public DataAddress getMonsterResistanceAddress() {
         return monsterResistanceAddress;
+    }
+
+    @Override
+    public DataAddress getMonsterAbilityAddress() {
+        return monsterAbilityAddress;
     }
 
     @Override

@@ -19,6 +19,10 @@ public enum MonsterType {
      * 坦克类
      */
     TANK((byte) 0B1000_0000),
+    /**
+     * 未知类
+     */
+    UNKNOWN((byte) 0B1100_0000),
     ;
 
     public final byte value;
@@ -42,7 +46,7 @@ public enum MonsterType {
             case 0B0000_0000 -> CYBERNETIC;
             case 0B0100_0000 -> BIONIC;
             case 0B1000_0000 -> TANK;
-//            case 0B1100_0000 -> null; TODO 该值未确认会发生什么，但怪物被击败后三种类型的击破数都不会增加
+            case 0B1100_0000 -> UNKNOWN; // TODO 该值未确认会发生什么，但怪物被击败后三种类型的击破数都不会增加
             default -> throw new IllegalStateException("Unexpected value: " + attribute);
         };
     }

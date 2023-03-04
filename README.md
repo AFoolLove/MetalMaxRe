@@ -49,6 +49,7 @@
 | [ITankEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/ITankEditor.java)                  | 坦克编辑器    | 完成          |
 | [ITextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/ITextEditor.java)                  | 文本编辑器    | 基础完成，不支持日文  |
 | [ITreasureEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/ITreasureEditor.java)      | 宝藏编辑器    | 完成          |
+| [IElevatorEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/elevator/IElevatorEditor.java)      | 电梯编辑器    | 完成          |
 
 ## 编辑器可编辑内容
 
@@ -222,5 +223,14 @@
 * 宝藏坐标、所在地图和物品
 * 地图的调查点
 * 随机调查获得的宝藏和获取宝藏概率
+
+注：宝箱的图像因地图图块组成不同而不同，世界地图为隐藏显示
+
+### [IElevatorEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/elevator/IElevatorEditor.java)（电梯编辑器）
+
+实现类：[ElevatorEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/elevator/ElevatorEditorImpl.java)
+
+* 设置每个电梯的楼层和数量
+* 设置触发每个电梯的地图id范围
 
 注：宝箱的图像因地图图块组成不同而不同，世界地图为隐藏显示

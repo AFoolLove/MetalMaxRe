@@ -1,6 +1,8 @@
 package me.afoolslove.metalmaxre.editors.monster;
 
+import me.afoolslove.metalmaxre.editors.player.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 /**
@@ -50,7 +52,7 @@ public class Monster {
     /**
      * 掉落物
      */
-    public byte dropsItem;
+    public Byte dropsItem;
 
     /**
      * 怪物的类型，等其它属性
@@ -61,6 +63,11 @@ public class Monster {
      * 属性抗性和自动恢复HP
      */
     public byte resistance;
+
+    /**
+     * 特殊能力
+     */
+    public byte ability;
 
     public Monster() {
     }
@@ -79,6 +86,134 @@ public class Monster {
     }
 
     /**
+     * 设置怪物的特殊能力
+     * <p>
+     * 0B0000_0000 攻击1次<p>
+     * 0B0100_0000 攻击1次+概率攻击1次<p>
+     * 0B1000_0000 攻击2次<p>
+     * 0B1100_0000 攻击2次+概率攻击1次<p>
+     * 0B0001_0000 优先攻击老大<p>
+     * 0B0010_0000 优先攻击老二<p>
+     * 0B0011_0000 优先攻击老三<p>
+     * 0B0000_1000 分裂<p>
+     * 0B0000_0100 死亡后爆炸波及附近怪物，对其造成伤害<p>
+     * 0B0000_0011 闪避概率（默认00 08 40 80）
+     *
+     * @param ability 特殊能力
+     */
+    public void setAbility(byte ability) {
+        this.ability = ability;
+    }
+
+    public void setAbility(int ability) {
+        setAbility((byte) (ability & 0xFF));
+    }
+
+    /**
+     * 设置攻击次数<p>
+     * <p>
+     * 0 攻击1次<p>
+     * 1 攻击1次+概率攻击1次<p>
+     * 2 攻击2次<p>
+     * 3 攻击2次+概率攻击1次<p>
+     *
+     * @param attackNumber 攻击次数
+     */
+    public void setAttackNumber(@Range(from = 0x00, to = 0x03) int attackNumber) {
+        // 将值位移到D7D6
+        attackNumber &= 0B0000_0011;
+        attackNumber <<= 6;
+
+        int ability = this.ability;
+        // 清除原来的攻击次数
+        ability &= 0B0011_1111;
+        // 设置新的攻击次数
+        ability |= attackNumber;
+
+        setAbility(ability);
+    }
+
+    /**
+     * 设置攻击优先级
+     * <p>
+     * 传入 {@code null} 没有攻击优先级
+     *
+     * @param attackPriority 攻击优先级
+     */
+    public void setAttackPriority(@Nullable Player attackPriority) {
+        int ability = this.ability;
+        // 清除优先级
+        ability &= 0B1100_1111;
+        if (attackPriority != null) {
+            switch (attackPriority) {
+                case PLAYER_0 -> ability |= 0B0001_0000; //优先攻击老大
+                case PLAYER_1 -> ability |= 0B0010_0000; //优先攻击老二
+                case PLAYER_2 -> ability |= 0B0011_0000; //优先攻击老三
+            }
+        }
+
+        setAbility(ability);
+    }
+
+    /**
+     * 设置是否可以分裂
+     *
+     * @param canSplit 是否可以分裂
+     */
+    public void setCanSplit(boolean canSplit) {
+        int ability = this.ability;
+        // 清除可分裂
+        ability &= 0B1111_0111;
+
+        if (canSplit) {
+            // 添加可分裂
+            ability |= 0B0000_1000;
+        }
+
+        setAbility(ability);
+    }
+
+    /**
+     * 设置怪物死亡后是否波及附近怪物，对被波及的怪物造成伤害
+     *
+     * @param deathExplosion 死亡爆炸波及附近怪物
+     */
+    public void setDeathExplosion(boolean deathExplosion) {
+        int ability = this.ability;
+        // 清除死亡爆炸波及附近怪物
+        ability &= 0B1111_1011;
+
+        if (deathExplosion) {
+            // 添加死亡爆炸波及附近怪物
+            ability |= 0B0000_0100;
+        }
+
+        setAbility(ability);
+    }
+
+    /**
+     * 设置怪物的闪避率
+     * <p>
+     * 0（默认00<p>
+     * 1（默认08<p>
+     * 2（默认40<p>
+     * 3（默认80
+     *
+     * @param dodgeRate 闪避率
+     */
+    public void setDodgeRate(int dodgeRate) {
+        dodgeRate &= 0B0000_0011;
+
+        int ability = this.ability;
+        // 清除闪避率
+        ability &= 0B1111_1100;
+        // 添加闪避率
+        ability |= dodgeRate;
+
+        setAbility(ability);
+    }
+
+    /**
      * 设置怪物的生命值
      * *生命值会根据怪物的类型不同而不同
      *
@@ -90,6 +225,20 @@ public class Monster {
 
     public void setHealth(@Range(from = 0x00, to = 0xFF) int health) {
         this.health = (byte) (health & 0xFF);
+    }
+
+    /**
+     * 设置怪物的真实生命值，怪物类型会根据生命值被更改
+     *
+     * @param health 真实生命值
+     */
+    public void setHealthValue(int health) {
+        if (health > 0xFF) {
+            health &= 0B11_1111_1100;
+            health >>>= 0x02;
+            setType(MonsterType.CYBERNETIC);
+        }
+        setHealth(health);
     }
 
 
@@ -107,6 +256,23 @@ public class Monster {
     }
 
     /**
+     * 设置怪物的真实攻击力，会影响命中率D7
+     *
+     * @param attack 真实攻击力
+     */
+    public void setAttackValue(int attack) {
+        if (attack > 0xFF) {
+            attack &= 0B11_1111_1100;
+            attack >>= 0x02;
+
+            setRawHitRate(getRawHitRate() | 0B1000_0000);
+        } else {
+            setHitRate(getHitRate());
+        }
+        setAttack(attack);
+    }
+
+    /**
      * 设置怪物的防御力，实际防御力会根据战斗等级D7变化
      *
      * @param defense 防御力
@@ -117,6 +283,22 @@ public class Monster {
 
     public void setDefense(@Range(from = 0x00, to = 0xFF) int defense) {
         setDefense((byte) defense);
+    }
+
+    /**
+     * 设置真实防御力，会影响战斗等级D7
+     *
+     * @param defense 真实防御力
+     */
+    public void setDefenseValue(int defense) {
+        if (defense > 0xFF) {
+            defense &= 0B11_1111_1100;
+            defense >>>= 0x02;
+            setBattleLevel(getBattleLevel() | 0B1000_0000);
+        } else {
+            setBattleLevel(getBattleLevel() & 0B0111_1111);
+        }
+        setDefense(defense);
     }
 
     /**
@@ -150,12 +332,16 @@ public class Monster {
      * 如果高位攻击力超过0xFF，怪物的低位防御力左移1bit（低位防御力*2）
      * 如果存在0B0100_0000，上面的内容再来一次，不影响命中率
      */
-    public void setHitRate(byte hitRate) {
-        this.hitRate = hitRate;
+    public void setRawHitRate(@Range(from = 0x00, to = 0xFF) int hitRate) {
+        this.hitRate = (byte) (hitRate & 0xFF);
     }
 
-    public void setHitRate(@Range(from = 0x00, to = 0xFF) int hitRate) {
-        this.hitRate = (byte) (hitRate & 0xFF);
+    public void setHitRate(@Range(from = 0x00, to = 0x7F) byte hitRate) {
+        setRawHitRate(hitRate & 0B0111_1111);
+    }
+
+    public void setHitRate(@Range(from = 0x00, to = 0x7F) int hitRate) {
+        setHitRate((byte) (hitRate & 0B0111_1111));
     }
 
     /**
@@ -163,12 +349,16 @@ public class Monster {
      * 0B0111_1111 战斗等级（0x00-0x7F）
      * 0B1000_0000 影响 $72CC（未测试淦什么的），效果与命中率数据一致
      */
-    public void setBattleLevel(byte battleLevel) {
-        this.battleLevel = battleLevel;
+    public void setRawBattleLevel(@Range(from = 0x00, to = 0xFF) int battleLevel) {
+        this.battleLevel = (byte) (battleLevel & 0xFF);
     }
 
-    public void setBattleLevel(@Range(from = 0x00, to = 0xFF) int battleLevel) {
-        this.battleLevel = (byte) (battleLevel & 0xFF);
+    public void setBattleLevel(@Range(from = 0x00, to = 0x7F) byte battleLevel) {
+        setRawBattleLevel(battleLevel & 0B0111_1111);
+    }
+
+    public void setBattleLevel(@Range(from = 0x00, to = 0x7F) int battleLevel) {
+        setBattleLevel((byte) (battleLevel & 0B0111_1111));
     }
 
     /**
@@ -185,6 +375,23 @@ public class Monster {
     public void setExperience(@Range(from = 0x00, to = 0xFF) int experience) {
         this.experience = (byte) (experience & 0xFF);
     }
+/*
+
+7BA4
+D2A4
+D2A4-
+B7A4
+44A4
+4BA4
+63A4
+6FA4
+76A4
+7FA4
+B3A4
+8AA4
+A7A4
+
+ */
 
     /**
      * 设置怪物的类型等数据
@@ -248,7 +455,7 @@ public class Monster {
      * 设置掉落物
      * 注：只有怪物ID范围在0x18-0x82内才能设置为有效的战利品
      */
-    public void setDropsItem(byte dropsItem) {
+    public void setDropsItem(Byte dropsItem) {
         this.dropsItem = dropsItem;
     }
 
@@ -267,6 +474,73 @@ public class Monster {
 
     public int intResistance() {
         return getResistance() & 0xFF;
+    }
+
+    /**
+     * @return 怪物的特殊能力
+     */
+    public byte getAbility() {
+        return ability;
+    }
+
+    public int intAbility() {
+        return getAbility() & 0xFF;
+    }
+
+    /**
+     * @return 攻击次数
+     */
+    public int getAttackNumber() {
+        int ability = intAbility();
+        ability &= 0B1100_0000;
+        ability >>>= 6;
+        return ability;
+    }
+
+    /**
+     * @return 攻击优先级
+     */
+    public int getAttackPriority() {
+        int ability = intAbility();
+        ability &= 0B0011_0000;
+        ability >>>= 4;
+
+        return ability;
+    }
+
+    /**
+     * @return 攻击优先级，返回{#code null}时无攻击优先级
+     */
+    @Nullable
+    public Player getAttackPriorityToPlayer() {
+        int attackPriority = getAttackPriority();
+        if (attackPriority == 0) {
+            // 无优先级
+            return null;
+        }
+        // 减一后得到玩家id
+        return Player.formId(attackPriority - 1);
+    }
+
+    /**
+     * @return 是否可以分裂
+     */
+    public boolean isCanSplit() {
+        return (intAbility() & 0B000_1000) != 0x00;
+    }
+
+    /**
+     * @return 死亡后爆炸波及附近怪物，对被波及的怪物造成伤害
+     */
+    public boolean isDeathExplosion() {
+        return (intAbility() & 0B000_0100) != 0x00;
+    }
+
+    /**
+     * @return 闪避率
+     */
+    public int getDodgeRate() {
+        return intAbility() & 0B0000_0011;
     }
 
     /**
@@ -457,13 +731,20 @@ public class Monster {
     /**
      * @return 战利品
      */
-    public byte getDropsItem() {
+    public Byte getDropsItem() {
         return dropsItem;
     }
 
     @Range(from = 0x00, to = 0xFF)
     public int intDropsItem() {
         return getDropsItem() & 0xFF;
+    }
+
+    /**
+     * @return 是否拥有战利品
+     */
+    public boolean hasDropsItem() {
+        return getDropsItem() != null;
     }
 
 }

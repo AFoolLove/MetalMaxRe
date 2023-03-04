@@ -251,7 +251,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
             byte[] currentData = eventTiles[mapId];
             for (int afterMapId = mapId; afterMapId < count; afterMapId++) {
                 if (Arrays.equals(eventTiles[afterMapId], currentData)) {
-                    mapPropertiesEditor.getMapProperties(mapId).eventTilesIndex = eventTilesIndex;
+                    mapPropertiesEditor.getMapProperties(afterMapId).eventTilesIndex = eventTilesIndex;
                     eventTiles[afterMapId] = null;
                     if (afterMapId != mapId) {
                         System.out.printf("事件图块编辑器：地图%02X与%02X使用相同事件图块\n", afterMapId, mapId);

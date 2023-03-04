@@ -44,9 +44,16 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
     private final DataAddress mapPropertiesAddress;
     private final DataAddress mapPropertiesRedirectAddress;
     private final DataAddress mapPropertiesMonsterGroupIndexAddress;
+    private final DataAddress mapCustomWantedAddress;
 
 
     private final LinkedHashMap<Integer, MapProperties> mapProperties = new LinkedHashMap<>();
+
+    /**
+     * Key: map id
+     * Value：monsterId*2
+     */
+    public Map<Integer, Byte> customWanted = new HashMap<>(0x0D);
 
     public MapPropertiesEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -54,7 +61,9 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
                 DataAddress.fromPRG(0x1DEB0 - 0x10, 0x1E00F - 0x10),
                 DataAddress.fromPRG(0x0E510 - 0x10, 0x0FBBD - 0x10),
                 DataAddress.fromPRG(0x28707 - 0x10, 0x2870F - 0x10),
-                DataAddress.fromPRG(0x39343 - 0x10, 0x393B2 - 0x10));
+                DataAddress.fromPRG(0x39343 - 0x10, 0x393B2 - 0x10),
+                DataAddress.fromPRG(0x39FF4 - 0x10, 0x3A000 - 0x10)
+        );
     }
 
     public MapPropertiesEditorImpl(@NotNull MetalMaxRe metalMaxRe,
@@ -62,19 +71,23 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
                                    @NotNull DataAddress mapPropertiesIndexDownRollAddress,
                                    @NotNull DataAddress mapPropertiesAddress,
                                    @NotNull DataAddress mapPropertiesRedirectAddress,
-                                   @NotNull DataAddress mapPropertiesMonsterGroupIndexAddress) {
+                                   @NotNull DataAddress mapPropertiesMonsterGroupIndexAddress,
+                                   @NotNull DataAddress mapCustomWantedAddress
+    ) {
         super(metalMaxRe);
         this.mapPropertiesIndexUpRollAddress = mapPropertiesIndexUpRollAddress;
         this.mapPropertiesIndexDownRollAddress = mapPropertiesIndexDownRollAddress;
         this.mapPropertiesAddress = mapPropertiesAddress;
         this.mapPropertiesRedirectAddress = mapPropertiesRedirectAddress;
         this.mapPropertiesMonsterGroupIndexAddress = mapPropertiesMonsterGroupIndexAddress;
+        this.mapCustomWantedAddress = mapCustomWantedAddress;
     }
 
     @Editor.Load
     public void onLoad() {
         // 读取前清空数据
         getMapProperties().clear();
+        getCustomMapWanted().clear();
 
 
         // 读取世界地图属性
@@ -156,6 +169,14 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         for (int index = 0; index < getMapPropertiesRedirectMaxCount(); index++) {
             MapProperties mapProperties = getMapProperties(redirectData[0][index]);
             mapProperties.redirect = SingleMapEntry.create(redirectData[1][index], redirectData[2][index]);
+        }
+
+        // 读取自定义通缉令的地图和数据
+        position(getCustomMapWantedAddress());
+        byte[][] customWantedData = new byte[0x02][0x0D];
+        getBuffer().getAABytes(0, 0x0D, customWantedData);
+        for (int i = 0; i < 0x0D; i++) {
+            getCustomMapWanted().put(customWantedData[0x00][i] & 0xFF, customWantedData[0x01][i]);
         }
     }
 
@@ -252,6 +273,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             }
         }
 
+        // 写入地图重定向数据
         position(getMapPropertiesRedirectAddress());
         getBuffer().putAABytes(0, getMapPropertiesRedirectMaxCount(), redirectData);
 
@@ -276,12 +298,31 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // 写入事件图块索引
         getBuffer().putPrg(0x28AC3 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 0));
         getBuffer().putPrg(0x28AC7 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 1));
+
+        // 写入自定义地图通缉令地图和数据
+        List<Map.Entry<Integer, Byte>> customWantedDataEntries = getCustomMapWanted().entrySet()
+                .stream()
+                .limit(0x0D)
+                .toList();
+        byte[][] customWantedData = new byte[0x02][0x0D];
+        for (int i = 0; i < 0x0D; i++) {
+            Map.Entry<Integer, Byte> entry = customWantedDataEntries.get(i);
+            customWantedData[0x00][i] = (byte) (entry.getKey() & 0xFF);
+            customWantedData[0x01][i] = entry.getValue();
+        }
+        position(getCustomMapWantedAddress());
+        getBuffer().put(customWantedData);
     }
 
 
     @Override
     public LinkedHashMap<Integer, MapProperties> getMapProperties() {
         return mapProperties;
+    }
+
+    @Override
+    public Map<Integer, Byte> getCustomMapWanted() {
+        return customWanted;
     }
 
     @Override
@@ -319,6 +360,10 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         return mapPropertiesMonsterGroupIndexAddress;
     }
 
+    @Override
+    public DataAddress getCustomMapWantedAddress() {
+        return mapCustomWantedAddress;
+    }
 
     /**
      * SuperHack版本

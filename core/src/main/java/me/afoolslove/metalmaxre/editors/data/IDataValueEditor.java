@@ -22,6 +22,22 @@ public interface IDataValueEditor extends IRomEditor {
     @NotNull
     Map<Integer, Number> getValues();
 
+    /**
+     * @return 指定索引的数值
+     */
+    default Number getValue(int index) {
+        return getValues().get(index);
+    }
+
+    /**
+     * @return 指定索引的数值，如果不存在，返回提供的默认数值
+     */
+    default Number getOrDefault(int index, Number def) {
+        Number value = getValue(index);
+        return value == null ? def : value;
+    }
+
+
     default int get1ByteMaxCount() {
         return 0x47;
     }

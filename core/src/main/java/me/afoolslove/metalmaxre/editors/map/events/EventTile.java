@@ -95,4 +95,9 @@ public class EventTile extends Point2B {
     public int hashCode() {
         return Objects.hash(super.hashCode(), getTile());
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + String.format(",tile=0x%02X", getTile());
+    }
 }

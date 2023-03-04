@@ -107,7 +107,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
             towns[0][i] = entry.getKey();
             towns[1][i] = entry.getValue();
         }
-        getBuffer().putAABytes(getTownsAddress(), 0, towns.length, towns);
+        getBuffer().putAABytes(getTownsAddress(), 0, 0x17, towns);
 
         // x、y
         final byte[][] townPoints = new byte[2][getTownMaxCount()];
@@ -123,7 +123,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
         // x、y
         final byte[][] teleportPoints = new byte[2][getTeleportMaxCount()];
         for (int i = 0; i < getTeleportMaxCount(); i++) {
-            var teleportLocation = getTeleportLocation(i);
+            CameraMapPoint teleportLocation = getTeleportLocation(i);
             if (i < teleportMaps.length) {
                 teleportMaps[i] = teleportLocation.getMap();
             }

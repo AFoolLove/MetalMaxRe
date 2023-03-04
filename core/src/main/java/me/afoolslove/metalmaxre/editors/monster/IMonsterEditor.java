@@ -140,7 +140,7 @@ public interface IMonsterEditor extends IRomEditor {
      * @param monsterId 赏金首怪物id
      * @return 赏金首属性
      */
-    default WantedMonster getWantedMonster(byte monsterId) {
+    default WantedMonster getWantedMonster(int monsterId) {
         return ((WantedMonster) getMonsters().get(monsterId & 0xFF));
     }
 
@@ -168,6 +168,11 @@ public interface IMonsterEditor extends IRomEditor {
      * 怪物自动恢复HP
      */
     DataAddress getMonsterResistanceAddress();
+
+    /**
+     * 怪物的特殊能力地址
+     */
+    DataAddress getMonsterAbilityAddress();
 
     /**
      * 怪物的护甲值地址

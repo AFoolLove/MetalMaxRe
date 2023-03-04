@@ -19,6 +19,11 @@ public interface IMapPropertiesEditor extends IRomEditor {
     Map<Integer, MapProperties> getMapProperties();
 
     /**
+     * @return 自定义地图赏金首画像
+     */
+    Map<Integer, Byte> getCustomMapWanted();
+
+    /**
      * @return 指定地图的地图属性
      */
     default MapProperties getMapProperties(int map) {
@@ -58,4 +63,9 @@ public interface IMapPropertiesEditor extends IRomEditor {
      * @return 地图怪物组合索引
      */
     DataAddress getMapPropertiesMonsterGroupIndexAddress();
+
+    /**
+     * @return 自定义地图通缉令地址
+     */
+    DataAddress getCustomMapWantedAddress();
 }

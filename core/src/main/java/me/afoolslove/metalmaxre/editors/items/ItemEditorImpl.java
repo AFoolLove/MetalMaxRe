@@ -24,6 +24,7 @@ import java.util.List;
  */
 public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements IItemEditor {
     private final DataAddress tankEnginesMaxCapacityAddress;
+    private final DataAddress tankEnginesImprovableAddress;
     private final DataAddress playerEquipmentCanEquippedStartAddress;
 
     private final List<PlayerArmor> playerArmors = new ArrayList<>(getPlayerArmorMaxCount());
@@ -53,12 +54,18 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     public ItemEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x21804 - 0x10, 0x2181B - 0x10),
+                DataAddress.fromPRG(0x30A4A - 0x10, 0x30A51 - 0x10),
                 DataAddress.fromPRG(0x22285 - 0x10, 0x222A6 - 0x10));
     }
 
-    public ItemEditorImpl(@NotNull MetalMaxRe metalMaxRe, @NotNull DataAddress tankEnginesMaxCapacityAddress, @NotNull DataAddress playerEquipmentCanEquippedStartAddress) {
+    public ItemEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                          @NotNull DataAddress tankEnginesMaxCapacityAddress,
+                          @NotNull DataAddress tankEnginesImprovableAddress,
+                          @NotNull DataAddress playerEquipmentCanEquippedStartAddress
+    ) {
         super(metalMaxRe);
         this.tankEnginesMaxCapacityAddress = tankEnginesMaxCapacityAddress;
+        this.tankEnginesImprovableAddress = tankEnginesImprovableAddress;
         this.playerEquipmentCanEquippedStartAddress = playerEquipmentCanEquippedStartAddress;
     }
 
@@ -209,6 +216,16 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         for (int i = 0; i < getTankItemsMaxCount(); i++) {
             getTankItems().get(i).setPrice(getBuffer().get());
         }
+
+        // 读取不可改造的引擎
+        position(getTankEnginesImprovableAddress());
+        List<Item> items = getItems();
+        for (int i = 0; i < 0x08; i++) {
+            Item item = items.get(getBuffer().getToInt() - 1);
+            if (item instanceof TankEngine tankEngine) {
+                tankEngine.setImprovable(false);
+            }
+        }
     }
 
     @Editor.Apply
@@ -311,16 +328,21 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         for (int i = 0; i < getTankItemsMaxCount(); i++) {
             getBuffer().put(getTankItems().get(i).getPrice());
         }
-    }
 
-    @Override
-    public DataAddress getTankEnginesMaxCapacityAddress() {
-        return tankEnginesMaxCapacityAddress;
-    }
-
-    @Override
-    public DataAddress getPlayerEquipmentCanEquippedStartAddress() {
-        return playerEquipmentCanEquippedStartAddress;
+        // 写入不可改造的引擎
+        position(getTankEnginesImprovableAddress());
+        byte[] improvable = new byte[0x08];
+        List<Item> items = getItems();
+        for (int i = 0, j = 0; j < 0x08 && i < items.size(); i++) {
+            Item item = items.get(i);
+            if (item instanceof TankEngine tankEngine) {
+                if (!tankEngine.isImprovable()) {
+                    improvable[j] = (byte) (i + 1);
+                    j++;
+                }
+            }
+        }
+        getBuffer().put(improvable);
     }
 
     @Override
@@ -480,5 +502,20 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     @Override
     public void readData(InputStream in) throws IOException {
 
+    }
+
+    @Override
+    public DataAddress getTankEnginesMaxCapacityAddress() {
+        return tankEnginesMaxCapacityAddress;
+    }
+
+    @Override
+    public DataAddress getTankEnginesImprovableAddress() {
+        return tankEnginesImprovableAddress;
+    }
+
+    @Override
+    public DataAddress getPlayerEquipmentCanEquippedStartAddress() {
+        return playerEquipmentCanEquippedStartAddress;
     }
 }

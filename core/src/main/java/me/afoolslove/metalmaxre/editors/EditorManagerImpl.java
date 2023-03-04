@@ -8,6 +8,8 @@ import me.afoolslove.metalmaxre.editors.computer.shop.IShopEditor;
 import me.afoolslove.metalmaxre.editors.computer.shop.ShopEditorImpl;
 import me.afoolslove.metalmaxre.editors.data.DataValueEditorImpl;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
+import me.afoolslove.metalmaxre.editors.elevator.ElevatorEditorImpl;
+import me.afoolslove.metalmaxre.editors.elevator.IElevatorEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.items.ItemEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.*;
@@ -100,6 +102,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(ITextEditor.class, TextEditorImpl.class);
         register(IMonsterEditor.class, MonsterEditorImpl::new);
         register(MonsterModelImpl.class, MonsterModelImpl::new);
+        register(IElevatorEditor.class, ElevatorEditorImpl::new);
     }
 
 

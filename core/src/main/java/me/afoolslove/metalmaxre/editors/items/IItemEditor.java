@@ -168,6 +168,13 @@ public interface IItemEditor extends IRomEditor {
     DataAddress getTankEnginesMaxCapacityAddress();
 
     /**
+     * 获取坦克引擎是否能被改造地址
+     *
+     * @return 坦克引擎是否能被改造地址
+     */
+    DataAddress getTankEnginesImprovableAddress();
+
+    /**
      * 获取玩家装备可穿戴状态地址
      *
      * @return 玩家装备可穿戴状态地址
