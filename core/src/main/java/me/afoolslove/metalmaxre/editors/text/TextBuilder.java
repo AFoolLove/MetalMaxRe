@@ -2,11 +2,14 @@ package me.afoolslove.metalmaxre.editors.text;
 
 import me.afoolslove.metalmaxre.editors.text.action.*;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 public class TextBuilder implements IBaseText {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TextBuilder.class);
 
     private final List<IBaseText> texts = new ArrayList<>();
     private boolean has9F = false;
@@ -459,7 +462,7 @@ public class TextBuilder implements IBaseText {
                 }
             } else {
                 // 没有这个字符
-                System.out.println("未知字符：" + ch);
+                LOGGER.debug("未知字符：{}", ch);
             }
             i++;
         }

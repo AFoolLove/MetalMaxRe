@@ -2,6 +2,8 @@ package me.afoolslove.metalmaxre.editors.text;
 
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +16,7 @@ import java.util.*;
  * @author AFoolLove
  */
 public class WordBank {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WordBank.class);
     /**
      * 文字对应多个字节
      */
@@ -217,7 +220,7 @@ public class WordBank {
             }
         } else {
             // 不会真的会读取失败吧？
-            System.out.println("读取字库失败！");
+            LOGGER.error("读取字库失败！");
         }
 
 

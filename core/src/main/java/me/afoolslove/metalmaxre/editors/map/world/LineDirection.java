@@ -1,5 +1,7 @@
 package me.afoolslove.metalmaxre.editors.map.world;
 
+import me.afoolslove.metalmaxre.editors.map.MapPoint;
+
 /**
  * 航线方向
  */
@@ -37,5 +39,29 @@ public enum LineDirection {
             }
         }
         return null;
+    }
+
+    /**
+     * @return 通过坐标xy1到xy2的方向获取
+     */
+    public static LineDirection fromPoint(int x1, int y1, int x2, int y2) {
+        if (x1 == x2) {
+            if (y1 < y2) {
+                return UP;
+            } else {
+                return DOWN;
+            }
+        } else if (y1 == y2) {
+            if (x1 < x2) {
+                return RIGHT;
+            } else {
+                return LEFT;
+            }
+        }
+        return null;
+    }
+
+    public static LineDirection fromPoint(MapPoint point1, MapPoint point2) {
+        return fromPoint(point1.intX(), point1.intY(), point2.intX(), point2.intY());
     }
 }

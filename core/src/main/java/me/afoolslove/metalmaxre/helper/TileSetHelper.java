@@ -395,7 +395,7 @@ public class TileSetHelper {
 
 
                             if (l == 0) {
-                                //  精灵的第0颜色为透明
+                                // 精灵的第0颜色为透明
                                 continue;
                             }
 
@@ -439,11 +439,13 @@ public class TileSetHelper {
 
     /**
      * 生成指定大小的图片，图块集、图块组合、颜色组合
+     * <p>
+     * 0B0011_0000  调色板 Y<p>
+     * 0B0000_0011  调色板 X
      */
-    private static Color[][] generate(@NotNull MetalMaxRe metalMaxRe, int width, int height,
-                                      int x00, int x40, int x80, int xC0,
-                                      byte[][][] combinations, byte[][] attributes,
-                                      Color[][] colors) {
+    private static byte[][] generate(@NotNull MetalMaxRe metalMaxRe, int width, int height,
+                                     int x00, int x40, int x80, int xC0,
+                                     byte[][][] combinations, byte[][] attributes) {
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
 
         byte[][][] tiles = new byte[4][0x40][0x10];
@@ -452,7 +454,7 @@ public class TileSetHelper {
         tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
         tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
 
-        Color[][] image = new Color[height][width];
+        byte[][] image = new byte[height][width];
 
         // 每0x40个tile作为一个部分
         // 怎么写出来的？别问，问就是不知道
@@ -475,7 +477,9 @@ public class TileSetHelper {
                         byte[] bytes = tiles[b1 / 0x40][b1 % 0x40];
                         // 得到调色板
                         int b2 = color[(y % 0x04 * 0x10) + tileX] & 0xFF;
-                        Color[] colors1 = colors[b2 & 0B0000_0011]; // 获取调色盘
+
+                        int colorColumn = b2 & 0B0000_0011; // 获取调色盘 Y
+                        colorColumn <<= 4; // 0B0011_0000
 
                         // 绘制小tile
                         // 小tile的大小为8*8
@@ -493,7 +497,7 @@ public class TileSetHelper {
                                 int x2 = (tileX * 0x08 * 0x02) + ((smallTile % 0x02) * 0x08) + m;
                                 // 绘制像素点
 //                                graphics.drawLine(x2, y2, x2, y2);
-                                image[y2][x2] = colors1[l];
+                                image[y2][x2] = (byte) (colorColumn | l); // 0B0011_0011 (Y + X)
                             }
                         }
                     }
@@ -503,34 +507,35 @@ public class TileSetHelper {
         return image;
     }
 
-    public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,
-                                     int x00, int x40, int x80, int xC0,
-                                     Color[][] colors) {
-        final Color[][] image = new Color[0x80][0x80];
-        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
+    private static Color[][] generate(@NotNull MetalMaxRe metalMaxRe, int width, int height,
+                                      int x00, int x40, int x80, int xC0,
+                                      byte[][][] combinations, byte[][] attributes,
+                                      Color[][] colors) {
+        return palette(generate(metalMaxRe, width, height, x00, x40, x80, xC0, combinations, attributes), colors);
+    }
 
-        byte[][][] tiles = new byte[4][0x40][0x10];
-        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
-        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
-        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
-        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
+    /**
+     * 通过调色板进行调色
+     */
+    public static Color[][] palette(byte[][] imageData, @NotNull Color[][] colors) {
+        Color[][] image = new Color[imageData.length][];
 
-        for (int i = 0; i < tiles.length; i++) { //
-            for (int j = 0; j < tiles[i].length; j++) { // 0x40 size
-                final byte[] bytes = tiles[i][j]; // 0x10 size
-                for (int b = 0; b < 0x08; b++) { // byte
-                    for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
-                        int l = (bytes[b] & d) >>> (7 - k);
-                        l += ((bytes[b + 0x08] & d) >>> (7 - k)) << 1;
-
-                        int y = (i * 0x20) + ((j / 0x10) * 0x08) + b;
-                        int x = ((j % 0x10) * 0x08) + k;
-                        image[y][x] = colors[3][l];
-                    }
-                }
+        for (int y = 0; y < imageData.length; y++) {
+            byte[] imageColumn = imageData[y];
+            image[y] = new Color[imageColumn.length];
+            for (int x = 0; x < imageColumn.length; x++) {
+                byte point = imageColumn[x];
+                // 获取Y和X坐标
+                image[y][x] = colors[(point & 0B0011_0000) >>> 4][point & 0B0000_0011];
             }
         }
         return image;
+    }
+
+    public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,
+                                     int x00, int x40, int x80, int xC0,
+                                     Color[][] colors) {
+        return generate(metalMaxRe, x00, x40, x80, xC0, colors[0x03]);
     }
 
     public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,
@@ -556,6 +561,35 @@ public class TileSetHelper {
                         int y = (i * 0x20) + ((j / 0x10) * 0x08) + b;
                         int x = ((j % 0x10) * 0x08) + k;
                         image[y][x] = colors[l];
+                    }
+                }
+            }
+        }
+        return image;
+    }
+
+    public static byte[][] generate(@NotNull MetalMaxRe metalMaxRe,
+                                    int x00, int x40, int x80, int xC0) {
+        final byte[][] image = new byte[0x80][0x80];
+        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
+
+        byte[][][] tiles = new byte[4][0x40][0x10];
+        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
+        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
+        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
+        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
+
+        for (int i = 0; i < tiles.length; i++) { //
+            for (int j = 0; j < tiles[i].length; j++) { // 0x40 size
+                final byte[] bytes = tiles[i][j]; // 0x10 size
+                for (int b = 0; b < 0x08; b++) { // byte
+                    for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
+                        int l = (bytes[b] & d) >>> (7 - k);
+                        l += ((bytes[b + 0x08] & d) >>> (7 - k)) << 1;
+
+                        int y = (i * 0x20) + ((j / 0x10) * 0x08) + b;
+                        int x = ((j % 0x10) * 0x08) + k;
+                        image[y][x] = (byte) l;
                     }
                 }
             }
@@ -713,6 +747,25 @@ public class TileSetHelper {
         for (int y = 0; y < tH; y++) {
             for (int x = 0; x < tW; x++) {
                 value.add(bufferedImage.getSubimage(x * w, y * h, w, h));
+            }
+        }
+        return value;
+    }
+
+    public static List<byte[][]> diced(int w, int h, byte[][] data) {
+        List<byte[][]> value = new ArrayList<>();
+        int tW = data[0x00].length / w;
+        int tH = data.length / h;
+        for (int y = 0; y < tH; y++) {
+            for (int x = 0; x < tW; x++) {
+                byte[][] bytes = new byte[h][w];
+
+                for (int offsetY = 0; offsetY < h; offsetY++) {
+                    for (int offsetX = 0; offsetX < w; offsetX++) {
+                        bytes[offsetY][offsetX] = data[(y * h) + offsetY][(x * w) + offsetX];
+                    }
+                }
+                value.add(bytes);
             }
         }
         return value;

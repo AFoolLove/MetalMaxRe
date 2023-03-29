@@ -6,12 +6,15 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implements IElevatorEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElevatorEditorImpl.class);
     private final DataAddress elevatorTopFloorsAddress;
     private final DataAddress elevatorFloorsAddress;
     private final DataAddress elevatorMapsAddress;
@@ -107,12 +110,12 @@ public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implement
             int count = floor.length;
 
             if (floorCount >= floorMaxLength) {
-                System.err.format("电梯编辑器：空间不足，无法写入第%d电梯的楼层\n", i);
+                LOGGER.error("电梯编辑器：空间不足，无法写入第{}电梯的楼层", i);
                 continue;
             } else if (floorMaxLength < (floorCount + count)) {
                 // 空间不足，剪切楼层数量
                 count = (floorCount + count) - getElevatorFloorsAddress().length();
-                System.err.format("电梯编辑器：空间不足，剪切第%d电梯楼层数量为%d\n", i, count);
+                LOGGER.error("电梯编辑器：空间不足，剪切第{}电梯楼层数量为{}", i, count);
             }
 
             floorCount += count;
@@ -129,9 +132,9 @@ public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implement
                 Arrays.fill(fillBytes, (byte) 0xFF);
                 getBuffer().put(fillBytes);
             }
-            System.out.printf("电梯编辑器：剩余%d个空闲字节\n", end);
+            LOGGER.info("电梯编辑器：剩余{}个空闲字节", end);
         } else {
-            System.err.printf("电梯编辑器：错误！超出了数据上限%d字节\n", -end);
+            LOGGER.error("电梯编辑器：错误！超出了数据上限{}字节", -end);
         }
 
         // 写入电梯有效范围

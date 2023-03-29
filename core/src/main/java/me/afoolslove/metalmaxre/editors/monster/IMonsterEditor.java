@@ -154,6 +154,16 @@ public interface IMonsterEditor extends IRomEditor {
     DataAddress getMonsterDropItemsAddress();
 
     /**
+     * 怪物的攻击组合索引地址
+     */
+    DataAddress getMonsterAttackModeGroupIndexAddress();
+
+    /**
+     * 怪物的攻击组合地址
+     */
+    DataAddress getMonsterAttackModeGroupsAddress();
+
+    /**
      * 怪物的属性地址
      * <p>
      * 怪物的经验值和金钱值是否 *100

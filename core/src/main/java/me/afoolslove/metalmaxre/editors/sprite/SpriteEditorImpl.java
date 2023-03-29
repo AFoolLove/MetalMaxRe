@@ -6,11 +6,14 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpriteEditorImpl.class);
     private final DataAddress spritesIndexAddress;
     private final DataAddress spritesAddress;
     /**
@@ -108,13 +111,13 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
                 continue;
             }
             if (spriteIndex == endSpriteIndex) {
-                System.err.printf("精灵编辑器：剩余的空间无法写入地图%02X的所有精灵\n", mapId);
+                LOGGER.error("精灵编辑器：剩余的空间无法写入地图{}的所有精灵", NumberR.toHex(mapId));
                 continue;
             }
             if (endSpriteIndex - spriteIndex < (0x01 + (mapSprites.size() * 0x06))) {
                 // 剩余空间不能完整的写入了
                 spriteIndex = endSpriteIndex;
-                System.err.printf("精灵编辑器：剩余的空间无法写入地图%02X的所有精灵\n", mapId);
+                LOGGER.error("精灵编辑器：剩余的空间无法写入地图{}的所有精灵", NumberR.toHex(mapId));
                 continue;
             }
 
@@ -131,7 +134,9 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
                 if (Objects.equals(getSprites().get(afterMapId), mapSprites)) {
                     spritesIndexes[afterMapId] = spriteIndex;
                     if (afterMapId != mapId) {
-                        System.out.printf("精灵编辑器：地图%02X与%02X使用相同的精灵\n", afterMapId, mapId);
+                        LOGGER.info("精灵编辑器：地图{}与{}使用相同的精灵",
+                                NumberR.toHex(afterMapId),
+                                NumberR.toHex(mapId));
                     }
                 }
             }
@@ -164,9 +169,9 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
                 Arrays.fill(fillBytes, (byte) 0x00);
                 getBuffer().put(fillBytes);
             }
-            System.out.printf("精灵编辑器：剩余%d个空闲字节\n", end);
+            LOGGER.info("精灵编辑器：剩余{}个空闲字节", end);
         } else {
-            System.err.printf("精灵编辑器：错误！超出了数据上限%d字节\n", -end);
+            LOGGER.error("精灵编辑器：错误！超出了数据上限{}字节", -end);
         }
     }
 

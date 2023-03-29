@@ -184,7 +184,7 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> {
      * @return 判断value是否在范围内
      */
     public boolean range(int value) {
-        return getStartAddress() > value || getValue() == null || getEndAddress() <= value;
+        return getStartAddress() <= value && getValue() != null && getEndAddress() >= value;
     }
 
     @Override

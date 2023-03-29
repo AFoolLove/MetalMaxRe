@@ -5,6 +5,8 @@ import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
+import java.util.Arrays;
+
 /**
  * 调色板
  * <p>
@@ -91,6 +93,29 @@ public class PaletteRow {
         colors[0x02] = systemPalette.getColor(paletteRow[0x02]);
         colors[0x03] = systemPalette.getColor(paletteRow[0x03]);
         return colors;
+    }
+
+    public byte[] getRawPaletteRow() {
+        return paletteRow;
+    }
+
+    public byte[] toPalette() {
+        byte[] palette = new byte[0x03];
+        System.arraycopy(getRawPaletteRow(), 0x01, palette, 0x00, palette.length);
+        return palette;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PaletteRow that)) return false;
+
+        return Arrays.equals(getPaletteRow(), that.getPaletteRow());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(getPaletteRow());
     }
 
     @Override

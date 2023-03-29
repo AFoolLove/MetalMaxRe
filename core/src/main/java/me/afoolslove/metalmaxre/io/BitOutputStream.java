@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.io;
 
+import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
@@ -93,6 +94,17 @@ public class BitOutputStream extends ByteArrayOutputStream {
         }
     }
 
+    /**
+     * 写入指定数量的bit
+     */
+    public synchronized void writeBits(int bits, int index, int length) {
+        int at = NumberR.at(bits, index, length, true);
+        for (int i = 0; i < length; i++) {
+            writeBit((at & 0B0000_0001) != 0x00);
+            at >>>= 1;
+        }
+    }
+
 
     @Override
     public synchronized void write(int b) {
@@ -120,6 +132,14 @@ public class BitOutputStream extends ByteArrayOutputStream {
         // 直接写入字节会使下一个被写入的bit位变为初始位
         nextBitIndex = 0;
         super.write(b);
+    }
+
+    @Override
+    public synchronized int size() {
+        if (count != 0 && nextBitIndex == 0x00) {
+            return count - 1;
+        }
+        return super.size();
     }
 
     @NotNull

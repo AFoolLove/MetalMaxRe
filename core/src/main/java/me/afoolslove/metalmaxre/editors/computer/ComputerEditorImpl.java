@@ -6,6 +6,8 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.event.editors.computer.EditorComputerEvent;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +32,7 @@ import java.util.List;
  * @author AFoolLove
  */
 public class ComputerEditorImpl extends AbstractEditor implements IComputerEditor<Computer> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComputerEditorImpl.class);
     protected final DataAddress computerAddress;
     private final List<Computer> computers = new ArrayList<>(getMaxCount());
 
@@ -91,10 +94,10 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
 
         if (computers.size() > count) {
             for (Computer computer : computers.subList(count, computers.size())) {
-                System.err.printf("计算机编辑器：计算机未写入 %s\n", computer);
+                LOGGER.error("计算机编辑器：计算机未写入 {}", computer);
             }
         } else if (computers.size() < count) {
-            System.out.printf("计算机编辑器：%d个计算机空闲空间", count - computers.size());
+            LOGGER.info("计算机编辑器：{}个计算机空闲空间", count - computers.size());
         }
     }
 

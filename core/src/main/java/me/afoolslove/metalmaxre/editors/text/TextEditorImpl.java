@@ -4,7 +4,10 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -20,6 +23,7 @@ import java.util.Map;
  */
 @Editor.TargetVersions
 public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements ITextEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TextEditorImpl.class);
     private final Map<Integer, DataAddress> textAddresses;
 
     private final Map<DataAddress, List<TextBuilder>> text = new HashMap<>();
@@ -87,9 +91,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
             if (bytes.length != length) {
                 if (bytes.length < length) {
-                    System.out.printf("文本编辑器：%05X-%05X 剩余%d个字节\n", entry.getKey().getStartAddress(), entry.getKey().getEndAddress(), length - bytes.length);
+                    LOGGER.info("文本编辑器：{}-{} 剩余{}个字节",
+                            NumberR.toHex(5, entry.getKey().getStartAddress()), NumberR.toHex(5, entry.getKey().getEndAddress()),
+                            length - bytes.length);
                 } else {
-                    System.err.printf("文本编辑器：%05X-%05X 溢出%d个字节未写入\n", entry.getKey().getStartAddress(), entry.getKey().getEndAddress(), bytes.length - length);
+                    LOGGER.error("文本编辑器：{}-{} 溢出{}个字节未写入",
+                            NumberR.toHex(5, entry.getKey().getStartAddress()), NumberR.toHex(5, entry.getKey().getEndAddress()),
+                            bytes.length - length);
                 }
             }
         });
@@ -220,11 +228,6 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         @Editor.Apply
         public void onApply() {
             super.onApply();
-        }
-
-        @Override
-        public DataAddress getItemNameAddress() {
-            return getTextAddresses().get(0x52010 - 0x10);
         }
     }
 }

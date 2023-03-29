@@ -12,6 +12,8 @@ import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.Point2B;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor implements IEventTilesEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventTilesEditorImpl.class);
     private final DataAddress eventTilesAddress;
     private final HashMap<Integer, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
     @Nullable
@@ -220,7 +223,8 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                 continue;
             }
             if (eventTilesIndex == endEventTilesIndex) {
-                System.err.printf("事件图块编辑器：没有剩余的空间写入地图%02X的事件：%s\n", mapId, NumberR.toHexString(eventTile));
+                LOGGER.error("事件图块编辑器：没有剩余的空间写入地图{}的事件：{}",
+                        NumberR.toHex(mapId), NumberR.toHexString(eventTile));
                 continue;
             }
             if ((endEventTilesIndex - eventTilesIndex) < eventTile.length) {
@@ -230,7 +234,8 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                     // 剩余的空间已经不能写入任何事件了
                     // 设置为已写满
                     eventTilesIndex = endEventTilesIndex;
-                    System.err.printf("事件图块编辑器：没有剩余的空间写入地图%02X的事件：%s\n", mapId, NumberR.toHexString(eventTile));
+                    LOGGER.error("事件图块编辑器：没有剩余的空间写入地图{}的事件：{}",
+                            NumberR.toHex(mapId), NumberR.toHexString(eventTile));
                     continue;
                 }
 
@@ -245,7 +250,8 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                 // 复制 X、Y、Tile
                 System.arraycopy(eventTiles[mapId], 0x02, eventTile, 0x02, c * 3);
 
-                System.err.printf("事件图块编辑器：%02X写入部分事件图块：%s\n", mapId, NumberR.toHexString(eventTile));
+                LOGGER.warn("事件图块编辑器：{}写入部分事件图块：{}",
+                        NumberR.toHex(mapId), NumberR.toHexString(eventTile));
             }
             // 将后面相同数据的事件图块索引一同设置
             byte[] currentData = eventTiles[mapId];
@@ -254,7 +260,9 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                     mapPropertiesEditor.getMapProperties(afterMapId).eventTilesIndex = eventTilesIndex;
                     eventTiles[afterMapId] = null;
                     if (afterMapId != mapId) {
-                        System.out.printf("事件图块编辑器：地图%02X与%02X使用相同事件图块\n", afterMapId, mapId);
+                        LOGGER.info("事件图块编辑器：地图{}与{}使用相同事件图块",
+                                NumberR.toHex(afterMapId),
+                                NumberR.toHex(mapId));
                     }
                 }
             }
@@ -277,9 +285,9 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                 Arrays.fill(fillBytes, (byte) 0x00);
                 getBuffer().put(fillBytes);
             }
-            System.out.printf("事件图块编辑器：剩余%d个空闲字节\n", end);
+            LOGGER.info("事件图块编辑器：剩余{}个空闲字节", end);
         } else {
-            System.err.printf("事件图块编辑器：错误！超出了数据上限%d字节\n", -end);
+            LOGGER.error("事件图块编辑器：错误！超出了数据上限{}字节", -end);
         }
 
         if (worldMapInteractiveEvent != null) {

@@ -14,6 +14,9 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 
@@ -23,6 +26,9 @@ import static java.nio.file.StandardOpenOption.CREATE;
  * @author AFoolLove
  */
 public class RomBuffer implements AutoCloseable, Closeable {
+    private static final byte[] ZIP_HEADER_1 = {0x50, 0x4B, 0x03, 0x04};
+    private static final byte[] ZIP_HEADER_2 = {0x50, 0x4B, 0x05, 0x06};
+    public static final byte[] NES_HEADER = {0x4E, 0x45, 0x53, 0x1A};
 
     /**
      * NES头属性
@@ -58,6 +64,9 @@ public class RomBuffer implements AutoCloseable, Closeable {
      */
     @Nullable
     private final Path path;
+
+    private boolean isZip = false;
+    private String zipRomName;
 
     /**
      * PRG ROM大小变更监听器
@@ -125,6 +134,34 @@ public class RomBuffer implements AutoCloseable, Closeable {
         } else {
             // 读取外部文件
             bytes = Files.readAllBytes(path);
+
+            // 验证是否为zip
+            byte[] fileHeader = Arrays.copyOfRange(bytes, 0x00, 0x04);
+            if (!Arrays.equals(fileHeader, NES_HEADER) && (Arrays.equals(fileHeader, ZIP_HEADER_1) || Arrays.equals(fileHeader, ZIP_HEADER_2))) {
+                // ZIP文件，打开并搜索nes文件
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                try (ZipFile zipFile = new ZipFile(path.toFile())) {
+                    Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                    while (entries.hasMoreElements()) {
+                        ZipEntry zipEntry = entries.nextElement();
+                        if (zipEntry.isDirectory()) {
+                            continue;
+                        }
+                        if (zipEntry.getName().endsWith(".nes")) {
+                            zipFile.getInputStream(zipEntry).transferTo(outputStream);
+                            isZip = true;
+                            zipRomName = zipEntry.getName();
+                            break;
+                        }
+                    }
+                }
+
+                if (!isZip) {
+                    // zip中没有nes文件
+                    throw new RuntimeException(String.format("nes file was not found in the zip file(%s)", path));
+                }
+                bytes = outputStream.toByteArray();
+            }
         }
 
         this.header = new GameHeader(Arrays.copyOfRange(bytes, 0x00000, GameHeader.HEADER_LENGTH));
@@ -161,6 +198,17 @@ public class RomBuffer implements AutoCloseable, Closeable {
     @Nullable
     public Path getPath() {
         return path;
+    }
+
+    /**
+     * @return 是否为在Zip中加载的ROM
+     */
+    public boolean isZip() {
+        return isZip;
+    }
+
+    public String getZipRomName() {
+        return zipRomName;
     }
 
     /**

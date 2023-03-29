@@ -3,8 +3,11 @@ package me.afoolslove.metalmaxre.editors.map;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +36,7 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMapEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapEditorImpl.class);
     public static final int[] MAP_CONTAINERS = {0x0B6D4 - 0x00610, 0xBF010 - 0xBB010};
 
     private final HashMap<Integer, MapBuilder> maps = new HashMap<>();
@@ -132,7 +136,9 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
                 if (Arrays.equals(data, entry.getValue())) {
                     mapState.put(entry.getKey(), mapId);
                     if (!Objects.equals(mapId, entry.getKey())) {
-                        System.out.printf("地图编辑器：地图%02X与地图%02X使用相同地图\n", entry.getKey(), mapId);
+                        LOGGER.info("地图编辑器：地图{}与地图{}使用相同地图",
+                                NumberR.toHex(entry.getKey()),
+                                NumberR.toHex(mapId));
                     }
                 }
             }
@@ -155,7 +161,7 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
                 if (mapIndex2 == 0x0B6D3 || (mapIndex2 + data.length) >= 0x0B6D3) {
                     // 寄咯，存不下了
                     if (mapIndex == 0x10000 && mapIndex2 == 0x0B6D3) {
-                        System.err.printf("地图编辑器：没有剩余的空间储存地图%02X\n", mapId);
+                        LOGGER.error("地图编辑器：没有剩余的空间储存地图{}", NumberR.toHex(mapId));
                         continue;
                     }
                     // 可能还能存下两张半截地图
@@ -163,14 +169,17 @@ public class MapEditorImpl extends RomBufferWrapperAbstractEditor implements IMa
                         // 塞入一个半截地图
                         mapProperties.mapIndex = (char) mapIndex;
                         getBuffer().putChr(0x2F000 + mapIndex, data, 0, 0x10000 - mapIndex);
-                        System.out.format("地图编辑器A：地图%02X剩余%d字节未写入\n", mapId, (mapIndex + data.length) - 0x10000);
+                        LOGGER.warn("地图编辑器A：地图{}剩余{}字节未写入",
+                                NumberR.toHex(mapId),
+                                (mapIndex + data.length) - 0x10000);
                         mapIndex = 0x10000;
                     } else if (mapIndex2 < 0x0B6D3) {
                         // 塞入一个半截地图
                         mapProperties.mapIndex = (char) mapIndex2;
                         getBuffer().putPrg(mapIndex2, data, 0, 0x0B6D3 - mapIndex2);
-                        System.out.format("地图编辑器B：地图%02X剩余%d字节未写入\n", mapId, (mapIndex2 + data.length) - 0x0B6D3);
-
+                        LOGGER.warn("地图编辑器B：地图{}剩余{}字节未写入",
+                                NumberR.toHex(mapId),
+                                (mapIndex2 + data.length) - 0x0B6D3);
                         mapIndex2 = 0x0B6D3;
                     }
                 } else {

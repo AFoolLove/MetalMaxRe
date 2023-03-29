@@ -9,6 +9,8 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -39,6 +41,7 @@ import java.util.*;
  */
 @Editor.TargetVersions
 public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor implements IMapPropertiesEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapPropertiesEditorImpl.class);
     private final DataAddress mapPropertiesIndexUpRollAddress;
     private final DataAddress mapPropertiesIndexDownRollAddress;
     private final DataAddress mapPropertiesAddress;
@@ -249,9 +252,9 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
 
         int end = getMapPropertiesAddress().getEndAddress(-position() + 0x10 + 1);
         if (end >= 0) {
-            System.out.printf("地图属性编辑器：剩余%d个空闲字节\n", end);
+            LOGGER.info("地图属性编辑器：剩余{}个空闲字节", end);
         } else {
-            System.err.printf("地图属性编辑器：错误！超出了数据上限%d字节\n", -end);
+            LOGGER.error("地图属性编辑器：错误！超出了数据上限{}字节", -end);
         }
 
         // 写入重定向的条件数据和地图

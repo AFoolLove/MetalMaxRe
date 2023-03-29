@@ -53,21 +53,22 @@ public class Monster {
      * 掉落物
      */
     public Byte dropsItem;
-
     /**
      * 怪物的类型，等其它属性
      */
     public byte attribute;
-
     /**
      * 属性抗性和自动恢复HP
      */
     public byte resistance;
-
     /**
      * 特殊能力
      */
     public byte ability;
+    /**
+     * 攻击模式索引
+     */
+    public byte attackMode;
 
     public Monster() {
     }
@@ -146,11 +147,34 @@ public class Monster {
         ability &= 0B1100_1111;
         if (attackPriority != null) {
             switch (attackPriority) {
-                case PLAYER_0 -> ability |= 0B0001_0000; //优先攻击老大
-                case PLAYER_1 -> ability |= 0B0010_0000; //优先攻击老二
-                case PLAYER_2 -> ability |= 0B0011_0000; //优先攻击老三
+                case PLAYER_0 -> ability |= 0B0001_0000; // 优先攻击老大
+                case PLAYER_1 -> ability |= 0B0010_0000; // 优先攻击老二
+                case PLAYER_2 -> ability |= 0B0011_0000; // 优先攻击老三
             }
         }
+
+        setAbility(ability);
+    }
+
+    /**
+     * 设置攻击优先级
+     * <p>
+     * 0 无优先级<p>
+     * 1 优先攻击老大<p>
+     * 2 优先攻击老二<p>
+     * 3 优先攻击老三
+     *
+     * @param attackPriority 攻击优先级
+     */
+    public void setAttackPriority(int attackPriority) {
+        attackPriority &= 0B0000_0011;
+        attackPriority <<= 4;
+
+        int ability = this.ability;
+        // 清除优先级
+        ability &= 0B1100_1111;
+        // 添加优先级
+        ability |= attackPriority;
 
         setAbility(ability);
     }
@@ -211,6 +235,19 @@ public class Monster {
         ability |= dodgeRate;
 
         setAbility(ability);
+    }
+
+    /**
+     * 设置怪物的攻击模式组的索引
+     *
+     * @param attackMode 攻击模式组的索引
+     */
+    public void setAttackMode(byte attackMode) {
+        this.attackMode = attackMode;
+    }
+
+    public void setAttackMode(int attackMode) {
+        setAttackMode((byte) (attackMode & 0xFF));
     }
 
     /**
@@ -544,6 +581,17 @@ A7A4
     }
 
     /**
+     * @return 攻击模式组的索引
+     */
+    public byte getAttackMode() {
+        return attackMode;
+    }
+
+    public int intAttackMode() {
+        return getAttackMode() & 0xFF;
+    }
+
+    /**
      * @return 怪物的生命值
      */
     public byte getHealth() {
@@ -667,7 +715,13 @@ A7A4
         return battleLevel;
     }
 
+    @Range(from = 0x00, to = 0x7F)
     public int intBattleLevel() {
+        return getBattleLevel() & 0x7F;
+    }
+
+    @Range(from = 0x00, to = 0xFF)
+    public int intRawBattleLevel() {
         return getBattleLevel() & 0xFF;
     }
 

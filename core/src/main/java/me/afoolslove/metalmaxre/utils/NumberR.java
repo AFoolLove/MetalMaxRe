@@ -10,6 +10,30 @@ import org.jetbrains.annotations.Range;
  */
 public class NumberR {
 
+    public static String toHex(byte value) {
+        return String.format("%02X", value);
+    }
+
+    public static String toHex(int len, byte value) {
+        return String.format(String.format("%%0%dX", len), value);
+    }
+
+    public static String toHex(char value) {
+        return String.format("%04X", (int) value);
+    }
+
+    public static String toHex(int len, char value) {
+        return String.format(String.format("%%0%dX", len), value);
+    }
+
+    public static String toHex(int value) {
+        return toHex(2, value);
+    }
+
+    public static String toHex(int len, int value) {
+        return String.format(String.format("%%0%dX", len), value);
+    }
+
     /**
      * 获取int中指定位置的byte
      * <p>
@@ -26,6 +50,36 @@ public class NumberR {
         index *= 8; // 8 bit = 1 byte
         value &= (0xFF << index); // 保留需要获取的8bit，其它bit置零
         return (byte) (value >>> index); // 将保留的8bit右位移，转换为byte
+    }
+
+    /**
+     * 获取int中指定bit位和长度的数据
+     *
+     * @param value  被获取的值
+     * @param index  bit位索引
+     * @param length 获取的bit长度
+     * @param reset  是否将值右位移到D0开始
+     * @return 获取的值
+     */
+    public static int at(int value, int index, int length, boolean reset) {
+        if (value == 0 || length <= 0 || index < (length - 1)) {
+            return 0;
+        }
+
+        int fill = 0xFF_FF_FF_FF;
+        fill >>>= 32 - length;        // 0B1111_1111 > 0B0000_1111
+
+        fill <<= index - length + 1;  // 0B0000_1111 > 0B1111_0000
+        value &= fill;                // 0B1111_0000 = at value
+        if (!reset) {
+            return value;
+        }
+        return value >>> index - length + 1; // value: 0B1111_0000 > 0B0000_1111
+    }
+
+    public static void main(String[] args) {
+        int n = at(0B0101_0001, 6, 3, false);
+        System.out.println(n);
     }
 
     /**

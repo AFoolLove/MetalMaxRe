@@ -41,6 +41,8 @@ import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -54,6 +56,7 @@ import java.util.function.Function;
  * @author AFoolLove
  */
 public class EditorManagerImpl implements IEditorManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditorManagerImpl.class);
     private final MetalMaxRe metalMaxRe;
 
     private final Map<Class<? extends IRomEditor>, IRomEditor> editors = new LinkedHashMap<>();
@@ -150,7 +153,12 @@ public class EditorManagerImpl implements IEditorManager {
             }
         }
         if (loadMethod == null || applyMethod == null) {
-            //TODO 没有找到加载或应用数据的方法
+            if (loadMethod == null) {
+                LOGGER.warn("{}未找到加载ROM数据方法", editor.getClass());
+            }
+            if (applyMethod == null) {
+                LOGGER.warn("{}未找到应用ROM数据方法", editor.getClass());
+            }
             return;
         }
 

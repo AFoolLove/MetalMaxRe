@@ -42,6 +42,7 @@
 | [IMapEntranceEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapEntranceEditor.java)     | 地图出入口编辑器 | 完成          |
 | [IMapPropertiesEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapPropertiesEditor.java) | 地图属性编辑器  | 完成          |
 | [IMonsterEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/IMonsterEditor.java)         | 怪物编辑器    | 进行中         |
+| [MonsterModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)   | 怪物模型编辑器  | 测试          |
 | [IPaletteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/palette/IPaletteEditor.java)         | 调色板编辑器   | 完成          |
 | [IPlayerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerEditor.java)            | 玩家编辑器    | 完成          |
 | [IPlayerExpEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerExpEditor.java)      | 玩家经验值编辑器 | 完成          |
@@ -157,6 +158,18 @@
 * 怪物的部分属性
 * 怪物的组合方式
 * 怪物组合在地图和世界地图上的分布
+
+**和其它未提及的小功能数据修改**
+
+### [MonsterModelImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)（怪物模型辑器（测试））
+
+实现类：[MonsterEditorImplImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)
+
+测试中
+
+* 怪物的图像模型数据
+* 怪物的调色板
+* 怪物的模型格式
 
 **和其它未提及的小功能数据修改**
 

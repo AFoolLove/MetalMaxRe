@@ -13,6 +13,8 @@ import java.util.Map;
 
 public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements IMonsterEditor {
     private final DataAddress monsterDropItemsAddress;
+    private final DataAddress monsterAttackModeGroupIndexAddress;
+    private final DataAddress monsterAttackModeGroupsAddress;
     private final DataAddress monsterAttributesAddress;
     private final DataAddress monsterResistanceAddress;
     private final DataAddress monsterAbilityAddress;
@@ -52,9 +54,13 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
      */
     public final SpecialMonsterGroup[] specialMonsterGroups = new SpecialMonsterGroup[getSpecialMonsterGroupMaxCount()];
 
+    public final List<byte[]> attackModeGroups = new ArrayList<>();
+
     public MonsterEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x2253F - 0x10, 0x225AA - 0x10),
+                DataAddress.fromPRG(0x226FA - 0x10, 0x2277C - 0x10),
+                DataAddress.fromPRG(0x2277D - 0x10),
                 DataAddress.fromPRG(0x3886E - 0x10, 0x388EF - 0x10),
                 DataAddress.fromPRG(0x388F1 - 0x10, 0x38973 - 0x10),
                 DataAddress.fromPRG(0x38974 - 0x10, 0x389F6 - 0x10),
@@ -78,6 +84,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
     public MonsterEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                              DataAddress monsterDropItemsAddress,
+                             DataAddress monsterAttackModeGroupIndexAddress,
+                             DataAddress monsterAttackModeGroupsAddress,
                              DataAddress monsterAttributesAddress,
                              DataAddress monsterResistanceAddress,
                              DataAddress monsterAbilityAddress,
@@ -97,6 +105,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                              DataAddress worldMapMonsterRealmsAddress) {
         super(metalMaxRe);
         this.monsterDropItemsAddress = monsterDropItemsAddress;
+        this.monsterAttackModeGroupIndexAddress = monsterAttackModeGroupIndexAddress;
+        this.monsterAttackModeGroupsAddress = monsterAttackModeGroupsAddress;
         this.monsterAttributesAddress = monsterAttributesAddress;
         this.monsterResistanceAddress = monsterResistanceAddress;
         this.monsterAbilityAddress = monsterAbilityAddress;
@@ -137,6 +147,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         byte[] golds = new byte[getMonsterMaxCount()];
         byte[] bounty = new byte[getWantedMonsterBountyMaxCount()];
         byte[] dropsItems = new byte[getMonsterMaxCount() - 0x18];
+        byte[] attackModeGroupIndexes = new byte[getMonsterMaxCount()];
 
         // 读取怪物的属性
         getBuffer().get(getMonsterAttributesAddress(), attributes);
@@ -171,7 +182,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         getBuffer().get(getWantedMonsterBountyAddress(), bounty);
         // 读取怪物掉落物
         getBuffer().get(getMonsterDropItemsAddress(), dropsItems);
-
+        // 读取怪物的攻击模式组索引
+        getBuffer().get(getMonsterAttackModeGroupIndexAddress(), attackModeGroupIndexes);
 
         for (int monsterId = 0; monsterId < getMonsterMaxCount(); monsterId++) {
             Monster monster;
@@ -187,6 +199,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                     monster.setDropsItem(dropsItems[monsterId - 0x18]);
                 }
             }
+            // 设置怪物的攻击模式组索引
+            monster.setAttackMode(attackModeGroupIndexes[monsterId]);
             // 设置属性
             monster.setAttribute(attributes[monsterId]);
             // 设置抗性和自动恢复HP
@@ -209,9 +223,9 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             // 设置速度
             monster.setSpeed(speeds[monsterId]);
             // 设置命中率
-            monster.setHitRate(hitRates[monsterId]);
+            monster.setRawHitRate(hitRates[monsterId]);
             // 设置战斗等级
-            monster.setBattleLevel(battleLevels[monsterId]);
+            monster.setRawBattleLevel(battleLevels[monsterId]);
             // 设置经验值
             monster.setExperience(experiences[monsterId]);
             // 设置金钱值
@@ -263,6 +277,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         byte[] golds = new byte[getMonsterMaxCount()];
 
         byte[] dropsItems = new byte[getMonsterMaxCount() - 0x18];
+        byte[] attackModeGroupIndexes = new byte[getMonsterMaxCount()];
         byte[] bounty = new byte[getWantedMonsterBountyMaxCount()];
 
         for (Map.Entry<Integer, Monster> entry : monsters.entrySet()) {
@@ -287,6 +302,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                     dropsItems[monsterId - 0x18] = monster.dropsItem;
                 }
             }
+            attackModeGroupIndexes[monsterId] = monster.attackMode;
         }
 
         // 写入怪物的属性
@@ -317,6 +333,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         // 写入怪物的掉落物
         getBuffer().put(getMonsterDropItemsAddress(), dropsItems);
+        // 写入怪物的攻击模式组索引
+        getBuffer().put(getMonsterAttackModeGroupIndexAddress(), attackModeGroupIndexes);
 
         // 写入领域索引
         position(getWorldMapMonsterRealmsAddress());
@@ -368,6 +386,16 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Override
     public DataAddress getMonsterDropItemsAddress() {
         return monsterDropItemsAddress;
+    }
+
+    @Override
+    public DataAddress getMonsterAttackModeGroupIndexAddress() {
+        return monsterAttackModeGroupIndexAddress;
+    }
+
+    @Override
+    public DataAddress getMonsterAttackModeGroupsAddress() {
+        return monsterAttackModeGroupsAddress;
     }
 
     @Override

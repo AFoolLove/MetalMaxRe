@@ -8,6 +8,8 @@ import me.afoolslove.metalmaxre.editors.map.MapPoint;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +22,7 @@ import java.util.List;
  * @author AFoolLove
  */
 public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implements ITreasureEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TreasureEditorImpl.class);
     private final DataAddress randomTreasureAddress;
     private final DataAddress checkPointsAddress;
     private final DataAddress treasureAddress;
@@ -94,7 +97,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         if (!listTreasures.isEmpty()) {
             for (Treasure treasure : listTreasures) {
                 // 重复的宝藏
-                System.out.println("读取到重复的宝藏 " + treasure);
+                LOGGER.info("读取到重复的宝藏 {}", treasure);
             }
         }
 
@@ -170,10 +173,10 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
 
         if (treasures.size() > count) {
             for (Treasure treasure : treasures.subList(count, treasures.size())) {
-                System.err.printf("宝藏编辑器：宝藏未写入 %s\n", treasure);
+                LOGGER.error("宝藏编辑器：宝藏未写入 {}", treasure);
             }
         } else if (treasures.size() < count) {
-            System.out.printf("宝藏编辑器：%d个宝藏空闲空间", count - treasures.size());
+            LOGGER.info("宝藏编辑器：{}个宝藏空闲空间", count - treasures.size());
         }
 
         // 写入地图的调查点

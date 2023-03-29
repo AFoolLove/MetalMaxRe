@@ -7,6 +7,8 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
@@ -22,6 +24,7 @@ import java.util.*;
  */
 @Editor.TargetVersions
 public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implements IMapEntranceEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapEntranceEditorImpl.class);
     private final DataAddress mapEntranceAddress;
 
     public MapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
@@ -128,7 +131,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 // 必须保证地图边界和出入口数据的完整性，不能写入部分
                 mapEntranceIndex = endMapEntranceIndex;
 
-                System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入地图%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
+                LOGGER.error("地图边界和出入口编辑器：没有剩余的空间写入地图{}的边界和出入口数据：{}",
+                        NumberR.toHex(mapId),
+                        NumberR.toHexString(mapEntrance));
                 continue;
             }
 
@@ -151,7 +156,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
                 mapEntrances[afterMapId] = null;
                 if (afterMapId != mapId) {
-                    System.out.printf("地图边界和出入口编辑器：地图%02X与%02X使用相同边界和出入口\n", afterMapId, mapId);
+                    LOGGER.info("地图边界和出入口编辑器：地图{}与{}使用相同边界和出入口",
+                            NumberR.toHex(afterMapId),
+                            NumberR.toHex(mapId));
                 }
             }
 
@@ -173,9 +180,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 Arrays.fill(fillBytes, (byte) 0x00);
                 getBuffer().put(fillBytes);
             }
-            System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", end);
+            LOGGER.info("地图边界和出入口编辑器：剩余{}个空闲字节", end);
         } else {
-            System.err.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", -end);
+            LOGGER.error("地图边界和出入口编辑器：错误！超出了数据上限{}字节", -end);
         }
     }
 
@@ -241,6 +248,8 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
      */
     @Editor.TargetVersion("super_hack")
     public static class SHMapEntranceEditorImpl extends MapEntranceEditorImpl {
+        private static final Logger LOGGER = LoggerFactory.getLogger(SHMapEntranceEditorImpl.class);
+
         public SHMapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, DataAddress.fromPRG(0x7E7B0 - 0x10, 0x7FC20 - 0x10));
         }
@@ -325,8 +334,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
                     // 必须保证地图边界和出入口数据的完整性，不能写入部分
                     mapEntranceIndex = endMapEntranceIndex;
-
-                    System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入地图%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
+                    LOGGER.error("地图边界和出入口编辑器：没有剩余的空间写入地图{}的边界和出入口数据：{}",
+                            NumberR.toHex(mapId),
+                            NumberR.toHexString(mapEntrance));
                     continue;
                 }
 
@@ -349,7 +359,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
                     mapEntrances[afterMapId] = null;
                     if (afterMapId != mapId) {
-                        System.out.printf("地图边界和出入口编辑器：地图%02X与%02X使用相同边界和出入口\n", afterMapId, mapId);
+                        LOGGER.info("地图边界和出入口编辑器：地图{}与{}使用相同边界和出入口",
+                                NumberR.toHex(afterMapId),
+                                NumberR.toHex(mapId));
                     }
                 }
 
@@ -370,9 +382,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     Arrays.fill(fillBytes, (byte) 0x00);
                     getBuffer().put(fillBytes);
                 }
-                System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", end);
+                LOGGER.info("地图边界和出入口编辑器：剩余{}个空闲字节", end);
             } else {
-                System.err.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", -end);
+                LOGGER.error("地图边界和出入口编辑器：错误！超出了数据上限{}字节", -end);
             }
             // 写入世界地图出入口
             prgPosition(0x7FE83 - 0x10);
@@ -384,9 +396,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     Arrays.fill(fillBytes, (byte) 0x00);
                     getBuffer().put(fillBytes);
                 }
-                System.out.printf("地图边界和出入口编辑器：世界地图剩余%d个空闲字节\n", 0x18D - bytes.length);
+                LOGGER.info("地图边界和出入口编辑器：剩余{}个空闲字节", 0x18D - bytes.length);
             } else {
-                System.err.printf("地图边界和出入口编辑器：错误！世界地图超出了数据上限%d字节\n", bytes.length - 0x18D);
+                LOGGER.error("地图边界和出入口编辑器：错误！超出了数据上限{}字节", bytes.length - 0x18D);
             }
         }
     }
@@ -396,6 +408,8 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
      */
     @Editor.TargetVersion("super_hack_general")
     public static class SHGMapEntranceEditorImpl extends MapEntranceEditorImpl {
+        private static final Logger LOGGER = LoggerFactory.getLogger(SHGMapEntranceEditorImpl.class);
+
         public SHGMapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, DataAddress.fromPRG(0x527B0 - 0x10, 0x53C20 - 0x10));
         }
@@ -480,8 +494,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
                     // 必须保证地图边界和出入口数据的完整性，不能写入部分
                     mapEntranceIndex = endMapEntranceIndex;
-
-                    System.err.printf("地图边界和出入口编辑器：没有剩余的空间写入地图%02X的边界和出入口数据：%s\n", mapId, NumberR.toHexString(mapEntrance));
+                    LOGGER.error("地图边界和出入口编辑器：没有剩余的空间写入地图{}的边界和出入口数据：{}",
+                            NumberR.toHex(mapId),
+                            NumberR.toHexString(mapEntrance));
                     continue;
                 }
 
@@ -504,7 +519,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
                     mapEntrances[afterMapId] = null;
                     if (afterMapId != mapId) {
-                        System.out.printf("地图边界和出入口编辑器：地图%02X与%02X使用相同边界和出入口\n", afterMapId, mapId);
+                        LOGGER.info("地图边界和出入口编辑器：地图{}与{}使用相同边界和出入口",
+                                NumberR.toHex(afterMapId),
+                                NumberR.toHex(mapId));
                     }
                 }
 
@@ -525,9 +542,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     Arrays.fill(fillBytes, (byte) 0x00);
                     getBuffer().put(fillBytes);
                 }
-                System.out.printf("地图边界和出入口编辑器：剩余%d个空闲字节\n", end);
+                LOGGER.info("地图边界和出入口编辑器：剩余{}个空闲字节", end);
             } else {
-                System.err.printf("地图边界和出入口编辑器：错误！超出了数据上限%d字节\n", -end);
+                LOGGER.error("地图边界和出入口编辑器：错误！超出了数据上限{}字节", -end);
             }
             // 写入世界地图出入口
             prgPosition(0x53E83 - 0x10);
@@ -539,9 +556,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     Arrays.fill(fillBytes, (byte) 0x00);
                     getBuffer().put(fillBytes);
                 }
-                System.out.printf("地图边界和出入口编辑器：世界地图剩余%d个空闲字节\n", 0x18D - bytes.length);
+                LOGGER.info("地图边界和出入口编辑器：剩余{}个空闲字节", 0x18D - bytes.length);
             } else {
-                System.err.printf("地图边界和出入口编辑器：错误！世界地图超出了数据上限%d字节\n", bytes.length - 0x18D);
+                LOGGER.error("地图边界和出入口编辑器：错误！超出了数据上限{}字节", bytes.length - 0x18D);
             }
         }
     }

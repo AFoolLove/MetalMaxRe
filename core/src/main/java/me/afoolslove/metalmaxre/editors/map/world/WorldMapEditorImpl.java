@@ -11,6 +11,8 @@ import me.afoolslove.metalmaxre.editors.map.events.WorldEventTile;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.*;
  */
 @Editor.TargetVersions
 public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implements IWorldMapEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorldMapEditorImpl.class);
     private final DataAddress worldMapTilesIndexAddress;
     private final DataAddress worldMapX00410Address;
     private final List<DataAddress> worldMapIndexesAddress;
@@ -240,7 +243,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             LineDirection direction = LineDirection.fromAction(action);
             if (direction == null) {
                 // 航线错误
-                System.err.printf("世界地图编辑器：出航航线读取错误：未知的操作码 %02X\n", action);
+                LOGGER.error("世界地图编辑器：出航航线读取错误：未知的操作码 {}", NumberR.toHex(action));
                 continue;
             }
             if (direction == LineDirection.END) {
@@ -265,7 +268,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
             LineDirection direction = LineDirection.fromAction(action);
             if (direction == null) {
                 // 航线错误
-                System.err.printf("世界地图编辑器：归航航线读取错误：未知的操作码 %02X\n", action);
+                LOGGER.error("世界地图编辑器：归航航线读取错误：未知的操作码 {}", NumberR.toHex(action));
                 continue;
             }
             if (direction == LineDirection.END) {
@@ -382,7 +385,9 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
 
                 if (!hasSave) {
                     // 什么？还是没存进去？等死吧！
-                    System.err.printf("世界地图编辑器：无法储存的世界地图4*4tile数据，可能会导致地图(%02X,%02X)异常：%S\n", x * 0x04, y * 0x04, NumberR.toHexString(tiles));
+                    LOGGER.error("世界地图编辑器：无法储存的世界地图4*4tile数据，可能会导致地图({},{})异常：{}\n",
+                            NumberR.toHex(2, x * 0x04), NumberR.toHex(2, y * 0x04),
+                            NumberR.toHexString(tiles));
                 }
             }
         }
@@ -414,7 +419,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
 
         if (fillCount > 0x00) {
-            System.out.printf("世界地图编辑器：剩余%d个空闲4*4tile\n", fillCount);
+            LOGGER.info("世界地图编辑器：剩余{}个空闲4*4tile", fillCount);
         }
 
         // 更新index
