@@ -94,9 +94,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 // 写入地图出入口数据
 
                 // 重新排序，需要顺序写入 出入口的坐标
-                List<SingleMapEntry<MapPoint, MapPoint>> list = entry.getValue().getEntrances().entrySet().stream()
-                        .map(SingleMapEntry::create)
-                        .toList();
+                List<SingleMapEntry<MapPoint, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
 
                 // 写入入口 X、Y
                 for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
@@ -226,8 +224,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             }
             // 读取入口对应的出口
             for (int i = 0; i < count; i++) {
+                MapPoint outPoint = new MapPoint(getBuffer().get(), getBuffer().get(), getBuffer().get());
                 // 读取出口的 Map、X、Y
-                mapEntrance.getEntrances().put(entrances[i], new MapPoint(getBuffer().get(), getBuffer().get(), getBuffer().get()));
+                mapEntrance.getEntrances().add(SingleMapEntry.create(entrances[i], outPoint));
             }
         }
         return mapEntrance;
@@ -291,9 +290,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     // 写入地图出入口数据
 
                     // 重新排序，需要顺序写入 出入口的坐标
-                    List<SingleMapEntry<MapPoint, MapPoint>> list = entry.getValue().getEntrances().entrySet().stream()
-                            .map(SingleMapEntry::create)
-                            .toList();
+                    List<SingleMapEntry<MapPoint, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
 
                     // 写入入口 X、Y
                     for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
@@ -451,9 +448,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     // 写入地图出入口数据
 
                     // 重新排序，需要顺序写入 出入口的坐标
-                    List<SingleMapEntry<MapPoint, MapPoint>> list = entry.getValue().getEntrances().entrySet().stream()
-                            .map(SingleMapEntry::create)
-                            .toList();
+                    List<SingleMapEntry<MapPoint, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
 
                     // 写入入口 X、Y
                     for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {

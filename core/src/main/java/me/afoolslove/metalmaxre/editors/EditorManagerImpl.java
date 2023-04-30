@@ -30,6 +30,8 @@ import me.afoolslove.metalmaxre.editors.player.PlayerEditorImpl;
 import me.afoolslove.metalmaxre.editors.player.PlayerExpEditorImpl;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
 import me.afoolslove.metalmaxre.editors.sprite.SpriteEditorImpl;
+import me.afoolslove.metalmaxre.editors.sprite.script.ISpriteScriptEditor;
+import me.afoolslove.metalmaxre.editors.sprite.script.SpriteScriptEditorImpl;
 import me.afoolslove.metalmaxre.editors.tank.ITankEditor;
 import me.afoolslove.metalmaxre.editors.tank.TankEditorImpl;
 import me.afoolslove.metalmaxre.editors.text.ITextEditor;
@@ -106,6 +108,9 @@ public class EditorManagerImpl implements IEditorManager {
         register(IMonsterEditor.class, MonsterEditorImpl::new);
         register(MonsterModelImpl.class, MonsterModelImpl::new);
         register(IElevatorEditor.class, ElevatorEditorImpl::new);
+        register(ISpriteScriptEditor.class, SpriteScriptEditorImpl::new);
+
+        getEditor(MonsterModelImpl.class).setEnabled(false); // TODO 怪物模型编辑器暂时不进行写入
     }
 
 

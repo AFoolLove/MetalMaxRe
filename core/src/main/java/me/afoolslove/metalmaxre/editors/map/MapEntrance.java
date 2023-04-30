@@ -1,10 +1,11 @@
 package me.afoolslove.metalmaxre.editors.map;
 
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +30,7 @@ public class MapEntrance {
      * <p>
      * *支持相同出入口
      */
-    private final Map<MapPoint, MapPoint> entrance = new IdentityHashMap<>();
+    private final List<SingleMapEntry<MapPoint, MapPoint>> entrance = new ArrayList<>();
 
     public MapEntrance(@NotNull MapBorder border) {
         this.border = border;
@@ -45,7 +46,7 @@ public class MapEntrance {
     /**
      * @return 地图内的出入口
      */
-    public Map<MapPoint, MapPoint> getEntrances() {
+    public List<SingleMapEntry<MapPoint, MapPoint>> getEntrances() {
         return entrance;
     }
 
@@ -70,8 +71,8 @@ public class MapEntrance {
         }
 
         MapEntrance mapEntrance = new MapEntrance(mapBorder);
-        for (Map.Entry<MapPoint, MapPoint> pointEntry : mapEntrance.getEntrances().entrySet()) {
-            mapEntrance.getEntrances().put(new MapPoint(pointEntry.getKey()), new MapPoint(pointEntry.getValue()));
+        for (Map.Entry<MapPoint, MapPoint> pointEntry : mapEntrance.getEntrances()) {
+            mapEntrance.getEntrances().add(SingleMapEntry.create(new MapPoint(pointEntry.getKey()), new MapPoint(pointEntry.getValue())));
         }
         return mapEntrance;
     }
@@ -88,14 +89,16 @@ public class MapEntrance {
             // 写入地图出入口数据
 
             // 重新排序，需要顺序写入 出入口的坐标
-            LinkedHashMap<MapPoint, MapPoint> linkedEntrances = new LinkedHashMap<>(getEntrances());
+            List<SingleMapEntry<MapPoint, MapPoint>> listEntrances = new ArrayList<>(getEntrances());
             // 写入入口 X、Y
-            for (MapPoint mapPoint : linkedEntrances.keySet()) {
+            for (SingleMapEntry<MapPoint, MapPoint> entry : listEntrances) {
+                MapPoint mapPoint = entry.getKey();
                 outputStream.write(mapPoint.getX());
                 outputStream.write(mapPoint.getY());
             }
             // 写入出口 Map、X、Y
-            for (MapPoint mapPoint : linkedEntrances.values()) {
+            for (SingleMapEntry<MapPoint, MapPoint> entry : listEntrances) {
+                MapPoint mapPoint = entry.getValue();
                 outputStream.write(mapPoint.getMap());
                 outputStream.write(mapPoint.getX());
                 outputStream.write(mapPoint.getY());

@@ -79,7 +79,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
             prgPosition(0x1C000 + eventTilesIndex - 0x8000);
 
             // 一个或多个事件作为一组，一组使用 0x00 作为结尾
-            var events = new HashMap<Integer, List<EventTile>>();
+            Map<Integer, List<EventTile>> events = new HashMap<>();
             // 事件
             int event = getBuffer().getToInt();
             do {
@@ -194,7 +194,9 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
         List<byte[]> eventTilesData = new ArrayList<>();
 
         for (Map.Entry<Integer, Map<Integer, List<EventTile>>> entry : getEventTiles().entrySet()) {
-            if (entry.getValue() == null || entry.getValue().isEmpty()) {
+            if (entry.getValue() == null || entry.getValue().isEmpty()
+                || !mapPropertiesEditor.getMapProperties(entry.getKey()).hasEventTile()
+            ) {
                 continue;
             }
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

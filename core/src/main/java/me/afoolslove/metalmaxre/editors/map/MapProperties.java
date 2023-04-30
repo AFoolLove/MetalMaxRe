@@ -94,8 +94,8 @@ public class MapProperties {
         this.height = properties[0x02];
         this.movableWidthOffset = properties[0x03];
         this.movableHeightOffset = properties[0x04];
-        this.movableWidth = properties[0x05];
-        this.movableHeight = properties[0x06];
+        this.movableWidth = (byte) ((properties[0x05] & 0xFF) - (this.movableWidthOffset & 0xFF));
+        this.movableHeight = (byte) ((properties[0x06] & 0xFF) - (this.movableHeightOffset & 0xFF));
         this.mapIndex = (char) NumberR.toInt(properties[0x07], properties[0x08]);
         this.combinationA = properties[0x09];
         this.combinationB = properties[0x0A];
@@ -298,6 +298,45 @@ public class MapProperties {
     }
 
     /**
+     * 添加头属性flag
+     *
+     * @param flags 头属性flags
+     */
+    public void addHeadFlags(int flags) {
+        setHead((byte) (getHead() | flags));
+    }
+
+    /**
+     * 移除头属性flags
+     *
+     * @param flags 头属性flags
+     */
+    public void removeHeadFlags(int flags) {
+        // 将flags反码，得到需要保留的数据
+        setHead((byte) (getHead() & ~flags));
+    }
+
+    /**
+     * 判断是否存在某些头属性
+     *
+     * @return 如果存在其中一个头属性flag则返回{@code true}，否则返回{@code false}
+     */
+    public boolean hasHeadFlags(int flags) {
+        // 通过移除头属性中的目标flags后，与头属性比较判断是否存在，不一致表示至少存在一个
+        return (getHead() & ~flags) != getHead();
+    }
+
+    /**
+     * 判断是否存在指定头属性flag
+     *
+     * @param flag 头属性flag
+     * @return 是否存在指定头属性flag
+     */
+    public boolean hasHeadFlag(int flag) {
+        return (getHead() & flag) != 0x00;
+    }
+
+    /**
      * @return 地图的宽度
      */
     public byte getWidth() {
@@ -456,8 +495,8 @@ public class MapProperties {
         attributes[0x02] = this.height;
         attributes[0x03] = this.movableWidthOffset;
         attributes[0x04] = this.movableHeightOffset;
-        attributes[0x05] = this.movableWidth;
-        attributes[0x06] = this.movableHeight;
+        attributes[0x05] = (byte) ((this.movableWidth & 0xFF) + (this.movableWidthOffset & 0xFF));
+        attributes[0x06] = (byte) ((this.movableHeight & 0xFF) + (this.movableHeightOffset & 0xFF));
         attributes[0x07] = NumberR.at(this.mapIndex, 0);
         attributes[0x08] = NumberR.at(this.mapIndex, 1);
         attributes[0x09] = this.combinationA;

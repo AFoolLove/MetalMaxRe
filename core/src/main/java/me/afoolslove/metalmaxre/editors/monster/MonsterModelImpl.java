@@ -27,7 +27,7 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
     private final DataAddress monsterModelSize = DataAddress.fromPRG(0x22D0A - 0x10, 0x22D57 - 0x10);
     private final DataAddress monsterModelLayoutIndex = DataAddress.fromPRG(0x22EB4 - 0x10, 0x22F51 - 0x10);
     //    private final DataAddress monsterModelLayout = DataAddress.fromPRG(0x22F52 - 0x10, 0x23223 - 0x10);
-    private final DataAddress monsterModelLayout = DataAddress.fromPRG(0x22F52 - 0x10, 0x23CA3 - 0x10);
+    private final DataAddress monsterModelLayout = DataAddress.fromPRG(0x22F52 - 0x10, 0x232AF - 0x10);
 
     private final DataAddress monsterModelLayoutTileIndex = DataAddress.fromPRG(0x22D59 - 0x10, 0x22DA7 - 0x10);
 
@@ -87,6 +87,15 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
 
             outputStream.reset();
         }
+
+//        char[] data = Arrays.copyOfRange(modelLayoutIndexes, 0x00, modelLayoutIndexes.length);
+//        Arrays.sort(data);
+//        for (char datum : data) {
+//            int modelLayoutIndex = datum - (0x8000 + 0x0F52 - 0x10);
+//            LOGGER.debug("{}",
+//                    NumberR.toHex(5, getMonsterModelLayout().getStartAddress(modelLayoutIndex + 1) + 0x10)
+//            );
+//        }
 
         // 将数据分配到 MonsterModel 中
         for (int monsterId = 0; monsterId < 0x83; monsterId++) {
@@ -331,7 +340,12 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         }
         // 更新模型索引
         int layoutIndex = 0x8000 + 0x0F52 - 0x10;
-        for (Map.Entry<Integer, byte[]> entry : modelData.entrySet()) {
+        List<Map.Entry<Integer, byte[]>> sortModelData = modelData.entrySet().stream()
+                .sorted(Comparator.comparingInt(o -> o.getValue().length))
+                .toList();
+
+
+        for (Map.Entry<Integer, byte[]> entry : sortModelData) {
             for (int modelIndex = 0; modelIndex < monsterModels.length; modelIndex++) {
                 MonsterModel monsterModel = monsterModels[modelIndex];
                 if (monsterModel == null) {
@@ -433,6 +447,13 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             }
         }
 
+        if (modelPalettes.length - paletteLength > 0x00) {
+            LOGGER.info("剩余{}个空闲调色板", modelPalettes.length - paletteLength);
+        }
+        if ((modelDoublePaletteIndexes.length / 0x02) - doublePaletteLength > 0x00) {
+            LOGGER.info("剩余{}个空闲双调色板", (modelDoublePaletteIndexes.length / 0x02) - doublePaletteLength);
+        }
+
         // 写入所有怪物的调色板索引
         getBuffer().put(getMonsterModelPaletteIndex(), modelPaletteIndexes);
         // 写入怪物使用的双调色板索引集
@@ -454,9 +475,56 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         getBuffer().put(getMonsterModelSize(), modelSizes);
         // 写入所有怪物模型数据
         position(getMonsterModelLayout());
-        for (byte[] modelLayout : modelData.values()) {
+
+        ArrayList<Map.Entry<Integer, byte[]>> modelLayouts = new ArrayList<>(sortModelData);
+        ArrayList<byte[]> newModelLayouts = new ArrayList<>();
+        for (int i = 0; i < modelLayouts.size(); i++) {
+            byte[] modelLayout = modelLayouts.get(i).getValue();
             if (modelLayout != null) {
-                getBuffer().put(modelLayout);
+                // 在已有的模型数据中判断是否包含当前模型数据
+                boolean hasModel = false;
+                for (int j = 0; j < newModelLayouts.size(); j++) {
+                    byte[] bytes = newModelLayouts.get(j);
+                    if (bytes.length < modelLayout.length) {
+                        // 比当前模型数据小，跳过
+                        continue;
+                    }
+                    int k = 0; // 该数据在已有模型数据中的索引
+                    int l = 0; // 连续匹配的数量，最终需要等于当前模型数据大小
+                    for (; bytes.length - k >= modelLayout.length; k++) { // 循环保证剩余数量大于等于当前模型数据数量
+                        if (bytes[k] == modelLayout[l]) {
+                            l++;
+                            if (modelLayout.length == l) {
+                                // 匹配完成
+                                break;
+                            }
+                        } else if (l != 0) {
+                            l = 0;
+                        }
+                    }
+
+                    if (modelLayout.length == l) {
+                        // 匹配完成
+                        // 更新模型数据索引
+                        modelLayoutIndexes[i] = (char) (modelLayoutIndexes[j] + k);
+                        hasModel = true;
+                        LOGGER.info("模型数据({})包含模型数据({})", NumberR.toHex(2, j), NumberR.toHex(2, i));
+                        break;
+                    }
+                }
+
+                if (hasModel) {
+                    // 包含，跳过写入
+                    continue;
+                }
+                if (getMonsterModelLayout().range((position() - 0x10) + modelLayout.length)) {
+                    getBuffer().put(modelLayout);
+                    newModelLayouts.add(modelLayout);
+                } else {
+                    LOGGER.error("模型索引({})写入失败，没有多余的空间写入{}/{}", NumberR.toHex(2, i),
+                            modelLayout.length, getMonsterModelLayout().getEndAddress() - (position() - 0x10));
+                }
+
             }
         }
         // 写入怪物图像起始id
@@ -464,8 +532,8 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
 
         // 写入所有怪物模型数据索引
         position(getMonsterModelLayoutIndex());
-        for (char modelLayout1Index : modelLayoutIndexes) {
-            getBuffer().putChar(NumberR.toChar(modelLayout1Index));
+        for (char modelLayoutIndex : modelLayoutIndexes) {
+            getBuffer().putChar(NumberR.toChar(modelLayoutIndex));
         }
 
         // 写入自定义调色板Y值

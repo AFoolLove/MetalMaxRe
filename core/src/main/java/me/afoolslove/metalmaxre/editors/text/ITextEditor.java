@@ -23,6 +23,21 @@ public interface ITextEditor extends IRomEditor {
     List<TextBuilder> getPage(int page);
 
     /**
+     * 获取指定页，指定段的文本
+     *
+     * @param page 文本页
+     * @param row  文本段
+     * @return 获取失败返回 {@code null}
+     */
+    default TextBuilder getText(int page, int row) {
+        List<TextBuilder> list = getPage(page);
+        if (list != null && list.size() > row) {
+            return list.get(row);
+        }
+        return null;
+    }
+
+    /**
      * 获取城镇的名称
      *
      * @param townId 城镇id

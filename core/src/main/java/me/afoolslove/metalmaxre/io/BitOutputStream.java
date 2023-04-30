@@ -37,6 +37,20 @@ public class BitOutputStream extends ByteArrayOutputStream {
     }
 
     /**
+     * 写入1
+     */
+    public void writeTrue() {
+        writeBit(true);
+    }
+
+    /**
+     * 写入0
+     */
+    public void writeFalse() {
+        writeBit(false);
+    }
+
+    /**
      * 写入一个bit，非0为1
      */
     public void writeBit(int bit) {

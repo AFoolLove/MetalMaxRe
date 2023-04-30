@@ -125,16 +125,18 @@ public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
 
         int end = getElevatorFloorsAddress().getEndAddress(-position() + 0x10 + 1);
-        if (end >= 0) {
-            if (end > 0) {
-                // 使用0xFF填充未使用的数据
-                byte[] fillBytes = new byte[end];
-                Arrays.fill(fillBytes, (byte) 0xFF);
-                getBuffer().put(fillBytes);
+        if (end != 0) {
+            if (end >= 0) {
+                if (end > 0) {
+                    // 使用0xFF填充未使用的数据
+                    byte[] fillBytes = new byte[end];
+                    Arrays.fill(fillBytes, (byte) 0xFF);
+                    getBuffer().put(fillBytes);
+                }
+                LOGGER.info("电梯编辑器：剩余{}个空闲字节", end);
+            } else {
+                LOGGER.error("电梯编辑器：错误！超出了数据上限{}字节", -end);
             }
-            LOGGER.info("电梯编辑器：剩余{}个空闲字节", end);
-        } else {
-            LOGGER.error("电梯编辑器：错误！超出了数据上限{}字节", -end);
         }
 
         // 写入电梯有效范围

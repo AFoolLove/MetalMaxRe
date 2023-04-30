@@ -242,6 +242,30 @@ public class NumberR {
     }
 
     /**
+     * 将数组中的Number以字节数组的方式转换为十六进制文本
+     */
+    public static String toHexString(Object[] a) {
+        if (a == null)
+            return "[]";
+        int iMax = a.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0; ; i++) {
+            if (a[i] instanceof Number n) {
+                b.append(String.format("%02X", n.intValue() & 0xFF));
+            } else {
+                b.append("null");
+            }
+            if (i == iMax)
+                return b.append(']').toString();
+            b.append(", ");
+        }
+    }
+
+    /**
      * 将字节数组转换为纯十六进制文本
      */
     public static String toPlainHexString(byte[] a) {

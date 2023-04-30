@@ -18,6 +18,9 @@ public interface ISpriteScriptEditor extends IRomEditor {
         return 0xA9;
     }
 
+
+    Map<Integer, SpriteScriptAction> getSpriteScriptActions();
+
     /**
      * 获取所有精灵脚本
      *

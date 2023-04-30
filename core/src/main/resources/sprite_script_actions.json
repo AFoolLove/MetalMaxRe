@@ -1,0 +1,999 @@
+[
+  {
+    "code": "00",
+    "name": "结束剧情",
+    "length": 0,
+    "format": "00",
+    "formatText": "结束剧情",
+    "shortDescription": "执行该命令后不会再继续执行命令",
+    "detailedDescription": "该命令会无条件执行自己，但自己什么也不会做，陷入死循环，从而停止剧情"
+  },
+  {
+    "code": "01",
+    "type": "STATIC_TYPE",
+    "length": 1,
+    "name": "显示05页的文本",
+    "format": "01 XX",
+    "formatText": "显示文本，05页%02X段：%s",
+    "shortDescription": "???"
+  },
+  {
+    "code": "02",
+    "type": "STATIC_TYPE",
+    "length": 1,
+    "name": "显示0E页的文本",
+    "format": "02 XX",
+    "formatText": "显示文本，0E页%02X段：%s",
+    "shortDescription": "???"
+  },
+  {
+    "code": "03",
+    "type": "DYNAMIC_TYPE",
+    "length": 1,
+    "name": "显示0F页的文本",
+    "format": "03 XX",
+    "formatText": "打开对话框，显示文本，0F页%02X段：%s",
+    "shortDescription": "主动打开对话框，并显示0F页的XX段文本",
+    "detailedDescription": "主动打开对话框，并显示0F页的XX段文本，如果想要在进入地图后立即打开对话框，需要延迟执行，否则无法打开对话框"
+  },
+  {
+    "code": "04",
+    "length": 1,
+    "name": "打开事件开关($441)",
+    "format": "04 XX",
+    "formatText": "打开事件开关%02X",
+    "shortDescription": "打开事件开关，如果有检测事件打开的精灵，该精灵会继续执行接下来的指令"
+  },
+  {
+    "code": "05",
+    "length": 1,
+    "name": "关闭事件开关($441)",
+    "format": "05 XX",
+    "formatText": "关闭事件开关($441)%02X",
+    "shortDescription": "关闭事件开关($441)XX"
+  },
+  {
+    "code": "06",
+    "length": 2,
+    "name": "检测事件开关($441)",
+    "gotoIndex": 1,
+    "format": "06 XX YY",
+    "formatText": "检测事件开关%02X是否关闭，关闭则跳转%02X字节",
+    "shortDescription": "检测事件开关XX是否关闭，如果事件开关关闭，则跳过YY字节"
+  },
+  {
+    "code": "07",
+    "length": 2,
+    "name": "循环执行N次",
+    "gotoIndex": 0,
+    "format": "07 XX YY",
+    "formatText": "跳转到%02X字节，执行%d次",
+    "shortDescription": "循环执行YY次，跳转到XX执行YY次，一般为向后跳转，执行完毕后继续执行指令"
+  },
+  {
+    "code": "08",
+    "length": 3,
+    "name": "检测玩家坐标",
+    "gotoIndex": 2,
+    "format": "08 XX YY ZZ",
+    "formatText": "检测玩家当前坐标是否为[%02X,%02X]，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家当前坐标是否为[XX,YY]，检测失败跳转ZZ字节"
+  },
+  {
+    "code": "09",
+    "length": 1,
+    "name": "选择检测",
+    "gotoIndex": 0,
+    "format": "09 XX",
+    "formatText": "检测玩家选择的选项，选择“是”则继续，选择“否”跳过%02X字节",
+    "shortDescription": "检测玩家选择的选项，选择“是”继续执行，选择“否”跳过XX字节，使用前需要先执行文本进行选择"
+  },
+  {
+    "code": "0A",
+    "length": 0,
+    "name": "随机行走",
+    "format": "0A",
+    "formatText": "精灵低概率向四周随机前进一格",
+    "shortDescription": "精灵低概率向四周随机前进一格",
+    "detailedDescription": "精灵低概率向四周随机前进一格，通常使用 0A 18FF，循环执行达到精灵一直随机行走的效果"
+  },
+  {
+    "code": "0B",
+    "length": 4,
+    "name": "固定区域行走",
+    "format": "0B X1 X1 Y2 Y2",
+    "formatText": "精灵低概率在[%02X, %02X]到[%02X, %02X]随机行走一格",
+    "shortDescription": "精灵低概率在固定区域随机行走一格",
+    "detailedDescription": "精灵低概率在固定区域随机行走一格，例子：0B 0406 090A 18FB，精灵在坐标[04,09]到[06,0A]之间一直随机行走"
+  },
+  {
+    "code": "0C",
+    "length": 0,
+    "name": "朝向 上",
+    "format": "0C",
+    "formatText": "改变精灵的朝向为上",
+    "shortDescription": "改变精灵的朝向为上"
+  },
+  {
+    "code": "0D",
+    "length": 0,
+    "name": "朝向 下",
+    "format": "0D",
+    "formatText": "改变精灵的朝向为下",
+    "shortDescription": "改变精灵的朝向为下"
+  },
+  {
+    "code": "0E",
+    "length": 0,
+    "name": "朝向 左",
+    "format": "0E",
+    "formatText": "改变精灵的朝向为左",
+    "shortDescription": "改变精灵的朝向为左"
+  },
+  {
+    "code": "0F",
+    "length": 0,
+    "name": "朝向 右",
+    "format": "0F",
+    "formatText": "改变精灵的朝向为右",
+    "shortDescription": "改变精灵的朝向为右"
+  },
+  {
+    "code": "10",
+    "length": 0,
+    "name": "朝反方向",
+    "format": "10",
+    "formatText": "改变精灵的朝向为反方向",
+    "shortDescription": "改变精灵的朝向为反方向，朝向左就变更为朝向右，朝向上就变更为朝向下等"
+  },
+  {
+    "code": "11",
+    "length": 0,
+    "name": "朝玩家的反方向",
+    "format": "11",
+    "formatText": "改变精灵的朝向为玩家朝向的反方向",
+    "shortDescription": "改变精灵的朝向为玩家朝向的反方向，玩家朝向左就变更为朝向右，玩家朝向上就变更为朝向下等"
+  },
+  {
+    "code": "12",
+    "length": 0,
+    "name": "向上走一步",
+    "format": "12",
+    "formatText": "精灵向上走一步",
+    "shortDescription": "精灵向上走一步"
+  },
+  {
+    "code": "13",
+    "length": 0,
+    "name": "向下走一步",
+    "format": "13",
+    "formatText": "精灵向下走一步",
+    "shortDescription": "精灵向下走一步"
+  },
+  {
+    "code": "14",
+    "length": 0,
+    "name": "向左走一步",
+    "format": "14",
+    "formatText": "精灵向左走一步",
+    "shortDescription": "精灵向左走一步"
+  },
+  {
+    "code": "15",
+    "length": 0,
+    "name": "向右走一步",
+    "format": "15",
+    "formatText": "精灵向右走一步",
+    "shortDescription": "精灵向右走一步"
+  },
+  {
+    "code": "16",
+    "length": 2,
+    "name": "移动到指定位置",
+    "format": "16 XX YY",
+    "formatText": "精灵行走到[%02X,%02X]",
+    "shortDescription": "精灵行走到指定坐标"
+  },
+  {
+    "code": "17",
+    "length": 0,
+    "name": "朝玩家走一步",
+    "format": "17",
+    "formatText": "精灵朝玩家走一步",
+    "shortDescription": "精灵朝玩家走一步",
+    "detailedDescription": "精灵朝玩家走一步，通过 17 18FF 可循环执行移动到玩家位置，17 18FF可以使用34代替"
+  },
+  {
+    "code": "18",
+    "length": 1,
+    "gotoIndex": 0,
+    "notLeaf": true,
+    "name": "无条件跳转（相对）",
+    "format": "18 XX",
+    "formatText": "无条件跳转（相对）%02X字节",
+    "shortDescription": "无条件跳转（相对）指定字节"
+  },
+  {
+    "code": "19",
+    "length": 1,
+    "name": "延时",
+    "format": "19 XX",
+    "formatText": "延迟时间：%02X",
+    "shortDescription": "延迟指定时间",
+    "detailedDescription": "延迟指定时间，70 71 72指令都基于此"
+  },
+  {
+    "code": "1A",
+    "length": 0,
+    "name": "暂时消失",
+    "format": "1A",
+    "formatText": "精灵暂时消失",
+    "shortDescription": "精灵暂时消失，通过执行20显示"
+  },
+  {
+    "code": "1B",
+    "length": 1,
+    "name": "精灵动画帧",
+    "format": "1B XX",
+    "formatText": "精灵动画帧%02X",
+    "shortDescription": "???"
+  },
+  {
+    "code": "1C",
+    "length": 1,
+    "name": "变更图像",
+    "format": "1C XX",
+    "formatText": "精灵图像变更为%02X",
+    "shortDescription": "变更精灵的图像"
+  },
+  {
+    "code": "1D",
+    "length": 1,
+    "name": "变更音乐",
+    "format": "1D XX",
+    "formatText": "变更音乐为%02X",
+    "shortDescription": "变更音乐"
+  },
+  {
+    "code": "1E",
+    "length": 1,
+    "name": "玩家睡觉",
+    "format": "1E XX",
+    "formatText": "玩家睡觉房间为%02X",
+    "shortDescription": "玩家进行睡觉并设置睡醒后的房间"
+  },
+  {
+    "code": "1F",
+    "length": 0,
+    "name": "原地踏步",
+    "format": "1F",
+    "formatText": "精灵原地踏步一次",
+    "shortDescription": "精灵原地踏步一次",
+    "detailedDescription": "精灵原地踏步一次，通过 1F 18FF 可一直原地踏步"
+  },
+  {
+    "code": "20",
+    "length": 2,
+    "name": "传送精灵",
+    "format": "20 XX YY",
+    "formatText": "传送精灵到[%02X,%02X]",
+    "shortDescription": "传送精灵到指定位置"
+  },
+  {
+    "code": "21",
+    "length": 0,
+    "name": "天亮了",
+    "format": "21",
+    "formatText": "天亮了",
+    "shortDescription": "显示天亮了"
+  },
+  {
+    "code": "22",
+    "length": 1,
+    "name": "检测玩家是否乘坐战车",
+    "gotoIndex": 0,
+    "format": "22 XX",
+    "formatText": "检测玩家是否乘坐战车，未乘坐战车跳转%02X字节",
+    "shortDescription": "显示天亮了"
+  },
+  {
+    "code": "23",
+    "length": 1,
+    "name": "伙伴加入",
+    "format": "23 XX",
+    "formatText": "玩家%02X入队",
+    "shortDescription": "指定玩家入队"
+  },
+  {
+    "code": "24",
+    "length": 2,
+    "name": "判断玩家是否入队",
+    "gotoIndex": 1,
+    "format": "23 XX YY",
+    "formatText": "判断玩家%02X是否入队，未入队跳转%02X字节",
+    "shortDescription": "判断玩家是否入队，在队伍中继续，未在队伍中跳转YY字节"
+  },
+  {
+    "code": "25",
+    "length": 1,
+    "name": "变更对白名字",
+    "format": "25 XX",
+    "formatText": "变更说话的人为%02X",
+    "shortDescription": "变更说话人的名字"
+  },
+  {
+    "code": "26",
+    "length": 2,
+    "name": "功能指令",
+    "gotoIndex": 1,
+    "format": "26 XX YY",
+    "formatText": "功能为%02X，跳转%02X字节",
+    "shortDescription": "=12诺亚被打败后对白，=2A学校捐献，2B=激光炮博士，=2C买车，=2F按摩，=30还车，=31直接读档，=34存档"
+  },
+  {
+    "code": "27",
+    "length": 1,
+    "name": "监听开关打开",
+    "format": "27 XX",
+    "formatText": "监听到开关%02X打开时，继续执行",
+    "shortDescription": "监听到指定开关打开时才会继续执行，否则一直监听"
+  },
+  {
+    "code": "28",
+    "length": 1,
+    "name": "立即进入剧情",
+    "format": "28 XX",
+    "formatText": "立即开始剧情%02X",
+    "shortDescription": "XX=00无\nXX=01开始剧情\nXX=02被赶出家门剧情\nXX=03明奇剧情\nXX=04打死战狗剧情\nXX=05女战士酒吧闹事剧情\nXX=06戈斯和红狼剧情\nXX=7及以上死机"
+  },
+  {
+    "code": "29",
+    "length": 1,
+    "name": "变更属性和移动速度",
+    "format": "29 XX",
+    "formatText": "精灵的属性变更为%02X",
+    "shortDescription": "变更精灵的属性和移动速度"
+  },
+  {
+    "code": "2A",
+    "length": 2,
+    "name": "判断玩家死亡或未入队",
+    "gotoIndex": 1,
+    "format": "2A XX YY",
+    "formatText": "判断玩家%02X是否死亡或未入队，已死亡或未入队跳转%02X字节",
+    "shortDescription": "判断指定玩家是否死亡或未入队，已入队未死亡继续，已死亡或未入队跳转YY字节"
+  },
+  {
+    "code": "2B",
+    "length": 1,
+    "name": "解除玩家异常和满血",
+    "format": "2B XX",
+    "formatText": "解除玩家%02X的所有异常并满血",
+    "shortDescription": "解除指定玩家的所有异常状态，并且恢复满血状态"
+  },
+  {
+    "code": "2C",
+    "length": 2,
+    "name": "检测玩家朝向",
+    "gotoIndex": 1,
+    "format": "2C XX YY",
+    "formatText": "检测玩家朝向为%02X，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家的朝向是否为指定朝向，检测成功继续执行，检测失败跳转YY字节"
+  },
+  {
+    "code": "2D",
+    "length": 1,
+    "name": "检测当前地图是否停放战车",
+    "gotoIndex": 0,
+    "format": "2D XX",
+    "formatText": "检测当前地图是否停放战车，没有停放战车跳转%02X字节",
+    "shortDescription": "检测当前地图是否停放战车，检测成功继续执行，检测失败跳转YY字节"
+  },
+  {
+    "code": "2E",
+    "length": 0,
+    "name": "*移动到指定坐标",
+    "format": "2E",
+    "formatText": "精灵移动到设定好的坐标，设置方法未知",
+    "shortDescription": "精灵移动到设定好的坐标，设置方法未知"
+  },
+  {
+    "code": "2F",
+    "length": 1,
+    "name": "*绕圈",
+    "format": "2F XX",
+    "formatText": "精灵沿着某规律绕圈",
+    "shortDescription": "精灵沿着某规律绕圈，比如：机械师拿着你的车围着树转圈圈"
+  },
+  {
+    "code": "30",
+    "length": 0,
+    "name": "坐上你的战车",
+    "format": "30",
+    "formatText": "精灵坐上你的车",
+    "shortDescription": "精灵坐上你的车，比如：机械师坐上你的车"
+  },
+  {
+    "code": "31",
+    "length": 1,
+    "name": "坦克移动到当前精灵位置",
+    "format": "31 XX",
+    "formatText": "坦克移动到当前精灵位置，精灵图像变更为%02X",
+    "shortDescription": "坦克移动到当前精灵位置，坦克朝向为精灵的朝向，会同时关闭开关FB"
+  },
+  {
+    "code": "32",
+    "length": 0,
+    "name": "明奇电击尸体动画",
+    "format": "32",
+    "formatText": "明奇电击尸体动画",
+    "shortDescription": "明奇电击尸体动画"
+  },
+  {
+    "code": "33",
+    "length": 2,
+    "name": "*仍飞出去",
+    "format": "33 XX YY",
+    "formatText": "未知%02X，精灵图像为%02X",
+    "shortDescription": "将精灵仍飞出去，比如：红狼将玩家三人从酒吧扔出去"
+  },
+  {
+    "code": "34",
+    "length": 0,
+    "name": "追击玩家",
+    "format": "34",
+    "formatText": "追击玩家，追上后继续",
+    "shortDescription": "追击玩家，追上后继续执行"
+  },
+  {
+    "code": "35",
+    "length": 5,
+    "name": "区域检测",
+    "format": "35 XX1 XX2 YY1 YY2 ZZ",
+    "formatText": "检测玩家是否在[%02X,%02X]到[%02X,%02X]，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家是否在指定区域内，在区域内继续执行，不在区域内跳转YY字节"
+  },
+  {
+    "code": "36",
+    "length": 2,
+    "name": "检测玩家等级",
+    "gotoIndex": 1,
+    "format": "36 XX YY",
+    "formatText": "检测玩家等级是否大于等于%d，检测失败跳转YY字节",
+    "shortDescription": "检测玩家等级是否大于等于指定等级，玩家等级大于等于指定等级继续执行，玩家等级小于指定等级跳转YY字节"
+  },
+  {
+    "code": "37",
+    "length": 3,
+    "name": "进入战斗",
+    "format": "37 XX YY ZZ",
+    "formatText": "进入战斗，出现的怪物为%02X，击败后打开开关%02X，战斗结束后执行剧情%02X",
+    "shortDescription": "进入战斗，指定怪物为XX，击败怪物后打开开关YY，战斗结束后执行剧情ZZ，剧情填FF无事发生"
+  },
+  {
+    "code": "38",
+    "length": 0,
+    "name": "结束特殊剧情($481)",
+    "format": "38",
+    "formatText": "结束特殊剧情",
+    "shortDescription": "结束特殊剧情"
+  },
+  {
+    "code": "39",
+    "length": 2,
+    "name": "检测玩家道具",
+    "gotoIndex": 1,
+    "format": "39 XX YY",
+    "formatText": "检测玩家的道具栏中是否存在%02X，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家的道具栏中是否存在指定道具，存在指定道具继续执行，不存在指定道具跳转YY字节"
+  },
+  {
+    "code": "3A",
+    "length": 2,
+    "name": "交换玩家道具",
+    "format": "3A XX YY",
+    "formatText": "将玩家道具栏中的道具%02X，交换为%02X",
+    "shortDescription": "将玩家道具栏中的指定道具交换为另一个道具，如果不存在指定道具，交换失败"
+  },
+  {
+    "code": "3B",
+    "length": 1,
+    "name": "变更精灵图像",
+    "format": "3B XX",
+    "formatText": "将精灵的图像变更为%02X",
+    "shortDescription": "将精灵的图像变更为指定的图像"
+  },
+  {
+    "code": "3C",
+    "length": 0,
+    "name": "变更精灵图像为上一个",
+    "format": "3C",
+    "formatText": "变更精灵图像为上一个",
+    "shortDescription": "变更精灵图像为上一个"
+  },
+  {
+    "code": "3D",
+    "length": 0,
+    "name": "变更精灵图像为下一个",
+    "format": "3D",
+    "formatText": "变更精灵图像为下一个",
+    "shortDescription": "变更精灵图像为下一个"
+  },
+  {
+    "code": "3E",
+    "length": 1,
+    "name": "切换精灵表下半部分",
+    "format": "3E XX",
+    "formatText": "切换精灵表下半部分的图块代码为%02X",
+    "shortDescription": "切换精灵表下半部分的图像"
+  },
+  {
+    "code": "3F",
+    "length": 1,
+    "name": "设置精灵坐标（相对）",
+    "format": "3E XY",
+    "formatText": "屏幕左上角为原点，设置精灵坐标为%02X",
+    "shortDescription": "屏幕左上角为原点，设置精灵坐标XY"
+  },
+  {
+    "code": "40",
+    "length": 1,
+    "name": "精灵变成玩家",
+    "format": "40 XX",
+    "formatText": "瞬移到玩家位置变成玩家%02X",
+    "shortDescription": "瞬移到玩家位置变成玩家"
+  },
+  {
+    "code": "41",
+    "length": 1,
+    "name": "玩家显示或隐藏",
+    "format": "41 XX",
+    "formatText": "玩家显示或隐藏%02X",
+    "shortDescription": "玩家显示或隐藏"
+  },
+  {
+    "code": "42",
+    "length": 0,
+    "name": "玩家附近随机爆炸",
+    "format": "42",
+    "formatText": "玩家附近随机爆炸一次",
+    "shortDescription": "玩家附近随机爆炸一次"
+  },
+  {
+    "code": "43",
+    "length": 0,
+    "name": "玩家恢复/停止操作",
+    "format": "43",
+    "formatText": "玩家恢复/停止操作",
+    "shortDescription": "玩家恢复/停止操作"
+  },
+  {
+    "code": "44",
+    "length": 1,
+    "name": "地震",
+    "format": "44 XX",
+    "formatText": "开始地震，地震时间为%02X",
+    "shortDescription": "开始地震，地震时间为YY"
+  },
+  {
+    "code": "45",
+    "length": 2,
+    "name": "检测金钱",
+    "gotoIndex": 1,
+    "format": "45 XX YY",
+    "formatText": "检测玩家金钱是否大于等于%d，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家金钱是否大于等于指定金钱，检测成功继续，检测失败跳转YY字节"
+  },
+  {
+    "code": "46",
+    "length": 1,
+    "name": "玩家加入队伍",
+    "format": "46 XX",
+    "formatText": "玩家%02X加入队伍，但不会跟随",
+    "shortDescription": "指定玩家加入队伍，但不会立即出现跟随，切换地图后出现"
+  },
+  {
+    "code": "47",
+    "length": 1,
+    "name": "玩家退出队伍",
+    "format": "47 XX",
+    "formatText": "玩家%02X退出队伍，但不会立即消失",
+    "shortDescription": "指定玩家退出队伍，但不会立即消失，实际上已经退出，切换地图后消失"
+  },
+  {
+    "code": "48",
+    "length": 1,
+    "type": "STATIC_TYPE",
+    "name": "显示0E页的文本",
+    "format": "48 XX",
+    "formatText": "显示文本，0E页%02X段：%s",
+    "shortDescription": "???"
+  },
+  {
+    "code": "49",
+    "length": 1,
+    "name": "获得道具",
+    "format": "49 XX",
+    "formatText": "将%02X放入玩家道具栏，显示对白%02X",
+    "shortDescription": "玩家获得一个道具，并显示一段文本"
+  },
+  {
+    "code": "4A",
+    "length": 1,
+    "name": "播放动画",
+    "format": "4A XX",
+    "formatText": "精灵开始播放动画%02X",
+    "shortDescription": "精灵开始播放指定动画动画，需要先改变精灵表下半部分才会正常显示"
+  },
+  {
+    "code": "4B",
+    "length": 1,
+    "name": "扣钱",
+    "format": "4B XX",
+    "formatText": "扣除玩家金钱%dG",
+    "shortDescription": "扣除玩家金钱，如果不够扣除会导致金钱溢出变成最大值"
+  },
+  {
+    "code": "4C",
+    "length": 1,
+    "name": "*时空隧道发生故障",
+    "format": "4C XX",
+    "formatText": "时空隧道发生故障",
+    "shortDescription": "时空隧道发生故障",
+    "detailedDescription": "将 78-7F开关关闭\n\t判断再生丸\t已拾取\n\t判断光环大楼\t未倒塌\n\t开关F7\t\t未关闭\n\t上面条件成功后\n\t吉田生命研究所大门\t调整开关为打开\n\t上面条件失败后\n\t跳转到时空隧道目的地"
+  },
+  {
+    "code": "4D",
+    "length": 1,
+    "name": "*未知跳转",
+    "gotoIndex": 0,
+    "format": "4D XX",
+    "formatText": "$05A3不等于FF时，跳转%02X字节",
+    "shortDescription": "$05A3不等于FF时，跳转XX字节"
+  },
+  {
+    "code": "4E",
+    "length": 1,
+    "name": "玩家变成精灵",
+    "format": "4E XX",
+    "formatText": "玩家%02X变成精灵，移动后生效",
+    "shortDescription": "指定玩家变成精灵的样子，移动后生效"
+  },
+  {
+    "code": "4F",
+    "length": 0,
+    "name": "开门",
+    "format": "4F",
+    "formatText": "精灵开启房门",
+    "shortDescription": "精灵在门前使用可以开启房门"
+  },
+  {
+    "code": "50",
+    "length": 0,
+    "name": "移动镜头向上移动",
+    "format": "50",
+    "formatText": "镜头向上移动一格",
+    "shortDescription": "镜头向上移动一格"
+  },
+  {
+    "code": "51",
+    "length": 0,
+    "name": "移动镜头向下移动",
+    "format": "51",
+    "formatText": "镜头向下移动一格",
+    "shortDescription": "镜头向下移动一格"
+  },
+  {
+    "code": "52",
+    "length": 0,
+    "name": "移动镜头向左移动",
+    "format": "52",
+    "formatText": "镜头向左移动一格",
+    "shortDescription": "镜头向左移动一格"
+  },
+  {
+    "code": "53",
+    "length": 0,
+    "name": "移动镜头向右移动",
+    "format": "53",
+    "formatText": "镜头向右移动一格",
+    "shortDescription": "镜头向右移动一格"
+  },
+  {
+    "code": "54",
+    "length": 2,
+    "name": "*未知移动",
+    "gotoIndex": 1,
+    "format": "54 XX YY",
+    "formatText": "移动路线%02X，跳转字节%02X",
+    "shortDescription": "移动路线XX，跳转字节YY"
+  },
+  {
+    "code": "55",
+    "length": 0,
+    "name": "立即消失",
+    "format": "55",
+    "formatText": "精灵立即消失",
+    "shortDescription": "精灵立即消失，无法恢复"
+  },
+  {
+    "code": "56",
+    "length": 0,
+    "name": "玩家触碰受到伤害",
+    "format": "56",
+    "formatText": "玩家在精灵上、下、左、右和重叠时受到一次伤害",
+    "shortDescription": "玩家在精灵上、下、左、右和重叠时受到一次伤害"
+  },
+  {
+    "code": "57",
+    "length": 0,
+    "name": "*玩家变成精灵",
+    "format": "57",
+    "formatText": "玩家立即变成精灵的样子，移动后解除",
+    "shortDescription": "玩家立即变成精灵的样子，移动后解除",
+    "detailedDescription": "\t$489值作为玩家\n\t将玩家X坐标设置到$48A\n\t将玩家Y坐标设置到$48B\n\t设置玩家X坐标为#$07\n\t设置玩家Y坐标为#$08"
+  },
+  {
+    "code": "58",
+    "length": 0,
+    "name": "隐藏玩家",
+    "format": "58",
+    "formatText": "玩家立即隐藏",
+    "shortDescription": "玩家立即隐藏，移动后解除"
+  },
+  {
+    "code": "59",
+    "length": 1,
+    "name": "绘制图块",
+    "format": "59 XX",
+    "formatText": "精灵原地绘制一个图块%02X",
+    "shortDescription": "精灵原地绘制一个图块"
+  },
+  {
+    "code": "5A",
+    "length": 2,
+    "name": "检测玩家乘坐的战车",
+    "gotoIndex": 1,
+    "format": "5A XX YY",
+    "formatText": "检测玩家当前乘坐的战车是否为%02X，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家当前是否乘坐指定战车，检测成功继续，检测失败跳转YY字节"
+  },
+  {
+    "code": "5B",
+    "length": 2,
+    "name": "检测当前地图是否停放指定战车",
+    "gotoIndex": 1,
+    "format": "5B XX YY",
+    "formatText": "检测当前地图是否停放的战车是否为%02X，检测失败跳转%02X字节",
+    "shortDescription": "检测当前地图是否停放指定战车，检测成功继续，检测失败跳转YY字节"
+  },
+  {
+    "code": "5C",
+    "length": 2,
+    "name": "检测事件开关($461)",
+    "gotoIndex": 1,
+    "format": "5C XX YY",
+    "formatText": "检测事件开关%02X是否关闭，检测失败跳转%02X字节",
+    "shortDescription": "检测事件开关XX是否关闭，如果事件开关关闭，则跳转YY字节"
+  },
+  {
+    "code": "5D",
+    "length": 2,
+    "name": "检测玩家血量",
+    "gotoIndex": 1,
+    "format": "5D XX YY",
+    "formatText": "检测玩家血量是否大于%d，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家血量是否大于指定血量，检测成功继续，检测失败跳转YY字节"
+  },
+  {
+    "code": "5E",
+    "length": 3,
+    "name": "地图跳转",
+    "format": "5E XX YY ZZ",
+    "formatText": "跳转地图到%02X，坐标[%02X,%02X]",
+    "shortDescription": "跳转到指定地图和坐标"
+  },
+  {
+    "code": "5F",
+    "length": 0,
+    "name": "隐藏玩家与战车",
+    "format": "5F",
+    "formatText": "隐藏玩家与战车",
+    "shortDescription": "隐藏玩家与战车"
+  },
+  {
+    "code": "60",
+    "length": 1,
+    "name": "牵引",
+    "format": "60 XX",
+    "formatText": "牵引物体%02X",
+    "shortDescription": "牵引指定物体"
+  },
+  {
+    "code": "61",
+    "length": 2,
+    "name": "取消牵引",
+    "format": "61 XX YY",
+    "formatText": "将牵引的物体放置到坐标[%02X,%02X]",
+    "shortDescription": "将牵引的物体放置到指定坐标"
+  },
+  {
+    "code": "62",
+    "length": 1,
+    "name": "监听开关关闭",
+    "format": "62 XX",
+    "formatText": "监听到开关%02X关闭时，继续执行",
+    "shortDescription": "监听到指定开关关闭时才会继续执行，否则一直监听"
+  },
+  {
+    "code": "63",
+    "length": 3,
+    "type": "STATIC_TYPE",
+    "name": "开关决定对白(05)",
+    "format": "63 XX YY ZZ",
+    "formatText": "检测开关%02X，显示文本，开关打开显示05页%02X段：%s,开关关闭显示05页%02X段：%s",
+    "shortDescription": "通过开关的状态显示05页的指定文本段，结尾无需添加结束指令"
+  },
+  {
+    "code": "64",
+    "length": 3,
+    "type": "STATIC_TYPE",
+    "name": "开关决定对白(0E)",
+    "format": "64 XX YY ZZ",
+    "formatText": "检测开关%02X，显示文本，开关打开显示0E页%02X段：%s,开关关闭显示0E页%02X段：%s",
+    "shortDescription": "通过开关的状态显示0E页的指定文本段，结尾无需添加结束指令"
+  },
+  {
+    "code": "65",
+    "length": 3,
+    "type": "STATIC_TYPE",
+    "name": "开关决定对白(0B)",
+    "format": "65 XX YY ZZ",
+    "formatText": "检测开关%02X，显示文本，开关打开显示0B页%02X段：%s,开关关闭显示0B页%02X段：%s",
+    "shortDescription": "通过开关的状态显示0B页的指定文本段，结尾无需添加结束指令"
+  },
+  {
+    "code": "66",
+    "length": 1,
+    "name": "关闭事件开关($461)",
+    "format": "65 XX",
+    "formatText": "关闭事件开关($461)%02X",
+    "shortDescription": "关闭事件开关($461)XX"
+  },
+  {
+    "code": "67",
+    "length": 0,
+    "name": "变成狼人模样",
+    "format": "67",
+    "formatText": "玩家图像和数据变成狼",
+    "shortDescription": "玩家图像和数据变成狼"
+  },
+  {
+    "code": "68",
+    "type": "DYNAMIC_TYPE",
+    "length": 1,
+    "name": "显示0E页的文本",
+    "format": "68 XX",
+    "formatText": "打开对话框，显示文本，0E页%02X段：%s",
+    "shortDescription": "主动打开对话框，并显示0E页的XX段文本",
+    "detailedDescription": "主动打开对话框，并显示0E页的XX段文本，如果想要在进入地图后立即打开对话框，需要延迟执行，否则无法打开对话框"
+  },
+  {
+    "code": "69",
+    "length": 1,
+    "name": "全屏闪光",
+    "format": "69 XX",
+    "formatText": "全屏闪光，时间为%02X",
+    "shortDescription": "全屏闪光，持续指定时间"
+  },
+  {
+    "code": "6A",
+    "length": 1,
+    "name": "传送带方向",
+    "format": "6A XX",
+    "formatText": "变更传送带方向为%02X",
+    "shortDescription": "变更传送带方向"
+  },
+  {
+    "code": "6B",
+    "length": 1,
+    "name": "系统指令",
+    "format": "6B XX",
+    "formatText": "执行系统指令%02X",
+    "shortDescription": "执行系统指令"
+  },
+  {
+    "code": "6C",
+    "length": 0,
+    "name": "玩家隐藏",
+    "format": "6C",
+    "formatText": "玩家隐藏，无法恢复",
+    "shortDescription": "玩家隐藏，无法恢复"
+  },
+  {
+    "code": "6D",
+    "length": 1,
+    "name": "改变玩家朝向",
+    "format": "6D XX",
+    "formatText": "改变玩家朝向%02X",
+    "shortDescription": "改变玩家朝向"
+  },
+  {
+    "code": "6E",
+    "length": 2,
+    "name": "指定地图里的坦克移动到指定地图",
+    "format": "6E XX YY",
+    "formatText": "将地图%02X里停放的所有坦克移动到地图%02X，坐标与朝向保持不变",
+    "shortDescription": "将指定地图里停放的所有坦克移动到另一个地图，坐标与朝向保持不变"
+  },
+  {
+    "code": "6F",
+    "length": 0,
+    "name": "获得勋章",
+    "format": "6F",
+    "formatText": "玩家当前乘坐的坦克获得一枚勋章",
+    "shortDescription": "玩家当前乘坐的坦克获得一枚勋章"
+  },
+  {
+    "code": "70",
+    "length": 0,
+    "name": "延时 XX0",
+    "format": "70",
+    "formatText": "延时，时间为XX0",
+    "shortDescription": "延时，持续指定时间"
+  },
+  {
+    "code": "71",
+    "length": 0,
+    "name": "延时 XX1",
+    "format": "71",
+    "formatText": "延时，时间为XX1",
+    "shortDescription": "延时，持续指定时间"
+  },
+  {
+    "code": "72",
+    "length": 0,
+    "name": "延时 7B",
+    "format": "72",
+    "formatText": "延时，时间为7B",
+    "shortDescription": "延时，持续指定时间"
+  },
+  {
+    "code": "73",
+    "length": 3,
+    "name": "传送",
+    "format": "73 XX YY ZZ",
+    "formatText": "传送到地图%02X，坐标[%02X,%02X]",
+    "shortDescription": "传送到指定地图的指定位置"
+  }
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

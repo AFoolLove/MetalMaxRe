@@ -77,7 +77,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         byte[][] data = new byte[4][getMaxCount()];
 
         for (int i = 0; i < count; i++) {
-            var computer = computers.get(i);
+            Computer computer = computers.get(i);
             data[0][i] = computer.getMap();
             data[1][i] = computer.getType();
             data[2][i] = computer.getX();
@@ -85,7 +85,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         }
 
         // 如果有空的计算机，将空的计算机设置到地图 0xFF 中去
-        var remain = getMaxCount() - count;
+        int remain = getMaxCount() - count;
         if (remain > 0) {
             Arrays.fill(data[0], count, getMaxCount(), (byte) 0xFF);
         }
@@ -93,11 +93,12 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         getBuffer().put(getComputerAddress(), data);
 
         if (computers.size() > count) {
+            LOGGER.error("计算机编辑器：计算机未写入{}个", computers.size() - count);
             for (Computer computer : computers.subList(count, computers.size())) {
                 LOGGER.error("计算机编辑器：计算机未写入 {}", computer);
             }
         } else if (computers.size() < count) {
-            LOGGER.info("计算机编辑器：{}个计算机空闲空间", count - computers.size());
+            LOGGER.info("计算机编辑器：剩余{}个计算机空闲空间", count - computers.size());
         }
     }
 
