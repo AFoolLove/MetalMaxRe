@@ -45,6 +45,17 @@ public class PlayerEquipmentItem extends Item {
     }
 
     /**
+     * 设置该装备攻击时玩家手持的武器
+     */
+    public void setAttackWeapon(int attackWeapon) {
+        attackWeapon &= 0B0000_0111;
+        byte newCanEquipped = getCanEquipped();
+        newCanEquipped &= 0B1111_1000;
+        newCanEquipped |= attackWeapon;
+        setCanEquipped(newCanEquipped);
+    }
+
+    /**
      * 添加可装备改装备的玩家
      */
     public void addCanEquipped(@NotNull Player... players) {
@@ -99,5 +110,12 @@ public class PlayerEquipmentItem extends Item {
      */
     public byte getCanEquipped() {
         return canEquipped;
+    }
+
+    /**
+     * @return 玩家攻击时手持的武器
+     */
+    public int getAttackWeapon() {
+        return getCanEquipped() & 0B0000_0111;
     }
 }

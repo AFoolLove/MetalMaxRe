@@ -66,6 +66,7 @@
     "length": 2,
     "name": "循环执行N次",
     "gotoIndex": 0,
+    "notLeaf": true,
     "format": "07 XX YY",
     "formatText": "跳转到%02X字节，执行%d次",
     "shortDescription": "循环执行YY次，跳转到XX执行YY次，一般为向后跳转，执行完毕后继续执行指令"
@@ -309,7 +310,7 @@
     "length": 2,
     "name": "判断玩家是否入队",
     "gotoIndex": 1,
-    "format": "23 XX YY",
+    "format": "24 XX YY",
     "formatText": "判断玩家%02X是否入队，未入队跳转%02X字节",
     "shortDescription": "判断玩家是否入队，在队伍中继续，未在队伍中跳转YY字节"
   },
@@ -318,7 +319,7 @@
     "length": 1,
     "name": "变更对白名字",
     "format": "25 XX",
-    "formatText": "变更说话的人为%02X",
+    "formatText": "变更说话的人%02X(%s)",
     "shortDescription": "变更说话人的名字"
   },
   {
@@ -449,9 +450,10 @@
     "code": "35",
     "length": 5,
     "name": "区域检测",
+    "gotoIndex": 4,
     "format": "35 XX1 XX2 YY1 YY2 ZZ",
     "formatText": "检测玩家是否在[%02X,%02X]到[%02X,%02X]，检测失败跳转%02X字节",
-    "shortDescription": "检测玩家是否在指定区域内，在区域内继续执行，不在区域内跳转YY字节"
+    "shortDescription": "检测玩家是否在指定区域内，在区域内继续执行，不在区域内跳转ZZ字节"
   },
   {
     "code": "36",
@@ -611,9 +613,9 @@
   },
   {
     "code": "49",
-    "length": 1,
+    "length": 2,
     "name": "获得道具",
-    "format": "49 XX",
+    "format": "49 XX YY",
     "formatText": "将%02X放入玩家道具栏，显示对白%02X",
     "shortDescription": "玩家获得一个道具，并显示一段文本"
   },
@@ -669,35 +671,35 @@
   },
   {
     "code": "50",
-    "length": 0,
+    "length": 1,
     "name": "移动镜头向上移动",
-    "format": "50",
-    "formatText": "镜头向上移动一格",
-    "shortDescription": "镜头向上移动一格"
+    "format": "50 XX",
+    "formatText": "镜头向上移动%02X格",
+    "shortDescription": "镜头向上移动XX格"
   },
   {
     "code": "51",
-    "length": 0,
+    "length": 1,
     "name": "移动镜头向下移动",
-    "format": "51",
-    "formatText": "镜头向下移动一格",
-    "shortDescription": "镜头向下移动一格"
+    "format": "51 XX",
+    "formatText": "镜头向下移动%02X格",
+    "shortDescription": "镜头向下移动XX格"
   },
   {
     "code": "52",
-    "length": 0,
+    "length": 1,
     "name": "移动镜头向左移动",
-    "format": "52",
-    "formatText": "镜头向左移动一格",
-    "shortDescription": "镜头向左移动一格"
+    "format": "52 XX",
+    "formatText": "镜头向左移动%02X格",
+    "shortDescription": "镜头向左移动XX格"
   },
   {
     "code": "53",
-    "length": 0,
+    "length": 1,
     "name": "移动镜头向右移动",
-    "format": "53",
-    "formatText": "镜头向右移动一格",
-    "shortDescription": "镜头向右移动一格"
+    "format": "53 XX",
+    "formatText": "镜头向右移动%02X格",
+    "shortDescription": "镜头向右移动XX格"
   },
   {
     "code": "54",
@@ -965,6 +967,312 @@
     "format": "73 XX YY ZZ",
     "formatText": "传送到地图%02X，坐标[%02X,%02X]",
     "shortDescription": "传送到指定地图的指定位置"
+  },
+  {
+    "code": "74",
+    "length": 2,
+    "name": "自定义\"天亮了\"",
+    "format": "74 XX YY",
+    "formatText": "自定义\"天亮了\"文本：%s",
+    "shortDescription": "自定义显示\"天亮了\"为XX页YY段文本"
+  },
+  {
+    "code": "75",
+    "type": "DYNAMIC_TYPE",
+    "length": 2,
+    "name": "显示文本",
+    "format": "75 XX YY",
+    "formatText": "打开对话框，显示文本，%02X页%02X段：%s",
+    "shortDescription": "主动打开对话框，并显示XX页的TT段文本",
+    "detailedDescription": "主动打开对话框，并显示XX页的YY段文本，如果想要在进入地图后立即打开对话框，需要延迟执行，否则无法打开对话框"
+  },
+  {
+    "code": "76",
+    "type": "STATIC_TYPE",
+    "length": 2,
+    "name": "显示文本",
+    "format": "76 XX YY",
+    "formatText": "显示文本，%02X页%02X段：%s",
+    "shortDescription": "???"
+  },
+  {
+    "code": "77",
+    "length": 3,
+    "name": "检测玩家指定道具",
+    "gotoIndex": 2,
+    "format": "77 XX YY ZZ",
+    "formatText": "检测玩家%d的道具栏中是否存在%02X道具，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家的道具栏中是否存在XX道具，检测失败跳转ZZ字节"
+  },
+  {
+    "code": "78",
+    "length": 3,
+    "name": "检测玩家指定装备",
+    "gotoIndex": 2,
+    "format": "78 XX YY ZZ",
+    "formatText": "检测玩家%d的装备栏中是否存在%02X装备，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家的装备栏中是否存在XX装备，检测失败跳转ZZ字节"
+  },
+  {
+    "code": "79",
+    "length": 0,
+    "name": "恢复狼人模样",
+    "format": "79",
+    "formatText": "恢复通过67变成的狼人模样",
+    "shortDescription": "恢复通过67变成的狼人模样"
+  },
+  {
+    "code": "7A",
+    "length": 2,
+    "name": "检测已入队玩家装备",
+    "gotoIndex": 1,
+    "format": "7A XX YY",
+    "formatText": "检测已入队玩家的装备中是否包含%02X装备，检测失败跳转%02X字节",
+    "shortDescription": "检测已入队玩家的装备中是否包含XX装备，检测失败跳转YY字节"
+  },
+  {
+    "code": "7B",
+    "length": 1,
+    "name": "起名界面",
+    "format": "7B XY",
+    "formatText": "打开起名界面，为%02X起名",
+    "shortDescription": "打开起名界面为玩家或坦克起名"
+  },
+  {
+    "code": "7C",
+    "length": 3,
+    "name": "设置上一个地图坐标",
+    "format": "7C XX YY ZZ",
+    "formatText": "设置上一个地图的坐标",
+    "shortDescription": "玩家通过传送到地面或通过边界为上一个地图时，传送到地图XX坐标[YY,ZZ]"
+  },
+  {
+    "code": "7D",
+    "length": 3,
+    "name": "检测玩家异常状态",
+    "format": "7D XX YY ZZ",
+    "formatText": "检测玩家%02X的异常状态是否为%02X，检测成功跳转%02X字节",
+    "shortDescription": "检测玩家XX的异常状态是否为YY，检测成功跳转ZZ字节"
+  },
+  {
+    "code": "7E",
+    "length": 2,
+    "name": "赋予玩家异常状态",
+    "format": "7E XX YY",
+    "formatText": "赋予玩家%02异常状态%02X",
+    "shortDescription": "赋予玩家指定异常状态"
+  },
+  {
+    "code": "7F",
+    "length": 2,
+    "name": "移除玩家异常状态",
+    "format": "7F XX YY",
+    "formatText": "移除玩家%02异常状态%02X",
+    "shortDescription": "移除玩家指定异常状态"
+  },
+  {
+    "code": "80",
+    "length": 5,
+    "name": "回收坦克",
+    "format": "80 XX YY ZZ AA BB",
+    "formatText": "回收坦克%02X到地图%02X，坐标[%02X, %02X]，朝向 %02X",
+    "shortDescription": "回收坦克到指定地图和坐标以及坦克的朝向"
+  },
+  {
+    "code": "81",
+    "length": 2,
+    "name": "检测玩家是否入队",
+    "format": "80 XX YY",
+    "formatText": "检测玩家%02X是否入队，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家XX是否入队，检测失败跳转YY字节"
+  },
+  {
+    "code": "82",
+    "length": 4,
+    "name": "检测玩家血量",
+    "gotoIndex": 3,
+    "format": "82 XX YY1 YY2 ZZ",
+    "formatText": "检测玩家%02X血量是否低于%02X%02X，检测失败跳转%02X字节",
+    "shortDescription": "检测指定玩家血量是否低于指定血量，血量大于等于跳过ZZ字节"
+  },
+  {
+    "code": "83",
+    "length": 4,
+    "name": "检测玩家最大血量",
+    "gotoIndex": 3,
+    "format": "83 XX YY1 YY2 ZZ",
+    "formatText": "检测玩家%02X最大血量是否低于%02X%02X，检测失败跳转%02X字节",
+    "shortDescription": "检测指定玩家最大血量是否低于指定血量，最大血量大于等于跳过ZZ字节"
+  },
+  {
+    "code": "84",
+    "length": 1,
+    "name": "JMP",
+    "gotoIndex": 0,
+    "format": "84 XX",
+    "formatText": "无条件跳转到%02X",
+    "shortDescription": "无条件跳转到XX位置执行"
+  },
+  {
+    "code": "85",
+    "length": 1,
+    "name": "JSR（相对）",
+    "gotoIndex": 0,
+    "format": "85 XX",
+    "formatText": "进入剧情段%02X",
+    "shortDescription": "进入剧情段，直到执行87(RTS)返回"
+  },
+  {
+    "code": "86",
+    "length": 1,
+    "name": "JSR（绝对）",
+    "gotoIndex": 0,
+    "format": "86 XX",
+    "formatText": "进入剧情段%02X",
+    "shortDescription": "进入剧情段，直到执行87(RTS)返回"
+  },
+  {
+    "code": "87",
+    "length": 0,
+    "name": "RTS",
+    "format": "88",
+    "formatText": "退出剧情段",
+    "shortDescription": "退出剧情段，需要先执行85或86"
+  },
+  {
+    "code": "89",
+    "length": 0,
+    "name": "RESET",
+    "format": "89",
+    "formatText": "重置游戏",
+    "shortDescription": "重置游戏"
+  },
+  {
+    "code": "8A",
+    "length": 1,
+    "name": "删除存档",
+    "format": "8A",
+    "formatText": "删除存档%02X",
+    "shortDescription": "删除一个存档"
+  },
+  {
+    "code": "8B",
+    "length": 4,
+    "name": "设置可移动区域",
+    "format": "8B XX1 YY1 XX2 YY2",
+    "formatText": "设置可移动区域 [%02X, %02X]到[%02X, %02X]",
+    "shortDescription": "设置可移动区域"
+  },
+  {
+    "code": "8C",
+    "length": 3,
+    "name": "增加金钱",
+    "format": "8C XX1 XX2 XX3",
+    "formatText": "给玩家增加金钱 %02X%02X%02X",
+    "shortDescription": "玩家给玩家增加金钱"
+  },
+  {
+    "code": "8D",
+    "length": 3,
+    "name": "扣除金钱",
+    "format": "8D XX1 XX2 XX3",
+    "formatText": "扣除玩家金钱 %02X%02X%02X",
+    "shortDescription": "扣除玩家金钱"
+  },
+  {
+    "code": "8F",
+    "length": 3,
+    "name": "移除玩家装备",
+    "gotoIndex": 2,
+    "format": "8F XX YY ZZ",
+    "formatText": "移除玩家装备%02X，移除失败跳转%02X字节",
+    "shortDescription": "移除玩家一个装备，移除失败跳转ZZ字节"
+  },
+  {
+    "code": "90",
+    "length": 2,
+    "name": "玩家获取装备",
+    "gotoIndex": 1,
+    "format": "90 XX YY",
+    "formatText": "玩家获取装备%02X，背包已满跳转%02X字节",
+    "shortDescription": "玩家获取一个装备，玩家背包已满跳转ZZ字节"
+  },
+  {
+    "code": "91",
+    "length": 3,
+    "name": "交换玩家装备",
+    "gotoIndex": 2,
+    "format": "91 XX YY ZZ",
+    "formatText": "将玩家的装备%02X交换为装备%02X，交换失败跳转%02X字节",
+    "shortDescription": "与交换玩家一个装备，交换失败跳转ZZ字节"
+  },
+  {
+    "code": "92",
+    "length": 4,
+    "name": "检测玩家攻击力",
+    "gotoIndex": 3,
+    "format": "92 XX YY1 YY2 ZZ",
+    "formatText": "检测玩家%02X的攻击力是否大于等于[%02X%02X]，检测失败跳转%02X字节",
+    "shortDescription": "检测指定玩家的攻击力是否大于等于指定攻击力，检测失败跳转ZZ字节"
+  },
+  {
+    "code": "93",
+    "length": 4,
+    "name": "检测玩家防御力",
+    "gotoIndex": 3,
+    "format": "93 XX YY1 YY2 ZZ",
+    "formatText": "检测玩家%02X的防御力是否大于等于[%02X%02X]，检测失败跳转%02X字节",
+    "shortDescription": "检测指定玩家的防御力是否大于等于指定防御力，检测失败跳转ZZ字节"
+  },
+  {
+    "code": "94",
+    "length": 3,
+    "name": "自定义\"天亮了\"",
+    "format": "94 XX YY ZZ",
+    "formatText": "检测开关%02关闭，显示自定义\"天亮了\"文本：%s",
+    "shortDescription": "检测开关关闭，自定义显示\"天亮了\"为XX页YY段文本"
+  },
+  {
+    "code": "95",
+    "length": 3,
+    "name": "自定义\"天亮了\"",
+    "format": "95 XX YY ZZ",
+    "formatText": "检测开关%02关闭，显示自定义\"天亮了\"文本：%s",
+    "shortDescription": "检测开关关闭，自定义显示\"天亮了\"为XX页YY段文本"
+  },
+  {
+    "code": "95",
+    "length": 3,
+    "name": "自定义\"天亮了\"",
+    "format": "95 XX YY ZZ",
+    "formatText": "检测开关%02关闭，显示自定义\"天亮了\"文本：%s",
+    "shortDescription": "检测开关关闭，自定义显示\"天亮了\"为XX页YY段文本"
+  },
+  {
+    "code": "96",
+    "length": 4,
+    "name": "检测金钱",
+    "gotoIndex": 3,
+    "format": "96 XX1 XX2 XX3 YY",
+    "formatText": "检测金钱是否大于等于[%02X%02X%02X]，检测失败跳转%02X字节",
+    "shortDescription": "检测玩家金钱是否大于等于指定金钱，检测失败跳转ZZ字节"
+  },
+  {
+    "code": "97",
+    "length": 2,
+    "name": "概率跳转",
+    "gotoIndex": 1,
+    "format": "97 XX YY",
+    "formatText": "有%02X的概率跳转%02X字节",
+    "shortDescription": "指定概率跳转YY字节"
+  },
+  {
+    "code": "98",
+    "length": 3,
+    "name": "设置内存地址",
+    "format": "98 XX YY ZZ",
+    "formatText": "将内存地址[%02X%02X]设置为%02X",
+    "shortDescription": "设置内存地址的值"
   }
 ]
 

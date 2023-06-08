@@ -321,7 +321,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         getBuffer().put(getMonsterDefensesAddress(), defenses);
 
         // 写入怪物出手攻击的速度
-        getBuffer().put(getSpecialMonsterGroupMaxCount(), speeds);
+        getBuffer().put(getMonsterSpeedsAddress(), speeds);
         // 写入怪物的命中率
         getBuffer().put(getMonsterHitRatesAddress(), hitRates);
         // 写入怪物的战斗等级

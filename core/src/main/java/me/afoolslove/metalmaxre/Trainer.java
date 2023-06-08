@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 /**
  * 在ROM中有0x200字节的额外内容
  * <p>
- * 游戏启动后会自动映射到内存地址 $7000-$81FF
+ * 游戏启动后会自动映射到内存地址 $7000-$71FF
  *
  * @author AFoolLove
  */

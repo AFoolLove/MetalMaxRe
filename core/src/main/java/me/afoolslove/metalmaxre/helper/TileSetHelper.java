@@ -6,11 +6,13 @@ import me.afoolslove.metalmaxre.editors.map.IMapPropertiesEditor;
 import me.afoolslove.metalmaxre.editors.map.MapProperties;
 import me.afoolslove.metalmaxre.editors.map.MapTile;
 import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
+import me.afoolslove.metalmaxre.editors.map.tileset.TileAttributes;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
 import me.afoolslove.metalmaxre.editors.palette.Color;
 import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
 import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
+import me.afoolslove.metalmaxre.editors.palette.SystemPalette;
 import me.afoolslove.metalmaxre.utils.BufferedImageUtils;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
@@ -121,7 +123,7 @@ public class TileSetHelper {
         return generate(metalMaxRe, 0x100, 0x80,
                 x00, x40, x80, xC0,
                 new byte[][][]{tileSetEditor.getCombinations()[combinationA], tileSetEditor.getCombinations()[combinationB]},
-                new byte[][]{tileSetEditor.getAttributes()[combinationA], tileSetEditor.getAttributes()[combinationB]},
+                new TileAttributes[]{tileSetEditor.getAttributes()[combinationA], tileSetEditor.getAttributes()[combinationB]},
                 palette);
     }
 
@@ -197,7 +199,7 @@ public class TileSetHelper {
      * 图片的大小为 256*192
      */
     public static Color[][] generateWorldTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0,
-                                                 byte[][][] combinations, byte[][] attributes,
+                                                 byte[][][] combinations, TileAttributes[] attributes,
                                                  Color[][] colors) {
         return generate(metalMaxRe, 0x100, 0x100, x00, x40, x80, xC0, combinations, attributes, colors);
     }
@@ -210,7 +212,7 @@ public class TileSetHelper {
      * @param xXX 分割为4个，高位到低位分别为 x00、x40、x80、xC0
      */
     public static Color[][] generateWorldTileSet(@NotNull MetalMaxRe metalMaxRe, int xXX,
-                                                 byte[][][] combinations, byte[][] attributes,
+                                                 byte[][][] combinations, TileAttributes[] attributes,
                                                  Color[][] colors) {
         int x00 = NumberR.at(xXX, 3) & 0xFF;
         int x40 = NumberR.at(xXX, 2) & 0xFF;
@@ -231,7 +233,7 @@ public class TileSetHelper {
         int x40 = NumberR.at(xXX, 2) & 0xFF;
         int x80 = NumberR.at(xXX, 1) & 0xFF;
         int xC0 = NumberR.at(xXX, 0) & 0xFF;
-        var systemPalette = metalMaxRe.getSystemPalette();
+        SystemPalette systemPalette = metalMaxRe.getSystemPalette();
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
         IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
         List<PaletteRow> palette = paletteEditor.getPaletteByIndex(0x9AD0);
@@ -445,7 +447,7 @@ public class TileSetHelper {
      */
     private static byte[][] generate(@NotNull MetalMaxRe metalMaxRe, int width, int height,
                                      int x00, int x40, int x80, int xC0,
-                                     byte[][][] combinations, byte[][] attributes) {
+                                     byte[][][] combinations, TileAttributes[] attributes) {
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
 
         byte[][][] tiles = new byte[4][0x40][0x10];
@@ -462,7 +464,7 @@ public class TileSetHelper {
             // 获取该部分的组合集
             byte[][] combination = combinations[part];
             // 获取该部分的颜色
-            byte[] color = attributes[part];
+            byte[] color = attributes[part].getAttributes();
 
             // pixel y
             // 该部分的所有y值
@@ -509,7 +511,7 @@ public class TileSetHelper {
 
     private static Color[][] generate(@NotNull MetalMaxRe metalMaxRe, int width, int height,
                                       int x00, int x40, int x80, int xC0,
-                                      byte[][][] combinations, byte[][] attributes,
+                                      byte[][][] combinations, TileAttributes[] attributes,
                                       Color[][] colors) {
         return palette(generate(metalMaxRe, width, height, x00, x40, x80, xC0, combinations, attributes), colors);
     }
