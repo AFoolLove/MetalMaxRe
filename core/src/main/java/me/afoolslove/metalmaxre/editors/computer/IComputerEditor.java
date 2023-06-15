@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editors.computer;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -30,6 +31,13 @@ public interface IComputerEditor<C extends Computer> extends IRomEditor {
      * @return 所有的计算机
      */
     List<C> getComputers();
+
+    /**
+     * 清空当前所有计算机，更换为新的计算机列表
+     *
+     * @param newComputers 新的计算机列表
+     */
+    void dataUpdate(@Nullable List<Computer> newComputers);
 
     /**
      * 添加一个计算机

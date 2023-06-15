@@ -6,11 +6,13 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.event.editors.computer.EditorComputerEvent;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -50,7 +52,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
     @Editor.Load
     public void onLoad() {
         // 初始化计算机
-        getComputers().clear();
+        getUnsafeComputers().clear();
 
         // data[0] = map
         // data[1] = type
@@ -60,7 +62,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         getBuffer().getAABytes(getComputerAddress(), 0, getMaxCount(), data);
 
         for (int i = 0; i < getMaxCount(); i++) {
-            getComputers().add(new Computer(data[0][i], data[1][i], data[2][i], data[3][i]));
+            getUnsafeComputers().add(new Computer(data[0][i], data[1][i], data[2][i], data[3][i]));
         }
 
     }
@@ -109,29 +111,58 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
 
     @Override
     public List<Computer> getComputers() {
+        return new ArrayList<>(getUnsafeComputers());
+    }
+
+    /**
+     * @return 直接操作列表，不会通知修改事件
+     */
+    public List<Computer> getUnsafeComputers() {
         return computers;
+    }
+
+    /**
+     * 清空当前所有计算机，更换为新的计算机列表
+     *
+     * @param newComputers 新的计算机列表
+     */
+    public void dataUpdate(@Nullable List<Computer> newComputers) {
+        if (newComputers == null) {
+            newComputers = Collections.emptyList();
+        }
+
+        // 保留旧的计算机列表
+        List<Computer> oldComputers = getComputers();
+
+        // 清空旧的计算机列表，添加新的计算机列表
+        getUnsafeComputers().clear();
+        getUnsafeComputers().addAll(newComputers);
+
+        EditorComputerEvent.DataUpdateComputer dataUpdateComputer = new EditorComputerEvent.DataUpdateComputer(getMetalMaxRe(), this, oldComputers, newComputers);
+        getMetalMaxRe().getEventHandler().callEvent(dataUpdateComputer);
     }
 
     @Override
     public void addComputer(@NotNull Computer computer) {
-        computers.add(computer);
+        getUnsafeComputers().add(computer);
+        getMetalMaxRe().getEventHandler().callEvent(new EditorComputerEvent.AddComputer(getMetalMaxRe(), this, computer));
     }
 
     @Override
     public void removeComputer(@NotNull Computer computer) {
-        computers.remove(computer);
+        getUnsafeComputers().remove(computer);
         getMetalMaxRe().getEventHandler().callEvent(new EditorComputerEvent.RemoveComputer(getMetalMaxRe(), this, computer));
     }
 
     @Override
     public boolean replaceComputer(@NotNull Computer source, @NotNull Computer replace) {
-        if (computers.contains(replace)) {
+        if (getUnsafeComputers().contains(replace)) {
             return true;
         }
-        if (computers.remove(source)) {
+        if (getUnsafeComputers().remove(source)) {
             // 移除旧计算机成功，添加新的计算机
             try {
-                return computers.add(replace);
+                return getUnsafeComputers().add(replace);
             } finally {
                 getMetalMaxRe().getEventHandler().callEvent(new EditorComputerEvent.ReplaceComputer(getMetalMaxRe(), this, source, replace));
             }

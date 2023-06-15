@@ -1,6 +1,8 @@
 package me.afoolslove.metalmaxre.editors.text;
 
 import me.afoolslove.metalmaxre.editors.text.action.*;
+import me.afoolslove.metalmaxre.editors.text.mapping.CharMapCN;
+import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +32,13 @@ public class TextBuilder implements IBaseText {
         has9F(has9F);
     }
 
-    public TextBuilder add(@NotNull IBaseText baseText) {
+    public TextBuilder add(@NotNull IBaseText baseText, @NotNull ICharMap charMap) {
         // 如果上一个和当前都是Text，直接添加到上一个里，而不是添加到当前list里
         if (baseText instanceof Text text && !texts.isEmpty()) {
             IBaseText lastBaseText = texts.get(texts.size() - 1);
             if (lastBaseText instanceof Text lastText) {
                 // 添加到上一个Text里
-                lastText.append(text);
+                lastText.append(text, charMap);
                 return this;
             }
         }
@@ -56,10 +58,10 @@ public class TextBuilder implements IBaseText {
     }
 
     @Override
-    public byte[] toByteArray() {
+    public byte[] toByteArray(@NotNull ICharMap charMap) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (IBaseText text : texts) {
-            outputStream.writeBytes(text.toByteArray());
+            outputStream.writeBytes(text.toByteArray(charMap));
         }
         if (has9F()) {
             outputStream.write(0x9F);
@@ -80,14 +82,14 @@ public class TextBuilder implements IBaseText {
     }
 
     @Override
-    public String toText() {
-        return toText(false);
+    public String toText(@NotNull ICharMap charMap) {
+        return toText(false, charMap);
     }
 
-    public String toText(boolean include9F) {
+    public String toText(boolean include9F, @NotNull ICharMap charMap) {
         StringBuilder builder = new StringBuilder();
         for (IBaseText text : texts) {
-            builder.append(text.toText());
+            builder.append(text.toText(charMap));
         }
         if (include9F && has9F()) {
             builder.append("[9F]");
@@ -96,23 +98,27 @@ public class TextBuilder implements IBaseText {
     }
 
     @Override
-    public int length() {
+    public int length(@NotNull ICharMap charMap) {
         int length = has9F() ? 1 : 0;
         for (IBaseText text : texts) {
-            length += text.length();
+            length += text.length(charMap);
         }
         return length;
     }
 
+    public String toString(@NotNull ICharMap charMap) {
+        return String.format("size=%d,text=%s", texts.size(), toText(charMap));
+    }
+
     @Override
     public String toString() {
-        return String.format("size=%d,text=%s", texts.size(), toText());
+        return String.format("size=%d,-charMap is null-", texts.size());
     }
 
     /**
      * 将游戏中的字节转换为可操作的对象
      */
-    public static List<TextBuilder> fromBytes(byte[] bytes) {
+    public static List<TextBuilder> fromBytes(byte[] bytes, @NotNull ICharMap charMap) {
         List<TextBuilder> textBuilders = new ArrayList<>();
 
         // 储存一段对象文本
@@ -124,7 +130,7 @@ public class TextBuilder implements IBaseText {
         for (int position = 0; position < bytes.length; ) {
             // 在字库中查找对应的字符文本
             allFonts:
-            for (Map.Entry<Character, ?> entry : WordBank.ALL_FONTS) {
+            for (Map.Entry<Character, ?> entry : charMap.getValues()) {
                 if (entry.getValue() instanceof byte[] bs) {
                     if (!bytesStartsWith(bytes, position, bs)) {
                         continue allFonts;
@@ -141,7 +147,7 @@ public class TextBuilder implements IBaseText {
                             // 断句
                             // 保存当前文本，并清空缓存文本
                             if (!text.isEmpty()) {
-                                textBuilder.add(new Text(text.toString()));
+                                textBuilder.add(new Text(text.toString()), charMap);
                                 text.setLength(0);
                             }
                             textBuilder.has9F(true);
@@ -160,7 +166,7 @@ public class TextBuilder implements IBaseText {
             }
 
             // 单字节的操作码
-            var opcodeLength = WordBank.OPCODES.get(bytes[position]);
+            var opcodeLength = charMap.getOpcodes().get(bytes[position]);
             if (opcodeLength == null) {
                 // 未知的数据
                 text.append(String.format("[%02X]", bytes[position]));
@@ -176,7 +182,7 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     text.append("[E3]");
-                    textBuilder.add(new Text(text.toString()));
+                    textBuilder.add(new Text(text.toString()), charMap);
                     text.setLength(0);
                     // 因为选择只能放在最后，所以结束当前文本
                     textBuilders.add(textBuilder);
@@ -190,11 +196,11 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()));
+                        textBuilder.add(new Text(text.toString()), charMap);
                         text.setLength(0);
                     }
                     // 添加选择action
-                    textBuilder.add(new SelectAction(bytes[position + 0x01], bytes[position + 0x02]));
+                    textBuilder.add(new SelectAction(bytes[position + 0x01], bytes[position + 0x02]), charMap);
                     position += 3;
 
                     // 因为选择只能放在最后，所以结束当前文本
@@ -208,11 +214,11 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()));
+                        textBuilder.add(new Text(text.toString()), charMap);
                         text.setLength(0);
                     }
                     // 添加设置文本速度
-                    textBuilder.add(new TextSpeedAction(bytes[position + 0x01]));
+                    textBuilder.add(new TextSpeedAction(bytes[position + 0x01]), charMap);
                     position += 2;
                     break;
                 case 0xED: // 空白占位
@@ -221,11 +227,11 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()));
+                        textBuilder.add(new Text(text.toString()), charMap);
                         text.setLength(0);
                     }
                     // 添加占位
-                    textBuilder.add(new SpaceAction(bytes[position + 0x01]));
+                    textBuilder.add(new SpaceAction(bytes[position + 0x01]), charMap);
                     position += 2;
                     break;
                 case 0xF1: // 文本等待
@@ -234,11 +240,11 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()));
+                        textBuilder.add(new Text(text.toString()), charMap);
                         text.setLength(0);
                     }
                     // 添加文本等待
-                    textBuilder.add(new WaitTimeAction(bytes[position + 0x01]));
+                    textBuilder.add(new WaitTimeAction(bytes[position + 0x01]), charMap);
                     position += 2;
                     break;
                 case 0xF5: // 精灵动作
@@ -247,11 +253,11 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()));
+                        textBuilder.add(new Text(text.toString()), charMap);
                         text.setLength(0);
                     }
                     // 添加精灵动作
-                    textBuilder.add(new SpriteAction(bytes[position + 0x01]));
+                    textBuilder.add(new SpriteAction(bytes[position + 0x01]), charMap);
                     position += 2;
                     break;
                 case 0xF6:  // 读取到 0x9F 或 0x63 后结束
@@ -316,7 +322,7 @@ public class TextBuilder implements IBaseText {
 
                                 // 断句
                                 // 保存当前文本，并清空缓存文本
-                                textBuilder.add(new Text(text.toString()));
+                                textBuilder.add(new Text(text.toString()), charMap);
                                 text.setLength(0);
                                 textBuilder.has9F(true);
 
@@ -381,7 +387,7 @@ public class TextBuilder implements IBaseText {
         return true;
     }
 
-    public static List<TextBuilder> fromTexts(String text) {
+    public static List<TextBuilder> fromTexts(String text, @NotNull ICharMap charMap) {
         if (text.isEmpty()) {
             return new LinkedList<>();
         }
@@ -394,7 +400,7 @@ public class TextBuilder implements IBaseText {
         text = text.replaceAll("\\\\b", "\b");
 
         text = text.replaceAll("\r\n", "");
-        return fromTexts(text.toCharArray());
+        return fromTexts(text.toCharArray(), charMap);
     }
 
     /**
@@ -403,7 +409,7 @@ public class TextBuilder implements IBaseText {
      * @param text 文本
      * @return List<TextBuilder>
      */
-    public static List<TextBuilder> fromTexts(char[] text) {
+    public static List<TextBuilder> fromTexts(char[] text, @NotNull ICharMap charMap) {
         if (text == null || text.length == 0) {
             // null或空文本返回空的list
             return new LinkedList<>();
@@ -453,7 +459,7 @@ public class TextBuilder implements IBaseText {
             }
 
             // 从重复单byte中获取
-            Object temp = WordBank.getValue(ch);
+            Object temp = charMap.getValue(ch);
             if (temp != null) {
                 if (temp instanceof byte[] bytes) {
                     outputStream.writeBytes(bytes);
@@ -466,14 +472,14 @@ public class TextBuilder implements IBaseText {
             }
             i++;
         }
-        return fromBytes(outputStream.toByteArray());
+        return fromBytes(outputStream.toByteArray(), charMap);
     }
 
     /**
      * 读取十六进制文本为文本段列表
      */
-    public static List<TextBuilder> readBracketHex(char[] chars) {
-        return fromBytes(readBracketHexToBytes(chars));
+    public static List<TextBuilder> readBracketHex(char[] chars, @NotNull ICharMap charMap) {
+        return fromBytes(readBracketHexToBytes(chars), charMap);
     }
 
     /**
@@ -496,7 +502,7 @@ public class TextBuilder implements IBaseText {
 
             if (i >= chars.length || chars[i] == ' ') {
                 // 单十六进制 0-F
-                outputStream.write(WordBank.HEX_DIGITS.indexOf(ch));
+                outputStream.write(ICharMap.HEX_DIGITS.indexOf(ch));
                 continue;
             }
 
@@ -506,13 +512,14 @@ public class TextBuilder implements IBaseText {
             }
 
             // 高F(4bit)+低F(4bit)
-            outputStream.write((WordBank.HEX_DIGITS.indexOf(ch) << 4) + WordBank.HEX_DIGITS.indexOf(chars[i++]));
+            outputStream.write((ICharMap.HEX_DIGITS.indexOf(ch) << 4) + ICharMap.HEX_DIGITS.indexOf(chars[i++]));
         }
         return outputStream.toByteArray();
     }
 
     public static void main(String[] args) {
-        var textBuilders = fromTexts("你的名字是[E8]，想知道我的名字吗？[F70001][EB0001]".toCharArray());
+        CharMapCN charMap = new CharMapCN();
+        var textBuilders = fromTexts("你的名字是[E8]，想知道我的名字吗？[F70001][EB0001]".toCharArray(), charMap);
         System.out.println();
     }
 

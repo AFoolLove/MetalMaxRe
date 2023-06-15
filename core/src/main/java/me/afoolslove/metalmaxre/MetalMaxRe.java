@@ -4,6 +4,8 @@ import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.IEditorManager;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.palette.SystemPalette;
+import me.afoolslove.metalmaxre.editors.text.mapping.CharMapCN;
+import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import me.afoolslove.metalmaxre.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +17,7 @@ import java.util.Map;
 public class MetalMaxRe {
     private RomBuffer romBuffer;
     private IEditorManager editorManager;
+    private ICharMap charMap;
 
     private EventHandler eventHandler = new EventHandler();
 
@@ -34,6 +37,10 @@ public class MetalMaxRe {
         if (getEditorManager() == null) {
             setEditorManager(new EditorManagerImpl(this));
         }
+
+        if (getCharMap() == null) {
+            setCharMap(new CharMapCN());
+        }
     }
 
     public RomBuffer getBuffer() {
@@ -46,6 +53,14 @@ public class MetalMaxRe {
 
     public void setEditorManager(IEditorManager editorManager) {
         this.editorManager = editorManager;
+    }
+
+    public ICharMap getCharMap() {
+        return charMap;
+    }
+
+    public void setCharMap(ICharMap charMap) {
+        this.charMap = charMap;
     }
 
     public EventHandler getEventHandler() {

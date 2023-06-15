@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.utils;
 
 import me.afoolslove.metalmaxre.editors.text.ITextEditor;
 import me.afoolslove.metalmaxre.editors.text.TextBuilder;
+import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -18,16 +19,16 @@ public class TextUtils {
      * @param hasId      名称前缀是否包含id
      * @return 所有物品名称
      */
-    public static List<String> getItemNames(@NotNull ITextEditor textEditor, boolean hasId) {
+    public static List<String> getItemNames(@NotNull ITextEditor textEditor, boolean hasId, @NotNull ICharMap charMap) {
         if (hasId) {
             List<String> names = new ArrayList<>();
             List<TextBuilder> list = textEditor.getPage(0x00);
             for (int i = 0; i < list.size(); i++) {
-                names.add(String.format("%02X %s", i, list.get(i).toText()));
+                names.add(String.format("%02X %s", i, list.get(i).toText(charMap)));
             }
             return names;
         }
-        return textEditor.getPage(0x00).stream().map(TextBuilder::toText).toList();
+        return textEditor.getPage(0x00).stream().map(v -> v.toText(charMap)).toList();
     }
 
     /**
@@ -37,16 +38,16 @@ public class TextUtils {
      * @param hasId      名称前缀是否包含id
      * @return 所有怪物的名称
      */
-    public static List<String> getMonsterNames(@NotNull ITextEditor textEditor, boolean hasId) {
+    public static List<String> getMonsterNames(@NotNull ITextEditor textEditor, boolean hasId, @NotNull ICharMap charMap) {
         if (hasId) {
             List<String> names = new ArrayList<>();
             List<TextBuilder> list = textEditor.getPage(0x01);
             for (int i = 0; i < list.size(); i++) {
-                names.add(String.format("%02X %s", i, list.get(i).toText()));
+                names.add(String.format("%02X %s", i, list.get(i).toText(charMap)));
             }
             return names;
         }
-        return textEditor.getPage(0x01).stream().map(TextBuilder::toText).toList();
+        return textEditor.getPage(0x01).stream().map(v -> v.toText(charMap)).toList();
     }
 
 

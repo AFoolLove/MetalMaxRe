@@ -18,6 +18,13 @@ import java.util.Objects;
  * @author AFoolLove
  */
 public class Computer extends MapPoint {
+    public static final Computer EMPTY_COMPUTER = new Computer() {
+        @Override
+        public boolean equals(Object o) {
+            return o == this;
+        }
+    };
+
     private byte type;
 
     public Computer() {

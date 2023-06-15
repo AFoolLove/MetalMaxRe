@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editors.text;
 
+import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,17 +23,17 @@ public interface IBaseText extends Comparable<IBaseText> {
     /**
      * @return 转换为游戏中使用的文本字节
      */
-    byte[] toByteArray();
+    byte[] toByteArray(@NotNull ICharMap charMap);
 
     /**
      * @return 转换为文本
      */
-    String toText();
+    String toText(@NotNull ICharMap charMap);
 
     /**
      * @return 占用长度
      */
-    int length();
+    int length(@NotNull ICharMap charMap);
 
     @Override
     default int compareTo(@NotNull IBaseText o) {

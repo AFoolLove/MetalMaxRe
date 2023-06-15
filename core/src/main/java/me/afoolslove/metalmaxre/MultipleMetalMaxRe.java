@@ -1,8 +1,12 @@
 package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
+import me.afoolslove.metalmaxre.editors.text.mapping.CharMapCN;
+import me.afoolslove.metalmaxre.editors.text.mapping.CharMapJP;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -13,6 +17,7 @@ import java.util.List;
  * 多MetalMaxRe实例管理
  */
 public class MultipleMetalMaxRe {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MultipleMetalMaxRe.class);
     private final List<MetalMaxRe> metalMaxRes = new ArrayList<>();
 
     /**
@@ -48,6 +53,13 @@ public class MultipleMetalMaxRe {
      */
     public MetalMaxRe create(@NotNull RomBuffer romBuffer, boolean useDefEditors) {
         MetalMaxRe metalMaxRe = new MetalMaxRe(romBuffer);
+
+        if (romBuffer.getVersion() == RomVersion.getJapanese()) {
+            metalMaxRe.setCharMap(new CharMapJP());
+        } else {
+            metalMaxRe.setCharMap(new CharMapCN());
+        }
+
         if (useDefEditors) {
             EditorManagerImpl editorManager = new EditorManagerImpl(metalMaxRe);
             metalMaxRe.setEditorManager(editorManager);

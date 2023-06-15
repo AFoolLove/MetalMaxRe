@@ -1,7 +1,9 @@
 package me.afoolslove.metalmaxre.editors.text.action;
 
 import me.afoolslove.metalmaxre.editors.text.IBaseText;
+import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -77,17 +79,18 @@ public class SpriteAction implements IBaseText {
         value[0x01] = action.getAction();
     }
 
-    public byte[] toByteArray() {
+    @Override
+    public byte[] toByteArray(@Nullable ICharMap charMap) {
         return Arrays.copyOf(value, value.length);
     }
 
     @Override
-    public String toText() {
+    public String toText(@Nullable ICharMap charMap) {
         return String.format("[%02X%02X]", value[0], value[1]);
     }
 
     @Override
-    public int length() {
+    public int length(@Nullable ICharMap charMap) {
         return 2;
     }
 

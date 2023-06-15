@@ -1,5 +1,9 @@
 package me.afoolslove.metalmaxre.editors.text;
 
+import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * 游戏中的一段文本
  * <p>
@@ -10,8 +14,12 @@ package me.afoolslove.metalmaxre.editors.text;
 public class Text extends AbstractBaseText {
     private final StringBuilder builder = new StringBuilder();
 
+    public Text(Text text, @Nullable ICharMap charMap) {
+        append(text, charMap);
+    }
+
     public Text(Text text) {
-        append(text);
+        append(text, null);
     }
 
     public Text(CharSequence text) {
@@ -22,8 +30,8 @@ public class Text extends AbstractBaseText {
         append(text);
     }
 
-    public Text append(Text text) {
-        builder.append(text.toText());
+    public Text append(Text text, @Nullable ICharMap charMap) {
+        builder.append(text.toText(charMap));
         return this;
     }
 
@@ -33,23 +41,23 @@ public class Text extends AbstractBaseText {
     }
 
     @Override
-    public byte[] toByteArray() {
-        var chars = builder.toString();
-        return WordBank.toBytes(chars);
+    public byte[] toByteArray(@NotNull ICharMap charMap) {
+        String chars = builder.toString();
+        return charMap.toBytes(chars, null);
     }
 
     @Override
-    public String toText() {
+    public String toText(@Nullable ICharMap charMap) {
         return builder.toString();
     }
 
     @Override
-    public int length() {
-        return toByteArray().length;
+    public int length(@NotNull ICharMap charMap) {
+        return toByteArray(charMap).length;
     }
 
     @Override
     public String toString() {
-        return toText();
+        return toText(null);
     }
 }

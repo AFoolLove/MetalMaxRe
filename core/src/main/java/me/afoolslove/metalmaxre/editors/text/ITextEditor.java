@@ -38,6 +38,18 @@ public interface ITextEditor extends IRomEditor {
     }
 
     /**
+     * 获取指定页，指定段的纯文本
+     *
+     * @param page 文本页
+     * @param row  文本段
+     * @return 获取失败返回 {@code null}
+     */
+    default String getPlainText(int page, int row) {
+        TextBuilder text = getText(page, row);
+        return text == null ? null : text.toText(getCharMap());
+    }
+
+    /**
      * 获取城镇的名称
      *
      * @param townId 城镇id
