@@ -7,14 +7,22 @@ import me.afoolslove.metalmaxre.editors.palette.SystemPalette;
 import me.afoolslove.metalmaxre.editors.text.mapping.CharMapCN;
 import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import me.afoolslove.metalmaxre.event.EventHandler;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.EventListener;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author AFoolLove
  */
 public class MetalMaxRe {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MetalMaxRe.class);
     private RomBuffer romBuffer;
     private IEditorManager editorManager;
     private ICharMap charMap;
@@ -93,5 +101,26 @@ public class MetalMaxRe {
      */
     public Map<Class<? extends IRomEditor>, IRomEditor> getEditors() {
         return getEditorManager().getEditors();
+    }
+
+    @TestOnly
+    public void debugLoadTime() {
+        getEventHandler().register(new EventListener() {
+            private final Map<IRomEditor, Long> times = new HashMap<>();
+
+            public void onPre(EditorLoadEvent.Pre pre) {
+                times.put(pre.getEditor(), System.currentTimeMillis());
+            }
+
+            public void onPost(EditorLoadEvent.Post post) {
+                times.put(post.getEditor(), System.currentTimeMillis() - times.get(post.getEditor()));
+                LOGGER.debug(post.getEditor().getClass().getSimpleName() + times.get(post.getEditor()));
+            }
+
+            public void onEnd(EditorManagerEvent.Post post) {
+                LOGGER.debug("time:" + times.values().stream().mapToInt(Long::intValue).sum());
+                times.clear();
+            }
+        });
     }
 }

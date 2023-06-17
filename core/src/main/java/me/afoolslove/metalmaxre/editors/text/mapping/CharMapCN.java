@@ -19,6 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 中文字库
+ * 文字（char）对应游戏中的文字（byte）
+ *
+ * @author AFoolLove
+ */
 public class CharMapCN implements ICharMap {
     private static final Logger LOGGER = LoggerFactory.getLogger(CharMapCN.class);
 

@@ -19,6 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 日文字库
+ * 文字（char）对应游戏中的文字（byte）
+ *
+ * @author AFoolLove
+ */
 public class CharMapJP implements ICharMap {
     private static final Logger LOGGER = LoggerFactory.getLogger(CharMapJP.class);
 
@@ -32,27 +38,6 @@ public class CharMapJP implements ICharMap {
      */
     public List<SingleMapEntry<Character, Object>> load(@Nullable String path) {
         List<SingleMapEntry<Character, Object>> values = new ArrayList<>();
-        values.add(SingleMapEntry.create('-', (byte) (0x62)));
-        values.add(SingleMapEntry.create('▼', (byte) (0x63)));  // 下标
-        values.add(SingleMapEntry.create('。', (byte) (0x64)));
-        values.add(SingleMapEntry.create('.', (byte) (0x65)));
-        values.add(SingleMapEntry.create('*', (byte) (0x8E)));  // 类似于 *
-        values.add(SingleMapEntry.create('…', (byte) (0x8F)));  // 两个 ..
-        values.add(SingleMapEntry.create('^', (byte) (0x90)));  // 对话时名称与文字中间的符号
-        values.add(SingleMapEntry.create('!', (byte) (0x91)));
-        values.add(SingleMapEntry.create('?', (byte) (0x92)));
-        values.add(SingleMapEntry.create(':', (byte) (0x93)));
-//        values.add(SingleMapEntry.create('弹', (byte) (0x94)));
-//        values.add(SingleMapEntry.create('货', (byte) (0x95)));
-        values.add(SingleMapEntry.create('#', (byte) (0x96)));
-//        values.add(SingleMapEntry.create('无', (byte) (0x97)));
-//        values.add(SingleMapEntry.create('攻', (byte) (0x98)));
-        values.add(SingleMapEntry.create('/', (byte) (0x99)));
-//        values.add(SingleMapEntry.create('击', (byte) (0x9A)));
-//        values.add(SingleMapEntry.create('防', (byte) (0x9B)));
-//        values.add(SingleMapEntry.create('t', (byte) (0x9C)));
-//        values.add(SingleMapEntry.create('@', (byte) (0x9D)));
-//        values.add(SingleMapEntry.create('', (byte) (0x9E))); // 可自定义图块
         values.add(SingleMapEntry.create(' ', (byte) (0xFF))); // 空格，占一个英文字符，全角空格占两个英文字符'　'
         values.add(SingleMapEntry.create('\t', (byte) (0xE5))); // 换行
 //        values.add(SingleMapEntry.create('\r', (byte) (0xFE))); // 带名称换行

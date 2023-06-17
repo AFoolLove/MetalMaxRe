@@ -147,7 +147,7 @@ public class TextBuilder implements IBaseText {
                             // 断句
                             // 保存当前文本，并清空缓存文本
                             if (!text.isEmpty()) {
-                                textBuilder.add(new Text(text.toString()), charMap);
+                                textBuilder.add(new Text(text), charMap);
                                 text.setLength(0);
                             }
                             textBuilder.has9F(true);
@@ -182,7 +182,7 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     text.append("[E3]");
-                    textBuilder.add(new Text(text.toString()), charMap);
+                    textBuilder.add(new Text(text), charMap);
                     text.setLength(0);
                     // 因为选择只能放在最后，所以结束当前文本
                     textBuilders.add(textBuilder);
@@ -196,7 +196,7 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()), charMap);
+                        textBuilder.add(new Text(text), charMap);
                         text.setLength(0);
                     }
                     // 添加选择action
@@ -214,7 +214,7 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()), charMap);
+                        textBuilder.add(new Text(text), charMap);
                         text.setLength(0);
                     }
                     // 添加设置文本速度
@@ -227,7 +227,7 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()), charMap);
+                        textBuilder.add(new Text(text), charMap);
                         text.setLength(0);
                     }
                     // 添加占位
@@ -240,7 +240,7 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()), charMap);
+                        textBuilder.add(new Text(text), charMap);
                         text.setLength(0);
                     }
                     // 添加文本等待
@@ -253,7 +253,7 @@ public class TextBuilder implements IBaseText {
                     }
                     // 保存当前文本，并清空缓存文本
                     if (!text.isEmpty()) {
-                        textBuilder.add(new Text(text.toString()), charMap);
+                        textBuilder.add(new Text(text), charMap);
                         text.setLength(0);
                     }
                     // 添加精灵动作
@@ -361,7 +361,7 @@ public class TextBuilder implements IBaseText {
         }
         if (!text.isEmpty()) {
             if (textBuilder == null) {
-                textBuilder = new TextBuilder(new Text(text.toString()));
+                textBuilder = new TextBuilder(new Text(text));
             }
         }
         if (textBuilder != null) {
