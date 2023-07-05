@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public interface IMonsterEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "monsterEditor";
+    }
+
     /**
      * 获取怪物的最大数量
      *

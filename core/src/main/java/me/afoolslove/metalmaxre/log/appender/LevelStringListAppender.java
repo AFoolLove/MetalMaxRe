@@ -4,14 +4,14 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.Layout;
-import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class LevelStringListAppender extends AppenderBase<ILoggingEvent> {
     Layout<ILoggingEvent> layout;
-    private List<SingleMapEntry<Level, String>> list = new ArrayList<>();
+    private List<Map.Entry<Level, String>> list = new ArrayList<>();
 
     public void start() {
         list.clear();
@@ -37,10 +37,10 @@ public class LevelStringListAppender extends AppenderBase<ILoggingEvent> {
     @Override
     protected void append(ILoggingEvent eventObject) {
         String res = layout.doLayout(eventObject);
-        list.add(SingleMapEntry.create(eventObject.getLevel(), res));
+        list.add(Map.entry(eventObject.getLevel(), res));
     }
 
-    public List<SingleMapEntry<Level, String>> getList() {
+    public List<Map.Entry<Level, String>> getList() {
         return list;
     }
 }

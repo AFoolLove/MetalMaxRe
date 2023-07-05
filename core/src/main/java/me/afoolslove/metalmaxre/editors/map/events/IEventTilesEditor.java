@@ -3,11 +3,15 @@ package me.afoolslove.metalmaxre.editors.map.events;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public interface IEventTilesEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "eventTilesEditor";
+    }
+
     /**
      * @return 事件图块数据地址
      */

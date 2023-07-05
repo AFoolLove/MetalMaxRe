@@ -11,9 +11,6 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -431,77 +428,6 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     @Override
     public List<TankItem> getTankItems() {
         return tankItems;
-    }
-
-    @Override
-    public void writeData(OutputStream out) throws IOException {
-//        List<Item> items = getItems();
-//        for (int itemId = 0; ; itemId++) {
-//            Item item = items.get(itemId);
-//            // 头写入物品ID
-//            out.writeBytes(String.format("%02X", itemId));
-//
-//            // 写入数据
-//            if (item instanceof PlayerWeapon playerWeapon) {
-//                // FF 1 FF 111
-//                out.writeBytes(String.format(" %02X %d %02X %d%d%d",
-//                        playerWeapon.getAttackAnim(),
-//                        playerWeapon.getAttackRange().getValue(),
-//                        playerWeapon.getAttack(),
-//                        playerWeapon.hasEquipped(Player.PLAYER_0) ? 1 : 0,
-//                        playerWeapon.hasEquipped(Player.PLAYER_1) ? 1 : 0,
-//                        playerWeapon.hasEquipped(Player.PLAYER_2) ? 1 : 0
-//                ));
-//            } else if (item instanceof PlayerArmor playerArmor) {
-//                // FF 111
-//                out.writeBytes(String.format(" %02X %d%d%d",
-//                        playerArmor.getDefense(),
-//                        playerArmor.hasEquipped(Player.PLAYER_0) ? 1 : 0,
-//                        playerArmor.hasEquipped(Player.PLAYER_1) ? 1 : 0,
-//                        playerArmor.hasEquipped(Player.PLAYER_2) ? 1 : 0
-//                ));
-//            } else if (item instanceof TankWeapon tankWeapon) {
-//                // FF 1 FF FF 1 FF 1111
-//                out.writeBytes(String.format(" %02X %d %02X %02X %d %02X %d%d%d",
-//                        tankWeapon.getAttackAnim(),
-//                        tankWeapon.getAttackRange().getValue(),
-//                        tankWeapon.getAttack(),
-//                        tankWeapon.getDefense(),
-//                        tankWeapon.getShellCapacity().getValue(),
-//                        tankWeapon.getWeight(),
-//                        tankWeapon.hasEquipped(TankWeaponSlot.MAIN_GUN) ? 1 : 0,
-//                        tankWeapon.hasEquipped(TankWeaponSlot.SECONDARY_GUN) ? 1 : 0,
-//                        tankWeapon.hasEquipped(TankWeaponSlot.SPECIAL_EQUIPMENT) ? 1 : 0
-//                ));
-//            } else if (item instanceof TankCUnit tankCUnit) {
-//                // FF FF
-//                out.writeBytes(String.format(" %02X %02X",
-//                        tankCUnit.getDefense(),
-//                        tankCUnit.getWeight()
-//                ));
-//            } else if (item instanceof TankEngine tankEngine) {
-//                // FF FF FF
-//                out.writeBytes(String.format(" %02X %02X %02X",
-//                        tankEngine.getDefense(),
-//                        tankEngine.getCapacity(),
-//                        tankEngine.getWeight()
-//                ));
-//            }
-//
-//            // 末尾写入金钱值
-//            out.writeBytes(String.format(" %02X", item.getPrice()));
-//
-//            if (itemId + 1 >= items.size()) {
-//                // 结束循环
-//                break;
-//            }
-//            out.write('\n');
-//        }
-    }
-
-    @Override
-    public void readData(InputStream in) throws IOException {
-
     }
 
     @Override

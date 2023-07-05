@@ -6,6 +6,11 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import java.util.Map;
 
 public interface IMapEntranceEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "mapEntranceEditor";
+    }
+
     /**
      * @return 所有地图的边界和出入口
      */

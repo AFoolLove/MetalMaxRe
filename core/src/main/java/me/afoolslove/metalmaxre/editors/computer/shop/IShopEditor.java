@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface IShopEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "shopEditor";
+    }
+
     /**
      * @return 售货机商品的最大组合数量
      */

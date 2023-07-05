@@ -50,7 +50,7 @@ public class PlayerArmor extends PlayerEquipmentItem {
      * @see IDataValueEditor#get2ByteValues()
      */
     public int getDefenseValue(@NotNull IDataValueEditor dataValues) {
-        return dataValues.getValues().get(value & 0xFF).intValue();
+        return dataValues.getValue(value & 0xFF).intValue();
     }
 
 }

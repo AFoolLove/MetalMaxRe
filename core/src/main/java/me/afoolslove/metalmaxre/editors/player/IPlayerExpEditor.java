@@ -7,6 +7,10 @@ import org.jetbrains.annotations.Range;
 import java.util.Map;
 
 public interface IPlayerExpEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "playerExpEditor";
+    }
 
     /**
      * 获取所有等级（2-99）的所需的经验值

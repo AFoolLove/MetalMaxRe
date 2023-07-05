@@ -2,15 +2,19 @@ package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
+import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.Serializable;
+import java.util.Properties;
 
 /**
  * 提供了编辑器部分所需的方法
  *
  * @author AFoolLove
  */
-public interface IRomEditor {
+public interface IRomEditor extends Serializable {
     /**
      * 获取主实例
      *
@@ -18,6 +22,33 @@ public interface IRomEditor {
      */
     @NotNull
     MetalMaxRe getMetalMaxRe();
+
+    /**
+     * 获取编辑器的id
+     *
+     * @return 编辑器的id
+     */
+    String getId();
+
+    /**
+     * 获取配置
+     *
+     * @return 配置
+     */
+    @NotNull
+    default Properties getProperties() {
+        return getMetalMaxRe().getProperties();
+    }
+
+    /**
+     * 获取字符映射
+     *
+     * @return 字符映射
+     */
+    @NotNull
+    default ICharMap getCharMap() {
+        return getMetalMaxRe().getCharMap();
+    }
 
     /**
      * 设置启用或禁用编辑器
@@ -109,6 +140,4 @@ public interface IRomEditor {
     default RomBuffer getBuffer() {
         return getMetalMaxRe().getBuffer();
     }
-
-
 }

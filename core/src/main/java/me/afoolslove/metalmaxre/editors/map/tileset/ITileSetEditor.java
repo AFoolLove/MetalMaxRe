@@ -7,6 +7,11 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
 public interface ITileSetEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "tileSetEditor";
+    }
+
     byte[][][] getTiles();
 
     byte[][][] getCombinations();
@@ -45,6 +50,7 @@ public interface ITileSetEditor extends IRomEditor {
     byte[] getX847B();
 
     byte[] getX8552();
+
     byte[] getX8629();
 
     /**

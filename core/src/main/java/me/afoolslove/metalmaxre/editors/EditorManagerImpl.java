@@ -59,6 +59,9 @@ import java.util.function.Function;
  */
 public class EditorManagerImpl implements IEditorManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditorManagerImpl.class);
+
+    public static final String PROPERTIES_EDITOR_DEFAULT_ENABLE = "editorManager.defaultEnabled";
+
     private final MetalMaxRe metalMaxRe;
 
     private final Map<Class<? extends IRomEditor>, IRomEditor> editors = new LinkedHashMap<>();
@@ -110,9 +113,8 @@ public class EditorManagerImpl implements IEditorManager {
         register(IElevatorEditor.class, ElevatorEditorImpl::new);
         register(ISpriteScriptEditor.class, SpriteScriptEditorImpl::new);
 
-        getEditor(MonsterModelImpl.class).setEnabled(false); // TODO 怪物模型编辑器暂时不进行写入
+//        getEditor(MonsterModelImpl.class).setEnabled(false); // TODO 怪物模型编辑器暂时不进行写入
     }
-
 
     @Override
     public int getCount() {
@@ -169,6 +171,25 @@ public class EditorManagerImpl implements IEditorManager {
 
         loadMethods.put(editorType, loadMethod);
         applyMethods.put(editorType, applyMethod);
+
+        String property = getProperties().getProperty("editorManager.%s.enable".formatted(editor.getId()));
+        if (property == null) {
+            // 获取默认状态，获取不到也提供默认不启用的状态
+            property = getProperties().getOrDefault(PROPERTIES_EDITOR_DEFAULT_ENABLE, "false").toString();
+        }
+        // 去除空格
+        property = property.replaceAll("\\s*", "");
+        boolean enable = Boolean.parseBoolean(property);
+//        // 使用 , 分割是否启用读取和是否启用写入
+//        String[] split = property.split(",", 2);
+//        boolean readEnable = false, writeEnable = false;
+//        if (split.length == 1) {
+//            readEnable = Boolean.parseBoolean(split[0]);
+//        }
+//        if (split.length == 2) {
+//            writeEnable = Boolean.parseBoolean(split[1]);
+//        }
+        editor.setEnabled(enable);
     }
 
     @SuppressWarnings("unchecked")

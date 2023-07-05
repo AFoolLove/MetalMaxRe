@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface ITextEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "textEditor";
+    }
+
     /**
      * 获取所有索引文本集
      *

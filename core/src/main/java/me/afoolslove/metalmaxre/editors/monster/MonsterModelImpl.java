@@ -15,6 +15,11 @@ import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
+    @Override
+    public String getId() {
+        return "monsterModelEditor";
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MonsterModelImpl.class);
 
     private final DataAddress monsterModelPaletteIndex = DataAddress.fromPRG(0x229CF - 0x10, 0x22A51 - 0x10);

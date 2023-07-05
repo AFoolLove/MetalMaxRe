@@ -100,6 +100,6 @@ public class TankEquipmentItem extends Item {
      * @see IDataValueEditor#get2ByteValues()
      */
     public int getDefenseValue(@NotNull IDataValueEditor dataValues) {
-        return dataValues.getValues().get(defense & 0xFF).intValue();
+        return dataValues.getValue(defense & 0xFF).intValue();
     }
 }

@@ -16,6 +16,11 @@ import java.util.List;
  * @author AFoolLove
  */
 public interface IComputerEditor<C extends Computer> extends IRomEditor {
+    @Override
+    default String getId() {
+        return "computerEditor";
+    }
+
     /**
      * 获取计算机的最大数量
      *
@@ -36,8 +41,9 @@ public interface IComputerEditor<C extends Computer> extends IRomEditor {
      * 清空当前所有计算机，更换为新的计算机列表
      *
      * @param newComputers 新的计算机列表
+     * @return 旧的计算机列表
      */
-    void dataUpdate(@Nullable List<Computer> newComputers);
+    List<Computer> dataUpdate(@Nullable List<Computer> newComputers);
 
     /**
      * 添加一个计算机

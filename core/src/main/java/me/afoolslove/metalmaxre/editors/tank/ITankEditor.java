@@ -7,6 +7,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.EnumMap;
 
 public interface ITankEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "tankEditor";
+    }
+
     /**
      * 设置改造防御力梯级
      */

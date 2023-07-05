@@ -4,7 +4,6 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.event.editors.EditorEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -113,7 +112,7 @@ public class EventHandler {
                             try {
                                 declaredMethod.setAccessible(true);
                                 declaredMethod.invoke(eventListener, parameter.getType().cast(event));
-                            } catch (IllegalAccessException | InvocationTargetException ex) {
+                            } catch (Exception ex) {
                                 // throw new RuntimeException(ex);
                                 ex.printStackTrace();
                             }

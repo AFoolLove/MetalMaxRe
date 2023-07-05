@@ -9,6 +9,7 @@ import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import me.afoolslove.metalmaxre.event.EventHandler;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
+import me.afoolslove.metalmaxre.utils.PropertiesUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author AFoolLove
@@ -31,11 +33,18 @@ public class MetalMaxRe {
 
     private SystemPalette systemPalette = SystemPalette.DEFAULT_SYSTEM_PALETTE;
 
+    private Properties properties;
+
     private MetalMaxRe() {
     }
 
     public MetalMaxRe(@NotNull RomBuffer romBuffer) {
+        this(romBuffer, PropertiesUtils.loadDefault());
+    }
+
+    public MetalMaxRe(@NotNull RomBuffer romBuffer, @NotNull Properties properties) {
         this.romBuffer = romBuffer;
+        this.properties = properties;
     }
 
     /**
@@ -47,7 +56,7 @@ public class MetalMaxRe {
         }
 
         if (getCharMap() == null) {
-            setCharMap(new CharMapCN());
+            setCharMap(new CharMapCN(getProperties().getProperty("charMapCN", null)));
         }
     }
 
@@ -101,6 +110,20 @@ public class MetalMaxRe {
      */
     public Map<Class<? extends IRomEditor>, IRomEditor> getEditors() {
         return getEditorManager().getEditors();
+    }
+
+    /**
+     * 配置数据
+     */
+    public Properties getProperties() {
+        return properties;
+    }
+
+    /**
+     * 重新设置所有配置数据
+     */
+    public void setProperties(Properties properties) {
+        this.properties = properties;
     }
 
     @TestOnly

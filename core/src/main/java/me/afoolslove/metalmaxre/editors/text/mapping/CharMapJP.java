@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editors.text.mapping;
 
+import me.afoolslove.metalmaxre.utils.ExceptionUtils;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +30,15 @@ public class CharMapJP implements ICharMap {
     private static final Logger LOGGER = LoggerFactory.getLogger(CharMapJP.class);
 
     private final Map<Byte, Integer> opcodes = createDefaultOpcodes();
-    private final List<SingleMapEntry<Character, Object>> values = load(null);
+    private final List<SingleMapEntry<Character, Object>> values;
+
+    public CharMapJP() {
+        values = new ArrayList<>();
+    }
+
+    public CharMapJP(@Nullable String path) {
+        values = load(path);
+    }
 
     /**
      * 加载映射表
@@ -45,7 +54,7 @@ public class CharMapJP implements ICharMap {
 //        values.add(SingleMapEntry.create('\b', (byte) (0x42))); // 忽略字符
 
         InputStream resourceAsStream;
-        if (path == null) {
+        if (path == null || path.isEmpty()) {
             // 默认映射表
             resourceAsStream = ResourceManager.getAsStream("/japanese_fonts.txt");
         } else {
@@ -53,10 +62,12 @@ public class CharMapJP implements ICharMap {
             try {
                 resourceAsStream = Files.newInputStream(Path.of(path));
             } catch (IOException e) {
+                LOGGER.error("字库加载失败：" + ExceptionUtils.toString(e));
                 return null;
             }
         }
         if (resourceAsStream == null) {
+            LOGGER.error("字库加载失败。");
             return null;
         }
         Map<Character, Object> FONTS = new HashMap<>();

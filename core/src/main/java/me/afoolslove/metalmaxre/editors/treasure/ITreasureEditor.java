@@ -12,6 +12,11 @@ import java.util.Map;
  * @author AFoolLove
  */
 public interface ITreasureEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "treasureEditor";
+    }
+
     /**
      * 获取所有宝藏的最大数量
      *
@@ -66,10 +71,24 @@ public interface ITreasureEditor extends IRomEditor {
      */
     Map.Entry<Byte, Byte> getDefaultRandomTreasure();
 
-
+    /**
+     * 随机宝藏相关数据
+     *
+     * @return 随机宝藏相关数据
+     */
     DataAddress getRandomTreasureAddress();
 
+    /**
+     * 特殊调查点
+     *
+     * @return 特殊调查点
+     */
     DataAddress getCheckPointsAddress();
 
+    /**
+     * 宝藏数据地址
+     *
+     * @return 宝藏数据地址
+     */
     DataAddress getTreasureAddress();
 }

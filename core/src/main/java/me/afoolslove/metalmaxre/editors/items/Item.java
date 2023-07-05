@@ -66,6 +66,6 @@ public class Item {
         if (isPriceless()) {
             return getPrice();
         }
-        return dataValueEditor.getValues().get(getPrice() & 0xFF).intValue();
+        return dataValueEditor.getValue(getPrice() & 0xFF).intValue();
     }
 }

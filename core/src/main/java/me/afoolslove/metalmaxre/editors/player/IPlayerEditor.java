@@ -7,6 +7,11 @@ import org.jetbrains.annotations.Range;
 import java.util.Map;
 
 public interface IPlayerEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "playerEditor";
+    }
+
 
     /**
      * @return 所有玩家的初始属性

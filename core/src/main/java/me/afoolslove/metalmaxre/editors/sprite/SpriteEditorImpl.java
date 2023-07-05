@@ -80,7 +80,7 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
                     // 设置为已读取
                     spritesIndexes[j] = null;
                     // 添加精灵
-                    getSprites().put(j, spriteList);
+                    getSprites().put(j, new ArrayList<>(spriteList));
                 }
             }
         }

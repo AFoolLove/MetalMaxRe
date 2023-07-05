@@ -71,7 +71,7 @@ public class MapEntrance {
         }
 
         MapEntrance mapEntrance = new MapEntrance(mapBorder);
-        for (Map.Entry<MapPoint, MapPoint> pointEntry : mapEntrance.getEntrances()) {
+        for (Map.Entry<MapPoint, MapPoint> pointEntry : getEntrances()) {
             mapEntrance.getEntrances().add(SingleMapEntry.create(new MapPoint(pointEntry.getKey()), new MapPoint(pointEntry.getValue())));
         }
         return mapEntrance;

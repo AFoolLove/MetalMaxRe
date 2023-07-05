@@ -3,12 +3,14 @@ package me.afoolslove.metalmaxre.editors.data;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.event.editors.EditorDataValueEvent;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * 0x00 - 0x46为1byte数据
@@ -26,6 +28,13 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implements IDataValueEditor {
+    /**
+     * 字符串形式的数值格式(十六进制 十进制)
+     * <p>
+     * [FF 123456789]
+     */
+    public static final Pattern STRING_VALUE_PATTERN = Pattern.compile("^([0-9a-fA-F]{1,2}) [0-9]+");
+
     private final DataAddress x1ByteAddress;
     private final DataAddress x2ByteAddress;
     private final DataAddress x3ByteAddress;
@@ -40,7 +49,10 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
         );
     }
 
-    public DataValueEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress x1ByteAddress, DataAddress x2ByteAddress, DataAddress x3ByteAddress) {
+    public DataValueEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                               @NotNull DataAddress x1ByteAddress,
+                               @NotNull DataAddress x2ByteAddress,
+                               @NotNull DataAddress x3ByteAddress) {
         super(metalMaxRe);
         this.x1ByteAddress = x1ByteAddress;
         this.x2ByteAddress = x2ByteAddress;
@@ -49,19 +61,19 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
 
     @Editor.Load
     public void onLoad() {
-        getValues().clear();
+        getUnsafeValues().clear();
 
 
         byte[] x1Bytes = new byte[get1ByteMaxCount()];
         getBuffer().get(get1ByteAddress(), x1Bytes);
         for (byte x1Byte : x1Bytes) {
-            getValues().put(getValues().size(), x1Byte & 0xFF);
+            getUnsafeValues().put(getUnsafeValues().size(), x1Byte & 0xFF);
         }
 
         byte[] x2Bytes = new byte[get2ByteMaxCount() * 2];
         getBuffer().get(get2ByteAddress(), x2Bytes);
         for (int i = 0; i < get2ByteMaxCount(); i++) {
-            getValues().put(getValues().size(), NumberR.toInt(x2Bytes[i * 2], x2Bytes[(i * 2) + 1]));
+            getUnsafeValues().put(getUnsafeValues().size(), NumberR.toInt(x2Bytes[i * 2], x2Bytes[(i * 2) + 1]));
         }
 
         byte[] x3Bytes = new byte[get3ByteMaxCount() * 2];
@@ -70,12 +82,12 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
         for (int i = 0; i < get3ByteMaxCount(); i++) {
             if (i < 0x24) {
                 // 前0x24个数据值虽然属于3byte，但会被当作2byte使用，实际上也是2byte
-                getValues().put(getValues().size(), NumberR.toInt(x3Bytes[i * 2], x3Bytes[(i * 2) + 1]));
+                getUnsafeValues().put(getUnsafeValues().size(), NumberR.toInt(x3Bytes[i * 2], x3Bytes[(i * 2) + 1]));
             } else {
                 final int A = 0x0A; // 程序中写死的值
                 int x08 = x3Bytes[i * 2] & 0xFF;
                 int x09 = x3Bytes[(i * 2) + 1] & 0xFF;
-                getValues().put(getValues().size(), (x08 * A) + (x09 * 0x100 * A));
+                getUnsafeValues().put(getUnsafeValues().size(), (x08 * A) + (x09 * 0x100 * A));
             }
         }
     }
@@ -136,6 +148,22 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
 
     @Override
     public @NotNull Map<Integer, Number> getValues() {
+        return new HashMap<>(getUnsafeValues());
+    }
+
+    public @NotNull Map<Integer, Number> getUnsafeValues() {
         return VALUES;
+    }
+
+    @Override
+    public Number getValue(int index) {
+        return getUnsafeValues().get(index);
+    }
+
+    @Override
+    public Number changeValue(int index, Number value) {
+        Number oldValue = getUnsafeValues().replace(index, value);
+        getMetalMaxRe().getEventHandler().callEvent(new EditorDataValueEvent.ValueChanged(getMetalMaxRe(), this, oldValue, value));
+        return oldValue;
     }
 }

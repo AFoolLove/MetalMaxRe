@@ -28,6 +28,11 @@ public class MapProperties {
      * 使用犬系统显示返回地面
      */
     public static final byte FLAG_UNDERGROUND = 0B0000_1000;
+    /**
+     * 地图是否为高层建筑
+     * 走出边界时会播放摔落声音
+     */
+    public static final byte FLAG_HIGH_RISE = 0B0001_0000;
 
     /**
      * 单个地图属性的最大长度
@@ -477,6 +482,10 @@ public class MapProperties {
         return isUnderground(this.head);
     }
 
+    public boolean isHighRise() {
+        return isHighRise(this.head);
+    }
+
     /**
      * @return 将基本属性打包为数组，写入数据时直接写入该数组
      */
@@ -544,6 +553,13 @@ public class MapProperties {
      */
     public static boolean isUnderground(int head) {
         return (head & FLAG_UNDERGROUND) == FLAG_UNDERGROUND;
+    }
+
+    /**
+     * @return 是否为高层建筑（走出边界时会播放摔落声音）
+     */
+    public static boolean isHighRise(int head) {
+        return (head & FLAG_HIGH_RISE) == FLAG_HIGH_RISE;
     }
 
     @Override

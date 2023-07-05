@@ -8,6 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface IDogSystemEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "dogSystemEditor";
+    }
+
     /**
      * 获取城镇的数量
      *

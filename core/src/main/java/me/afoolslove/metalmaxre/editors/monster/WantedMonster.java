@@ -12,6 +12,7 @@ public class WantedMonster extends Monster {
      * 赏金
      *
      * @see IDataValueEditor#getValues()
+     * @see IDataValueEditor#getValue(int)
      */
     public byte bounty;
 
@@ -20,6 +21,7 @@ public class WantedMonster extends Monster {
      *
      * @param bounty 赏金，请使用 {@link IDataValueEditor#getValues()} 的索引
      * @see IDataValueEditor#getValues()
+     * @see IDataValueEditor#getValue(int)
      * @see IDataValueEditor#get3ByteValues()
      */
     public void setBounty(byte bounty) {
@@ -31,6 +33,7 @@ public class WantedMonster extends Monster {
      *
      * @return 赏金索引值，可以通过{@link IDataValueEditor#getValues()}获取真实数值
      * @see IDataValueEditor#getValues()
+     * @see IDataValueEditor#getValue(int)
      * @see #getBountyValue(IDataValueEditor)
      */
     public byte getBounty() {
@@ -40,9 +43,10 @@ public class WantedMonster extends Monster {
     /**
      * @return 真实的赏金数值
      * @see IDataValueEditor#getValues()
+     * @see IDataValueEditor#getValue(int)
      */
     public int getBountyValue(IDataValueEditor dataValueEditor) {
-        return dataValueEditor.getValues().get(bounty & 0xFF).intValue();
+        return dataValueEditor.getValue(bounty & 0xFF).intValue();
     }
 
 }

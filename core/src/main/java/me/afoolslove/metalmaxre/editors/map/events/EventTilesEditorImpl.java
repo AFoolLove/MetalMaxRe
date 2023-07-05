@@ -112,7 +112,12 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
             for (Map.Entry<Integer, MapProperties> propertiesEntry : mapPropertiesEditor.getMapProperties().entrySet()) {
                 if (propertiesEntry.getValue().eventTilesIndex == eventTilesIndex) {
                     // 添加使用当前事件图块的地图
-                    getEventTiles().put(propertiesEntry.getKey(), events);
+                    // 克隆一份
+                    HashMap<Integer, List<EventTile>> clone = new HashMap<>(events.size());
+                    for (Map.Entry<Integer, List<EventTile>> entry : events.entrySet()) {
+                        clone.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+                    }
+                    getEventTiles().put(propertiesEntry.getKey(), clone);
                 }
             }
         }

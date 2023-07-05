@@ -126,7 +126,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
      *
      * @param newComputers 新的计算机列表
      */
-    public void dataUpdate(@Nullable List<Computer> newComputers) {
+    public List<Computer> dataUpdate(@Nullable List<Computer> newComputers) {
         if (newComputers == null) {
             newComputers = Collections.emptyList();
         }
@@ -140,6 +140,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
 
         EditorComputerEvent.DataUpdateComputer dataUpdateComputer = new EditorComputerEvent.DataUpdateComputer(getMetalMaxRe(), this, oldComputers, newComputers);
         getMetalMaxRe().getEventHandler().callEvent(dataUpdateComputer);
+        return oldComputers;
     }
 
     @Override

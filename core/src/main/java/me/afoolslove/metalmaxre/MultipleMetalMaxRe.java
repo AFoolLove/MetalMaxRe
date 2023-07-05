@@ -55,9 +55,9 @@ public class MultipleMetalMaxRe {
         MetalMaxRe metalMaxRe = new MetalMaxRe(romBuffer);
 
         if (romBuffer.getVersion() == RomVersion.getJapanese()) {
-            metalMaxRe.setCharMap(new CharMapJP());
+            metalMaxRe.setCharMap(new CharMapJP(metalMaxRe.getProperties().getProperty("charMapJP", null)));
         } else {
-            metalMaxRe.setCharMap(new CharMapCN());
+            metalMaxRe.setCharMap(new CharMapCN(metalMaxRe.getProperties().getProperty("charMapCN", null)));
         }
 
         if (useDefEditors) {

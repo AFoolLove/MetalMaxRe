@@ -16,6 +16,10 @@ import java.util.List;
  * @author AFoolLove
  */
 public interface IItemEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "itemEditor";
+    }
 
     /**
      * 获取玩家所有防具的数量

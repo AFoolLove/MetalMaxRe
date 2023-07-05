@@ -11,6 +11,10 @@ import java.util.List;
  * @author AFoolLove
  */
 public interface IPaletteEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "paletteEditor";
+    }
 
     /**
      * @return 调色板数量

@@ -41,7 +41,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
     /**
      * K：map
      */
-    private final Map<Integer, MapEntrance> mapEntrances = new LinkedHashMap<>();
+    private final Map<Integer, MapEntrance> mapEntrances = new HashMap<>();
 
     @Editor.Load
     public void onLoad(IMapPropertiesEditor mapPropertiesEditor) {
@@ -67,7 +67,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     .filter(entry -> entry.getValue().entrance == mapProperties.entrance)
                     .forEach(entry -> {
                         // 添加该地图的边界和出入口数据
-                        getMapEntrances().put(entry.getKey(), mapEntrance);
+                        getMapEntrances().put(entry.getKey(), mapEntrance.copy());
                     });
         }
     }
@@ -139,6 +139,9 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             MapEntrance currentMapEntrance = getMapEntrance(mapId);
             for (int afterMapId = mapId; afterMapId < count; afterMapId++) {
                 MapEntrance afterMapEntrance = getMapEntrance(afterMapId);
+                if (afterMapEntrance == null) {
+                    continue;
+                }
                 if (afterMapEntrance != currentMapEntrance) {
                     if (!Arrays.equals(mapBorders[afterMapId], mapBorders[mapId])) {
                         // 不一样，下一个

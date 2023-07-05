@@ -8,6 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 public interface ISpriteScriptEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "spriteScriptEditor";
+    }
 
     /**
      * 获取精灵脚本的最大数量

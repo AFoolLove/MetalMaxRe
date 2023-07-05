@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
  * @author AFoolLove
  */
 public interface IDataValueEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "dataValueEditor";
+    }
 
     /**
      * @return 所有数据值
@@ -106,4 +110,13 @@ public interface IDataValueEditor extends IRomEditor {
 //                })
 //                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 //    }
+
+    /**
+     * 更新数据值
+     *
+     * @param index 数据值索引
+     * @param value 新的数据值
+     * @return 旧的数据值
+     */
+    Number changeValue(int index, Number value);
 }

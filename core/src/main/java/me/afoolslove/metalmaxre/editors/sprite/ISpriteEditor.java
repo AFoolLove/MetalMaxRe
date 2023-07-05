@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface ISpriteEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "spriteEditor";
+    }
+
     /**
      * @return 获取所有地图的精灵
      */

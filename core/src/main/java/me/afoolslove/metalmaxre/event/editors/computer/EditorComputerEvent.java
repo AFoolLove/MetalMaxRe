@@ -19,7 +19,7 @@ import java.util.List;
 public class EditorComputerEvent extends EditorEvent {
     private final Computer computer;
 
-    public EditorComputerEvent(@NotNull MetalMaxRe metalMaxRe, @NotNull IComputerEditor<Computer> editor, @NotNull Computer computer) {
+    private EditorComputerEvent(@NotNull MetalMaxRe metalMaxRe, @NotNull IComputerEditor<Computer> editor, @NotNull Computer computer) {
         super(metalMaxRe, editor);
         this.computer = computer;
     }

@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface IWorldMapEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "worldMapEditor";
+    }
+
     /**
      * index与indexOffsets的比例是 1byte：2bit
      */

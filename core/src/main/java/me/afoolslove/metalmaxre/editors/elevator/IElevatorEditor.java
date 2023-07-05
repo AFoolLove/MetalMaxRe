@@ -12,6 +12,11 @@ import java.util.List;
  * @author AFoolLove
  */
 public interface IElevatorEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "elevatorEditor";
+    }
+
     /**
      * @return 电梯的数量
      */

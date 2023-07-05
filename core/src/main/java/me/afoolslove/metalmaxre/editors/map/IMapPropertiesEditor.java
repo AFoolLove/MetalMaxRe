@@ -6,6 +6,11 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import java.util.Map;
 
 public interface IMapPropertiesEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "mapPropertiesEditor";
+    }
+
     /**
      * @return 进入地图时根据条件是否重定向到其它地图的最大数量
      */

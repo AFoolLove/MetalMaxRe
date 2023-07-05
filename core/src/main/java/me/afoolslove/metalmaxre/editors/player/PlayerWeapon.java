@@ -101,6 +101,6 @@ public class PlayerWeapon extends PlayerEquipmentItem {
      * @see IDataValueEditor#get2ByteValues()
      */
     public int getAttackValue(@NotNull IDataValueEditor dataValues) {
-        return dataValues.getValues().get(intAttack()).intValue();
+        return dataValues.getValue(intAttack()).intValue();
     }
 }

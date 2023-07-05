@@ -5,6 +5,11 @@ import me.afoolslove.metalmaxre.editors.IRomEditor;
 import java.util.Map;
 
 public interface IMapEditor extends IRomEditor {
+    @Override
+    default String getId() {
+        return "mapEditor";
+    }
+
     /**
      * @return 地图的数量（包括世界地图
      */

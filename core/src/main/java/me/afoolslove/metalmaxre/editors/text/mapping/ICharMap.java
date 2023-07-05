@@ -317,16 +317,16 @@ public interface ICharMap {
         OPCODES.put((byte) 0xE7, 0);
         OPCODES.put((byte) 0xE8, 0);  // 当前控制的角色名称
         OPCODES.put((byte) 0xE9, 0);
-        OPCODES.put((byte) 0xEA, 1);  // 索引 11933-11A1F 的文本，第二字节为下标
+        OPCODES.put((byte) 0xEA, 1);  // 索引 13=0x11933-0x11A1F 的文本，第二字节为下标
         OPCODES.put((byte) 0xEB, 2);  // 进行选择
-        OPCODES.put((byte) 0xEC, 1);  // 引用 0xBE90 文本集
+        OPCODES.put((byte) 0xEC, 1);  // 引用 14=0x0BE90-0x0C00F 文本集
         OPCODES.put((byte) 0xED, 1);  // 空白占位，第一字节为数量
         OPCODES.put((byte) 0xEE, 1);  // 变更对话速度，不会自行恢复速度
         OPCODES.put((byte) 0xEF, 2);  // 横向重复一个字符，第一个为重复数量，第二个被重复的字符
-        OPCODES.put((byte) 0xF0, 1);  // 引用 0x12010 文本集，名称，引用前会自动加上 [E4][E5]
+        OPCODES.put((byte) 0xF0, 1);  // 引用 0C=0x12010-0x120DF 文本集，名称，引用前会自动加上 [E4][E5]
         OPCODES.put((byte) 0xF1, 1);  // 对话 sleep
-        OPCODES.put((byte) 0xF2, 1);  // 引用 0x10010 文本集
-        OPCODES.put((byte) 0xF3, 1);  // 引用 0x1F99A 文本集
+        OPCODES.put((byte) 0xF2, 1);  // 引用 09=0x10010-0x10128 文本集
+        OPCODES.put((byte) 0xF3, 1);  // 引用 11=0x1F99A-0x2000F 文本集
         OPCODES.put((byte) 0xF4, 1);  // 重复文本，直到遇见 0XFE ！！？，全屏文本时使用，否则文字刷屏死机
         OPCODES.put((byte) 0xF5, 1);  // 与NPC对话时，对NPC移动操作，未与NPC对话引用会死机(等待NPC移动完成，但没有目标NPC)
         OPCODES.put((byte) 0xF6, 0);  // 后面的字符将直接显示，不进行转换为中文等

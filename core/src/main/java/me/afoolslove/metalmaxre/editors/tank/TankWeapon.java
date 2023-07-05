@@ -185,7 +185,7 @@ public class TankWeapon extends TankEquipmentItem {
      * @see IDataValueEditor#get2ByteValues()
      */
     public int getAttackValue(@NotNull IDataValueEditor dataValues) {
-        return dataValues.getValues().get(value & 0xFF).intValue();
+        return dataValues.getValue(value & 0xFF).intValue();
     }
 
     /**

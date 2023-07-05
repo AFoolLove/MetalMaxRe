@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editors.text.mapping;
 
+import me.afoolslove.metalmaxre.utils.ExceptionUtils;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +30,15 @@ public class CharMapCN implements ICharMap {
     private static final Logger LOGGER = LoggerFactory.getLogger(CharMapCN.class);
 
     private final Map<Byte, Integer> opcodes = createDefaultOpcodes();
-    private final List<SingleMapEntry<Character, Object>> values = load(null);
+    private final List<SingleMapEntry<Character, Object>> values;
 
+    public CharMapCN() {
+        values = new ArrayList<>();
+    }
+
+    public CharMapCN(@Nullable String path) {
+        values = load(path);
+    }
 
     /**
      * 加载映射表
@@ -104,7 +112,7 @@ public class CharMapCN implements ICharMap {
 
 
         InputStream resourceAsStream;
-        if (path == null) {
+        if (path == null || path.isEmpty()) {
             // 默认映射表
             resourceAsStream = ResourceManager.getAsStream("/fonts.txt");
         } else {
@@ -112,10 +120,12 @@ public class CharMapCN implements ICharMap {
             try {
                 resourceAsStream = Files.newInputStream(Path.of(path));
             } catch (IOException e) {
+                LOGGER.error("字库加载失败：" + ExceptionUtils.toString(e));
                 return null;
             }
         }
         if (resourceAsStream == null) {
+            LOGGER.error("字库加载失败。");
             return null;
         }
 
