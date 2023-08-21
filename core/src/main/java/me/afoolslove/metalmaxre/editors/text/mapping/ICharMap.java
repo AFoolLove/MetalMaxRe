@@ -309,14 +309,14 @@ public interface ICharMap {
         Map<Byte, Integer> OPCODES = new LinkedHashMap<>();
         OPCODES.put((byte) 0x33, 1);  // 不显示精灵和上半部分，第二字节未知
         OPCODES.put((byte) 0x42, 0);  // 忽略字符
-        OPCODES.put((byte) 0xE2, 0);
+        OPCODES.put((byte) 0xE2, 0);  // ($DF,$E0,$E1) 三字节的数字
         OPCODES.put((byte) 0xE3, 0);
         OPCODES.put((byte) 0xE4, 0);  // 等待确认后继续对话
         OPCODES.put((byte) 0xE5, 0);  // 换行
         OPCODES.put((byte) 0xE6, 0);  // 未知，没有实际占用文本？似乎通过判断读取文本
-        OPCODES.put((byte) 0xE7, 0);
+        OPCODES.put((byte) 0xE7, 0);  // 换行，但($C4,$C5)的值+#$40，通常在战斗状态文本中使用
         OPCODES.put((byte) 0xE8, 0);  // 当前控制的角色名称
-        OPCODES.put((byte) 0xE9, 0);
+        OPCODES.put((byte) 0xE9, 0);  // $E2 物品的名称
         OPCODES.put((byte) 0xEA, 1);  // 索引 13=0x11933-0x11A1F 的文本，第二字节为下标
         OPCODES.put((byte) 0xEB, 2);  // 进行选择
         OPCODES.put((byte) 0xEC, 1);  // 引用 14=0x0BE90-0x0C00F 文本集

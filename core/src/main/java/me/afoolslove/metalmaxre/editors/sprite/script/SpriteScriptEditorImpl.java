@@ -89,7 +89,7 @@ public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor imple
     public SpriteScriptEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                                   @NotNull DataAddress spriteScriptIndexAddress,
                                   @NotNull DataAddress spriteScriptAddress) {
-        super(metalMaxRe);
+        super(metalMaxRe, false);
         this.spriteScriptAddress = spriteScriptAddress;
         this.spriteScriptIndexAddress = spriteScriptIndexAddress;
 

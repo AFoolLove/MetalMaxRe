@@ -9,7 +9,7 @@ import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import me.afoolslove.metalmaxre.event.EventHandler;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
-import me.afoolslove.metalmaxre.utils.PropertiesUtils;
+import me.afoolslove.metalmaxre.utils.PreferencesUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+import java.util.prefs.Preferences;
 
 /**
  * @author AFoolLove
@@ -33,18 +33,11 @@ public class MetalMaxRe {
 
     private SystemPalette systemPalette = SystemPalette.DEFAULT_SYSTEM_PALETTE;
 
-    private Properties properties;
-
     private MetalMaxRe() {
     }
 
     public MetalMaxRe(@NotNull RomBuffer romBuffer) {
-        this(romBuffer, PropertiesUtils.loadDefault());
-    }
-
-    public MetalMaxRe(@NotNull RomBuffer romBuffer, @NotNull Properties properties) {
         this.romBuffer = romBuffer;
-        this.properties = properties;
     }
 
     /**
@@ -56,7 +49,12 @@ public class MetalMaxRe {
         }
 
         if (getCharMap() == null) {
-            setCharMap(new CharMapCN(getProperties().getProperty("charMapCN", null)));
+            // 字库配置
+            Preferences preferences = PreferencesUtils.getPreferences().node("char_map");
+            // - char_map
+            // |- jp
+            // |- cn
+            setCharMap(new CharMapCN(preferences.get("cn", null)));
         }
     }
 
@@ -112,20 +110,6 @@ public class MetalMaxRe {
         return getEditorManager().getEditors();
     }
 
-    /**
-     * 配置数据
-     */
-    public Properties getProperties() {
-        return properties;
-    }
-
-    /**
-     * 重新设置所有配置数据
-     */
-    public void setProperties(Properties properties) {
-        this.properties = properties;
-    }
-
     @TestOnly
     public void debugLoadTime() {
         getEventHandler().register(new EventListener() {
@@ -140,7 +124,7 @@ public class MetalMaxRe {
                 LOGGER.debug(post.getEditor().getClass().getSimpleName() + times.get(post.getEditor()));
             }
 
-            public void onEnd(EditorManagerEvent.Post post) {
+            public void onEnd(EditorManagerEvent.LoadPost post) {
                 LOGGER.debug("time:" + times.values().stream().mapToInt(Long::intValue).sum());
                 times.clear();
             }

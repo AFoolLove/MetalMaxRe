@@ -135,7 +135,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         this.worldMapBackLineAddress = worldMapBackLineAddress;
 
         this.worldMapIndexesAddress = new ArrayList<>();
-        int position = (metalMaxRe.getBuffer().getHeader().getLastPrgRom() * 0x4000) + 0x01E94;
+        int position = metalMaxRe.getBuffer().getHeader().getLastPrgRomLength() + 0x01E94;
 
         worldMapIndexesAddress.add(DataAddress.fromPRG(metalMaxRe.getBuffer().getToInt(position++) * 0x2000));
         worldMapIndexesAddress.add(DataAddress.fromPRG(metalMaxRe.getBuffer().getToInt(position++) * 0x2000));

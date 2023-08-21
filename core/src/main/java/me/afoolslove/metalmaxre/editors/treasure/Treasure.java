@@ -122,7 +122,7 @@ public class Treasure extends MapPoint {
         if (!super.equals(o)) {
             return false;
         }
-        return getMap() == treasure.getMap()
+        return Objects.equals(getMap(), treasure.getMap())
                && getItem() == treasure.getItem();
     }
 

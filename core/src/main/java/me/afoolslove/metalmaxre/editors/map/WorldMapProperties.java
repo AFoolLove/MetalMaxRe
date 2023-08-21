@@ -33,8 +33,8 @@ public class WorldMapProperties extends MapProperties {
      */
     @Deprecated
     @Override
-    public boolean hasDyTile() {
-        return super.hasDyTile();
+    public boolean hasBeltConveyor() {
+        return super.hasBeltConveyor();
     }
 
     /**

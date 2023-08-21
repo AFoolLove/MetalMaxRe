@@ -134,7 +134,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             prgPosition(mapPropertiesOffset + index);
             // 获取基本属性，将两个不确定属性排除
             getBuffer().get(properties, 0, MapProperties.PROPERTIES_MAX_LENGTH - 2 - 2);
-            if (MapProperties.hasDyTile(properties[0])) {
+            if (MapProperties.hasBeltConveyor(properties[0])) {
                 // 如果存在动态图块，读取属性
                 properties[0x18] = getBuffer().get();
                 properties[0x19] = getBuffer().get();
@@ -296,8 +296,8 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // 写入可移动区域，同上
         getBuffer().putPrg(0x28A95 - 0x10, (byte) (worldMapProperties.intMovableWidth() + worldMapProperties.intMovableWidthOffset()));
         // 写入出入口初始地址
-        getBuffer().putPrg(0x28ABB - 0x10, NumberR.at(worldMapProperties.entrance, 0)); // 默认 0x80
-        getBuffer().putPrg(0x28ABF - 0x10, NumberR.at(worldMapProperties.entrance, 1)); // 默认 0x89
+        getBuffer().putPrg(0x28ABB - 0x10, NumberR.at(worldMapProperties.getEntrance(), 0)); // 默认 0x80
+        getBuffer().putPrg(0x28ABF - 0x10, NumberR.at(worldMapProperties.getEntrance(), 1)); // 默认 0x89
         // 写入事件图块索引
         getBuffer().putPrg(0x28AC3 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 0));
         getBuffer().putPrg(0x28AC7 - 0x10, NumberR.at(worldMapProperties.eventTilesIndex, 1));
@@ -382,7 +382,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         public void onLoad() {
             super.onLoad();
             // SH的固定入口
-            getWorldMapProperties().entrance = 0x87A0;
+            getWorldMapProperties().setEntrance(0x87A0);
         }
 
         @Override
@@ -409,7 +409,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         public void onLoad() {
             super.onLoad();
             // SH的固定入口
-            getWorldMapProperties().entrance = 0x87A0;
+            getWorldMapProperties().setEntrance(0x87A0);
         }
 
         @Override

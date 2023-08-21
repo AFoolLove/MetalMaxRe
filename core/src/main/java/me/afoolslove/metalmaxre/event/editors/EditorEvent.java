@@ -14,6 +14,8 @@ public class EditorEvent extends Event {
     @NotNull
     private final IRomEditor editor;
 
+    private long completionTime = -1;
+
     public EditorEvent(@NotNull MetalMaxRe metalMaxRe, @NotNull IRomEditor editor) {
         super(metalMaxRe);
         this.editor = editor;
@@ -23,5 +25,18 @@ public class EditorEvent extends Event {
     @NotNull
     public <E extends IRomEditor> E getEditor() {
         return (E) editor;
+    }
+
+
+    public long getCompletionTime() {
+        return completionTime;
+    }
+
+    public boolean isComplete() {
+        return completionTime != -1;
+    }
+
+    public void setCompletionTime(long completionTime) {
+        this.completionTime = completionTime;
     }
 }

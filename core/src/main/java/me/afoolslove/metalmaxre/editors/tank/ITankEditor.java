@@ -43,6 +43,11 @@ public interface ITankEditor extends IRomEditor {
     byte getMaxShells();
 
     /**
+     * @return 获取武器的炮弹容量
+     */
+    byte[] getWeaponShellCapacities();
+
+    /**
      * 获取所有坦克的初始属性
      *
      * @return 所有坦克的初始属性

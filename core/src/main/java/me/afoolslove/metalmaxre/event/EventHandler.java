@@ -3,6 +3,8 @@ package me.afoolslove.metalmaxre.event;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.event.editors.EditorEvent;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -13,6 +15,7 @@ import java.util.*;
  * @author AFoolLove
  */
 public class EventHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventHandler.class);
     private final Map<Class<Event>, Set<EventListener>> eventListeners = new HashMap<>();
 
     /**
@@ -37,8 +40,9 @@ public class EventHandler {
      * @param eventType 事件类型
      * @param listener  被注册的监听器
      */
-    public synchronized void register(@NotNull Class<Event> eventType, @NotNull EventListener listener) {
-        var listeners = eventListeners.computeIfAbsent(eventType, k -> new HashSet<>());
+    public synchronized <E extends Event> void register(@NotNull Class<E> eventType, @NotNull EventListener listener) {
+        @SuppressWarnings("unchecked")
+        var listeners = eventListeners.computeIfAbsent((Class<Event>) eventType, k -> new HashSet<>());
         listeners.add(listener);
     }
 
@@ -114,11 +118,28 @@ public class EventHandler {
                                 declaredMethod.invoke(eventListener, parameter.getType().cast(event));
                             } catch (Exception ex) {
                                 // throw new RuntimeException(ex);
-                                ex.printStackTrace();
+                                if (ex.getCause() != null) {
+                                    ex.getCause().printStackTrace();
+                                } else {
+                                    ex.printStackTrace();
+                                }
                             }
                         }
                     }
                 });
 
+    }
+
+    /**
+     * 通知一个编辑器事件的发生
+     * <p>
+     * 注：该方法与#callEvent(EditorEvent)方法唯一不同的是，它需要一个编辑器的 加载耗时 参数
+     * 但不是所有编辑器事件都需要 加载耗时 ，所以编辑器事件使用#callEvent(EditorEvent)方法也不会有什么问题
+     *
+     * @param event 编辑器发生的事件
+     */
+    public void callEvent(@NotNull EditorEvent event, long completionTime) {
+        event.setCompletionTime(completionTime);
+        callEvent(event);
     }
 }

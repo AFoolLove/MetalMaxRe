@@ -249,6 +249,39 @@ public class MapBuilder extends LinkedList<MapTile> {
         bytes[index] = (byte) (temp & 0xFF);
         offset += 7;
         offset %= 8;
+    }
 
+    /**
+     * 将地图数据转换为二维数组
+     *
+     * @param width  地图宽度
+     * @param height 地图高度
+     * @return 二维地图
+     */
+    public byte[][] toMapArray(int width, int height) {
+        byte[][] map = new byte[height][width];
+        int index = 0;
+        for (MapTile mapTile : this) {
+            // 获取tile
+            for (int i = 0, count = mapTile.getCount(); i < count; i++, index++) {
+                if (index >= (width * height)) {
+                    // 超出地图
+                    break;
+                }
+                // 设置tile
+                map[index / width][index % width] = mapTile.getTile();
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 将地图数据转换为二维数组
+     *
+     * @param properties 地图属性，获取宽高
+     * @return 二维地图
+     */
+    public byte[][] toMapArray(@NotNull MapProperties properties) {
+        return toMapArray(properties.intWidth(), properties.intHeight());
     }
 }

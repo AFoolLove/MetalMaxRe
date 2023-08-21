@@ -12,9 +12,9 @@ public class EditorManagerEvent extends Event {
     /**
      * 所有编辑器加载前
      */
-    public static class Pre extends EditorManagerEvent {
+    public static class LoadPre extends EditorManagerEvent {
 
-        public Pre(@NotNull MetalMaxRe metalMaxRe) {
+        public LoadPre(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe);
         }
     }
@@ -22,10 +22,33 @@ public class EditorManagerEvent extends Event {
     /**
      * 所有编辑器加载完毕
      */
-    public static class Post extends EditorManagerEvent {
+    public static class LoadPost extends EditorManagerEvent {
 
-        public Post(@NotNull MetalMaxRe metalMaxRe) {
+        public LoadPost(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe);
         }
     }
+
+
+    /**
+     * 所有编辑器应用前
+     */
+    public static class ApplyPre extends EditorManagerEvent {
+
+        public ApplyPre(@NotNull MetalMaxRe metalMaxRe) {
+            super(metalMaxRe);
+        }
+    }
+
+    /**
+     * 所有编辑器应用完毕
+     */
+    public static class ApplyPost extends EditorManagerEvent {
+
+        public ApplyPost(@NotNull MetalMaxRe metalMaxRe) {
+            super(metalMaxRe);
+        }
+    }
+
+
 }

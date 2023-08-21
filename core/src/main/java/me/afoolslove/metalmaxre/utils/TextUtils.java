@@ -23,7 +23,8 @@ public class TextUtils {
         if (hasId) {
             List<String> names = new ArrayList<>();
             List<TextBuilder> list = textEditor.getPage(0x00);
-            for (int i = 0; i < list.size(); i++) {
+            int size = Math.min(list.size(), 0x100); // 防止超过 0xFF
+            for (int i = 0; i < size; i++) {
                 names.add(String.format("%02X %s", i, list.get(i).toText(charMap)));
             }
             return names;

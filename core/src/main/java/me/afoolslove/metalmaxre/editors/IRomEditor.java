@@ -4,10 +4,11 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
 import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.PreferencesUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.Properties;
+import java.util.prefs.Preferences;
 
 /**
  * 提供了编辑器部分所需的方法
@@ -31,13 +32,12 @@ public interface IRomEditor extends Serializable {
     String getId();
 
     /**
-     * 获取配置
+     * 获取当前编辑器配置
      *
-     * @return 配置
+     * @return 当前编辑器配置
      */
-    @NotNull
-    default Properties getProperties() {
-        return getMetalMaxRe().getProperties();
+    default Preferences getPreferences() {
+        return PreferencesUtils.getPreferences().node("editor_manager").node(getId());
     }
 
     /**

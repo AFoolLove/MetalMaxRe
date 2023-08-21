@@ -33,6 +33,8 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     private byte shellsUpStep;
     private byte maxShells;
 
+    private byte[] weaponShellCapacities;
+
     /**
      * NO.1 - NO.8 - TAX1 - TAXA 的初始属性
      */
@@ -66,6 +68,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     public void onLoad() {
         // 读取前清空数据
         getTankInitAttributes().clear();
+        weaponShellCapacities = new byte[0x08];
 
         // 创建新的初始坦克属性
         TankInitialAttribute[] tankInitialAttributes = new TankInitialAttribute[Tank.values().length];
@@ -80,6 +83,8 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         maxShells = getBuffer().getPrg(0x30B2D - 0x10);
         // 读取坦克防御力改造梯级
         defenseUpStep = getBuffer().getPrg(0x30B54 - 0x10);
+        // 读取坦克武器的炮弹容量
+        getBuffer().getLastPrg(0x26F7 - 0x10, weaponShellCapacities);
 
         // 读取坦克初始装备（6byte）
         position(getTankInitEquipmentsAddress());
@@ -152,6 +157,8 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         getBuffer().putPrg(0x30B2D - 0x10, maxShells);
         // 写入坦克防御力改造梯级
         getBuffer().putPrg(0x30B54 - 0x10, defenseUpStep);
+        // 写入坦克武器的炮弹容量
+        getBuffer().putLastPrg(0x26F7 - 0x10, weaponShellCapacities);
 
         // 写入初始属性
         TankInitialAttribute[] tankInitialAttributes = new TankInitialAttribute[Tank.ALL_COUNT];
@@ -249,6 +256,11 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     @Override
     public byte getMaxShells() {
         return maxShells;
+    }
+
+    @Override
+    public byte[] getWeaponShellCapacities() {
+        return weaponShellCapacities;
     }
 
     @Override

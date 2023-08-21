@@ -139,6 +139,31 @@ public class RomBufferWrapper extends RomBuffer {
     }
 
     @Override
+    public void getLastPrg(int index, byte[] bytes, int offset, int length) {
+        romBuffer.getLastPrg(index, bytes, offset, length);
+    }
+
+    @Override
+    public void getLastPrg(int index, byte[] bytes) {
+        romBuffer.getLastPrg(index, bytes);
+    }
+
+    @Override
+    public byte getLastPrg(int index) {
+        return romBuffer.getLastPrg(index);
+    }
+
+    @Override
+    public int getLastPrgToInt(int index) {
+        return romBuffer.getLastPrgToInt(index);
+    }
+
+    @Override
+    public char getLastPrgToChar(int index) {
+        return romBuffer.getLastPrgToChar(index);
+    }
+
+    @Override
     public void putPrg(int index, byte[] bytes, int offset, int length) {
         romBuffer.putPrg(index, bytes, offset, length);
     }
@@ -166,6 +191,36 @@ public class RomBufferWrapper extends RomBuffer {
     @Override
     public void putPrgChar(int index, char c) {
         romBuffer.putPrgChar(index, c);
+    }
+
+    @Override
+    public void putLastPrg(int index, byte[] bytes, int offset, int length) {
+        romBuffer.putLastPrg(index, bytes, offset, length);
+    }
+
+    @Override
+    public void putLastPrg(int index, byte[]... bytes) {
+        romBuffer.putLastPrg(index, bytes);
+    }
+
+    @Override
+    public void putLastPrg(int index, byte[] bytes) {
+        romBuffer.putLastPrg(index, bytes);
+    }
+
+    @Override
+    public void putLastPrg(int index, byte b) {
+        romBuffer.putLastPrg(index, b);
+    }
+
+    @Override
+    public void putLastPrgInt(int index, int n) {
+        romBuffer.putPrgInt(index, n);
+    }
+
+    @Override
+    public void putLastPrgChar(int index, char c) {
+        romBuffer.putLastPrgChar(index, c);
     }
 
     @Override

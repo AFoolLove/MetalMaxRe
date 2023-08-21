@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.text.mapping.CharMapCN;
 import me.afoolslove.metalmaxre.editors.text.mapping.CharMapJP;
+import me.afoolslove.metalmaxre.utils.PreferencesUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 /**
  * 多MetalMaxRe实例管理
@@ -54,10 +56,16 @@ public class MultipleMetalMaxRe {
     public MetalMaxRe create(@NotNull RomBuffer romBuffer, boolean useDefEditors) {
         MetalMaxRe metalMaxRe = new MetalMaxRe(romBuffer);
 
+        // 字库配置
+        Preferences preferences = PreferencesUtils.getPreferences().node("char_map");
+        // - char_map
+        // |- jp
+        // |- cn
+
         if (romBuffer.getVersion() == RomVersion.getJapanese()) {
-            metalMaxRe.setCharMap(new CharMapJP(metalMaxRe.getProperties().getProperty("charMapJP", null)));
+            metalMaxRe.setCharMap(new CharMapJP(preferences.get("jp", null)));
         } else {
-            metalMaxRe.setCharMap(new CharMapCN(metalMaxRe.getProperties().getProperty("charMapCN", null)));
+            metalMaxRe.setCharMap(new CharMapCN(preferences.get("cn", null)));
         }
 
         if (useDefEditors) {

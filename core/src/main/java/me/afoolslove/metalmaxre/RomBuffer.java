@@ -207,6 +207,9 @@ public class RomBuffer implements AutoCloseable, Closeable {
         return isZip;
     }
 
+    /**
+     * @return zip中的ROM文件名称，需要 {@link #isZip()} == true 才能使用，否则返回{ @code null}
+     */
     public String getZipRomName() {
         return zipRomName;
     }
@@ -318,6 +321,26 @@ public class RomBuffer implements AutoCloseable, Closeable {
         return (char) getPrgToInt(index);
     }
 
+    public void getLastPrg(int index, byte[] bytes, int offset, int length) {
+        getPrgRom().get(getHeader().getLastPrgRomLength() + index, bytes, offset, length);
+    }
+
+    public void getLastPrg(int index, byte[] bytes) {
+        getLastPrg(index, bytes, 0x00000, bytes.length);
+    }
+
+    public byte getLastPrg(int index) {
+        return getPrgRom().get(getHeader().getLastPrgRomLength() + index);
+    }
+
+    public int getLastPrgToInt(int index) {
+        return getLastPrg(index) & 0xFF;
+    }
+
+    public char getLastPrgToChar(int index) {
+        return (char) getLastPrgToInt(index);
+    }
+
     public void putPrg(int index, byte[] bytes, int offset, int length) {
         getPrgRom().put(index, bytes, offset, length);
     }
@@ -342,6 +365,33 @@ public class RomBuffer implements AutoCloseable, Closeable {
 
     public void putPrgChar(int index, char c) {
         getPrgRom().putChar(index, c);
+    }
+
+
+    public void putLastPrg(int index, byte[] bytes, int offset, int length) {
+        getPrgRom().put(getHeader().getLastPrgRomLength() + index, bytes, offset, length);
+    }
+
+    public void putLastPrg(int index, byte[]... bytes) {
+        for (int i = 0, offset = 0; i < bytes.length; offset += bytes[i].length, i++) {
+            putLastPrg(index + offset, bytes[i], 0x00000, bytes[i].length);
+        }
+    }
+
+    public void putLastPrg(int index, byte[] bytes) {
+        getPrgRom().put(getHeader().getLastPrgRomLength() + index, bytes, 0x00000, bytes.length);
+    }
+
+    public void putLastPrg(int index, byte b) {
+        getPrgRom().put(getHeader().getLastPrgRomLength() + index, b);
+    }
+
+    public void putLastPrgInt(int index, int n) {
+        getPrgRom().putInt(getHeader().getLastPrgRomLength() + index, n);
+    }
+
+    public void putLastPrgChar(int index, char c) {
+        getPrgRom().putChar(getHeader().getLastPrgRomLength() + index, c);
     }
 
 

@@ -81,7 +81,7 @@ public class TileSetHelper {
 
         if (palette == null) {
             IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
-            List<PaletteRow> palettes = paletteEditor.getPaletteByIndex(mapProperties.palette);
+            List<PaletteRow> palettes = paletteEditor.getPaletteByIndex(mapProperties.getPalette());
 
             palette = new Color[0x04][];
             palette[0x00] = palettes.get(0x00).toColors(systemPalette);

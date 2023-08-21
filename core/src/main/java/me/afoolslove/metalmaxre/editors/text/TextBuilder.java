@@ -347,6 +347,10 @@ public class TextBuilder implements IBaseText {
                         text.append(String.format("[%02X]", bytes[position]));
                         position++;
                     } else {
+                        if ((len + position) >= bytes.length) {
+                            len = bytes.length - position;
+                        }
+
                         text.append('[');
                         for (int j = 0; j < len; j++) {
                             text.append(String.format("%02X", bytes[position + j]));

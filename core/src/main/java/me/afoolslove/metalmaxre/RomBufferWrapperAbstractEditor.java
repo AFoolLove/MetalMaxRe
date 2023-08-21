@@ -11,6 +11,11 @@ public abstract class RomBufferWrapperAbstractEditor extends AbstractEditor {
         this.romBufferWrapper = new EditorRomBufferWrapper(metalMaxRe.getBuffer(), this);
     }
 
+    public RomBufferWrapperAbstractEditor(@NotNull MetalMaxRe metalMaxRe, boolean enabled) {
+        super(metalMaxRe, enabled);
+        this.romBufferWrapper = new EditorRomBufferWrapper(metalMaxRe.getBuffer(), this);
+    }
+
     @Override
     public @NotNull EditorRomBufferWrapper getBuffer() {
         return romBufferWrapper;

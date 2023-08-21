@@ -12,11 +12,16 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class AbstractEditor implements IRomEditor {
     private final MetalMaxRe metalMaxRe;
-    private boolean enabled = true;
+    private boolean enabled;
     private int position = 0;
 
     protected AbstractEditor(@NotNull MetalMaxRe metalMaxRe) {
+        this(metalMaxRe, true);
+    }
+
+    protected AbstractEditor(@NotNull MetalMaxRe metalMaxRe, boolean enabled) {
         this.metalMaxRe = metalMaxRe;
+        this.enabled = enabled;
     }
 
     @NotNull

@@ -116,13 +116,17 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public String getTownName(int townId) {
-        return text.get(getTownNameAddress()).get(0x30 + townId).toText(getCharMap());
+        List<TextBuilder> textBuilders = text.get(getTownNameAddress());
+        if (textBuilders == null || (0x30 + townId) >= textBuilders.size()) {
+            return "null";
+        }
+        return textBuilders.get(0x30 + townId).toText(getCharMap());
     }
 
     @Override
     public String getItemName(int itemId) {
         List<TextBuilder> textBuilders = text.get(getItemNameAddress());
-        if (itemId >= textBuilders.size()) {
+        if (textBuilders == null || itemId >= textBuilders.size()) {
             return "null";
         }
         return textBuilders.get(itemId).toText(getCharMap());
@@ -131,7 +135,7 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     @Override
     public String getMonsterName(int monsterId) {
         List<TextBuilder> textBuilders = text.get(getMonsterNameAddress());
-        if (monsterId >= textBuilders.size()) {
+        if (textBuilders == null || monsterId >= textBuilders.size()) {
             return "null";
         }
         return textBuilders.get(monsterId).toText(getCharMap());
@@ -140,7 +144,7 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     @Override
     public void setTownName(int townId, String newName) {
         List<TextBuilder> textBuilders = text.get(getTownNameAddress());
-        if ((0x30 + townId) >= textBuilders.size()) {
+        if (textBuilders == null || (0x30 + townId) >= textBuilders.size()) {
             return;
         }
         textBuilders.set(0x30 + townId, new TextBuilder(new Text(newName)));
@@ -149,7 +153,7 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     @Override
     public void setItemName(int itemId, String newName) {
         List<TextBuilder> textBuilders = text.get(getItemNameAddress());
-        if (itemId >= textBuilders.size()) {
+        if (textBuilders == null || itemId >= textBuilders.size()) {
             return;
         }
         textBuilders.set(itemId, new TextBuilder(new Text(newName)));
@@ -158,7 +162,7 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     @Override
     public void setMonsterName(int monsterId, String newName) {
         List<TextBuilder> textBuilders = text.get(getItemNameAddress());
-        if (monsterId >= textBuilders.size()) {
+        if (textBuilders == null || monsterId >= textBuilders.size()) {
             return;
         }
         textBuilders.set(monsterId, new TextBuilder(new Text(newName)));

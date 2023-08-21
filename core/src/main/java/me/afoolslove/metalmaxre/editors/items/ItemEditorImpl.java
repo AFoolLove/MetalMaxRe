@@ -11,8 +11,7 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 物品编辑器
@@ -20,9 +19,12 @@ import java.util.List;
  * @author AFoolLove
  */
 public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements IItemEditor {
+    public static final List<ItemType> TYPES = Arrays.stream(ItemType.values()).toList();
+
     private final DataAddress tankEnginesMaxCapacityAddress;
     private final DataAddress tankEnginesImprovableAddress;
     private final DataAddress playerEquipmentCanEquippedStartAddress;
+    private final DataAddress itemTypesAddress;
 
     private final List<PlayerArmor> playerArmors = new ArrayList<>(getPlayerArmorMaxCount());
     private final List<PlayerWeapon> playerWeapons = new ArrayList<>(getPlayerWeaponMaxCount());
@@ -33,6 +35,11 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     private final List<TankEngine> tankEngines = new ArrayList<>(getTankEngineMaxCount());
     private final List<TankChassis> tankChassis = new ArrayList<>(getTankChassisMaxCount());
     private final List<TankItem> tankItems = new ArrayList<>(getTankItemsMaxCount());
+
+
+    private final Map<Integer, ItemType> itemTypes = new HashMap<>();
+    private final Map<ItemType, Integer> itemTypeNumbers = new HashMap<>();
+
 
     /**
      * 道具类型
@@ -52,18 +59,22 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         this(metalMaxRe,
                 DataAddress.fromPRG(0x21804 - 0x10, 0x2181B - 0x10),
                 DataAddress.fromPRG(0x30A4A - 0x10, 0x30A51 - 0x10),
-                DataAddress.fromPRG(0x22285 - 0x10, 0x222A6 - 0x10));
+                DataAddress.fromPRG(0x22285 - 0x10, 0x222A6 - 0x10),
+                DataAddress.fromPRG(0x32C0D - 0x10, 0x32C18 - 0x10)
+        );
     }
 
     public ItemEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                           @NotNull DataAddress tankEnginesMaxCapacityAddress,
                           @NotNull DataAddress tankEnginesImprovableAddress,
-                          @NotNull DataAddress playerEquipmentCanEquippedStartAddress
+                          @NotNull DataAddress playerEquipmentCanEquippedStartAddress,
+                          @NotNull DataAddress itemTypesAddress
     ) {
         super(metalMaxRe);
         this.tankEnginesMaxCapacityAddress = tankEnginesMaxCapacityAddress;
         this.tankEnginesImprovableAddress = tankEnginesImprovableAddress;
         this.playerEquipmentCanEquippedStartAddress = playerEquipmentCanEquippedStartAddress;
+        this.itemTypesAddress = itemTypesAddress;
     }
 
     @Editor.Load
@@ -77,6 +88,29 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         getTankChassis().clear();
         getPlayerItems().clear();
         getTankItems().clear();
+
+        getItemTypes().clear();
+
+
+        // 读取所有物品类型
+        position(getItemTypesAddress());
+        byte[] itemTypes = new byte[getItemTypesAddress().length()];
+        getBuffer().get(itemTypes);
+
+        // 物品的顺序为
+        // 人类帽子、人类上衣、人类鞋子、人类护甲、人类护手、人类武器
+        // 坦克主炮、坦克S-E、坦克副炮、坦克C装置、坦克引擎、坦克底盘
+        for (int itemType = 0, lastItemId = 0; itemType < itemTypes.length; itemType++) {
+            ItemType type = TYPES.get(itemType);
+            int number = (itemTypes[itemType] & 0xFF) - lastItemId;
+            // 读取这个类型的数量
+            for (int id = 0; id <= number; id++) {
+                getItemTypes().put(lastItemId + id, type);
+            }
+
+            lastItemId += number + 1;
+            getItemTypeNumbers().put(type, number);
+        }
 
         // 初始化数据
         // 初始化道具
@@ -377,6 +411,26 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     }
 
     @Override
+    public ItemType getItemType(byte id) {
+        return getItemType(id & 0xFF);
+    }
+
+    @Override
+    public Map<Integer, ItemType> getItemTypes() {
+        return itemTypes;
+    }
+
+    @Override
+    public Map<ItemType, Integer> getItemTypeNumbers() {
+        return itemTypeNumbers;
+    }
+
+    /**
+     * 获取所有物品，00不是空道具，想要以下标作为id需要-1
+     *
+     * @return 所有物品
+     */
+    @Override
     public List<Item> getItems() {
         List<Item> items = new ArrayList<>();
         items.addAll(getPlayerArmors());
@@ -443,5 +497,10 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     @Override
     public DataAddress getPlayerEquipmentCanEquippedStartAddress() {
         return playerEquipmentCanEquippedStartAddress;
+    }
+
+    @Override
+    public DataAddress getItemTypesAddress() {
+        return itemTypesAddress;
     }
 }

@@ -40,7 +40,7 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
 
 
     public MonsterModelImpl(@NotNull MetalMaxRe metalMaxRe) {
-        super(metalMaxRe);
+        super(metalMaxRe, false);
     }
 
     @Editor.Load

@@ -19,9 +19,7 @@ import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
 import me.afoolslove.metalmaxre.editors.map.tileset.TileSetEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
-import me.afoolslove.metalmaxre.editors.monster.IMonsterEditor;
-import me.afoolslove.metalmaxre.editors.monster.MonsterEditorImpl;
-import me.afoolslove.metalmaxre.editors.monster.MonsterModelImpl;
+import me.afoolslove.metalmaxre.editors.monster.*;
 import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
 import me.afoolslove.metalmaxre.editors.palette.PaletteEditorImpl;
 import me.afoolslove.metalmaxre.editors.player.IPlayerEditor;
@@ -41,6 +39,7 @@ import me.afoolslove.metalmaxre.editors.treasure.TreasureEditorImpl;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
+import me.afoolslove.metalmaxre.utils.PreferencesUtils;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -53,14 +52,13 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
+import java.util.prefs.Preferences;
 
 /**
  * @author AFoolLove
  */
 public class EditorManagerImpl implements IEditorManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditorManagerImpl.class);
-
-    public static final String PROPERTIES_EDITOR_DEFAULT_ENABLE = "editorManager.defaultEnabled";
 
     private final MetalMaxRe metalMaxRe;
 
@@ -112,8 +110,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(MonsterModelImpl.class, MonsterModelImpl::new);
         register(IElevatorEditor.class, ElevatorEditorImpl::new);
         register(ISpriteScriptEditor.class, SpriteScriptEditorImpl::new);
-
-//        getEditor(MonsterModelImpl.class).setEnabled(false); // TODO 怪物模型编辑器暂时不进行写入
+        register(IMonsterProbabilityEditor.class, MonsterProbabilityEditorImpl.class);
     }
 
     @Override
@@ -172,14 +169,15 @@ public class EditorManagerImpl implements IEditorManager {
         loadMethods.put(editorType, loadMethod);
         applyMethods.put(editorType, applyMethod);
 
-        String property = getProperties().getProperty("editorManager.%s.enable".formatted(editor.getId()));
-        if (property == null) {
-            // 获取默认状态，获取不到也提供默认不启用的状态
-            property = getProperties().getOrDefault(PROPERTIES_EDITOR_DEFAULT_ENABLE, "false").toString();
-        }
-        // 去除空格
-        property = property.replaceAll("\\s*", "");
-        boolean enable = Boolean.parseBoolean(property);
+        Preferences editorMangerPreferences = PreferencesUtils.getPreferences().node("editor_manager");
+        // - editor_manager
+        // |- *editor_enable*
+        //  |- *editor*
+        //   |- *editor preferences*
+
+        // 获取该编辑器的是否启用状态
+        boolean enable = editorMangerPreferences.getBoolean(editor.getId(), editor.isEnabled());
+
 //        // 使用 , 分割是否启用读取和是否启用写入
 //        String[] split = property.split(",", 2);
 //        boolean readEnable = false, writeEnable = false;
@@ -261,7 +259,7 @@ public class EditorManagerImpl implements IEditorManager {
     @Override
     public synchronized Future<?> loadEditors() {
         // call event
-        getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.Pre(metalMaxRe));
+        getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadPre(metalMaxRe));
         return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
             var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
             editors.addFirst(new HashSet<>());
@@ -362,13 +360,15 @@ public class EditorManagerImpl implements IEditorManager {
                 throw new RuntimeException(e);
             } finally {
                 // call event
-                getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.Post(metalMaxRe));
+                getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadPost(metalMaxRe));
             }
         });
     }
 
     @Override
     public synchronized Future<?> applyEditors() {
+        // call event
+        getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadPre(metalMaxRe));
         return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
             var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
             editors.addFirst(new HashSet<>());
@@ -468,6 +468,9 @@ public class EditorManagerImpl implements IEditorManager {
                 latch.await();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } finally {
+                // call event
+                getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadPost(metalMaxRe));
             }
         });
     }
@@ -571,22 +574,30 @@ public class EditorManagerImpl implements IEditorManager {
                 pars[i] = getEditor((Class<? extends IRomEditor>) parameter.getType());
             }
 
+            Long start = null;
             try {
                 // 准备加载
                 metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Pre(metalMaxRe, editor, reload));
 
                 // 开始加载并计时
-                final long start = System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 loadMethod.invoke(editor, pars);
                 final long end = System.currentTimeMillis() - start;
 
                 // 加载完毕
-                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, reload));
+                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, reload), end);
             } catch (Exception exception) {
-                exception.printStackTrace();
+                // 如果start是null，还未开始加载就发生异常了
+                final long end = start == null ? -1L : System.currentTimeMillis() - start;
 
-                // 加载失败
-                metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, exception, reload));
+                // 通知加載数据失败
+                if (exception.getCause() != null) {
+                    exception.getCause().printStackTrace();
+                    metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, (Exception) exception.getCause(), reload), end);
+                } else {
+                    exception.printStackTrace();
+                    metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, exception, reload), end);
+                }
             }
             return editor;
         });

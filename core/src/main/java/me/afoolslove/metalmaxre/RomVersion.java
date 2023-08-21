@@ -46,11 +46,11 @@ public class RomVersion {
         return getVersion("super_hack_general");
     }
 
-    public static RomVersion getVersion(String version) {
+    public static RomVersion getVersion(@NotNull String version) {
         return getVersion(version, "chinese");
     }
 
-    public static RomVersion getVersion(String version, String def) {
+    public static RomVersion getVersion(@NotNull String version, String def) {
         var ver = VERSIONS.get(version);
         if (ver == null && def != null) {
             return VERSIONS.get(def);

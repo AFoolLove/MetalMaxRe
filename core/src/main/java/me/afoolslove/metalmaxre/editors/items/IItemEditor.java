@@ -6,9 +6,11 @@ import me.afoolslove.metalmaxre.editors.player.PlayerItem;
 import me.afoolslove.metalmaxre.editors.player.PlayerWeapon;
 import me.afoolslove.metalmaxre.editors.tank.*;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 物品编辑器
@@ -100,6 +102,48 @@ public interface IItemEditor extends IRomEditor {
     Item getItem(byte id);
 
     /**
+     * 获取物品的类型
+     *
+     * @param id 物品的id
+     * @return 物品的类型
+     */
+    default ItemType getItemType(@Range(from = 0x00, to = 0xFF) int id) {
+        return getItemTypes().get(id);
+    }
+
+    /**
+     * 获取物品的类型
+     *
+     * @param id 物品的id
+     * @return 物品的类型
+     */
+    ItemType getItemType(byte id);
+
+    /**
+     * 获取所有物品的类型
+     *
+     * @return 所有物品的类型
+     */
+    Map<Integer, ItemType> getItemTypes();
+
+    /**
+     * 获取物品类型的数量
+     *
+     * @param itemType 物品类型
+     * @return 物品类型的数量
+     */
+    default int getItemTypeNumber(@NotNull ItemType itemType) {
+        return getItemTypeNumbers().get(itemType);
+    }
+
+    /**
+     * 获取物品类型的数量
+     *
+     * @return 物品类型的数量
+     */
+    Map<ItemType, Integer> getItemTypeNumbers();
+
+    /**
      * 获取玩家所有防具
      *
      * @return 玩家所有防具
@@ -184,4 +228,11 @@ public interface IItemEditor extends IRomEditor {
      * @return 玩家装备可穿戴状态地址
      */
     DataAddress getPlayerEquipmentCanEquippedStartAddress();
+
+    /**
+     * 获取所有物品的类型地址
+     *
+     * @return 所有物品的类型地址
+     */
+    DataAddress getItemTypesAddress();
 }

@@ -16,9 +16,15 @@ import java.util.Objects;
  */
 public class MapProperties {
     /**
-     * 暂时不知道叫什么好，可以影响传送带等的运动方式 2byte
+     * ベルトコンベアー
+     * <p>
+     * 皮带输送机，传送带 2byte
      */
-    public static final byte FLAG_DY_TILE = 0B0000_0001;
+    public static final byte FLAG_BELT_CONVEYOR = 0B0000_0001;
+    /**
+     * 地图迷雾
+     */
+    public static final byte FLAG_FOG_OF_MAP = 0B0000_0010;
     /**
      * 地图是否存在事件图块
      */
@@ -51,18 +57,18 @@ public class MapProperties {
     public byte movableWidth, movableHeight;
     public char mapIndex;
     public byte combinationA, combinationB;
-    public char entrance;
-    public char palette;
-    public byte spriteIndex;
+    private char entrance;
+    private char palette;
+    private byte spriteIndex;
     public byte tilesIndexA, tilesIndexB, tilesIndexC, tilesIndexD;
     private byte hideTile;
-    public byte unknown;
+    private byte fogOfMapTile;
     private byte fillTile;
     private byte music;
     /**
-     * 可能不存在
+     * 传送带，扶梯等
      */
-    public byte dyTileSpeed, dyTile;
+    public byte beltConveyorDirection, beltConveyorStepBack;
     /**
      * 事件图块索引
      * <p>
@@ -112,13 +118,13 @@ public class MapProperties {
         this.tilesIndexC = properties[0x12];
         this.tilesIndexD = properties[0x13];
         this.hideTile = properties[0x14];
-        this.unknown = properties[0x15];
+        this.fogOfMapTile = properties[0x15];
         this.fillTile = properties[0x16];
         this.music = properties[0x17];
 
-        if (hasDyTile()) {
-            this.dyTileSpeed = properties[0x18];
-            this.dyTile = properties[0x19];
+        if (hasBeltConveyor()) {
+            this.beltConveyorDirection = properties[0x18];
+            this.beltConveyorStepBack = properties[0x19];
         }
         if (hasEventTile()) {
             this.eventTilesIndex = (char) NumberR.toInt(properties[0x1A], properties[0x1B]);
@@ -171,8 +177,20 @@ public class MapProperties {
         setCombination(NumberR.at(combination, 1), NumberR.at(combination, 0));
     }
 
+    public void setEntrance(char entrance) {
+        this.entrance = entrance;
+    }
+
+    public void setEntrance(int entrance) {
+        setEntrance((char) entrance);
+    }
+
     public void setPalette(char palette) {
         this.palette = palette;
+    }
+
+    public void setPalette(int palette) {
+        setPalette((char) palette);
     }
 
     public void setSpriteIndex(byte spriteIndex) {
@@ -206,9 +224,26 @@ public class MapProperties {
     }
 
     /**
+     * 设置地图的宽高
+     */
+    public void setSize(@Range(from = 0x00, to = 0xFF) int width, @Range(from = 0x00, to = 0xFF) int height) {
+        setWidth(width);
+        setHeight(height);
+    }
+
+    /**
+     * 设置地图的宽高
+     */
+    public void setSize(byte width, byte height) {
+        setWidth(width);
+        setHeight(height);
+    }
+
+
+    /**
      * 设置可移动区域X轴偏移
      *
-     * @param movableWidthOffset 偏移
+     * @param movableWidthOffset X偏移
      */
     public void setMovableWidthOffset(byte movableWidthOffset) {
         this.movableWidthOffset = movableWidthOffset;
@@ -216,6 +251,35 @@ public class MapProperties {
 
     public void setMovableWidthOffset(@Range(from = 0x00, to = 0xFF) int movableWidthOffset) {
         setMovableWidthOffset((byte) (movableWidthOffset & 0xFF));
+    }
+
+    /**
+     * 设置可移动区域Y轴偏移
+     *
+     * @param movableHeightOffset Y偏移
+     */
+    public void setMovableHeightOffset(byte movableHeightOffset) {
+        this.movableHeightOffset = movableHeightOffset;
+    }
+
+    public void setMovableHeightOffset(@Range(from = 0x00, to = 0xFF) int movableHeightOffset) {
+        setMovableHeightOffset((byte) (movableHeightOffset & 0xFF));
+    }
+
+    /**
+     * 设置可移动区域X和Y轴偏移
+     */
+    public void setMovableOffset(@Range(from = 0x00, to = 0xFF) int movableWidthOffset, @Range(from = 0x00, to = 0xFF) int movableHeightOffset) {
+        setMovableWidthOffset(movableWidthOffset);
+        setMovableHeightOffset(movableHeightOffset);
+    }
+
+    /**
+     * 设置可移动区域X和Y轴偏移
+     */
+    public void setMovableOffset(byte movableWidthOffset, byte movableHeightOffset) {
+        setMovableWidthOffset(movableWidthOffset);
+        setMovableHeightOffset(movableHeightOffset);
     }
 
     /**
@@ -232,19 +296,6 @@ public class MapProperties {
     }
 
     /**
-     * 设置可移动区域Y轴偏移
-     *
-     * @param movableHeightOffset 偏移
-     */
-    public void setMovableHeightOffset(byte movableHeightOffset) {
-        this.movableHeightOffset = movableHeightOffset;
-    }
-
-    public void setMovableHeightOffset(@Range(from = 0x00, to = 0xFF) int movableHeightOffset) {
-        setMovableHeightOffset((byte) (movableHeightOffset & 0xFF));
-    }
-
-    /**
      * 设置可移动区域高度
      *
      * @param movableHeight 可移动区域的高度
@@ -255,6 +306,22 @@ public class MapProperties {
 
     public void setMovableHeight(@Range(from = 0x00, to = 0xFF) int movableHeight) {
         setMovableHeight((byte) (movableHeight & 0xFF));
+    }
+
+    /**
+     * 设置可移动区域的宽度和高度
+     */
+    public void setMovable(@Range(from = 0x00, to = 0xFF) int movableWidth, @Range(from = 0x00, to = 0xFF) int movableHeight) {
+        setMovableWidth(movableWidth);
+        setMovableHeight(movableHeight);
+    }
+
+    /**
+     * 设置可移动区域的宽度和高度
+     */
+    public void setMovable(byte movableWidth, byte movableHeight) {
+        setMovableWidth(movableWidth);
+        setMovableHeight(movableHeight);
     }
 
 
@@ -293,6 +360,10 @@ public class MapProperties {
      */
     public void setMusic(byte music) {
         this.music = music;
+    }
+
+    public void setMusic(int music) {
+        this.music = (byte) music;
     }
 
     /**
@@ -366,6 +437,32 @@ public class MapProperties {
     }
 
 
+    public char getEntrance() {
+        return entrance;
+    }
+
+    public int intEntrance() {
+        return getEntrance() & 0xFFFF;
+    }
+
+    public char getPalette() {
+        return palette;
+    }
+
+    public int intPalette() {
+        return getPalette() & 0xFFFF;
+    }
+
+
+    public byte getSpriteIndex() {
+        return spriteIndex;
+    }
+
+    public int intSpriteIndex() {
+        return getSpriteIndex() & 0xFF;
+    }
+
+
     /**
      * @return 可移动区域宽度
      */
@@ -427,6 +524,17 @@ public class MapProperties {
     }
 
     /**
+     * @return 地图迷雾图块
+     */
+    public byte getFogOfMapTile() {
+        return fogOfMapTile;
+    }
+
+    public int intFogOfMapTile() {
+        return getFogOfMapTile() & 0xFF;
+    }
+
+    /**
      * @return 隐藏的图块（门下图块
      */
     public byte getHideTile() {
@@ -457,7 +565,7 @@ public class MapProperties {
      * 获取地图的头属性
      *
      * @return 地图的头属性
-     * @see #hasDyTile(int)
+     * @see #hasBeltConveyor(int)
      * @see #hasEventTile(int)
      * @see #isUnderground(int)
      */
@@ -474,8 +582,12 @@ public class MapProperties {
         return hasEventTile(this.head);
     }
 
-    public boolean hasDyTile() {
-        return hasDyTile(this.head);
+    public boolean hasBeltConveyor() {
+        return hasBeltConveyor(this.head);
+    }
+
+    public boolean hasFogOfMap() {
+        return hasFogOfMap(this.head);
     }
 
     public boolean isUnderground() {
@@ -491,7 +603,7 @@ public class MapProperties {
      */
     public byte[] toByteArray() {
         int length = PROPERTIES_MAX_LENGTH;
-        if (!hasDyTile()) {
+        if (!hasBeltConveyor()) {
             length -= 2;
         }
         if (!hasEventTile()) {
@@ -520,15 +632,15 @@ public class MapProperties {
         attributes[0x12] = this.tilesIndexC;
         attributes[0x13] = this.tilesIndexD;
         attributes[0x14] = this.hideTile;
-        attributes[0x15] = this.unknown;
+        attributes[0x15] = this.fogOfMapTile;
         attributes[0x16] = this.fillTile;
         attributes[0x17] = this.music;
 
         // 后面的属性是紧凑的方式储存
         int index = 0x18;
-        if (hasDyTile(this.head)) {
-            attributes[index++] = this.dyTileSpeed;
-            attributes[index++] = this.dyTile;
+        if (hasBeltConveyor(this.head)) {
+            attributes[index++] = this.beltConveyorDirection;
+            attributes[index++] = this.beltConveyorStepBack;
         }
         if (hasEventTile(this.head)) {
             attributes[index++] = NumberR.at(this.eventTilesIndex, 0);
@@ -544,8 +656,12 @@ public class MapProperties {
         return (head & FLAG_EVENT_TILE) == FLAG_EVENT_TILE;
     }
 
-    public static boolean hasDyTile(int head) {
-        return (head & FLAG_DY_TILE) == FLAG_DY_TILE;
+    public static boolean hasBeltConveyor(int head) {
+        return (head & FLAG_BELT_CONVEYOR) == FLAG_BELT_CONVEYOR;
+    }
+
+    public static boolean hasFogOfMap(int head) {
+        return (head & FLAG_FOG_OF_MAP) == FLAG_FOG_OF_MAP;
     }
 
     /**
@@ -588,16 +704,16 @@ public class MapProperties {
                && tilesIndexC == that.tilesIndexC
                && tilesIndexD == that.tilesIndexD
                && hideTile == that.hideTile
-               && unknown == that.unknown
+               && fogOfMapTile == that.fogOfMapTile
                && fillTile == that.fillTile
                && music == that.music
-               && dyTileSpeed == that.dyTileSpeed
-               && dyTile == that.dyTile
+               && beltConveyorDirection == that.beltConveyorDirection
+               && beltConveyorStepBack == that.beltConveyorStepBack
                && eventTilesIndex == that.eventTilesIndex;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(head, width, height, movableWidthOffset, movableHeightOffset, movableWidth, movableHeight, mapIndex, combinationA, combinationB, entrance, palette, spriteIndex, tilesIndexA, tilesIndexB, tilesIndexC, tilesIndexD, hideTile, unknown, fillTile, music, dyTileSpeed, dyTile, eventTilesIndex);
+        return Objects.hash(head, width, height, movableWidthOffset, movableHeightOffset, movableWidth, movableHeight, mapIndex, combinationA, combinationB, entrance, palette, spriteIndex, tilesIndexA, tilesIndexB, tilesIndexC, tilesIndexD, hideTile, fogOfMapTile, fillTile, music, beltConveyorDirection, beltConveyorStepBack, eventTilesIndex);
     }
 }

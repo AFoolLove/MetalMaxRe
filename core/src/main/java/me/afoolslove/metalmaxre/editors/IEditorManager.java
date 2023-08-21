@@ -4,7 +4,6 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
@@ -15,15 +14,6 @@ import java.util.function.Function;
  */
 public interface IEditorManager {
     MetalMaxRe getMetalMaxRe();
-
-    /**
-     * 获取编辑器配置
-     *
-     * @return 编辑器配置
-     */
-    default Properties getProperties() {
-        return getMetalMaxRe().getProperties();
-    }
 
     /**
      * 获取编辑器数量

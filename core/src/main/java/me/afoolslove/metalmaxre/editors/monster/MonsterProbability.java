@@ -7,24 +7,7 @@ import org.jetbrains.annotations.Range;
  *
  * @author AFoolLove
  */
-public enum MonsterProbability {
-    /**
-     * 概率A
-     */
-    A,
-    /**
-     * 概率B
-     */
-    B,
-    /**
-     * 概率C
-     */
-    C,
-    /**
-     * 概率D
-     */
-    D;
-
+public class MonsterProbability {
     /**
      * 怪物的权重，值越高，出现的概率越高
      * 注：所有权重相加不能大于255（可以相等）
@@ -40,23 +23,23 @@ public enum MonsterProbability {
      * <p>
      * 不包含特殊怪物组合
      */
-    public byte[] counts = new byte[0x0E - 0x04];
+    public byte[] numbers = new byte[0x0E - 0x04];
 
 
     public void setWeights(byte[] weights) {
         this.weights = weights;
     }
 
-    public void setCounts(byte[] counts) {
-        this.counts = counts;
+    public void setNumbers(byte[] numbers) {
+        this.numbers = numbers;
     }
 
     public byte[] getWeights() {
         return weights;
     }
 
-    public byte[] getCounts() {
-        return counts;
+    public byte[] getNumbers() {
+        return numbers;
     }
 
     public byte getWeight(@Range(from = 0x00, to = 0x0E) int index) {
@@ -68,39 +51,64 @@ public enum MonsterProbability {
         this.weights[index] = (byte) weight;
     }
 
-    public byte getCount(@Range(from = 0x00, to = 0x0E - 0x04) int index) {
-        return counts[index];
+    public byte getNumber(@Range(from = 0x00, to = 0x0E - 0x04) int index) {
+        return numbers[index];
     }
 
     @Range(from = 0x00, to = 0x0F)
-    public int getMinCount(@Range(from = 0x00, to = 0x0E - 0x04) int index) {
-        return (counts[index] & 0xF0) >>> 4;
+    public int getMinNumber(@Range(from = 0x00, to = 0x0E - 0x04) int index) {
+        return (numbers[index] & 0xF0) >>> 4;
     }
 
     @Range(from = 0x00, to = 0x0F)
-    public int getMaxCount(@Range(from = 0x00, to = 0x0E - 0x04) int index) {
-        return counts[index] & 0x0F;
+    public int getMaxNumber(@Range(from = 0x00, to = 0x0E - 0x04) int index) {
+        return numbers[index] & 0x0F;
     }
 
 
-    public void setCount(@Range(from = 0x00, to = 0x0E - 0x04) int index,
-                         @Range(from = 0x00, to = 0x0F) int count) {
-        counts[index] = (byte) (count & 0xFF);
+    public void setNumber(@Range(from = 0x00, to = 0x0E - 0x04) int index,
+                          @Range(from = 0x00, to = 0x0F) int number) {
+        numbers[index] = (byte) (number & 0xFF);
     }
 
-    public void setMinCount(@Range(from = 0x00, to = 0x0E - 0x04) int index,
-                            @Range(from = 0x00, to = 0x0F) int count) {
-        count &= 0x0F;
-        count <<= 4;
+    public void setMinNumber(@Range(from = 0x00, to = 0x0E - 0x04) int index,
+                             @Range(from = 0x00, to = 0x0F) int number) {
+        number &= 0x0F;
+        number <<= 4;
 
-        counts[index] &= 0x0F;
-        counts[index] |= count;
+        numbers[index] &= 0x0F;
+        numbers[index] |= number;
     }
 
-    public void setMaxCount(@Range(from = 0x00, to = 0x0E - 0x04) int index,
-                            @Range(from = 0x00, to = 0x0F) int count) {
-        count &= 0x0F;
-        counts[index] &= 0xF0;
-        counts[index] |= count;
+    public void setMaxNumber(@Range(from = 0x00, to = 0x0E - 0x04) int index,
+                             @Range(from = 0x00, to = 0x0F) int number) {
+        number &= 0x0F;
+        numbers[index] &= 0xF0;
+        numbers[index] |= number;
+    }
+
+    /**
+     * 计算权重之和
+     */
+    public int getWeightSum() {
+        int sum = 0;
+        for (byte weight : weights) {
+            sum += weight;
+        }
+        return sum;
+    }
+
+    /**
+     * 计算权重之和
+     */
+    public int getWeightSum(byte[] monsters) {
+        int sum = 0;
+        for (int i = 0; i < weights.length; i++) {
+            if (monsters[i] == 0x00) {
+                continue;
+            }
+            sum += weights[i];
+        }
+        return sum;
     }
 }

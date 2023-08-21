@@ -58,13 +58,13 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
             // 索引到数据
             // 兼容SH和SHG，只用0xFF000中的FF，后三个无用
-            prgPosition((getMapEntranceAddress().getStartAddress() & 0xFF000) + mapProperties.entrance - 0x8000);
+            prgPosition((getMapEntranceAddress().getStartAddress() & 0xFF000) + mapProperties.getEntrance() - 0x8000);
 //            System.out.printf("%02X. %05X ",map, position());
 
             MapEntrance mapEntrance = readBorderAndEntrance(mapId);
             // 设置所有使用此属性的地图
             mapPropertiesEditor.getMapProperties().entrySet().parallelStream()
-                    .filter(entry -> entry.getValue().entrance == mapProperties.entrance)
+                    .filter(entry -> entry.getValue().getEntrance() == mapProperties.getEntrance())
                     .forEach(entry -> {
                         // 添加该地图的边界和出入口数据
                         getMapEntrances().put(entry.getKey(), mapEntrance.copy());
@@ -115,7 +115,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         List<byte[]> mapEntrancesData = new ArrayList<>();
 
         // 边界和出入口数据索引
-        char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().entrance;
+        char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().getEntrance();
         final char endMapEntranceIndex = (char) (mapEntranceIndex + (getMapEntranceAddress().length() - 1));
         for (int mapId = 0, count = mapEditor.getMapMaxCount(); mapId < count; mapId++) {
             byte[] mapEntrance = mapEntrances[mapId];
@@ -154,7 +154,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     continue;
                 }
 
-                mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
+                mapPropertiesEditor.getMapProperties(afterMapId).setEntrance(mapEntranceIndex);
                 mapEntrances[afterMapId] = null;
                 if (afterMapId != mapId) {
                     LOGGER.info("地图边界和出入口编辑器：地图{}与{}使用相同边界和出入口",
@@ -314,7 +314,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             List<byte[]> mapEntrancesData = new ArrayList<>();
 
             // 边界和出入口数据索引
-            char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().entrance;
+            char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().getEntrance();
             final char endMapEntranceIndex = (char) (mapEntranceIndex + (getMapEntranceAddress().length() - 1));
             // 排除世界地图，在SH中，世界地图为独立数据，不参与其中
             for (int mapId = 0x00, count = mapEditor.getMapMaxCount(); mapId < count; mapId++) {
@@ -356,7 +356,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                         continue;
                     }
 
-                    mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
+                    mapPropertiesEditor.getMapProperties(afterMapId).setEntrance(mapEntranceIndex);
                     mapEntrances[afterMapId] = null;
                     if (afterMapId != mapId) {
                         LOGGER.info("地图边界和出入口编辑器：地图{}与{}使用相同边界和出入口",
@@ -472,7 +472,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             List<byte[]> mapEntrancesData = new ArrayList<>();
 
             // 边界和出入口数据索引
-            char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().entrance;
+            char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().getEntrance();
             final char endMapEntranceIndex = (char) (mapEntranceIndex + (getMapEntranceAddress().length() - 1));
             // 排除世界地图，在SH中，世界地图为独立数据，不参与其中
             for (int mapId = 0x00, count = mapEditor.getMapMaxCount(); mapId < count; mapId++) {
@@ -514,7 +514,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                         continue;
                     }
 
-                    mapPropertiesEditor.getMapProperties(afterMapId).entrance = mapEntranceIndex;
+                    mapPropertiesEditor.getMapProperties(afterMapId).setEntrance(mapEntranceIndex);
                     mapEntrances[afterMapId] = null;
                     if (afterMapId != mapId) {
                         LOGGER.info("地图边界和出入口编辑器：地图{}与{}使用相同边界和出入口",

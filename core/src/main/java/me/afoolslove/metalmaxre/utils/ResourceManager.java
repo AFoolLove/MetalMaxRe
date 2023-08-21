@@ -6,8 +6,10 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -17,6 +19,31 @@ import java.nio.file.Paths;
  * @author AFoolLove
  */
 public class ResourceManager {
+    /**
+     * 导出资源到指定路径
+     *
+     * @param name 资源路径
+     * @param path 目标资源路径
+     * @return 导出是否成功
+     */
+    public static boolean export(@NotNull String name, @NotNull Path path) throws IOException {
+        if (!Files.exists(path)) {
+            // 文件不存在
+            Files.createDirectories(path.getParent()); // 创建父级文件夹
+            Files.createFile(path); // 创建空文件
+        }
+
+        // 写入文件
+        try (OutputStream outputStream = Files.newOutputStream(path);
+             InputStream inputStream = getAsStream(name)) {
+            if (inputStream != null) {
+                inputStream.transferTo(outputStream);
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * 获取资源文件为URL
      *
