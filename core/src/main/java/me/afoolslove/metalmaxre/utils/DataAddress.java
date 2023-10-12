@@ -4,12 +4,14 @@ import me.afoolslove.metalmaxre.RomBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
+
 /**
  * 数据地址
  *
  * @author AFoolLove
  */
-public class DataAddress extends SingleMapEntry<Integer, Integer> {
+public class DataAddress extends SingleMapEntry<Integer, Integer> implements Serializable {
     public enum Type {
         PRG,
         CHR

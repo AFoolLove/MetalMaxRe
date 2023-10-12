@@ -9,6 +9,8 @@ import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import me.afoolslove.metalmaxre.event.EventHandler;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
+import me.afoolslove.metalmaxre.patch.IPatchManager;
+import me.afoolslove.metalmaxre.patch.PatchManagerImpl;
 import me.afoolslove.metalmaxre.utils.PreferencesUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
@@ -28,10 +30,9 @@ public class MetalMaxRe {
     private RomBuffer romBuffer;
     private IEditorManager editorManager;
     private ICharMap charMap;
-
     private EventHandler eventHandler = new EventHandler();
-
     private SystemPalette systemPalette = SystemPalette.DEFAULT_SYSTEM_PALETTE;
+    private IPatchManager patchManager;
 
     private MetalMaxRe() {
     }
@@ -45,6 +46,7 @@ public class MetalMaxRe {
      */
     public void useDefault() {
         if (getEditorManager() == null) {
+            // 配置默认编辑器管理器
             setEditorManager(new EditorManagerImpl(this));
         }
 
@@ -55,6 +57,11 @@ public class MetalMaxRe {
             // |- jp
             // |- cn
             setCharMap(new CharMapCN(preferences.get("cn", null)));
+        }
+
+        if (getPatchManager() == null) {
+            // 配置默认补丁管理器
+            setPatchManager(new PatchManagerImpl());
         }
     }
 
@@ -90,6 +97,13 @@ public class MetalMaxRe {
         return systemPalette;
     }
 
+    public void setPatchManager(IPatchManager patchManager) {
+        this.patchManager = patchManager;
+    }
+
+    public IPatchManager getPatchManager() {
+        return patchManager;
+    }
 
     /**
      * 获取编辑器实例

@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre;
 import me.afoolslove.metalmaxre.editors.EditorManagerImpl;
 import me.afoolslove.metalmaxre.editors.text.mapping.CharMapCN;
 import me.afoolslove.metalmaxre.editors.text.mapping.CharMapJP;
+import me.afoolslove.metalmaxre.patch.PatchManagerImpl;
 import me.afoolslove.metalmaxre.utils.PreferencesUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,6 +73,7 @@ public class MultipleMetalMaxRe {
             EditorManagerImpl editorManager = new EditorManagerImpl(metalMaxRe);
             metalMaxRe.setEditorManager(editorManager);
             editorManager.registerDefaultEditors();
+            metalMaxRe.setPatchManager(new PatchManagerImpl());
         }
         add(metalMaxRe);
         return metalMaxRe;
@@ -104,7 +106,14 @@ public class MultipleMetalMaxRe {
      * @return 是否存在一个或多个实例
      */
     public boolean hasInstance() {
-        return !metalMaxRes.isEmpty();
+        return !isNotLoadedInstance();
+    }
+
+    /**
+     * @return 尚未加载实例
+     */
+    public boolean isNotLoadedInstance() {
+        return metalMaxRes.isEmpty();
     }
 
     /**

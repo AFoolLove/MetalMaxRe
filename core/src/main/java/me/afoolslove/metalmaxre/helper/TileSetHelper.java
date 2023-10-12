@@ -726,22 +726,20 @@ public class TileSetHelper {
 
     /**
      * 将图片分割为数个0x10*0x10的图块
-     *
-     * @param bufferedImage 被分割的图片
-     * @return 图块
+     * @see #diced(int, int, BufferedImage)
      */
     public static List<BufferedImage> diced(BufferedImage bufferedImage) {
-        List<BufferedImage> value = new ArrayList<>();
-        int w = bufferedImage.getWidth() / 0x10;
-        int h = bufferedImage.getHeight() / 0x10;
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                value.add(bufferedImage.getSubimage(x * 0x10, y * 0x10, 0x10, 0x10));
-            }
-        }
-        return value;
+        return diced(0x10, 0x10, bufferedImage);
     }
 
+    /**
+     * 将图片分割为数个指定大小的图块
+     *
+     * @param w             图块宽度
+     * @param h             图库高度
+     * @param bufferedImage 图片
+     * @return 被分割完成的图块
+     */
     public static List<BufferedImage> diced(int w, int h, BufferedImage bufferedImage) {
         List<BufferedImage> value = new ArrayList<>();
         int tW = bufferedImage.getWidth() / w;

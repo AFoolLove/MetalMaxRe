@@ -34,6 +34,32 @@ public class NumberR {
         return String.format(String.format("%%0%dX", len), value);
     }
 
+    public static String toBinary(byte value) {
+        return toBinary(value, 8);
+    }
+
+    public static String toBinary(char value) {
+        return toBinary(value, 16);
+    }
+
+    public static String toBinary(int value) {
+        return toBinary(value, 32);
+    }
+
+    public static String toBinary(long value) {
+        return toBinary(value, 64);
+    }
+
+    public static String toBinary(long value, int len) {
+        char[] v = new char[len];
+
+        for (int i = 0; i < v.length; i++) {
+            v[i] = (value & 1) == 0 ? '0' : '1';
+            value >>>= 1;
+        }
+        return new String(v);
+    }
+
     /**
      * 获取int中指定位置的byte
      * <p>

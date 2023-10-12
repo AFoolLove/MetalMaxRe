@@ -49,7 +49,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
 
     public TileSetEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
-                DataAddress.fromCHR(0x00000),
+                DataAddress.fromCHR(0x00000, 0x34FFF),
                 DataAddress.fromCHR(0x35000, 0x386FF),
                 DataAddress.fromCHR(0x38700, 0x394C0),
                 DataAddress.fromPRG(0x0FBBE - 0x10, 0x1000F - 0x10),
