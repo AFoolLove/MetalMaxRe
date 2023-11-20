@@ -1,12 +1,14 @@
 package me.afoolslove.metalmaxre.event;
 
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.event.editors.EditorEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 /**
@@ -26,7 +28,7 @@ public class EventHandler {
     public synchronized void register(@NotNull EventListener listener) {
         for (Method declaredMethod : listener.getClass().getDeclaredMethods()) {
             if (declaredMethod.getParameterCount() == 1) {
-                var parameter = declaredMethod.getParameters()[0];
+                Parameter parameter = declaredMethod.getParameters()[0];
                 if (Event.class.isAssignableFrom(parameter.getType())) {
                     register((Class<Event>) parameter.getType(), listener);
                 }
@@ -42,7 +44,7 @@ public class EventHandler {
      */
     public synchronized <E extends Event> void register(@NotNull Class<E> eventType, @NotNull EventListener listener) {
         @SuppressWarnings("unchecked")
-        var listeners = eventListeners.computeIfAbsent((Class<Event>) eventType, k -> new HashSet<>());
+        Set<EventListener> listeners = eventListeners.computeIfAbsent((Class<Event>) eventType, k -> new HashSet<>());
         listeners.add(listener);
     }
 
@@ -54,7 +56,7 @@ public class EventHandler {
     public synchronized void unregister(@NotNull EventListener listener) {
         for (Method declaredMethod : listener.getClass().getDeclaredMethods()) {
             if (declaredMethod.getParameterCount() == 1) {
-                var parameter = declaredMethod.getParameters()[0];
+                Parameter parameter = declaredMethod.getParameters()[0];
                 if (Event.class.isAssignableFrom(parameter.getType())) {
                     unregister((Class<Event>) parameter.getType(), listener);
                 }
@@ -69,7 +71,7 @@ public class EventHandler {
      * @param listener  被注销的监听器
      */
     public synchronized void unregister(@NotNull Class<Event> eventType, @NotNull EventListener listener) {
-        var listeners = eventListeners.get(eventType);
+        Set<EventListener> listeners = eventListeners.get(eventType);
         if (listeners == null || listeners.isEmpty()) {
             return;
         }
@@ -92,18 +94,18 @@ public class EventHandler {
                 .forEach(eventListener -> {
                     for (Method declaredMethod : eventListener.getClass().getDeclaredMethods()) {
                         if (declaredMethod.getParameterCount() == 1) {
-                            var parameter = declaredMethod.getParameters()[0];
+                            Parameter parameter = declaredMethod.getParameters()[0];
                             if (!parameter.getType().isInstance(event)) {
                                 // 参数事件类与事件类不同或不是父子关系
                                 continue;
                             }
 
-                            var targetEditor = parameter.getAnnotation(Editor.TargetEditor.class);
+                            Editor.TargetEditor targetEditor = parameter.getAnnotation(Editor.TargetEditor.class);
                             if (targetEditor != null && event instanceof EditorEvent editorEvent) {
                                 // 如果没有指定编辑器，就是包括所有编辑器
                                 if (targetEditor.value().length != 0) {
                                     // 指定了编辑器
-                                    var any = Arrays.stream(targetEditor.value())
+                                    Optional<Class<? extends IRomEditor>> any = Arrays.stream(targetEditor.value())
                                             .filter(clazz -> clazz.isInstance(editorEvent.getEditor()))
                                             .findAny();
                                     if (any.isEmpty()) {

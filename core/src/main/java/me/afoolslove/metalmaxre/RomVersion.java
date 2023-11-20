@@ -51,7 +51,7 @@ public class RomVersion {
     }
 
     public static RomVersion getVersion(@NotNull String version, String def) {
-        var ver = VERSIONS.get(version);
+        RomVersion ver = VERSIONS.get(version);
         if (ver == null && def != null) {
             return VERSIONS.get(def);
         }
@@ -64,8 +64,8 @@ public class RomVersion {
     }
 
     static {
-        var infoBytes = ResourceManager.getAsBytes("/roms/info.json");
-        var gson = new Gson();
+        byte[] infoBytes = ResourceManager.getAsBytes("/roms/info.json");
+        Gson gson = new Gson();
         Map<String, RomVersion> map = gson.fromJson(new String(infoBytes), new TypeToken<Map<String, RomVersion>>() {
         }.getType());
         VERSIONS.putAll(map);

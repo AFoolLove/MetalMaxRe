@@ -113,9 +113,18 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> implements Ser
      * @return 实际起始地址
      */
     public int getAbsStartAddress(@NotNull RomBuffer buffer) {
+        return getAbsStartAddress(buffer, 0);
+    }
+
+    /**
+     * 获取实际起始地址，包含头长度等
+     *
+     * @return 实际起始地址
+     */
+    public int getAbsStartAddress(@NotNull RomBuffer buffer, int offset) {
         return switch (getType()) {
-            case PRG -> buffer.getHeader().getPrgRomStart(getStartAddress());
-            case CHR -> buffer.getHeader().getChrRomStart(getStartAddress());
+            case PRG -> buffer.getHeader().getPrgRomStart(getStartAddress(offset));
+            case CHR -> buffer.getHeader().getChrRomStart(getStartAddress(offset));
         };
     }
 
@@ -153,9 +162,18 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> implements Ser
      * @return 实际结束地址
      */
     public int getAbsEndAddress(@NotNull RomBuffer buffer) {
+        return getAbsEndAddress(buffer, 0);
+    }
+
+    /**
+     * 获取实际结束地址，包含头长度等
+     *
+     * @return 实际结束地址
+     */
+    public int getAbsEndAddress(@NotNull RomBuffer buffer, int offset) {
         return switch (getType()) {
-            case PRG -> buffer.getHeader().getPrgRomStart(getEndAddress());
-            case CHR -> buffer.getHeader().getChrRomStart(getEndAddress());
+            case PRG -> buffer.getHeader().getPrgRomStart(getEndAddress(offset));
+            case CHR -> buffer.getHeader().getChrRomStart(getEndAddress(offset));
         };
     }
 
@@ -209,6 +227,16 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> implements Ser
             return new DataAddress(type, end, start);
         }
         return new DataAddress(type, start, end);
+    }
+
+    public static DataAddress from(@NotNull Type type, @NotNull Integer start, @Nullable Integer end) {
+        if (end == null) {
+            return new DataAddress(type, start, null);
+        } else if (end < start) {
+            return new DataAddress(type, end, start);
+        } else {
+            return new DataAddress(type, start, end);
+        }
     }
 
     public static DataAddress from(@NotNull Type type, int start) {

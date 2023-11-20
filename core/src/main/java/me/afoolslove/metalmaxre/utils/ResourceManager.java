@@ -74,9 +74,9 @@ public class ResourceManager {
      */
     @Nullable
     public static byte[] getAsBytes(@NotNull String name) {
-        try (var asStream = getAsStream(name)) {
+        try (InputStream asStream = getAsStream(name)) {
             if (asStream != null) {
-                var byteArrayOutputStream = new ByteArrayOutputStream(asStream.available());
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(asStream.available());
                 asStream.transferTo(byteArrayOutputStream);
                 return byteArrayOutputStream.toByteArray();
             }

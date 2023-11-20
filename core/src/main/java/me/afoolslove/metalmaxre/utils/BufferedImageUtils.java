@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.utils;
 import me.afoolslove.metalmaxre.editors.palette.Color;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class BufferedImageUtils {
@@ -38,7 +39,7 @@ public class BufferedImageUtils {
         }
 
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        var graphics = bufferedImage.getGraphics();
+        Graphics graphics = bufferedImage.getGraphics();
 
         for (int y = 0; y < colors.length; y++) {
             final java.awt.Color[] cs = colors[y];

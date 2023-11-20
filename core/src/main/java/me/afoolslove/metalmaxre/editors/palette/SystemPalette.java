@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -59,9 +60,9 @@ public class SystemPalette {
      * @return 调色板字节数组
      */
     public byte[] toBytes() {
-        var bytes = new byte[PALETTE_BYTE_LENGTH];
+        byte[] bytes = new byte[PALETTE_BYTE_LENGTH];
         for (int i = 0; i < PALETTE_LENGTH; i++) {
-            var color = colors[i];
+            Color color = colors[i];
             bytes[(i * 3)] = color.getRed();
             bytes[(i * 3) + 1] = color.getGreen();
             bytes[(i * 3) + 2] = color.getBlue();
@@ -75,7 +76,7 @@ public class SystemPalette {
      * @param path 文件路径
      */
     public void toFile(@NotNull Path path) throws IOException {
-        try (var outputStream = Files.newOutputStream(path)) {
+        try (OutputStream outputStream = Files.newOutputStream(path)) {
             outputStream.write(toBytes());
             outputStream.flush();
         }
@@ -88,7 +89,7 @@ public class SystemPalette {
      * @return 调色板
      */
     public static SystemPalette fromIntColor(int[] colors) {
-        var palette = new SystemPalette();
+        SystemPalette palette = new SystemPalette();
         for (int i = 0; i < colors.length; i++) {
             palette.getColors()[i] = new Color(colors[i]);
         }
@@ -114,12 +115,12 @@ public class SystemPalette {
      */
     public static SystemPalette fromBytes(byte[] paletteBytes, int offset) {
         if ((paletteBytes.length - offset) != ((8 * 8) * 3)) {
-            var bytes = new byte[8 * 8];
+            byte[] bytes = new byte[8 * 8];
             System.arraycopy(paletteBytes, offset, bytes, 0, Math.min(paletteBytes.length, 8 * 8));
             paletteBytes = bytes;
         }
 
-        var palette = new SystemPalette();
+        SystemPalette palette = new SystemPalette();
         for (int i = 0; i < paletteBytes.length; i += 3) {
             palette.getColors()[i / 3] = new Color(0x00, paletteBytes[i], paletteBytes[i + 1], paletteBytes[i + 2]);
         }

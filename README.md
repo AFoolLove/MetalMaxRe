@@ -48,7 +48,7 @@
 | [IPlayerExpEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerExpEditor.java)      | 玩家经验值编辑器 | 完成          |
 | [ISpriteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteEditor.java)            | 精灵编辑器    | 完成          |
 | [ITankEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/ITankEditor.java)                  | 坦克编辑器    | 完成          |
-| [ITextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/ITextEditor.java)                  | 文本编辑器    | 基础完成，不支持日文  |
+| [ITextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/ITextEditor.java)                  | 文本编辑器    | 完成          |
 | [ITreasureEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/ITreasureEditor.java)      | 宝藏编辑器    | 完成          |
 | [IElevatorEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/elevator/IElevatorEditor.java)      | 电梯编辑器    | 完成          |
 
@@ -79,11 +79,28 @@
 
 实现类：[ItemEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/items/ItemEditorImpl.java)
 
-* 物品的价格
+* 物品的基本数据
+  * 价格（以下都包含）
 * 玩家的防具属性 [`PlayerArmor`](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerArmor.java)
+  * 可佩戴玩家
+  * 防御力
 * 玩家的武器属性 [`PlayerWeapon`](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerWeapon.java)
-* 坦克的装备属性 [`TankEquipmentItem`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEquipmentItem.java) [`TankEngine`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEngine.java)
-* 坦克的武器属性 [`TankWeapon`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankWeapon.java)
+  * 可佩戴玩家
+  * 攻击力
+  * 攻击范围 单体、一组、全体
+  * 攻击动画
+  * 攻击武器
+* 坦克的装备属性 [`TankEquipmentItem`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEquipmentItem.java)
+  * 重量
+  * 防御力
+  * 引擎 [`TankEngine`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankEngine.java)
+    * 载重
+  * 武器 [`TankWeapon`](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/TankWeapon.java)
+    * 可装备穴 主炮、副炮、S-E
+    * 弹药数量 2、4、8、16、32、48、62、无限
+    * 攻击力
+    * 攻击范围 单体、一组、全体
+    * 攻击动画
 
 ### [IEventEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/events/IEventTilesEditor.java)（事件编辑器）
 
@@ -106,6 +123,7 @@
 
 * 编辑世界地图
 * 修改出航/归航的航线，出航/归航航线的路径点各最大16条
+* 无歌村右边码头的地雷
 
 ### [IDogSystemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IDogSystemEditor.java)（犬系统编辑器）
 
@@ -120,9 +138,10 @@
 
 实现类：[MapEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapEditorImpl.java)
 
-不支持世界地图，世界地图请使用 [`WorldMapEditor`](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/WorldMapEditor.java)
+不支持世界地图，世界地图请使用 [`IWorldMapEditor`](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/IWorldMapEditor.java)
 
-* 通过 [`MapBuilder`](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapBuilder.java) 可以构建或编辑所有地图
+* 通过 [`MapBuilder`](core/src/main/java/me/afoolslove/metalmaxre/editors/map/MapBuilder.java) 可以构建或编辑地图，不支持世界地图
+
 
 注：暂时未解决如何在有限的空间里提搞空间利用率
 
@@ -146,7 +165,7 @@
 * 地图图块数据和地图图块数据的组合数据
 * 隐藏图块、填充图块、门后图块、背景音乐
 * 地图边界和出入口坐标
-* 特殊属性：动态图块、事件图块、地下地图
+* 特殊属性：动态图块、事件图块、地下地图、高层建筑
 
 ### [IMonsterEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/IMonsterEditor.java)（怪物编辑器）
 
@@ -165,7 +184,7 @@
 
 实现类：[MonsterEditorImplImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)
 
-测试中
+测试中，请勿启用写入数据
 
 * 怪物的图像模型数据
 * 怪物的调色板
@@ -178,6 +197,7 @@
 实现类：[PaletteEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/palette/PaletteEditorImpl.java)
 
 全局调色板、精灵调色板、战斗时和非战斗时的调色板
+支持导入导出
 
 ### [IPlayerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerEditor.java)（玩家编辑器）
 
@@ -185,23 +205,40 @@
 
 * 玩家的初始金钱
 * 玩家的初始属性
+  * 入队状态
+  * 等级
+  * 经验值
+  * HP/最大HP
+  * 异常状态
+  * 战斗、驾驶、修理等级
+  * 力量、智力、速度、体力
 * 玩家的初始装备
+  * 初始装备是否为已装备状态
 * 玩家的初始道具
 
 ### [IPlayerExpEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerExpEditor.java)（玩家经验值编辑器）
 
 实现类：[PlayerExpEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/player/PlayerExpEditorImpl.java)
 
-* 玩家到达某一等级所需的经验（不是差值）
+* 玩家到达某一等级所需的经验（不是差值，累积经验值）
 
-注：只能编辑2-99级，初始等级为1
+注：只能编辑2-99级，初始默认等级为1
 
 ### [ISpriteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteEditor.java)（精灵编辑器）
 
 实现类：[SpriteEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/SpriteEditorImpl.java)
 
-* 精灵的类型、坐标、对话和行动方式
-* 特殊属性：可被推动、无视地形移动、锁定朝向、移动时不播放移动动画（平移）
+* 精灵
+  * 图像
+  * 行动方式
+  * 坐标
+  * 朝向
+  * 对话功能
+* 特殊属性
+  * 是否可以被玩家推动
+  * 移动时是否无视地形行走或被推动
+  * 锁定朝向，与玩家对话时不会朝向玩家
+  * 移动时不播放移动动画（平移），雕像等
 
 ### [ITankEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/ITankEditor.java)（坦克编辑器）
 
@@ -209,10 +246,17 @@
 
 包含出租坦克
 
-* 坦克的初始装备
 * 坦克的初始属性
-* 坦克的初始装甲片
-* 坦克的初始位置（出租坦克只能修改初始地图，但这有什么用呢）
+  * 初始坐标
+  * 底盘防御力
+    * 防御力改造上限
+    * 防御力改造梯级
+  * 特殊弹仓
+    * 弹仓改造上限
+    * 弹仓改造梯级
+* 坦克的初始装备
+  * 初始装备是否为已装备状态，如果需要默认装备上，需要放入对应的位置
+* 坦克的初始穴
 
 ### [ITextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/ITextEditor.java)（文本编辑器）
 
@@ -225,7 +269,7 @@
 * get/set 物品名称
 
 注：所有的文本都使用该类修改  
-字库：[WordBank](core/src/main/java/me/afoolslove/metalmaxre/editors/text/WordBank.java)
+字库：[ICharMap](core/src/main/java/me/afoolslove/metalmaxre/editors/text/mapping/ICharMap.java)
 
 ### [ITreasureEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/ITreasureEditor.java)（宝藏编辑器）
 
@@ -245,5 +289,3 @@
 
 * 设置每个电梯的楼层和数量
 * 设置触发每个电梯的地图id范围
-
-注：宝箱的图像因地图图块组成不同而不同，世界地图为隐藏显示

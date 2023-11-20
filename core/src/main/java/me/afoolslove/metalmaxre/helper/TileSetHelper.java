@@ -1,10 +1,7 @@
 package me.afoolslove.metalmaxre.helper;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
-import me.afoolslove.metalmaxre.editors.map.IMapEditor;
-import me.afoolslove.metalmaxre.editors.map.IMapPropertiesEditor;
-import me.afoolslove.metalmaxre.editors.map.MapProperties;
-import me.afoolslove.metalmaxre.editors.map.MapTile;
+import me.afoolslove.metalmaxre.editors.map.*;
 import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
 import me.afoolslove.metalmaxre.editors.map.tileset.TileAttributes;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
@@ -77,7 +74,7 @@ public class TileSetHelper {
      * @see #generateTileSet(MetalMaxRe, int, int, int, int, int, int, Color[][])
      */
     public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, @NotNull MapProperties mapProperties, @Nullable Color[][] palette) {
-        var systemPalette = metalMaxRe.getSystemPalette();
+        SystemPalette systemPalette = metalMaxRe.getSystemPalette();
 
         if (palette == null) {
             IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
@@ -108,7 +105,7 @@ public class TileSetHelper {
      * 图片的大小为 256*128
      */
     public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0, int combinationA, int combinationB, @Nullable Color[][] palette) {
-        var systemPalette = metalMaxRe.getSystemPalette();
+        SystemPalette systemPalette = metalMaxRe.getSystemPalette();
         if (palette == null) {
             // 如果没有提供颜色，就适用灰白
             palette = new Color[][]{
@@ -135,7 +132,7 @@ public class TileSetHelper {
      * 图片的大小为 128*128
      */
     public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0) {
-        var systemPalette = metalMaxRe.getSystemPalette();
+        SystemPalette systemPalette = metalMaxRe.getSystemPalette();
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
 
         // 只能是灰白色了
@@ -256,7 +253,7 @@ public class TileSetHelper {
      * 图片的大小为
      */
     public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, int sprite) {
-        var systemPalette = metalMaxRe.getSystemPalette();
+        SystemPalette systemPalette = metalMaxRe.getSystemPalette();
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
         IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
 
@@ -634,11 +631,11 @@ public class TileSetHelper {
         IMapPropertiesEditor mapPropertiesEditor = metalMaxRe.getEditorManager().getEditor(IMapPropertiesEditor.class);
 
 
-        var mapBuilder = mapEditor.getMap(mapId);
-        var mapProperties = mapPropertiesEditor.getMapProperties(mapId);
+        MapBuilder mapBuilder = mapEditor.getMap(mapId);
+        MapProperties mapProperties = mapPropertiesEditor.getMapProperties(mapId);
 
-        var width = mapProperties.intWidth();
-        var height = mapProperties.intHeight();
+        int width = mapProperties.intWidth();
+        int height = mapProperties.intHeight();
 
         byte[][] map = new byte[height][width];
 
@@ -657,7 +654,7 @@ public class TileSetHelper {
 
         BufferedImage tileSet = BufferedImageUtils.fromColors(TileSetHelper.generateTileSet(metalMaxRe, mapProperties, null));
 
-        BufferedImage bufferedImage = new BufferedImage(width * 0x10, height * 0x10, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bufferedImage = new BufferedImage(width * 0x10, height * 0x10, BufferedImage.TYPE_INT_RGB);
 
         // 储存1tile(16*16)
         final Map<Integer, BufferedImage> tmpTiles = new HashMap<>();
@@ -696,7 +693,7 @@ public class TileSetHelper {
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        BufferedImage bufferedImage = new BufferedImage(0x100 * 0x10, 0x100 * 0x10, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bufferedImage = new BufferedImage(0x100 * 0x10, 0x100 * 0x10, BufferedImage.TYPE_INT_RGB);
 
 
         Graphics graphics = bufferedImage.getGraphics();

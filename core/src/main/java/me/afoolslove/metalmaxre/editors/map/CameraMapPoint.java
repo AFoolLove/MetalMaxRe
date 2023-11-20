@@ -110,7 +110,7 @@ public class CameraMapPoint extends MapPoint {
         if (!super.equals(o)) {
             return false;
         }
-        return getMap() == mapPoint.getMap();
+        return Objects.equals(getMap(), mapPoint.getMap());
     }
 
     @Override

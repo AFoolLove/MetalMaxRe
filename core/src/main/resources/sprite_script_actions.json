@@ -326,10 +326,9 @@
     "code": "26",
     "length": 2,
     "name": "功能指令",
-    "gotoIndex": 1,
     "format": "26 XX YY",
-    "formatText": "功能为%02X，跳转%02X字节",
-    "shortDescription": "=12诺亚被打败后对白，=2A学校捐献，2B=激光炮博士，=2C买车，=2F按摩，=30还车，=31直接读档，=34存档"
+    "formatText": "功能为%02X%02X",
+    "shortDescription": "1200 诺亚被打败后对白，2A00 学校捐献，2B00 激光炮博士，2C00 买车，2F00 按摩，3000 还车，3100 直接读档，3400 存档"
   },
   {
     "code": "27",

@@ -102,7 +102,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 写入调色板
         position(getPaletteAddress());
         for (int i = 0, maxCount = getPaletteMaxCount() / 0x03; i < maxCount; i++) {
-            var paletteRows = getPalettes().get(i);
+            List<PaletteRow> paletteRows = getPalettes().get(i);
             // 3个调色板，1个调色板3byte
             for (int j = 0; j < 0x03; j++) {
                 getBuffer().put(paletteRows.get(j).getPaletteRow(), 1, 3);

@@ -49,6 +49,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -124,7 +125,7 @@ public class EditorManagerImpl implements IEditorManager {
             return;
         }
         // 创建并储存编辑器实例
-        var editor = builder.apply(getMetalMaxRe());
+        E editor = builder.apply(getMetalMaxRe());
         if (editor == null) {
             throw new IllegalArgumentException(String.format("editor(%s) is null.", editorType.getSimpleName()));
         }
@@ -194,14 +195,14 @@ public class EditorManagerImpl implements IEditorManager {
     public <E extends IRomEditor, CE extends E> void register(@NotNull Class<E> editorType, @NotNull Class<CE> editor) {
         register(editorType, metalMaxRe -> {
             Class<CE> editorClazz = editor;
-            final var versionId = metalMaxRe.getBuffer().getVersion().getId();
+            final String versionId = metalMaxRe.getBuffer().getVersion().getId();
             if (editorClazz.getAnnotation(Editor.TargetVersions.class) != null) {
                 for (Class<?> declaredClass : editorClazz.getDeclaredClasses()) {
                     if (!IRomEditor.class.isAssignableFrom(declaredClass)) {
                         // 排除未实现IRomEditor接口的类
                         continue;
                     }
-                    var targetVersion = declaredClass.getAnnotation(Editor.TargetVersion.class);
+                    Editor.TargetVersion targetVersion = declaredClass.getAnnotation(Editor.TargetVersion.class);
                     if (targetVersion == null || targetVersion.value().length == 0) {
                         // 该类没有目标版本的标识
                         continue;
@@ -216,7 +217,7 @@ public class EditorManagerImpl implements IEditorManager {
                     }
                 }
             } else if (editorClazz.getAnnotation(Editor.TargetVersion.class) != null) {
-                var targetVersion = editorClazz.getAnnotation(Editor.TargetVersion.class);
+                Editor.TargetVersion targetVersion = editorClazz.getAnnotation(Editor.TargetVersion.class);
                 if (targetVersion.value().length > 0) {
                     boolean has = false;
                     for (String id : targetVersion.value()) {
@@ -261,15 +262,15 @@ public class EditorManagerImpl implements IEditorManager {
         // call event
         getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadPre(metalMaxRe));
         return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
-            var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
+            LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>> editors = new LinkedList<>();
             editors.addFirst(new HashSet<>());
-            for (var entry : loadMethods.entrySet()) {
+            for (Map.Entry<Class<? extends IRomEditor>, Method> entry : loadMethods.entrySet()) {
                 editors.getFirst().add(SingleMapEntry.create(entry));
             }
 
             // 无序的编辑器，加载与否都不会影响到其它编辑器
             // 在接下来分类中会移除有影响的编辑器，只留下无序的编辑器
-            var freeEditors = new HashSet<>(editors.getFirst());
+            HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>> freeEditors = new HashSet<>(editors.getFirst());
             do {
                 Set<Class<? extends IRomEditor>> nextList = new HashSet<>();
                 for (SingleMapEntry<Class<? extends IRomEditor>, Method> entry : editors.getLast()) {
@@ -279,9 +280,9 @@ public class EditorManagerImpl implements IEditorManager {
                     }
 
                     // 将参数中的编辑器作为前置编辑器，带有@Editor.QuoteOnly注解只是引用，不算作前置
-                    var parameterTypes = entry.getValue().getParameterTypes();
+                    Class<?>[] parameterTypes = entry.getValue().getParameterTypes();
                     if (parameterTypes.length > 0) {
-                        var parameterAnnotations = entry.getValue().getParameterAnnotations();
+                        Annotation[][] parameterAnnotations = entry.getValue().getParameterAnnotations();
                         pars:
                         for (int i = 0; i < parameterTypes.length; i++) {
                             Class<?> parameterType = parameterTypes[i];
@@ -311,7 +312,7 @@ public class EditorManagerImpl implements IEditorManager {
                     // 没有找到有前置的编辑器，跳出循环
                     break;
                 }
-                var nextEditors = new HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>>();
+                HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>> nextEditors = new HashSet<>();
                 editors.getLast().removeIf(next -> {
                     if (nextList.contains(next.getKey())) {
                         nextEditors.add(next);
@@ -368,18 +369,18 @@ public class EditorManagerImpl implements IEditorManager {
     @Override
     public synchronized Future<?> applyEditors() {
         // call event
-        getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadPre(metalMaxRe));
+        getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.ApplyPre(metalMaxRe));
         return LOAD_OR_APPLY_EXECUTOR.submit(() -> {
-            var editors = new LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>>();
+            LinkedList<Set<SingleMapEntry<Class<? extends IRomEditor>, Method>>> editors = new LinkedList<>();
             editors.addFirst(new HashSet<>());
 
-            for (var entry : applyMethods.entrySet()) {
+            for (Map.Entry<Class<? extends IRomEditor>, Method> entry : applyMethods.entrySet()) {
                 editors.getFirst().add(SingleMapEntry.create(entry));
             }
 
             // 无序的编辑器，应用与否都不会影响到其它编辑器
             // 在接下来分类中会移除有影响的编辑器，只留下无序的编辑器
-            var freeEditors = new HashSet<>(editors.getFirst());
+            HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>> freeEditors = new HashSet<>(editors.getFirst());
             do {
                 Set<Class<? extends IRomEditor>> nextList = new HashSet<>();
                 for (SingleMapEntry<Class<? extends IRomEditor>, Method> entry : editors.getLast()) {
@@ -389,9 +390,9 @@ public class EditorManagerImpl implements IEditorManager {
                     }
 
                     // 将参数中的编辑器作为前置编辑器，带有@Editor.QuoteOnly注解只是引用，不算作前置
-                    var parameterTypes = entry.getValue().getParameterTypes();
+                    Class<?>[] parameterTypes = entry.getValue().getParameterTypes();
                     if (parameterTypes.length > 0) {
-                        var parameterAnnotations = entry.getValue().getParameterAnnotations();
+                        Annotation[][] parameterAnnotations = entry.getValue().getParameterAnnotations();
                         pars:
                         for (int i = 0; i < parameterTypes.length; i++) {
                             Class<?> parameterType = parameterTypes[i];
@@ -421,7 +422,7 @@ public class EditorManagerImpl implements IEditorManager {
                     // 没有找到有前置的编辑器，跳出循环
                     break;
                 }
-                var nextEditors = new HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>>();
+                HashSet<SingleMapEntry<Class<? extends IRomEditor>, Method>> nextEditors = new HashSet<>();
                 editors.getLast().removeIf(next -> {
                     if (nextList.contains(next.getKey())) {
                         nextEditors.add(next);
@@ -470,7 +471,7 @@ public class EditorManagerImpl implements IEditorManager {
                 throw new RuntimeException(e);
             } finally {
                 // call event
-                getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadPost(metalMaxRe));
+                getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.ApplyPost(metalMaxRe));
             }
         });
     }
@@ -491,7 +492,7 @@ public class EditorManagerImpl implements IEditorManager {
     @Override
     public Future<IRomEditor> applyEditor(@NotNull Class<? extends IRomEditor> type) {
         return EDITOR_EXECUTOR.submit(() -> {
-            var editor = getEditor(type);
+            IRomEditor editor = getEditor(type);
             if (editor != null && editor.isEnabled()) {
                 Method applyMethod = applyMethods.get(type);
 
@@ -501,9 +502,9 @@ public class EditorManagerImpl implements IEditorManager {
                 }
 
                 Object[] pars = new Object[applyMethod.getParameterCount()];
-                var parameters = applyMethod.getParameters();
+                Parameter[] parameters = applyMethod.getParameters();
                 for (int i = 0; i < parameters.length; i++) {
-                    var parameter = parameters[i];
+                    Parameter parameter = parameters[i];
                     if (RomBuffer.class.isAssignableFrom(parameter.getType())) {
                         pars[i] = editor.getBuffer();
                         continue;
@@ -546,7 +547,7 @@ public class EditorManagerImpl implements IEditorManager {
     @NotNull
     private Future<IRomEditor> loadEditor(@NotNull Class<? extends IRomEditor> type, boolean reload) {
         return EDITOR_EXECUTOR.submit(() -> {
-            var editor = getEditor(type);
+            IRomEditor editor = getEditor(type);
             if (editor == null) {
                 // 没有这个类型的编辑器
                 return null;
@@ -560,9 +561,9 @@ public class EditorManagerImpl implements IEditorManager {
             }
 
             Object[] pars = new Object[loadMethod.getParameterCount()];
-            var parameters = loadMethod.getParameters();
+            Parameter[] parameters = loadMethod.getParameters();
             for (int i = 0; i < parameters.length; i++) {
-                var parameter = parameters[i];
+                Parameter parameter = parameters[i];
                 if (RomBuffer.class.isAssignableFrom(parameter.getType())) {
                     pars[i] = editor.getBuffer();
                     continue;

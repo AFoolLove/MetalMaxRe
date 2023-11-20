@@ -112,7 +112,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
         // x、y
         final byte[][] townPoints = new byte[2][getTownMaxCount()];
         for (int i = 0; i < getTownMaxCount(); i++) {
-            var townLocation = getTownLocation(i);
+            CameraMapPoint townLocation = getTownLocation(i);
             townPoints[0][i] = townLocation.getCameraX();
             townPoints[1][i] = townLocation.getCameraY();
         }

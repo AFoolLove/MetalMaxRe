@@ -38,7 +38,7 @@ public class GameHeader {
     public GameHeader(byte[] header) {
         if (header == null || header.length < HEADER_LENGTH) {
             // 如果传入的头数据长度小于所需要的头数据长度，使用0x00填充
-            var temp = new byte[HEADER_LENGTH];
+            byte[] temp = new byte[HEADER_LENGTH];
             if (header != null) {
                 // 将数据复制到新的数组里
                 System.arraycopy(header, 0, temp, 0, header.length);
@@ -56,7 +56,7 @@ public class GameHeader {
      * mapper就不用改了吧？
      */
     public void setMapper(@Range(from = 0x00, to = 0xFF) int mapper) {
-        var oldValue = header[0x06];
+        byte oldValue = header[0x06];
 
         // 设置低位
         header[0x06] &= 0B1111_0000;
@@ -97,7 +97,7 @@ public class GameHeader {
      * 是否开启Trainer
      */
     public void setTrainer(boolean trainer) {
-        var oldValue = isTrained();
+        boolean oldValue = isTrained();
         if (isTrained() != trainer) {
             if (trainer) {
                 header[0x06] |= 0B0000_0100;

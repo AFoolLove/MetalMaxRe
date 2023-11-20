@@ -23,7 +23,7 @@ public class Trainer {
     }
 
     public byte[] getTrainer() {
-        var dst = new byte[TRAINER_LENGTH];
+        byte[] dst = new byte[TRAINER_LENGTH];
         trainer.get(0x00000, dst);
         return dst;
     }

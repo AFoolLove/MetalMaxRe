@@ -66,7 +66,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
         worldMapInteractiveEvent = null;
 
         position(getEventTilesAddress());
-        var map = new HashMap<>(mapPropertiesEditor.getMapProperties())
+        TreeSet<Map.Entry<Integer, MapProperties>> map = new HashMap<>(mapPropertiesEditor.getMapProperties())
                 .entrySet().parallelStream()
                 .filter(entry -> entry.getValue().hasEventTile()) // 移除没有事件图块属性的地图
                 .collect(

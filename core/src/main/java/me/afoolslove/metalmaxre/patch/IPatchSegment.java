@@ -32,7 +32,7 @@ public interface IPatchSegment {
         byte[] patchData = getPatchData();
 
         for (int offset = 0; offset < patchData.length; offset++) {
-            byte b = romBuffer.get(address.getStartAddress(offset) + GameHeader.HEADER_LENGTH);
+            byte b = romBuffer.get(address.getAbsStartAddress(romBuffer, offset));
             if (b != patchData[offset]) {
                 // 数据不一致，判断失败
                 return false;

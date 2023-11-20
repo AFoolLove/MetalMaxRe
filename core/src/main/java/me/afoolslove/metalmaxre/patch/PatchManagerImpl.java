@@ -26,8 +26,11 @@ public class PatchManagerImpl implements IPatchManager {
                 // 反序列化 DataAddress
                 String[] split = json.getAsString().split("-");
                 DataAddress.Type type = DataAddress.Type.valueOf(split[0]);
-                int start = Integer.parseInt(split[1], 16);
-                int end = Integer.parseInt(split[2], 16);
+                Integer start = Integer.parseInt(split[1], 16);
+                Integer end = null;
+                if (split.length >= 3) {
+                    end = Integer.parseInt(split[2], 16);
+                }
                 return DataAddress.from(type, start, end);
             })
 
@@ -119,8 +122,22 @@ public class PatchManagerImpl implements IPatchManager {
                 // 反序列化 RomPatchImpl
                 JsonObject object = json.getAsJsonObject();
                 String key = object.get("key").getAsString();
-                String description = object.has("description") ? object.get("description").getAsString() : null;
-                String preKey = object.has("object") ? object.get("preKey").getAsString() : null;
+                String description = null;
+                String preKey = null;
+
+                if (object.has("description")) {
+                    JsonElement element = object.get("description");
+                    if (element.isJsonPrimitive()) {
+                        description = element.getAsString();
+                    }
+                }
+                if (object.has("preKey")) {
+                    JsonElement element = object.get("preKey");
+                    if (element.isJsonPrimitive()) {
+                        preKey = element.getAsString();
+                    }
+                }
+
                 JsonObject segmentsObject = object.get("patches").getAsJsonObject();
 
                 Map<String, List<IPatchSegmentWrapper>> segments = new HashMap<>();

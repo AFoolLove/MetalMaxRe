@@ -166,7 +166,7 @@ public class TextBuilder implements IBaseText {
             }
 
             // 单字节的操作码
-            var opcodeLength = charMap.getOpcodes().get(bytes[position]);
+            Integer opcodeLength = charMap.getOpcodes().get(bytes[position]);
             if (opcodeLength == null) {
                 // 未知的数据
                 text.append(String.format("[%02X]", bytes[position]));
@@ -523,7 +523,7 @@ public class TextBuilder implements IBaseText {
 
     public static void main(String[] args) {
         CharMapCN charMap = new CharMapCN();
-        var textBuilders = fromTexts("你的名字是[E8]，想知道我的名字吗？[F70001][EB0001]".toCharArray(), charMap);
+        List<TextBuilder> textBuilders = fromTexts("你的名字是[E8]，想知道我的名字吗？[F70001][EB0001]".toCharArray(), charMap);
         System.out.println();
     }
 

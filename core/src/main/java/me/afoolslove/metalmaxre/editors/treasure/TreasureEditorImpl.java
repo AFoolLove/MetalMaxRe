@@ -164,7 +164,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
             data[3][index] = treasure.getItem();
         }
         // 如果有空的宝藏，将空的宝藏设置到地图 0xFF 中去
-        var remain = getTreasureMaxCount() - count;
+        int remain = getTreasureMaxCount() - count;
         if (remain > 0) {
             Arrays.fill(data[0], count, getTreasureMaxCount(), (byte) 0xFF);
         }

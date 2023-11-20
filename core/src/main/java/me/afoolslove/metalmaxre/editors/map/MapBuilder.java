@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -25,15 +26,30 @@ public class MapBuilder extends LinkedList<MapTile> {
     public MapBuilder() {
     }
 
-    /**
-     * 不会进行优化！
-     */
     public MapBuilder(@NotNull Collection<? extends MapTile> c) {
-        super(c);
+        this(c, true);
+    }
+
+    /**
+     * 通过集合创建地图构建器
+     *
+     * @param c        集合
+     * @param optimize 是否优化传入的数据
+     */
+    public MapBuilder(@NotNull Collection<? extends MapTile> c, boolean optimize) {
+        if (optimize) {
+            addAll(c);
+        } else {
+            // 使用add(int, int)方法添加可以进行优化
+            for (MapTile mapTile : c) {
+                add(mapTile.intTile(), mapTile.intCount());
+            }
+        }
     }
 
     /**
      * 通过条件读取数据并转换为7bit的地图数据格式
+     * *使用RomBuffer
      *
      * @param buffer    被读取的缓存数据
      * @param bitOffset bit的偏移
@@ -42,6 +58,34 @@ public class MapBuilder extends LinkedList<MapTile> {
      * @return 7bit的地图数据格式
      */
     public static byte[] parseMap(RomBuffer buffer, int bufferPosition, int bitOffset, @NotNull Predicate<List<Byte>> condition, @Nullable Predicate<Byte> listener) {
+        return parseMap(buffer::get, bufferPosition, bitOffset, condition, listener);
+    }
+
+    /**
+     * 通过条件读取数据并转换为7bit的地图数据格式
+     * *使用字节数组
+     *
+     * @param buffer    被读取的缓存数据
+     * @param bitOffset bit的偏移
+     * @param condition 循环条件
+     * @param listener  每完成一个7bit就会调用一次
+     * @return 7bit的地图数据格式
+     */
+    public static byte[] parseMap(byte[] buffer, int bufferPosition, int bitOffset, @NotNull Predicate<List<Byte>> condition, @Nullable Predicate<Byte> listener) {
+        return parseMap(position -> buffer[position], bufferPosition, bitOffset, condition, listener);
+    }
+
+    /**
+     * 通过条件读取数据并转换为7bit的地图数据格式
+     * *使用泛型
+     *
+     * @param buffer    被读取的缓存数据
+     * @param bitOffset bit的偏移
+     * @param condition 循环条件
+     * @param listener  每完成一个7bit就会调用一次
+     * @return 7bit的地图数据格式
+     */
+    public static byte[] parseMap(@NotNull Function<Integer, Byte> buffer, int bufferPosition, int bitOffset, @NotNull Predicate<List<Byte>> condition, @Nullable Predicate<Byte> listener) {
         List<Byte> list = new ArrayList<>();
         int index = 0;
         while (condition.test(list)) {
@@ -50,7 +94,7 @@ public class MapBuilder extends LinkedList<MapTile> {
                 list.add(index, (byte) 0);
             }
 
-            int data = buffer.get(bufferPosition++) & 0xFF;
+            int data = buffer.apply(bufferPosition++) & 0xFF;
             int hBit, lBit;
             // 前bit和后bit的数量，总和不超过 7
 

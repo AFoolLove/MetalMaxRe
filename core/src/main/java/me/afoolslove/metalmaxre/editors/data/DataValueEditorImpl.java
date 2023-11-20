@@ -101,7 +101,7 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
 
         byte[] x2Bytes = new byte[get2ByteMaxCount() * 2];
         for (Map.Entry<Integer, Number> entry : get2ByteValues().entrySet()) {
-            var data = NumberR.toByteArray(entry.getValue().intValue(), 2, false);
+            byte[] data = NumberR.toByteArray(entry.getValue().intValue(), 2, false);
             x2Bytes[(entry.getKey() - get1ByteMaxCount()) * 2] = data[0];
             x2Bytes[((entry.getKey() - get1ByteMaxCount()) * 2) + 1] = data[1];
         }
@@ -111,14 +111,14 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
             int index = entry.getKey() - (get1ByteMaxCount() + get2ByteMaxCount());
             if (index < 0x24) {
                 // 前0x24个数据值虽然属于3byte，但会被当作2byte使用，实际上也是2byte
-                var value = NumberR.toByteArray(entry.getValue().intValue(), 2, false);
+                byte[] value = NumberR.toByteArray(entry.getValue().intValue(), 2, false);
                 x3Bytes[index * 2] = value[0];
                 x3Bytes[(index * 2) + 1] = value[1];
                 continue;
             }
 
             final int A = 0x0A;  // 程序中写死的值
-            var value = entry.getValue().intValue();
+            int value = entry.getValue().intValue();
             int x09 = value / (0x100 * A); // 得到 x09
             int x08 = (value - (x09 * 0x100 * A)) / A; // 得到 x08
 

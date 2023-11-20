@@ -135,13 +135,6 @@ public class BitOutputStream extends ByteArrayOutputStream {
     }
 
     @Override
-    public void writeBytes(byte[] b) {
-        // 直接写入字节会使下一个被写入的bit位变为初始位
-        nextBitIndex = 0;
-        super.writeBytes(b);
-    }
-
-    @Override
     public void write(@NotNull byte[] b) throws IOException {
         // 直接写入字节会使下一个被写入的bit位变为初始位
         nextBitIndex = 0;

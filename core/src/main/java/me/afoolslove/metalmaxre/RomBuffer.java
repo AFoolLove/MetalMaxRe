@@ -73,7 +73,7 @@ public class RomBuffer implements AutoCloseable, Closeable {
      */
     private final GameHeader.PrgRomChangeListener prgRomChangeListener = (header, oldValue, newValue) -> {
         if (oldValue != newValue) {
-            var oldPrgRom = prgRom;
+            ByteBuffer oldPrgRom = prgRom;
             prgRom = ByteBuffer.allocate(newValue * 0x4000);
             if (oldValue > newValue) {
                 prgRom.put(0x00000, oldPrgRom, 0x00000, prgRom.capacity());
@@ -87,7 +87,7 @@ public class RomBuffer implements AutoCloseable, Closeable {
      */
     private final GameHeader.ChrRomChangeListener chrRomChangeListener = (header, oldValue, newValue) -> {
         if (oldValue != newValue) {
-            var oldChrRom = chrRom;
+            ByteBuffer oldChrRom = chrRom;
             chrRom = ByteBuffer.allocate(newValue * 0x4000);
             if (oldValue > newValue) {
                 chrRom.put(0x00000, oldChrRom, 0x00000, chrRom.capacity());
@@ -630,7 +630,7 @@ public class RomBuffer implements AutoCloseable, Closeable {
      * @return 转换为字节数组的ROM
      */
     public byte[] toByteArray() {
-        var byteArrayOutputStream = new ByteArrayOutputStream(
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(
                 GameHeader.HEADER_LENGTH
                 + (trainer == null ? 0 : Trainer.TRAINER_LENGTH)
                 + header.getPrgRomLength()
