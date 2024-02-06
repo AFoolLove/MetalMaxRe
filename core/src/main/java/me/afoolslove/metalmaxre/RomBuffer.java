@@ -548,6 +548,13 @@ public class RomBuffer implements AutoCloseable, Closeable {
         }
     }
 
+    public void put(@NotNull DataAddress dataAddress, byte b) {
+        switch (dataAddress.getType()) {
+            case PRG -> putPrg(dataAddress.getStartAddress(), b);
+            case CHR -> putChr(dataAddress.getStartAddress(), b);
+        }
+    }
+
     /**
      * 获取相同大小的数据到数组中
      * <p>

@@ -34,7 +34,7 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
     //    private final DataAddress monsterModelLayout = DataAddress.fromPRG(0x22F52 - 0x10, 0x23223 - 0x10);
     private final DataAddress monsterModelLayout = DataAddress.fromPRG(0x22F52 - 0x10, 0x232AF - 0x10);
 
-    private final DataAddress monsterModelLayoutTileIndex = DataAddress.fromPRG(0x22D59 - 0x10, 0x22DA7 - 0x10);
+    private final DataAddress monsterModelLayoutTileIndex = DataAddress.fromPRG(0x22D59 - 0x10, 0x22DA0 - 0x10);
 
     private final List<MonsterModel> monsterModels = new ArrayList<>();
 
@@ -56,7 +56,7 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         byte[] modelSizes = new byte[0x4F];
         byte[] modelLayouts = new byte[getMonsterModelLayout().length()];
         char[] modelLayoutIndexes = new char[0x4F];
-        byte[] modelLayoutTileIndexes = new byte[0x4F];
+        byte[] modelLayoutTileIndexes = new byte[0x48];
 
 
         getBuffer().get(getMonsterModelPaletteIndex(), modelPaletteIndexes);
@@ -138,6 +138,8 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             if (modelIndex < 0x48) {
                 modelData = new byte[(int) Math.ceil((monsterModel.intWidth() * monsterModel.intHeight()) / 8.0)];
                 monsterModel.setModelType(MonsterModelType.A);
+                // 图块起始id
+                monsterModel.setTileIndex(modelLayoutTileIndexes[modelIndex]);
             } else {
                 modelData = new byte[monsterModel.intWidth() * monsterModel.intHeight()];
                 monsterModel.setModelType(MonsterModelType.B);
@@ -145,9 +147,6 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             int modelLayoutIndex = modelLayoutIndexes[modelIndex] - (0x8000 + 0x0F52 - 0x10);
             System.arraycopy(modelLayouts, modelLayoutIndex + 1, modelData, 0x00, modelData.length);
             monsterModel.setModelData(modelData);
-
-            // 图块起始id
-            monsterModel.setTileIndex(modelLayoutTileIndexes[modelIndex]);
 
             // 拥有自定义调色板Y值的模型
             if (customPaletteYsList.size() > modelIndex) {
@@ -173,7 +172,7 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         byte[] incrementalTileSet = new byte[0x07];
         byte[] modelSizes = new byte[0x4F];
         char[] modelLayoutIndexes = new char[0x4F];
-        byte[] modelLayoutTileIndexes = new byte[0x4F];
+        byte[] modelLayoutTileIndexes = new byte[0x48];
 
         // 基本怪物模型属性
         MonsterModel[] monsterAModels = new MonsterModel[0x48];
@@ -311,11 +310,12 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             if (monsterModel == null) {
                 // 模型数量少于原版数量
                 // 暂不处理
-
                 modelTileSets[modelIndex] = 0x00;
                 modelSizes[modelIndex] = 0x00;
-                modelLayoutTileIndexes[modelIndex] = 0x00;
                 modelLayoutIndexes[modelIndex] = 0x8000 + 0x0F52 - 0x10;
+                if (modelIndex < 0x48) {
+                    modelLayoutTileIndexes[modelIndex] = 0x00;
+                }
                 continue;
             }
             // 将自增chr提取出来
@@ -339,8 +339,9 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
                 modelTileSets[modelIndex] = monsterModel.getChrIndex();
             }
             modelSizes[modelIndex] = monsterModel.getModelSize();
-            modelLayoutTileIndexes[modelIndex] = monsterModel.getTileIndex();
-
+            if (modelIndex < 0x48) {
+                modelLayoutTileIndexes[modelIndex] = monsterModel.getTileIndex();
+            }
             modelData.put(Arrays.hashCode(monsterModel.getModelData()), monsterModel.getModelData());
         }
         // 更新模型索引

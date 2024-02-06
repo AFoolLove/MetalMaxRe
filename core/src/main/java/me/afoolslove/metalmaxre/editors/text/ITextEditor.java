@@ -71,12 +71,42 @@ public interface ITextEditor extends IRomEditor {
     String getItemName(int itemId);
 
     /**
+     * 获取物品的名称
+     *
+     * @param itemId 物品的id
+     * @return 物品的名称
+     */
+    default String getItemName(byte itemId) {
+        return getItemName(itemId & 0xFF);
+    }
+
+    /**
      * 获取怪物的名称
      *
      * @param monsterId 怪物的id
      * @return 怪物的名称
      */
     String getMonsterName(int monsterId);
+
+    /**
+     * 彩蛋名称
+     * <p>
+     * 如果玩家的名称与彩蛋名称相同，就会触发彩蛋名称
+     * <p>
+     * K：触发彩蛋名称
+     * V：彩蛋名称
+     */
+    Map<TextBuilder, List<TextBuilder>> getEasterEggNames();
+
+    /**
+     * 玩家二的名称池
+     */
+    List<TextBuilder> getPlayer1NamePool();
+
+    /**
+     * 玩家三的名称池
+     */
+    List<TextBuilder> getPlayer2NamePool();
 
     /**
      * 设置城镇的名称
@@ -101,6 +131,21 @@ public interface ITextEditor extends IRomEditor {
      * @param newName   新的怪物名称
      */
     void setMonsterName(int monsterId, String newName);
+
+    /**
+     * 设置彩蛋名称
+     */
+    void setEasterEggName(TextBuilder name, List<TextBuilder> easterEggName);
+
+    /**
+     * 设置玩家二名称池
+     */
+    void setPlayer1NamePool(List<TextBuilder> namePool);
+
+    /**
+     * 设置玩家三名称池
+     */
+    void setPlayer2NamePool(List<TextBuilder> namePool);
 
     /**
      * 获取已知的文本段的地址
@@ -129,4 +174,25 @@ public interface ITextEditor extends IRomEditor {
      * @return 怪物名称的地址
      */
     DataAddress getMonsterNameAddress();
+
+    /**
+     * 获取彩蛋名称的地址
+     *
+     * @return 彩蛋名称的地址
+     */
+    DataAddress getEasterEggNameAddress();
+
+    /**
+     * 获取玩家二名称池的地址
+     *
+     * @return 玩家二名称池的地址
+     */
+    DataAddress getPlayer1NamePoolAddress();
+
+    /**
+     * 获取玩家三名称池的地址
+     *
+     * @return 玩家三名称池的地址
+     */
+    DataAddress getPlayer2NamePoolAddress();
 }

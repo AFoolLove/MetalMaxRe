@@ -29,6 +29,21 @@ public class EditorManagerEvent extends Event {
         }
     }
 
+    /**
+     * 所有编辑加载时出现错误，无法正常等待编辑器加载完毕
+     */
+    public static class LoadError extends EditorManagerEvent {
+        private final Throwable throwable;
+
+        public LoadError(@NotNull MetalMaxRe metalMaxRe, @NotNull Throwable throwable) {
+            super(metalMaxRe);
+            this.throwable = throwable;
+        }
+
+        public Throwable getThrowable() {
+            return throwable;
+        }
+    }
 
     /**
      * 所有编辑器应用前
@@ -50,5 +65,20 @@ public class EditorManagerEvent extends Event {
         }
     }
 
+    /**
+     * 所有编辑器应用时出现错误，无法进行正常等待应用编辑器完毕
+     */
+    public static class ApplyError extends EditorManagerEvent {
+        private final Throwable throwable;
+
+        public ApplyError(@NotNull MetalMaxRe metalMaxRe, @NotNull Throwable throwable) {
+            super(metalMaxRe);
+            this.throwable = throwable;
+        }
+
+        public Throwable getThrowable() {
+            return throwable;
+        }
+    }
 
 }

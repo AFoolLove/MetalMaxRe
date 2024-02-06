@@ -43,7 +43,12 @@ public interface IComputerEditor<C extends Computer> extends IRomEditor {
      * @param newComputers 新的计算机列表
      * @return 旧的计算机列表
      */
-    List<Computer> dataUpdate(@Nullable List<Computer> newComputers);
+    List<C> dataUpdate(@Nullable List<C> newComputers);
+
+    /**
+     * 更新一个计算机的数据
+     */
+    void updateComputer(@NotNull C computer);
 
     /**
      * 添加一个计算机
@@ -66,7 +71,14 @@ public interface IComputerEditor<C extends Computer> extends IRomEditor {
      * @param replace 替换后的计算机
      * @return 是否替换成功
      */
-    boolean replaceComputer(@NotNull Computer source, @NotNull Computer replace);
+    boolean replaceComputer(@NotNull C source, @NotNull C replace);
+
+    /**
+     * 判断是否包含指定的计算机
+     *
+     * @param computer 被包含的计算机
+     */
+    boolean containsComputer(@NotNull C computer);
 
     /**
      * 获取计算机数据的起始地址

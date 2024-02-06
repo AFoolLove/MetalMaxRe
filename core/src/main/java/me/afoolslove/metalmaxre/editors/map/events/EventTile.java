@@ -91,6 +91,17 @@ public class EventTile extends Point2B {
         return getTile() == eventTile.getTile();
     }
 
+    /**
+     * 判断给定的坐标是否在矩形内
+     *
+     * @param x 给定的横坐标
+     * @param y 给定的纵坐标
+     * @return 如果给定的坐标在矩形内，则返回true；否则返回false
+     */
+    public boolean contains(int x, int y) {
+        return getX() == x && getY() == y;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), getTile());

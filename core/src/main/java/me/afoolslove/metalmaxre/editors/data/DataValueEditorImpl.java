@@ -3,7 +3,7 @@ package me.afoolslove.metalmaxre.editors.data;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
-import me.afoolslove.metalmaxre.event.editors.EditorDataValueEvent;
+import me.afoolslove.metalmaxre.event.editors.data.EditorDataValueEvent;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
@@ -161,9 +161,9 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
     }
 
     @Override
-    public Number changeValue(int index, Number value) {
+    public Number changeValue(int index, @NotNull Number value) {
         Number oldValue = getUnsafeValues().replace(index, value);
-        getMetalMaxRe().getEventHandler().callEvent(new EditorDataValueEvent.ValueChanged(getMetalMaxRe(), this, oldValue, value));
+        getMetalMaxRe().getEventHandler().callEvent(new EditorDataValueEvent.ValueChanged(getMetalMaxRe(), this, index, oldValue, value));
         return oldValue;
     }
 }

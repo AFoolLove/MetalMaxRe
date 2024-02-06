@@ -119,11 +119,10 @@ public class EventHandler {
                                 declaredMethod.setAccessible(true);
                                 declaredMethod.invoke(eventListener, parameter.getType().cast(event));
                             } catch (Exception ex) {
-                                // throw new RuntimeException(ex);
                                 if (ex.getCause() != null) {
-                                    ex.getCause().printStackTrace();
+                                    LOGGER.error("事件执行时异常", ex.getCause());
                                 } else {
-                                    ex.printStackTrace();
+                                    LOGGER.error("事件执行时异常", ex);
                                 }
                             }
                         }

@@ -67,7 +67,7 @@ public class EditorComputerEvent extends EditorEvent {
     }
 
     /**
-     * 更新一个计算机的事情
+     * 更新一个计算机的事件
      */
     public static class UpdateComputer extends EditorComputerEvent {
 

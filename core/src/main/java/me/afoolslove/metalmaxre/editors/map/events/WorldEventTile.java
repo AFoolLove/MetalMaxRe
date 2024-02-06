@@ -30,4 +30,18 @@ public class WorldEventTile extends EventTile {
     public void setTiles(byte[] tiles) {
         this.tiles = Arrays.copyOf(tiles, tiles.length);
     }
+
+    /**
+     * 判断坐标是否在事件地图中
+     * <p>
+     * 参数坐标范围为00-FF，自动转换为00-3F
+     *
+     * @param x 给定的横坐标
+     * @param y 给定的纵坐标
+     * @return 是否在事件地图中
+     */
+    @Override
+    public boolean contains(int x, int y) {
+        return super.contains(x / 4, y / 4);
+    }
 }

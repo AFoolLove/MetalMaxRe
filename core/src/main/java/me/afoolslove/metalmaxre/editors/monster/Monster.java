@@ -87,6 +87,66 @@ public class Monster {
     }
 
     /**
+     * 设置冷气抗性
+     *
+     * @see #setResistance(int)
+     * @see #setResistance(byte)
+     */
+    public void setColdResistance(int coldResistance) {
+        coldResistance = coldResistance & 0B0000_0011;
+
+        int resistance = intResistance();
+        resistance &= 0B1111_1100;
+        resistance |= coldResistance;
+        setResistance(resistance);
+    }
+
+    /**
+     * 设置火焰抗性
+     *
+     * @see #setResistance(int)
+     * @see #setResistance(byte)
+     */
+    public void setFireResistance(int fireResistance) {
+        fireResistance = (fireResistance & 0B0000_0011) << 2;
+
+        int resistance = intResistance();
+        resistance &= 0B1111_0011;
+        resistance |= fireResistance;
+        setResistance(resistance);
+    }
+
+    /**
+     * 设置气体抗性
+     *
+     * @see #setResistance(int)
+     * @see #setResistance(byte)
+     */
+    public void setGasResistance(int gasResistance) {
+        gasResistance = (gasResistance & 0B0000_0011) << 4;
+
+        int resistance = intResistance();
+        resistance &= 0B1100_1111;
+        resistance |= gasResistance;
+        setResistance(resistance);
+    }
+
+    /**
+     * 设置自动恢复HP
+     *
+     * @see #setResistance(int)
+     * @see #setResistance(byte)
+     */
+    public void setAutoRestore(int autoRestore) {
+        autoRestore = (autoRestore & 0B0000_0011) << 6;
+
+        int resistance = intResistance();
+        resistance &= 0B0011_1111;
+        resistance |= autoRestore;
+        setResistance(resistance);
+    }
+
+    /**
      * 设置怪物的特殊能力
      * <p>
      * 0B0000_0000 攻击1次<p>
@@ -412,23 +472,6 @@ public class Monster {
     public void setExperience(@Range(from = 0x00, to = 0xFF) int experience) {
         this.experience = (byte) (experience & 0xFF);
     }
-/*
-
-7BA4
-D2A4
-D2A4-
-B7A4
-44A4
-4BA4
-63A4
-6FA4
-76A4
-7FA4
-B3A4
-8AA4
-A7A4
-
- */
 
     /**
      * 设置怪物的类型等数据
@@ -511,6 +554,34 @@ A7A4
 
     public int intResistance() {
         return getResistance() & 0xFF;
+    }
+
+    /**
+     * @return 冷气抗性
+     */
+    public int getColdResistance() {
+        return getResistance() & 0B0000_0011;
+    }
+
+    /**
+     * @return 火焰抗性
+     */
+    public int getFireResistance() {
+        return (getResistance() & 0B0000_1100) >> 2;
+    }
+
+    /**
+     * @return 气体抗性
+     */
+    public int getGasResistance() {
+        return (getResistance() & 0B0011_0000) >> 4;
+    }
+
+    /**
+     * @return 气体抗性
+     */
+    public int getAutoRestore() {
+        return (getResistance() & 0B1100_0000) >> 6;
     }
 
     /**

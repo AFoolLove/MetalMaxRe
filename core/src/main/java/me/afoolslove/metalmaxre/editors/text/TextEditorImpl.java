@@ -10,9 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 文本编辑器
@@ -24,46 +22,70 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     private static final Logger LOGGER = LoggerFactory.getLogger(TextEditorImpl.class);
     private final Map<Integer, DataAddress> textAddresses;
 
+    private final DataAddress easterEggNameAddress;
+    private final DataAddress player1NamePoolAddress;
+    private final DataAddress player2NamePoolAddress;
+
     private final Map<DataAddress, List<TextBuilder>> text = new HashMap<>();
 
     public Map<DataAddress, List<TextBuilder>> getText() {
         return text;
     }
 
+    private final Map<TextBuilder, List<TextBuilder>> easterEggNames = new HashMap<>();
+    private final List<TextBuilder> player1NamePool = new ArrayList<>();
+    private final List<TextBuilder> player2NamePool = new ArrayList<>();
+
     public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe, Map.ofEntries(
-                Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
-                Map.entry(0x00, DataAddress.from(0x11A20 - 0x10, 0x1200F - 0x10)), //-
-                Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
-                Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
-                Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
-                Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
-                Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
-                Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
-                Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
-                Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
-                Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
-                Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
-        ));
+                        Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
+                        Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
+                        Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
+                        Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
+                        Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
+                        Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
+                        Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
+                        Map.entry(0x00, DataAddress.from(0x11A20 - 0x10, 0x1200F - 0x10)), //-
+                        Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
+                        Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
+                        Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
+                        Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
+                        Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)), //-
+                        Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
+                        Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
+                        Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
+                        Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
+                        Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
+                        Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
+                        Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
+                        Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
+                        Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
+                ),
+                DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
+                DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
+                DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10)
+        );
     }
 
-    public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe, @NotNull Map<Integer, DataAddress> textAddresses) {
+    public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                          @NotNull Map<Integer, DataAddress> textAddresses,
+                          @NotNull DataAddress easterEggNameAddress,
+                          @NotNull DataAddress player1NamePoolAddress,
+                          @NotNull DataAddress player2NamePoolAddress) {
         super(metalMaxRe);
         this.textAddresses = textAddresses;
+        this.easterEggNameAddress = easterEggNameAddress;
+        this.player1NamePoolAddress = player1NamePoolAddress;
+        this.player2NamePoolAddress = player2NamePoolAddress;
     }
 
     @Editor.Load
     public void onLoad() {
+        this.text.clear();
+        easterEggNames.clear();
+        player1NamePool.clear();
+        player2NamePool.clear();
+
         textAddresses.values().parallelStream().forEach(textAddress -> {
             // 得到这段文本的数据长度
             final byte[] bytes = new byte[textAddress.length()];
@@ -72,6 +94,32 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
             this.text.put(textAddress, TextBuilder.fromBytes(bytes, getCharMap()));
         });
+
+
+        position(getEasterEggNameAddress());
+        byte[][] easterEggNameBytes = new byte[0x04][0x04];
+        for (int easterEggName = 0; easterEggName < 0x05; easterEggName++) {
+            getBuffer().getAABytes(0, 0x04, easterEggNameBytes);
+
+            TextBuilder key = TextBuilder.fromBytes(easterEggNameBytes[0], getCharMap()).get(0);
+            List<TextBuilder> value = new ArrayList<>();
+            for (int i = 1; i < easterEggNameBytes.length; i++) {
+                value.add(TextBuilder.fromBytes(easterEggNameBytes[i], getCharMap()).get(0));
+            }
+            easterEggNames.put(key, value);
+        }
+
+        position(getPlayer1NamePoolAddress());
+        byte[] bytes = new byte[0x04];
+        for (int i = 0; i < 0x0B; i++) {
+            getBuffer().get(bytes);
+            player1NamePool.add(TextBuilder.fromBytes(bytes, getCharMap()).get(0));
+        }
+        position(getPlayer2NamePoolAddress());
+        for (int i = 0; i < 0x0B; i++) {
+            getBuffer().get(bytes);
+            player2NamePool.add(TextBuilder.fromBytes(bytes, getCharMap()).get(0));
+        }
     }
 
     @Editor.Apply
@@ -98,6 +146,40 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                 }
             }
         });
+
+        position(getEasterEggNameAddress());
+        byte[] bytes = new byte[0x04];
+        byte[] tmpBytes;
+        for (Map.Entry<TextBuilder, List<TextBuilder>> entry : easterEggNames.entrySet()) {
+            Arrays.fill(bytes, (byte) 0x9F);
+            tmpBytes = entry.getKey().toByteArray(getCharMap());
+            System.arraycopy(bytes, 0, tmpBytes, 0, Math.min(tmpBytes.length, 0x04));
+            getBuffer().putAABytes(0, 0x04, bytes);
+
+            for (TextBuilder textBuilder : entry.getValue()) {
+                Arrays.fill(bytes, (byte) 0x9F);
+                tmpBytes = textBuilder.toByteArray(getCharMap());
+                System.arraycopy(bytes, 0, tmpBytes, 0, Math.min(tmpBytes.length, 0x04));
+                getBuffer().putAABytes(0, 0x04, bytes);
+            }
+        }
+
+        position(getPlayer1NamePoolAddress());
+        for (int i = 0; i < 0x0B; i++) {
+            TextBuilder textBuilder = player1NamePool.get(i);
+            Arrays.fill(bytes, (byte) 0x9F);
+            tmpBytes = textBuilder.toByteArray(getCharMap());
+            System.arraycopy(bytes, 0, tmpBytes, 0, Math.min(tmpBytes.length, 0x04));
+            getBuffer().put(bytes);
+        }
+        position(getPlayer2NamePoolAddress());
+        for (int i = 0; i < 0x0B; i++) {
+            TextBuilder textBuilder = player2NamePool.get(i);
+            Arrays.fill(bytes, (byte) 0x9F);
+            tmpBytes = textBuilder.toByteArray(getCharMap());
+            System.arraycopy(bytes, 0, tmpBytes, 0, Math.min(tmpBytes.length, 0x04));
+            getBuffer().put(bytes);
+        }
     }
 
     @Override
@@ -142,6 +224,21 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     }
 
     @Override
+    public Map<TextBuilder, List<TextBuilder>> getEasterEggNames() {
+        return easterEggNames;
+    }
+
+    @Override
+    public List<TextBuilder> getPlayer1NamePool() {
+        return player1NamePool;
+    }
+
+    @Override
+    public List<TextBuilder> getPlayer2NamePool() {
+        return player2NamePool;
+    }
+
+    @Override
     public void setTownName(int townId, String newName) {
         List<TextBuilder> textBuilders = text.get(getTownNameAddress());
         if (textBuilders == null || (0x30 + townId) >= textBuilders.size()) {
@@ -169,6 +266,21 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     }
 
     @Override
+    public void setEasterEggName(TextBuilder name, List<TextBuilder> easterEggName) {
+
+    }
+
+    @Override
+    public void setPlayer1NamePool(List<TextBuilder> namePool) {
+
+    }
+
+    @Override
+    public void setPlayer2NamePool(List<TextBuilder> namePool) {
+
+    }
+
+    @Override
     public Map<Integer, DataAddress> getTextAddresses() {
         return textAddresses;
     }
@@ -188,34 +300,52 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         return getTextAddresses().get(0x01);
     }
 
+    @Override
+    public DataAddress getEasterEggNameAddress() {
+        return easterEggNameAddress;
+    }
+
+    @Override
+    public DataAddress getPlayer1NamePoolAddress() {
+        return player1NamePoolAddress;
+    }
+
+    @Override
+    public DataAddress getPlayer2NamePoolAddress() {
+        return player2NamePoolAddress;
+    }
+
     @Editor.TargetVersion("japanese")
     public static class JPTextEditorImpl extends TextEditorImpl {
 
         public JPTextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, Map.ofEntries(
-                    Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                    Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                    Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                    Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                    Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                    Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                    Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A25 - 0x10)), //-
-                    Map.entry(0x00, DataAddress.from(0x11A26 - 0x10, 0x1200F - 0x10)), //-
-                    Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120B5 - 0x10)), //-
-                    Map.entry(0x0D, DataAddress.from(0x120B6 - 0x10, 0x124ED - 0x10)), //-
-                    Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x13396 - 0x10)), //-
-                    Map.entry(0x10, DataAddress.from(0x13397 - 0x10, 0x1400F - 0x10)), //-
-                    Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
-                    Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                    Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x17502 - 0x10)), //-
-                    Map.entry(0x0F, DataAddress.from(0x17503 - 0x10, 0x1800F - 0x10)), //-
-                    Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                    Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                    Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21ECC - 0x10)), //-
-                    Map.entry(0x08, DataAddress.from(0x21ECD - 0x10, 0x2200F - 0x10)), //-
-                    Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                    Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
-            ));
+                            Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
+                            Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
+                            Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
+                            Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
+                            Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
+                            Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
+                            Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A25 - 0x10)), //-
+                            Map.entry(0x00, DataAddress.from(0x11A26 - 0x10, 0x1200F - 0x10)), //-
+                            Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120B5 - 0x10)), //-
+                            Map.entry(0x0D, DataAddress.from(0x120B6 - 0x10, 0x124ED - 0x10)), //-
+                            Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x13396 - 0x10)), //-
+                            Map.entry(0x10, DataAddress.from(0x13397 - 0x10, 0x1400F - 0x10)), //-
+                            Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
+                            Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
+                            Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x17502 - 0x10)), //-
+                            Map.entry(0x0F, DataAddress.from(0x17503 - 0x10, 0x1800F - 0x10)), //-
+                            Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
+                            Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
+                            Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21ECC - 0x10)), //-
+                            Map.entry(0x08, DataAddress.from(0x21ECD - 0x10, 0x2200F - 0x10)), //-
+                            Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
+                            Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
+                    ),
+                    DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
+                    DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
+                    DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10));
         }
 
         @Override
@@ -236,29 +366,32 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
         public SHTextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, Map.ofEntries(
-                    Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                    Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                    Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                    Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                    Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                    Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                    Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
-                    Map.entry(0x00, DataAddress.from(0x7E010 - 0x10, 0x7E7AF - 0x10)), //-
-                    Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
-                    Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
-                    Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
-                    Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
-                    Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
-                    Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                    Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
-                    Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
-                    Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                    Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                    Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
-                    Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
-                    Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                    Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
-            ));
+                            Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
+                            Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
+                            Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
+                            Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
+                            Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
+                            Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
+                            Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
+                            Map.entry(0x00, DataAddress.from(0x7E010 - 0x10, 0x7E7AF - 0x10)), //-
+                            Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
+                            Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
+                            Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
+                            Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
+                            Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)), //-
+                            Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
+                            Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
+                            Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
+                            Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
+                            Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
+                            Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
+                            Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
+                            Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
+                            Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
+                    ),
+                    DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
+                    DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
+                    DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10));
         }
 
         @Override
@@ -279,29 +412,32 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
         public SHGTextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
             super(metalMaxRe, Map.ofEntries(
-                    Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                    Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                    Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                    Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                    Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                    Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                    Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
-                    Map.entry(0x00, DataAddress.from(0x52010 - 0x10, 0x527AF - 0x10)), //-
-                    Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
-                    Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
-                    Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
-                    Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
-                    Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
-                    Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                    Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
-                    Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
-                    Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                    Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                    Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
-                    Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
-                    Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                    Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
-            ));
+                            Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
+                            Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
+                            Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
+                            Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
+                            Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
+                            Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
+                            Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
+                            Map.entry(0x00, DataAddress.from(0x52010 - 0x10, 0x527AF - 0x10)), //-
+                            Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
+                            Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
+                            Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
+                            Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
+                            Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)), //-
+                            Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
+                            Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
+                            Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
+                            Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
+                            Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
+                            Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
+                            Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
+                            Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
+                            Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
+                    ),
+                    DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
+                    DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
+                    DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10));
         }
 
         @Override

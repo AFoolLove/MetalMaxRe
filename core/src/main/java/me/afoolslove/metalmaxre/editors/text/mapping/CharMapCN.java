@@ -3,7 +3,6 @@ package me.afoolslove.metalmaxre.editors.text.mapping;
 import me.afoolslove.metalmaxre.utils.ExceptionUtils;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +119,7 @@ public class CharMapCN implements ICharMap {
             try {
                 resourceAsStream = Files.newInputStream(Path.of(path));
             } catch (IOException e) {
-                LOGGER.error("字库加载失败：" + ExceptionUtils.toString(e));
+                LOGGER.error("字库加载失败：", e);
                 return null;
             }
         }
@@ -156,8 +155,6 @@ public class CharMapCN implements ICharMap {
                     // 添加文字
                     char key = line.charAt(column);
                     if (key != ' ') { // 空格就算了吧
-
-
                         if (FONTS.containsKey(key)) {
                             // 如果已经添加过，添加进重复Map中
                             FONTS_REPEATED.put(key, value);
@@ -169,7 +166,7 @@ public class CharMapCN implements ICharMap {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("字库加载失败：" + ExceptionUtils.toString(e));
         }
 
         values.addAll(FONTS.entrySet().stream().map(SingleMapEntry::create).toList());
@@ -185,27 +182,5 @@ public class CharMapCN implements ICharMap {
     @Override
     public List<SingleMapEntry<Character, Object>> getValues() {
         return values;
-    }
-
-    @Override
-    @NotNull
-    public Object[] getValues(char ch) {
-        List<Object> values = new ArrayList<>();
-        for (SingleMapEntry<Character, Object> value : getValues()) {
-            if (value.getKey() == ch) {
-                values.add(value.getValue());
-            }
-        }
-        return values.toArray();
-    }
-
-    @Override
-    public @Nullable Object getValue(char ch) {
-        for (SingleMapEntry<Character, Object> value : getValues()) {
-            if (value.getKey() == ch) {
-                return value.getValue();
-            }
-        }
-        return null;
     }
 }

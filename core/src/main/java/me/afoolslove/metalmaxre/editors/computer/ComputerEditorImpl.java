@@ -64,7 +64,6 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         for (int i = 0; i < getMaxCount(); i++) {
             getUnsafeComputers().add(new Computer(data[0][i], data[1][i], data[2][i], data[3][i]));
         }
-
     }
 
     @Editor.Apply
@@ -136,28 +135,40 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
 
         // 清空旧的计算机列表，添加新的计算机列表
         getUnsafeComputers().clear();
-        getUnsafeComputers().addAll(newComputers);
+        // 在添加前移除重复对象
+        getUnsafeComputers().addAll(newComputers.stream().distinct().toList());
 
         EditorComputerEvent.DataUpdateComputer dataUpdateComputer = new EditorComputerEvent.DataUpdateComputer(getMetalMaxRe(), this, oldComputers, newComputers);
-        getMetalMaxRe().getEventHandler().callEvent(dataUpdateComputer);
+        callEvent(dataUpdateComputer);
         return oldComputers;
     }
 
     @Override
+    public void updateComputer(@NotNull Computer computer) {
+        if (containsComputer(computer)) {
+            // 我怎么知道你改了什么
+            callEvent(new EditorComputerEvent.UpdateComputer(getMetalMaxRe(), this, computer));
+        }
+    }
+
+    @Override
     public void addComputer(@NotNull Computer computer) {
-        getUnsafeComputers().add(computer);
-        getMetalMaxRe().getEventHandler().callEvent(new EditorComputerEvent.AddComputer(getMetalMaxRe(), this, computer));
+        if (!containsComputer(computer)) {
+            getUnsafeComputers().add(computer);
+            callEvent(new EditorComputerEvent.AddComputer(getMetalMaxRe(), this, computer));
+        }
     }
 
     @Override
     public void removeComputer(@NotNull Computer computer) {
-        getUnsafeComputers().remove(computer);
-        getMetalMaxRe().getEventHandler().callEvent(new EditorComputerEvent.RemoveComputer(getMetalMaxRe(), this, computer));
+        if (getUnsafeComputers().remove(computer)) {
+            callEvent(new EditorComputerEvent.RemoveComputer(getMetalMaxRe(), this, computer));
+        }
     }
 
     @Override
     public boolean replaceComputer(@NotNull Computer source, @NotNull Computer replace) {
-        if (getUnsafeComputers().contains(replace)) {
+        if (containsComputer(replace)) {
             return true;
         }
         if (getUnsafeComputers().remove(source)) {
@@ -165,10 +176,14 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
             try {
                 return getUnsafeComputers().add(replace);
             } finally {
-                getMetalMaxRe().getEventHandler().callEvent(new EditorComputerEvent.ReplaceComputer(getMetalMaxRe(), this, source, replace));
+                callEvent(new EditorComputerEvent.ReplaceComputer(getMetalMaxRe(), this, source, replace));
             }
         }
         return false;
+    }
 
+    @Override
+    public boolean containsComputer(@NotNull Computer computer) {
+        return getUnsafeComputers().contains(computer);
     }
 }

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteScriptEditor {
-    private final Gson gson = new GsonBuilder().registerTypeAdapter(SpriteScriptAction.class, new JsonDeserializer<>() {
+    public static final Gson SPRITE_SCRIPT_GSON = new GsonBuilder().registerTypeAdapter(SpriteScriptAction.class, new JsonDeserializer<>() {
         private final Pattern HEX_BYTE = Pattern.compile("^[0-9a-fA-F]{1,2}$");
 
         @Override
@@ -94,7 +94,7 @@ public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor imple
         this.spriteScriptIndexAddress = spriteScriptIndexAddress;
 
         byte[] bytes = ResourceManager.getAsBytes("/sprite_script_actions.json");
-        SpriteScriptAction[] spriteScriptActions = gson.fromJson(new String(bytes, StandardCharsets.UTF_8), new TypeToken<>() {
+        SpriteScriptAction[] spriteScriptActions = SPRITE_SCRIPT_GSON.fromJson(new String(bytes, StandardCharsets.UTF_8), new TypeToken<>() {
         });
         for (SpriteScriptAction spriteScriptAction : spriteScriptActions) {
             actions.put(spriteScriptAction.getCode(), spriteScriptAction);

@@ -34,7 +34,15 @@ public interface ICharMap {
      * @return 文字字节数组，数组值可能是{@code byte[]}、{@code byte}
      */
     @NotNull
-    Object[] getValues(char ch);
+    default Object[] getValues(char ch) {
+        List<Object> values = new ArrayList<>();
+        for (SingleMapEntry<Character, Object> value : getValues()) {
+            if (value.getKey() == ch) {
+                values.add(value.getValue());
+            }
+        }
+        return values.toArray();
+    }
 
     /**
      * 通过字符获取文字字节，只获取一个
@@ -43,7 +51,14 @@ public interface ICharMap {
      * @return 文字字节，数组值可能是{@code byte[]}、{@code byte}以及{@code null}
      */
     @Nullable
-    Object getValue(char ch);
+    default Object getValue(char ch) {
+        for (SingleMapEntry<Character, Object> value : getValues()) {
+            if (value.getKey() == ch) {
+                return value.getValue();
+            }
+        }
+        return null;
+    }
 
     /**
      * 判断是否存在该字符

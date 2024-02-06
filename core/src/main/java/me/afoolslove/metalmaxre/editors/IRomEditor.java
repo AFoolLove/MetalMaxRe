@@ -3,6 +3,8 @@ package me.afoolslove.metalmaxre.editors;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
 import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
+import me.afoolslove.metalmaxre.event.Event;
+import me.afoolslove.metalmaxre.event.editors.EditorEvent;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.PreferencesUtils;
 import org.jetbrains.annotations.NotNull;
@@ -139,5 +141,13 @@ public interface IRomEditor extends Serializable {
     @NotNull
     default RomBuffer getBuffer() {
         return getMetalMaxRe().getBuffer();
+    }
+
+    default void callEvent(@NotNull Event event) {
+        getMetalMaxRe().getEventHandler().callEvent(event);
+    }
+
+    default void callEvent(@NotNull EditorEvent event, long completionTime) {
+        getMetalMaxRe().getEventHandler().callEvent(event, completionTime);
     }
 }

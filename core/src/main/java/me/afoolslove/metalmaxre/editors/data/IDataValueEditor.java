@@ -118,5 +118,5 @@ public interface IDataValueEditor extends IRomEditor {
      * @param value 新的数据值
      * @return 旧的数据值
      */
-    Number changeValue(int index, Number value);
+    Number changeValue(int index, @NotNull Number value);
 }

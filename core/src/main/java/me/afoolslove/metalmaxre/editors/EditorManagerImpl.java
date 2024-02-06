@@ -335,7 +335,7 @@ public class EditorManagerImpl implements IEditorManager {
                 try {
                     loadEditor(editor.getKey()).get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    LOGGER.error("加载编辑器时被中断或执行异常", e);
                 } finally {
                     latch.countDown();
                 }
@@ -346,7 +346,7 @@ public class EditorManagerImpl implements IEditorManager {
                                 try {
                                     loadEditor(editor.getKey()).get();
                                 } catch (InterruptedException | ExecutionException e) {
-                                    e.printStackTrace();
+                                    LOGGER.error("加载编辑器时被中断或执行异常", e);
                                 } finally {
                                     latch.countDown();
                                 }
@@ -358,7 +358,9 @@ public class EditorManagerImpl implements IEditorManager {
                 // 等待加载完毕
                 latch.await();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                // 等待加载完毕时被中断
+                LOGGER.error("等待加载完毕时被中断", e);
+                getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadError(metalMaxRe, e));
             } finally {
                 // call event
                 getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.LoadPost(metalMaxRe));
@@ -445,7 +447,8 @@ public class EditorManagerImpl implements IEditorManager {
                 try {
                     applyEditor(editor.getKey()).get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    LOGGER.error("应用编辑器时被中断或执行异常", e);
+                    getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.ApplyError(metalMaxRe, e));
                 } finally {
                     latch.countDown();
                 }
@@ -456,7 +459,8 @@ public class EditorManagerImpl implements IEditorManager {
                                 try {
                                     applyEditor(editor.getKey()).get();
                                 } catch (InterruptedException | ExecutionException e) {
-                                    e.printStackTrace();
+                                    LOGGER.error("应用编辑器时被中断或执行异常", e);
+                                    getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.ApplyError(metalMaxRe, e));
                                 } finally {
                                     latch.countDown();
                                 }
@@ -468,7 +472,8 @@ public class EditorManagerImpl implements IEditorManager {
                 // 等待应用完毕
                 latch.await();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                LOGGER.error("等待应用完毕时被中断", e);
+                getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.ApplyError(metalMaxRe, e));
             } finally {
                 // call event
                 getMetalMaxRe().getEventHandler().callEvent(new EditorManagerEvent.ApplyPost(metalMaxRe));
@@ -528,7 +533,7 @@ public class EditorManagerImpl implements IEditorManager {
                     // 应用数据完成
                     getMetalMaxRe().getEventHandler().callEvent(new EditorApplyEvent.Post(getMetalMaxRe(), editor));
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    LOGGER.error("调用编辑器的应用方法时异常", exception);
 
                     // 应用数据失败
                     getMetalMaxRe().getEventHandler().callEvent(new EditorApplyEvent.Post(getMetalMaxRe(), editor, exception));
@@ -593,10 +598,10 @@ public class EditorManagerImpl implements IEditorManager {
 
                 // 通知加載数据失败
                 if (exception.getCause() != null) {
-                    exception.getCause().printStackTrace();
+                    LOGGER.error("编辑器加载失败", exception.getCause());
                     metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, (Exception) exception.getCause(), reload), end);
                 } else {
-                    exception.printStackTrace();
+                    LOGGER.error("编辑器加载失败", exception);
                     metalMaxRe.getEventHandler().callEvent(new EditorLoadEvent.Post(metalMaxRe, editor, exception, reload), end);
                 }
             }

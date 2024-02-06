@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editors.monster;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +121,13 @@ public interface IMonsterEditor extends IRomEditor {
     SpecialMonsterGroup[] getSpecialMonsterGroups();
 
     /**
+     * 获取自动恢复各个阶段的量
+     *
+     * @return 自动恢复各个阶段的量
+     */
+    List<SingleMapEntry<Integer, Integer>> getAutoRestores();
+
+    /**
      * 获取指定位置的特殊怪物组合集
      *
      * @param index 索引
@@ -167,6 +175,11 @@ public interface IMonsterEditor extends IRomEditor {
      * 怪物的攻击组合地址
      */
     DataAddress getMonsterAttackModeGroupsAddress();
+
+    /**
+     * 怪物属性中的每回合自动恢复量
+     */
+    DataAddress getMonsterResistanceAutoRestoreAddress();
 
     /**
      * 怪物的属性地址

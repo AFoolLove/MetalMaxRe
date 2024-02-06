@@ -314,6 +314,11 @@ public class RomBufferWrapper extends RomBuffer {
     }
 
     @Override
+    public void put(@NotNull DataAddress dataAddress, byte b) {
+        romBuffer.put(dataAddress, b);
+    }
+
+    @Override
     public void getWholeBytes(int index, int offset, int length, byte[]... aaBytes) {
         romBuffer.getWholeBytes(index, offset, length, aaBytes);
     }

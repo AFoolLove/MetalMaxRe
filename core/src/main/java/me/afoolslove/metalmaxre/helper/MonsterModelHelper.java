@@ -56,7 +56,7 @@ public class MonsterModelHelper {
     public static byte[][] generateMonsterModel(@NotNull MetalMaxRe metalMaxRe, @NotNull MonsterModel model) {
         int modelSize = model.intModelSize();                // 模型大小
         int chrIndex = model.intChrIndex();                  // 图形表
-        int tileIndex = model.intTileIndex();                // 图块起始索引
+        Byte tileIndex = model.getTileIndex();               // 图块起始索引
         MonsterModelType modelType = model.getModelType();   // 模型数据类型
         byte[] modelData = model.getModelData();             // 模型数据
         byte[] customPaletteYs = model.getCustomPaletteYs(); // 自定义调色板Y值
@@ -67,7 +67,7 @@ public class MonsterModelHelper {
                                                 int modelSize,
                                                 boolean isChrIncremental,
                                                 int chrIndex,
-                                                int tileIndex,
+                                                Byte tileIndex,
                                                 @NotNull MonsterModelType modelType,
                                                 byte[] model,
                                                 byte[] customPaletteYs
@@ -83,7 +83,7 @@ public class MonsterModelHelper {
                                                 int height,
                                                 boolean isChrIncremental,
                                                 int chrIndex,
-                                                int tileIndex,
+                                                Byte tileIndex,
                                                 @NotNull MonsterModelType modelType,
                                                 byte[] model,
                                                 byte[] customPaletteYs
@@ -144,10 +144,10 @@ public class MonsterModelHelper {
                 }
             }
         } else if (modelType == MonsterModelType.A) { // 00-47
-            tileIndex++;
+            int _tileIndex = tileIndex & 0xFF;
+            _tileIndex++;
 
             List<byte[][]> tiles = new ArrayList<>();
-
 
             // 根据bit是否显示当前图块
             for (int i = 0; i < model.length; i++) {
@@ -158,8 +158,8 @@ public class MonsterModelHelper {
                         tiles.add(null);
                         continue;
                     }
-                    tiles.add(diced.get(tileIndex & 0xFF));
-                    tileIndex++;
+                    tiles.add(diced.get(_tileIndex & 0xFF));
+                    _tileIndex++;
                 }
             }
             byte[][] blackPiece = null;

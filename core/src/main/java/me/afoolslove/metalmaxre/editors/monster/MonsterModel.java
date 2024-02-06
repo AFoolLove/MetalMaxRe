@@ -2,6 +2,7 @@ package me.afoolslove.metalmaxre.editors.monster;
 
 import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class MonsterModel {
     public byte width;
@@ -21,7 +22,7 @@ public class MonsterModel {
 
     private MonsterModelType modelType;
 
-    private byte tileIndex;
+    private Byte tileIndex; // 模型格式一有效，模型格式二为null
 
     private byte[] customPaletteYs; // 可能为null
 
@@ -188,15 +189,17 @@ public class MonsterModel {
 
     /**
      * 设置怪物起始图像id
+     * <p>
+     * *仅模型格式一有效
      *
      * @param tileIndex 怪物起始图像id
      */
-    public void setTileIndex(byte tileIndex) {
+    public void setTileIndex(@Nullable Byte tileIndex) {
         this.tileIndex = tileIndex;
     }
 
     public void setTileIndex(int tileIndex) {
-        setTileIndex((byte) (tileIndex & 0xFF));
+        setTileIndex(Byte.valueOf((byte) (tileIndex & 0xFF)));
     }
 
     /**
@@ -351,10 +354,12 @@ public class MonsterModel {
 
     /**
      * 获取怪物起始图像id
+     * <p>
+     * *仅模型格式一有效
      *
      * @return 怪物起始图像id
      */
-    public byte getTileIndex() {
+    public Byte getTileIndex() {
         return tileIndex;
     }
 

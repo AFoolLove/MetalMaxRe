@@ -4,6 +4,7 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     private final DataAddress monsterDropItemsAddress;
     private final DataAddress monsterAttackModeGroupIndexAddress;
     private final DataAddress monsterAttackModeGroupsAddress;
+    private final DataAddress monsterResistanceAutoRestoreAddress;
     private final DataAddress monsterAttributesAddress;
     private final DataAddress monsterResistanceAddress;
     private final DataAddress monsterAbilityAddress;
@@ -56,11 +58,14 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
     public final List<byte[]> attackModeGroups = new ArrayList<>();
 
+    public final List<SingleMapEntry<Integer, Integer>> autoRestores = new ArrayList<>();
+
     public MonsterEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x2253F - 0x10, 0x225AA - 0x10),
                 DataAddress.fromPRG(0x226FA - 0x10, 0x2277C - 0x10),
                 DataAddress.fromPRG(0x2277D - 0x10),
+                DataAddress.fromPRG(0x2F328 - 0x10, 0x2F32D - 0x10),
                 DataAddress.fromPRG(0x3886E - 0x10, 0x388EF - 0x10),
                 DataAddress.fromPRG(0x388F1 - 0x10, 0x38973 - 0x10),
                 DataAddress.fromPRG(0x38974 - 0x10, 0x389F6 - 0x10),
@@ -86,6 +91,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                              DataAddress monsterDropItemsAddress,
                              DataAddress monsterAttackModeGroupIndexAddress,
                              DataAddress monsterAttackModeGroupsAddress,
+                             DataAddress monsterResistanceAutoRestoreAddress,
                              DataAddress monsterAttributesAddress,
                              DataAddress monsterResistanceAddress,
                              DataAddress monsterAbilityAddress,
@@ -107,6 +113,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         this.monsterDropItemsAddress = monsterDropItemsAddress;
         this.monsterAttackModeGroupIndexAddress = monsterAttackModeGroupIndexAddress;
         this.monsterAttackModeGroupsAddress = monsterAttackModeGroupsAddress;
+        this.monsterResistanceAutoRestoreAddress = monsterResistanceAutoRestoreAddress;
         this.monsterAttributesAddress = monsterAttributesAddress;
         this.monsterResistanceAddress = monsterResistanceAddress;
         this.monsterAbilityAddress = monsterAbilityAddress;
@@ -131,6 +138,13 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 读取前清空数据
         monsters.clear();
         worldMapRealms.clear();
+        autoRestores.clear();
+
+        byte[] autoRestores = new byte[0x06];
+        getBuffer().get(getMonsterResistanceAutoRestoreAddress(), autoRestores);
+        for (int i = 0; i < 0x03; i++) {
+            this.autoRestores.add(SingleMapEntry.create(autoRestores[i * 2] & 0xFF, autoRestores[i * 2 + 1] & 0xFF));
+        }
 
         byte[] attributes = new byte[getMonsterMaxCount()];
         byte[] resistances = new byte[getMonsterMaxCount()];
@@ -264,6 +278,15 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
     @Editor.Apply
     public void onApply() {
+        byte[] autoRestores = new byte[0x06];
+        for (int i = 0; i < 0x03; i++) {
+            SingleMapEntry<Integer, Integer> entry = this.autoRestores.get(i);
+            autoRestores[i * 2] = ((Number) entry.getKey()).byteValue();
+            autoRestores[i * 2 + 1] = ((Number) entry.getValue()).byteValue();
+        }
+        position(getMonsterResistanceAutoRestoreAddress());
+        getBuffer().put(autoRestores);
+
         byte[] attributes = new byte[getMonsterMaxCount()];
         byte[] resistances = new byte[getMonsterMaxCount()];
         byte[] abilities = new byte[getMonsterMaxCount()];
@@ -379,6 +402,11 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     }
 
     @Override
+    public List<SingleMapEntry<Integer, Integer>> getAutoRestores() {
+        return autoRestores;
+    }
+
+    @Override
     public List<Byte> getWorldMapRealms() {
         return worldMapRealms;
     }
@@ -396,6 +424,11 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Override
     public DataAddress getMonsterAttackModeGroupsAddress() {
         return monsterAttackModeGroupsAddress;
+    }
+
+    @Override
+    public DataAddress getMonsterResistanceAutoRestoreAddress() {
+        return monsterResistanceAutoRestoreAddress;
     }
 
     @Override
