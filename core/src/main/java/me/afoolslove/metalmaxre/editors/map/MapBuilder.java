@@ -4,10 +4,9 @@ import me.afoolslove.metalmaxre.RomBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.awt.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -45,6 +44,92 @@ public class MapBuilder extends LinkedList<MapTile> {
                 add(mapTile.intTile(), mapTile.intCount());
             }
         }
+    }
+
+    /**
+     * 将地图构建器中的数据转换为二维地图数据
+     *
+     * @param mapBuilder 地图构建器
+     * @param width      宽度
+     * @param height     高度
+     * @param dest       二维地图的大小
+     * @param isFill     如果目标的大小超出了地图数据是否需要填充
+     * @param fillTile   填充的tile，仅在 {@code isFill}为true时有效
+     * @return 二维地图数据
+     */
+    public static byte[][] toMapData(@NotNull MapBuilder mapBuilder, int width, int height, @Nullable Rectangle dest, boolean isFill, Byte fillTile) {
+        if (dest == null) {
+            dest = new Rectangle(width, height);
+        }
+
+        if (isFill && fillTile == null) {
+            fillTile = 0x00;
+        }
+
+        byte[][] map = mapBuilder.toMapArray(width, height);
+        byte[][] destMap = new byte[dest.height][dest.width];
+
+        for (int y = 0; y < dest.height; y++) {
+            for (int x = 0; x < dest.width; x++) {
+                // 判断是否超出了目标宽度
+                if ((dest.x + x) < width) {
+                    destMap[y][x] = map[y][x + dest.x];
+                    continue;
+                }
+                if (isFill) {
+                    // 触发填充，这行之后的图块的不用遍历，直接计算数量添加
+                    Arrays.fill(destMap[y], x, dest.width, fillTile);
+                }
+                break;
+            }
+        }
+        return destMap;
+    }
+
+    /**
+     * 通过二维地图数据创建地图构建器
+     *
+     * @param mapData  二维地图数据
+     * @param dest     二维地图的大小
+     * @param isFill   如果目标的大小超出了地图数据是否需要填充
+     * @param fillTile 填充的tile，仅在 {@code isFill}为true时有效
+     * @return 地图构建器
+     */
+    public static MapBuilder fromMapData(@NotNull byte[][] mapData, @Nullable Rectangle dest, boolean isFill, Byte fillTile) {
+        MapBuilder mapBuilder = new MapBuilder();
+        int width = mapData[0].length;
+        int height = mapData.length;
+        if (dest == null) {
+            dest = new Rectangle(width, height);
+        }
+        if (isFill && fillTile == null) {
+            fillTile = 0x00;
+        }
+
+        for (int y = dest.y, h = dest.y + dest.height; y < h; y++) {
+            // 判断是否超出了目标高度
+            if (y > height) {
+                if (isFill) {
+                    mapBuilder.add(fillTile, dest.width);
+                }
+                continue;
+            }
+
+            for (int x = dest.x, w = dest.x + dest.width; x < w; x++) {
+                // 判断是否超出了目标宽度
+                if (x < width) {
+                    mapBuilder.add(mapData[y][x]);
+                    continue;
+                }
+                if (isFill) {
+                    // 触发填充，这行之后的图块的不用遍历，直接计算数量添加
+                    mapBuilder.add(fillTile, w - x);
+                }
+                break;
+            }
+        }
+
+        return mapBuilder;
     }
 
     /**
@@ -148,6 +233,42 @@ public class MapBuilder extends LinkedList<MapTile> {
             bytes[i] = list.get(i);
         }
         return bytes;
+    }
+
+    /**
+     * 将地图数据转换为二维数组
+     *
+     * @param mapBuilder 地图构建器
+     * @param width      地图宽度
+     * @param height     地图高度
+     * @return 二维地图
+     */
+    public static byte[][] toMapArray(@NotNull MapBuilder mapBuilder, int width, int height) {
+        byte[][] map = new byte[height][width];
+        int index = 0;
+        for (MapTile mapTile : mapBuilder) {
+            // 获取tile
+            for (int i = 0, count = mapTile.getCount(); i < count; i++, index++) {
+                if (index >= (width * height)) {
+                    // 超出地图
+                    break;
+                }
+                // 设置tile
+                map[index / width][index % width] = mapTile.getTile();
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 将地图数据转换为二维数组
+     *
+     * @param mapBuilder 地图构建器
+     * @param properties 地图属性，获取宽高
+     * @return 二维地图
+     */
+    public static byte[][] toMapArray(@NotNull MapBuilder mapBuilder, @NotNull MapProperties properties) {
+        return toMapArray(mapBuilder, properties.intWidth(), properties.intHeight());
     }
 
     /**
@@ -303,20 +424,7 @@ public class MapBuilder extends LinkedList<MapTile> {
      * @return 二维地图
      */
     public byte[][] toMapArray(int width, int height) {
-        byte[][] map = new byte[height][width];
-        int index = 0;
-        for (MapTile mapTile : this) {
-            // 获取tile
-            for (int i = 0, count = mapTile.getCount(); i < count; i++, index++) {
-                if (index >= (width * height)) {
-                    // 超出地图
-                    break;
-                }
-                // 设置tile
-                map[index / width][index % width] = mapTile.getTile();
-            }
-        }
-        return map;
+        return toMapArray(this, width, height);
     }
 
     /**
@@ -326,6 +434,33 @@ public class MapBuilder extends LinkedList<MapTile> {
      * @return 二维地图
      */
     public byte[][] toMapArray(@NotNull MapProperties properties) {
-        return toMapArray(properties.intWidth(), properties.intHeight());
+        return toMapArray(this, properties);
+    }
+
+    /**
+     * 将地图构建器中的数据转换为二维地图数据
+     *
+     * @param width    宽度
+     * @param height   高度
+     * @param dest     二维地图的大小
+     * @param isFill   如果目标的大小超出了地图数据是否需要填充
+     * @param fillTile 填充的tile，仅在 {@code isFill}为true时有效
+     * @return 二维地图数据
+     */
+    public byte[][] toMapData(int width, int height, @Nullable Rectangle dest, boolean isFill, Byte fillTile) {
+        return toMapData(this, width, height, dest, isFill, fillTile);
+    }
+
+    /**
+     * 将地图构建器中的数据转换为二维地图数据
+     *
+     * @param properties 地图属性，获取宽高
+     * @param dest       二维地图的大小
+     * @param isFill     如果目标的大小超出了地图数据是否需要填充
+     * @param fillTile   填充的tile，仅在 {@code isFill}为true时有效
+     * @return 二维地图数据
+     */
+    public byte[][] toMapData(@NotNull MapProperties properties, @Nullable Rectangle dest, boolean isFill, Byte fillTile) {
+        return toMapData(this, properties.intWidth(), properties.intHeight(), dest, isFill, fillTile);
     }
 }

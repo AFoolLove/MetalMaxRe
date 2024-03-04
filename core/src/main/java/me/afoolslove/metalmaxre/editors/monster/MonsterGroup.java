@@ -21,6 +21,10 @@ public class MonsterGroup {
         return Arrays.copyOf(monsters, 0x0A);
     }
 
+    public byte getSpecialMonsterGroup(int index) {
+        return monsters[0x0A + index];
+    }
+
     public byte[] getSpecialMonsterGroups() {
         byte[] specialMonsters = new byte[0x04];
         System.arraycopy(monsters, 0x0A, specialMonsters, 0x00, specialMonsters.length);

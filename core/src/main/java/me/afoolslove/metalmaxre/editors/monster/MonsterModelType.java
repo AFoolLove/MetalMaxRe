@@ -5,10 +5,14 @@ package me.afoolslove.metalmaxre.editors.monster;
  */
 public enum MonsterModelType {
     /**
+     * 模型格式一
+     * <p>
      * 怪物图像通过顺序摆放，一般用于复杂贴图不重复的怪物
      */
     A,
     /**
+     * 模型格式二
+     * <p>
      * 怪物图像可以自定义每个位置的图块id，多用于重复贴图高的怪物
      */
     B

@@ -242,7 +242,7 @@ public interface ICharMap {
                     // 0x9E + 1byte     (填充数量)空格占位，第二字节为占多少
                     // 0x63             (结束)
                     // 0x8C + 2byte     (填充数量，填充字符)
-                    // 0x43 ???
+                    // 0x43 + 1byte     (引用09页的文本)
                     whileF6:
                     while (true) {
                         if (++i >= copy.length) {
@@ -289,6 +289,18 @@ public interface ICharMap {
                                 // 填充字符
                                 text.append(String.format("%02X ", copy[i]));
                                 break;
+                            case 0x43:
+                                text.append(" 43");
+                                // 引用09页的文本
+                                if (++i >= copy.length) {
+                                    // 读取完毕
+                                    // 没有字符，直接结束
+                                    text.append(']');
+                                    return text.toString();
+                                }
+                                // 引用的字符
+                                text.append(String.format("%02X ", copy[i]));
+                                break;
                             case 0x9F:
                                 // 文本段结束，另一个的开始
                                 text.append("]\n");
@@ -322,47 +334,49 @@ public interface ICharMap {
      */
     default Map<Byte, Integer> createDefaultOpcodes() {
         Map<Byte, Integer> OPCODES = new LinkedHashMap<>();
-        OPCODES.put((byte) 0x33, 1);  // 不显示精灵和上半部分，第二字节未知
+        OPCODES.put((byte) 0x2F, 0);  // 在全屏界面时，最上方的边框正中间替换一个 0xFA（$6030），通常表现为焊点。未完全解析
+        OPCODES.put((byte) 0x30, 0);  // 在对话界面时（包括全屏界面），对话框的上边框普通焊点变更为有层次感的焊点0xFD（$6255），缺陷为下一个字符会重复两次，如302400，文本会显示为“架0”而不是正确的“眼”，所以通常后面连接FF使用
+        OPCODES.put((byte) 0x31, 0);  // 在对话界面时（包括全屏界面），对话框的下边框普通焊点变更为有层次感的焊点0xF8（$6395），缺陷为下一个字符会消失，如312400，文本会显示为“0”而不是正确的“眼”，所以通常后面连接FF使用
+        OPCODES.put((byte) 0x32, 0);  // 在对话界面时（包括全屏界面），对话框两边中间分割的下方普通焊点变更为有层次感的焊点0xF7（$638B），缺陷为下一个字符会消失，如322400，文本会显示为“0”而不是正确的“眼”，所以通常后面连接FF使用
+        OPCODES.put((byte) 0x33, 0);  // 对$2001写入0x0E，不显示精灵，缺陷为下一个字符会消失，如332400，文本会显示为“0”而不是正确的“眼”，所以通常后面连接00使用
+        OPCODES.put((byte) 0x34, 0);  // $59D = 0x03
         OPCODES.put((byte) 0x42, 0);  // 忽略字符
         OPCODES.put((byte) 0xE2, 0);  // ($DF,$E0,$E1) 三字节的数字
-        OPCODES.put((byte) 0xE3, 0);
+        OPCODES.put((byte) 0xE3, 0);  // 进行选择，但操作结果由系统程序接管（不是剧情指令接管）
         OPCODES.put((byte) 0xE4, 0);  // 等待确认后继续对话
         OPCODES.put((byte) 0xE5, 0);  // 换行
-        OPCODES.put((byte) 0xE6, 0);  // 未知，没有实际占用文本？似乎通过判断读取文本
+        OPCODES.put((byte) 0xE6, 0);  // 读取$0370作为玩家id，获取玩家的名称到$051D
         OPCODES.put((byte) 0xE7, 0);  // 换行，但($C4,$C5)的值+#$40，通常在战斗状态文本中使用
-        OPCODES.put((byte) 0xE8, 0);  // 当前控制的角色名称
+        OPCODES.put((byte) 0xE8, 0);  // 读取$051D的文本。通常先执行E6后再执行E8作为当前控制的角色名称
         OPCODES.put((byte) 0xE9, 0);  // $E2 物品的名称
         OPCODES.put((byte) 0xEA, 1);  // 索引 13=0x11933-0x11A1F 的文本，第二字节为下标
         OPCODES.put((byte) 0xEB, 2);  // 进行选择
         OPCODES.put((byte) 0xEC, 1);  // 引用 14=0x0BE90-0x0C00F 文本集
         OPCODES.put((byte) 0xED, 1);  // 空白占位，第一字节为数量
-        OPCODES.put((byte) 0xEE, 1);  // 变更对话速度，不会自行恢复速度
+        OPCODES.put((byte) 0xEE, 1);  // 变更全局对话速度，不会自行恢复速度，默认为0
         OPCODES.put((byte) 0xEF, 2);  // 横向重复一个字符，第一个为重复数量，第二个被重复的字符
         OPCODES.put((byte) 0xF0, 1);  // 引用 0C=0x12010-0x120DF 文本集，名称，引用前会自动加上 [E4][E5]
         OPCODES.put((byte) 0xF1, 1);  // 对话 sleep
         OPCODES.put((byte) 0xF2, 1);  // 引用 09=0x10010-0x10128 文本集
         OPCODES.put((byte) 0xF3, 1);  // 引用 11=0x1F99A-0x2000F 文本集
-        OPCODES.put((byte) 0xF4, 1);  // 重复文本，直到遇见 0XFE ！！？，全屏文本时使用，否则文字刷屏死机
+        OPCODES.put((byte) 0xF4, 1);  // 重复文本，参数为重复数量，遇见0XFE结束，全屏文本时使用，否则文字刷屏死机
         OPCODES.put((byte) 0xF5, 1);  // 与NPC对话时，对NPC移动操作，未与NPC对话引用会死机(等待NPC移动完成，但没有目标NPC)
         OPCODES.put((byte) 0xF6, 0);  // 后面的字符将直接显示，不进行转换为中文等
         OPCODES.put((byte) 0xF7, 2);  // 跨文本集引用文本段，第一字节为第几段文本，第二字节为哪一页的文本集
         OPCODES.put((byte) 0xF8, 2);  // 读取1-3个字节，变更为文本，向右对齐
         OPCODES.put((byte) 0xF9, 2);  // 读取1-3个字节，变更为文本，向左对齐
         OPCODES.put((byte) 0xFA, 1);  // 引用目标地址的文本
-        OPCODES.put((byte) 0xFB, 1);  // 引用文本，动态文本？未知
+        OPCODES.put((byte) 0xFB, 1);  // 引用目标地址的文本，目标地址的第一位作为$CC文本段，目标地址的第二位作为$CD文本页
         OPCODES.put((byte) 0xFC, 1);  // 引用数据
         OPCODES.put((byte) 0xFD, 1);  // 玩家名称
         OPCODES.put((byte) 0xFE, 0);  // 对话时按键确认后带名称换行
-        // E3 + 1byte = 进行选择，选择 是 空操作，选择 否 读取第一个字节文本?
+        // E3 + 1byte = 进行选择，由系统控制（非剧情脚本）
         // EB + 2byte = 进行选择，选择 是 读取第一个字节的文本索引，选择 否 读取第二个字节的文本索引，用在当前文本结尾处
         // ED + 1byte = 空白占位，第一个字节为需要用空白占位的字符数量
         // EE + 1byte = 对话速度，第一个字节为接下来的对话显示速度 ！！！永久有效！！！
         // F0 + 1byte = 对话时，第一个字节为选择另一个人换行进行说话
         // F1 + 1byte = 对话sleep一段时间，第一个字节为sleep时间，时间单位未知，多数为 0x3C
         // F3 + 1byte = 战斗时为当前进行操作的 怪物/玩家 名称
-        // F8 + 2byte = 读取0x33CBA的两个字节目标内存地址，第一个为索引，第二个为显示几个字节，最大为2(3个字节)
-        // F9 + 2byte = 读取0x33CBA的两个字节目标内存地址，第一个为索引，第二个为显示几个字节，最大为2(3个字节)
-        // FB + 1byte = ?
         // F5 + 0C = NPC对话时朝上，对话结束后恢复，一定要NPC！！！
         // F5 + 0D = NPC对话时朝下，对话结束后恢复，一定要NPC！！！
         // F5 + 0E = NPC对话时朝左，对话结束后恢复，一定要NPC！！！
@@ -373,7 +387,10 @@ public interface ICharMap {
         // F5 + 15 = NPC对话时向右走一步
         // F5 + 16 = NPC对话时向右走一步
         // F5 + 17 = NPC对话时向玩家走一步
-        // FA + 1byte = 读取0x33CBA的两个字节目标内存地址，将目标2byte内存值作为文本段和文本索引使用
+        // F8 + 2byte = 读取0x33CBA的两个字节目标内存地址，第一个为索引，第二个为显示几个字节，最大为2(3个字节)
+        // F9 + 2byte = 读取0x33CBA的两个字节目标内存地址，第一个为索引，第二个为显示几个字节，最大为2(3个字节)
+        // FA + 1byte = 读取0x33CBA的两个字节目标内存地址，目标地址的第一位作为$CC文本段，目标地址的第二位作为$CD文本页
+        // FB + 1byte = 读取0x33CBA的两个字节目标内存地址，第一个为索引，第二个为显示几个字节，最大为2(3个字节)
         // FC + 1byte = 读取0x33CBA的两个字节目标内存地址
         // FC + 07 = 强度中，玩家的名称
         // FC + 3F = 玩家存档 1 名称

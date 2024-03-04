@@ -32,7 +32,7 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         return text;
     }
 
-    private final Map<TextBuilder, List<TextBuilder>> easterEggNames = new HashMap<>();
+    private final Map<TextBuilder, List<TextBuilder>> easterEggNames = new LinkedHashMap<>();
     private final List<TextBuilder> player1NamePool = new ArrayList<>();
     private final List<TextBuilder> player2NamePool = new ArrayList<>();
 
@@ -151,15 +151,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         byte[] bytes = new byte[0x04];
         byte[] tmpBytes;
         for (Map.Entry<TextBuilder, List<TextBuilder>> entry : easterEggNames.entrySet()) {
-            Arrays.fill(bytes, (byte) 0x9F);
             tmpBytes = entry.getKey().toByteArray(getCharMap());
-            System.arraycopy(bytes, 0, tmpBytes, 0, Math.min(tmpBytes.length, 0x04));
+            copyArrayTo(tmpBytes, bytes, 0x04, (byte) 0x9F);
             getBuffer().putAABytes(0, 0x04, bytes);
 
             for (TextBuilder textBuilder : entry.getValue()) {
-                Arrays.fill(bytes, (byte) 0x9F);
                 tmpBytes = textBuilder.toByteArray(getCharMap());
-                System.arraycopy(bytes, 0, tmpBytes, 0, Math.min(tmpBytes.length, 0x04));
+                copyArrayTo(tmpBytes, bytes, 0x04, (byte) 0x9F);
                 getBuffer().putAABytes(0, 0x04, bytes);
             }
         }
@@ -167,19 +165,22 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         position(getPlayer1NamePoolAddress());
         for (int i = 0; i < 0x0B; i++) {
             TextBuilder textBuilder = player1NamePool.get(i);
-            Arrays.fill(bytes, (byte) 0x9F);
             tmpBytes = textBuilder.toByteArray(getCharMap());
-            System.arraycopy(bytes, 0, tmpBytes, 0, Math.min(tmpBytes.length, 0x04));
+            copyArrayTo(tmpBytes, bytes, 0x04, (byte) 0x9F);
             getBuffer().put(bytes);
         }
         position(getPlayer2NamePoolAddress());
         for (int i = 0; i < 0x0B; i++) {
             TextBuilder textBuilder = player2NamePool.get(i);
-            Arrays.fill(bytes, (byte) 0x9F);
             tmpBytes = textBuilder.toByteArray(getCharMap());
-            System.arraycopy(bytes, 0, tmpBytes, 0, Math.min(tmpBytes.length, 0x04));
+            copyArrayTo(tmpBytes, bytes, 0x04, (byte) 0x9F);
             getBuffer().put(bytes);
         }
+    }
+
+    private void copyArrayTo(byte[] src, byte[] dst, int length, byte fillValue) {
+        Arrays.fill(dst, fillValue);
+        System.arraycopy(src, 0, dst, 0, Math.min(src.length, length));
     }
 
     @Override

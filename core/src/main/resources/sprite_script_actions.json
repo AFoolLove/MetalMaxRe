@@ -636,11 +636,11 @@
   },
   {
     "code": "4C",
-    "length": 1,
-    "name": "*时空隧道发生故障",
-    "format": "4C XX",
-    "formatText": "时空隧道发生故障",
-    "shortDescription": "时空隧道发生故障",
+    "length": 0,
+    "name": "判断时空隧道是否发生故障",
+    "format": "4C",
+    "formatText": "判断时空隧道是否发生故障",
+    "shortDescription": "判断时空隧道是否发生故障",
     "detailedDescription": "将 78-7F开关关闭\n\t判断再生丸\t已拾取\n\t判断光环大楼\t未倒塌\n\t开关F7\t\t未关闭\n\t上面条件成功后\n\t吉田生命研究所大门\t调整开关为打开\n\t上面条件失败后\n\t跳转到时空隧道目的地"
   },
   {

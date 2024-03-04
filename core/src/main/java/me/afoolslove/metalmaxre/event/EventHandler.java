@@ -70,7 +70,7 @@ public class EventHandler {
      * @param eventType 事件类型
      * @param listener  被注销的监听器
      */
-    public synchronized void unregister(@NotNull Class<Event> eventType, @NotNull EventListener listener) {
+    public synchronized <E extends Event> void unregister(@NotNull Class<E> eventType, @NotNull EventListener listener) {
         Set<EventListener> listeners = eventListeners.get(eventType);
         if (listeners == null || listeners.isEmpty()) {
             return;

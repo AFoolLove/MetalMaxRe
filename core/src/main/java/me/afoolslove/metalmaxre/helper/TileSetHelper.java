@@ -1,7 +1,10 @@
 package me.afoolslove.metalmaxre.helper;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
-import me.afoolslove.metalmaxre.editors.map.*;
+import me.afoolslove.metalmaxre.editors.map.IMapEditor;
+import me.afoolslove.metalmaxre.editors.map.IMapPropertiesEditor;
+import me.afoolslove.metalmaxre.editors.map.MapBuilder;
+import me.afoolslove.metalmaxre.editors.map.MapProperties;
 import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
 import me.afoolslove.metalmaxre.editors.map.tileset.TileAttributes;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
@@ -637,20 +640,7 @@ public class TileSetHelper {
         int width = mapProperties.intWidth();
         int height = mapProperties.intHeight();
 
-        byte[][] map = new byte[height][width];
-
-        int index = 0;
-        for (MapTile mapTile : mapBuilder) {
-            // 获取tile
-            for (int i = 0, count = mapTile.getCount(); i < count; i++, index++) {
-                if (index >= (width * height)) {
-                    // 超出地图
-                    break;
-                }
-                // 设置tile
-                map[index / width][index % width] = mapTile.getTile();
-            }
-        }
+        byte[][] map = mapBuilder.toMapArray(mapProperties);
 
         BufferedImage tileSet = BufferedImageUtils.fromColors(TileSetHelper.generateTileSet(metalMaxRe, mapProperties, null));
 
@@ -723,6 +713,7 @@ public class TileSetHelper {
 
     /**
      * 将图片分割为数个0x10*0x10的图块
+     *
      * @see #diced(int, int, BufferedImage)
      */
     public static List<BufferedImage> diced(BufferedImage bufferedImage) {

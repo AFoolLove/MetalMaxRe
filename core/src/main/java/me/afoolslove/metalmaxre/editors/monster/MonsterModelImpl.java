@@ -192,8 +192,8 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
                     if (model.getChrIndex() == monsterModel.getChrIndex()
                         && model.isChrIndexIncremental() == monsterModel.isChrIndexIncremental()
                         && model.getModelSize() == monsterModel.getModelSize()
+                        && Objects.equals(model.getTileIndex(), monsterModel.getTileIndex())
                         && Arrays.equals(model.getModelData(), monsterModel.getModelData())
-                        && model.getTileIndex() == monsterModel.getTileIndex()
                         && Arrays.equals(model.getCustomPaletteYs(), monsterModel.getCustomPaletteYs())
                     ) {
                         // 已有的怪物模型属性
@@ -211,7 +211,6 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
                         && model.isChrIndexIncremental() == monsterModel.isChrIndexIncremental()
                         && model.getModelSize() == monsterModel.getModelSize()
                         && Arrays.equals(model.getModelData(), monsterModel.getModelData())
-                        && model.getTileIndex() == monsterModel.getTileIndex()
                         && Arrays.equals(model.getCustomPaletteYs(), monsterModel.getCustomPaletteYs())
                     ) {
                         // 已有的怪物模型属性
@@ -271,8 +270,8 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
                     if (model.getChrIndex() == monsterModel.getChrIndex()
                         && model.isChrIndexIncremental() == monsterModel.isChrIndexIncremental()
                         && model.getModelSize() == monsterModel.getModelSize()
+                        && Objects.equals(model.getTileIndex(), monsterModel.getTileIndex())
                         && Arrays.equals(model.getModelData(), monsterModel.getModelData())
-                        && model.getTileIndex() == monsterModel.getTileIndex()
                         && Arrays.equals(model.getCustomPaletteYs(), monsterModel.getCustomPaletteYs())
                     ) {
                         modelIndexes[monsterId] = (byte) modelIndex;
@@ -286,7 +285,6 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
                         && model.isChrIndexIncremental() == monsterModel.isChrIndexIncremental()
                         && model.getModelSize() == monsterModel.getModelSize()
                         && Arrays.equals(model.getModelData(), monsterModel.getModelData())
-                        && model.getTileIndex() == monsterModel.getTileIndex()
                         && Arrays.equals(model.getCustomPaletteYs(), monsterModel.getCustomPaletteYs())
                     ) {
                         modelIndexes[monsterId] = (byte) (modelIndex + 0x48);
@@ -349,8 +347,6 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         List<Map.Entry<Integer, byte[]>> sortModelData = modelData.entrySet().stream()
                 .sorted(Comparator.comparingInt(o -> o.getValue().length))
                 .toList();
-
-
         for (Map.Entry<Integer, byte[]> entry : sortModelData) {
             for (int modelIndex = 0; modelIndex < monsterModels.length; modelIndex++) {
                 MonsterModel monsterModel = monsterModels[modelIndex];
