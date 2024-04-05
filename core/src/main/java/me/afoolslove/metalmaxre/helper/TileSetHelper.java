@@ -247,15 +247,22 @@ public class TileSetHelper {
     }
 
     public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, byte sprite) {
-        return generateSpriteTileSet(metalMaxRe, sprite & 0xFF);
+        return generateSpriteTileSet(metalMaxRe, sprite, false);
     }
 
+    public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, byte sprite, boolean running) {
+        return generateSpriteTileSet(metalMaxRe, sprite & 0xFF, running);
+    }
+
+    public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, int sprite) {
+        return generateSpriteTileSet(metalMaxRe, sprite, false);
+    }
     /**
      * 生成一张精灵的 TileSet 图片
      * 该算法不完整，所以有部分错误的图像
      * 图片的大小为
      */
-    public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, int sprite) {
+    public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, int sprite, boolean running) {
         SystemPalette systemPalette = metalMaxRe.getSystemPalette();
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
         IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
@@ -292,7 +299,7 @@ public class TileSetHelper {
                 // 模拟内存地址$0150-$015F的数据
                 byte bA597 = xA597[direction];
                 byte bA59E = xA59E[spriteId];
-                int x0150 = (bA59E & 0xFF) + (bA597 & 0xFF);
+                int x0150 = (bA59E & 0xFF) + (bA597 & 0xFF) + (running ? 1 : 0);
                 // 模拟内存地址$0160-$016F的数据
                 byte bA59B = xA59B[direction];
                 byte bA5DD = xA5DD[spriteId];

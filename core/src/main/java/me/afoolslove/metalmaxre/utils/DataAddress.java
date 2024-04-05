@@ -177,6 +177,30 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> implements Ser
         };
     }
 
+
+    /**
+     * 获取地址在bank中的偏移量
+     *
+     * @return 地址在bank中的偏移量
+     */
+    public int getBankOffset() {
+        return getStartAddress() % switch (getType()) {
+            case PRG -> 0x2000;
+            case CHR -> 0x400;
+        };
+    }
+
+    public int getBank() {
+        return getStartAddress() / switch (getType()) {
+            case PRG -> 0x2000;
+            case CHR -> 0x400;
+        };
+    }
+
+    public int getBankStartAddress() {
+        return getStartAddress(-getBankOffset());
+    }
+
     /**
      * 是否为有限的数据范围，即结束地址不为null
      *

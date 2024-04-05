@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -84,6 +86,35 @@ public class ResourceManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 获取资源文件并转换为字符串
+     *
+     * @param name    资源路径
+     * @param charset 编码格式
+     * @return 资源文件的字符串
+     */
+    @Nullable
+    public static String getAsString(@NotNull String name, @NotNull Charset charset) {
+        byte[] bytes = getAsBytes(name);
+        if (bytes != null) {
+            return new String(bytes, charset);
+        }
+        return null;
+    }
+
+    /**
+     * 获取资源文件并转换为字符串
+     * <p>
+     * 编码为{@link StandardCharsets#UTF_8}
+     *
+     * @param name 资源路径
+     * @return 资源文件的字符串
+     */
+    @Nullable
+    public static String getAsString(@NotNull String name) {
+        return getAsString(name, StandardCharsets.UTF_8);
     }
 
     /**

@@ -77,13 +77,23 @@ public class RomVersion {
     private final int size;
     private final String description;
     private final List<String> modifyRecords;
+    private final boolean builtIn;
 
     public RomVersion(String name, String path, int size, String description, List<String> modifyRecords) {
+        this(false, name, path, size, description, modifyRecords);
+    }
+
+    private RomVersion(boolean builtIn, String name, String path, int size, String description, List<String> modifyRecords) {
+        this.builtIn = builtIn;
         this.name = name;
         this.path = path;
         this.size = size;
         this.description = description;
         this.modifyRecords = modifyRecords;
+    }
+
+    public boolean isBuiltIn() {
+        return builtIn;
     }
 
     public String getName() {

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
@@ -145,7 +146,11 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
                 monsterModel.setModelType(MonsterModelType.B);
             }
             int modelLayoutIndex = modelLayoutIndexes[modelIndex] - (0x8000 + 0x0F52 - 0x10);
-            System.arraycopy(modelLayouts, modelLayoutIndex + 1, modelData, 0x00, modelData.length);
+
+            int srcPos = Math.min(getMonsterModelLayout().length(), modelLayoutIndex + 1);
+            int length = Math.min(getMonsterModelLayout().length() - (modelLayoutIndex + 1), modelData.length);
+            length = Math.max(0, length);
+            System.arraycopy(modelLayouts, srcPos, modelData, 0x00, length);
             monsterModel.setModelData(modelData);
 
             // 拥有自定义调色板Y值的模型
@@ -343,22 +348,94 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             modelData.put(Arrays.hashCode(monsterModel.getModelData()), monsterModel.getModelData());
         }
         // 更新模型索引
-        int layoutIndex = 0x8000 + 0x0F52 - 0x10;
+        final int baseLayoutIndex = 0x8000 + 0x0F52 - 0x10;
         List<Map.Entry<Integer, byte[]>> sortModelData = modelData.entrySet().stream()
-                .sorted(Comparator.comparingInt(o -> o.getValue().length))
+                // 大到小排序
+                .sorted(Comparator.comparingInt(o -> -o.getValue().length))
                 .toList();
+
+        // 大小为所有模型数据最差的情况大小，即所有模型数据之和
+        ByteBuffer layoutBuffer = ByteBuffer.allocate(sortModelData.stream().mapToInt(m -> m.getValue().length).sum());
+
         for (Map.Entry<Integer, byte[]> entry : sortModelData) {
+            // 判断buffer中是否存在当前模型数据
+            // 模型数据
+            byte[] model = entry.getValue();
+            // 当前模型遍历buffer中模型数据的位置
+            int tempPosition = 0;
+            // 已经匹配的数量
+            int sum = 0;
+            for (int i = 0; i < model.length; ) {
+                if (model[i] == layoutBuffer.get(tempPosition++)) {
+                    sum++;
+                    if (sum == model.length) {
+                        // 匹配成功
+                        break;
+                    }
+                    i++;
+                    continue;
+                }
+                sum = 0;
+                i = 0;
+                if (tempPosition + model.length > layoutBuffer.position()) {
+                    // 剩下的数据不够判断了，直接跳过
+                    break;
+                }
+            }
+
+            if (sum == model.length) {
+                // 匹配成功，使用匹配的位置
+                tempPosition -= model.length;
+            } else {
+                // 匹配失败，从末尾追加
+                tempPosition = layoutBuffer.position();
+            }
+
+            // 判断与上一个模型数据是否连续
+            byte[] tempBytes = new byte[Math.max(0, layoutBuffer.position() - model.length)];
+            layoutBuffer.get(Math.max(0, layoutBuffer.position() - tempBytes.length), tempBytes);
+
+            int overlapLength = getOverlapLength(tempBytes, model);
+//            if (overlapLength > 0){
+//                LOGGER.info("怪物模型编辑器：重合度{}", overlapLength);
+//            }
+            tempPosition -= overlapLength;
+            layoutBuffer.position(layoutBuffer.position() - overlapLength);
+
+            // 更新所有相同模型数据索引
             for (int modelIndex = 0; modelIndex < monsterModels.length; modelIndex++) {
                 MonsterModel monsterModel = monsterModels[modelIndex];
                 if (monsterModel == null) {
                     continue;
                 }
-                if (Arrays.hashCode(monsterModel.getModelData()) == entry.getKey()) {
-                    modelLayoutIndexes[modelIndex] = (char) (layoutIndex - 1);
+                if (monsterModel.getModelData().length == entry.getValue().length) {
+                    if (Arrays.hashCode(monsterModel.getModelData()) == entry.getKey()) {
+                        modelLayoutIndexes[modelIndex] = (char) ((baseLayoutIndex + tempPosition) - 1);
+                        monsterModel.setModelIndex(modelIndex);
+                    }
                 }
             }
-            layoutIndex += entry.getValue().length;
+
+            if (sum != model.length) {
+                // 匹配失败
+                // 追加到末尾
+                layoutBuffer.put(model);
+            }
         }
+
+
+//        for (Map.Entry<Integer, byte[]> entry : sortModelData) {
+//            for (int modelIndex = 0; modelIndex < monsterModels.length; modelIndex++) {
+//                MonsterModel monsterModel = monsterModels[modelIndex];
+//                if (monsterModel == null) {
+//                    continue;
+//                }
+//                if (Arrays.hashCode(monsterModel.getModelData()) == entry.getKey()) {
+//                    modelLayoutIndexes[modelIndex] = (char) (layoutIndex - 1);
+//                }
+//            }
+//            layoutIndex += entry.getValue().length;
+//        }
 
         // 整合调色板
         int paletteLength = 0;          // 单调色板
@@ -477,58 +554,71 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         getBuffer().put(getMonsterModelSize(), modelSizes);
         // 写入所有怪物模型数据
         position(getMonsterModelLayout());
-
-        ArrayList<Map.Entry<Integer, byte[]>> modelLayouts = new ArrayList<>(sortModelData);
-        ArrayList<byte[]> newModelLayouts = new ArrayList<>();
-        for (int i = 0; i < modelLayouts.size(); i++) {
-            byte[] modelLayout = modelLayouts.get(i).getValue();
-            if (modelLayout != null) {
-                // 在已有的模型数据中判断是否包含当前模型数据
-                boolean hasModel = false;
-                for (int j = 0; j < newModelLayouts.size(); j++) {
-                    byte[] bytes = newModelLayouts.get(j);
-                    if (bytes.length < modelLayout.length) {
-                        // 比当前模型数据小，跳过
-                        continue;
-                    }
-                    int k = 0; // 该数据在已有模型数据中的索引
-                    int l = 0; // 连续匹配的数量，最终需要等于当前模型数据大小
-                    for (; bytes.length - k >= modelLayout.length; k++) { // 循环保证剩余数量大于等于当前模型数据数量
-                        if (bytes[k] == modelLayout[l]) {
-                            l++;
-                            if (modelLayout.length == l) {
-                                // 匹配完成
-                                break;
-                            }
-                        } else if (l != 0) {
-                            l = 0;
-                        }
-                    }
-
-                    if (modelLayout.length == l) {
-                        // 匹配完成
-                        // 更新模型数据索引
-                        modelLayoutIndexes[i] = (char) (modelLayoutIndexes[j] + k);
-                        hasModel = true;
-                        LOGGER.info("模型数据({})包含模型数据({})", NumberR.toHex(2, j), NumberR.toHex(2, i));
-                        break;
-                    }
+        int maxModelLayoutLength = Math.min(getMonsterModelLayout().length(), layoutBuffer.position());
+        getBuffer().put(layoutBuffer.array(), 0, maxModelLayoutLength);
+        if (getMonsterModelLayout().length() < layoutBuffer.position()) {
+            int length = getMonsterModelLayout().length();
+            for (int modelIndex = 0; modelIndex < monsterModels.length; modelIndex++) {
+                // TODO
+                MonsterModel monsterModel = monsterModels[modelIndex];
+                if (length - (modelLayoutIndexes[modelIndex] - baseLayoutIndex) < monsterModel.getModelData().length) {
+                    LOGGER.error("怪物模型编辑器：索引({})模型数据写入失败({}/{})，没有多余的空间写入", NumberR.toHex(2, modelIndex), length - (modelLayoutIndexes[modelIndex] - baseLayoutIndex), monsterModel.getModelData().length);
                 }
-
-                if (hasModel) {
-                    // 包含，跳过写入
-                    continue;
-                }
-                if (getMonsterModelLayout().range((position() - 0x10) + modelLayout.length)) {
-                    getBuffer().put(modelLayout);
-                    newModelLayouts.add(modelLayout);
-                } else {
-                    LOGGER.error("模型索引({})写入失败，没有多余的空间写入{}/{}", NumberR.toHex(2, i),
-                            modelLayout.length, getMonsterModelLayout().getEndAddress() - (position() - 0x10));
-                }
-
             }
+            LOGGER.error("怪物模型编辑器：模型数据长度不足！无法写入 {} 字节的模型数据", layoutBuffer.position() - getMonsterModelLayout().length());
         }
+
+//        ArrayList<Map.Entry<Integer, byte[]>> modelLayouts = new ArrayList<>(sortModelData);
+//        ArrayList<byte[]> newModelLayouts = new ArrayList<>();
+//        for (int i = 0; i < modelLayouts.size(); i++) {
+//            byte[] modelLayout = modelLayouts.get(i).getValue();
+//            if (modelLayout != null) {
+//                // 在已有的模型数据中判断是否包含当前模型数据
+//                boolean hasModel = false;
+//                for (int j = 0; j < newModelLayouts.size(); j++) {
+//                    byte[] bytes = newModelLayouts.get(j);
+//                    if (bytes.length < modelLayout.length) {
+//                        // 比当前模型数据小，跳过
+//                        continue;
+//                    }
+//                    int k = 0; // 该数据在已有模型数据中的索引
+//                    int l = 0; // 连续匹配的数量，最终需要等于当前模型数据大小
+//                    for (; bytes.length - k >= modelLayout.length; k++) { // 循环保证剩余数量大于等于当前模型数据数量
+//                        if (bytes[k] == modelLayout[l]) {
+//                            l++;
+//                            if (modelLayout.length == l) {
+//                                // 匹配完成
+//                                break;
+//                            }
+//                        } else if (l != 0) {
+//                            l = 0;
+//                        }
+//                    }
+//
+//                    if (modelLayout.length == l) {
+//                        // 匹配完成
+//                        // 更新模型数据索引
+//                        modelLayoutIndexes[i] = (char) (modelLayoutIndexes[j] + k);
+//                        hasModel = true;
+//                        LOGGER.info("模型数据({})包含模型数据({})", NumberR.toHex(2, j), NumberR.toHex(2, i));
+//                        break;
+//                    }
+//                }
+//
+//                if (hasModel) {
+//                    // 包含，跳过写入
+//                    continue;
+//                }
+//                if (getMonsterModelLayout().range((position() - 0x10) + modelLayout.length)) {
+//                    getBuffer().put(modelLayout);
+//                    newModelLayouts.add(modelLayout);
+//                } else {
+//                    LOGGER.error("模型索引({})写入失败，没有多余的空间写入{}/{}", NumberR.toHex(2, i),
+//                            modelLayout.length, getMonsterModelLayout().getEndAddress() - (position() - 0x10));
+//                }
+//
+//            }
+//        }
         // 写入怪物图像起始id
         getBuffer().put(getMonsterModelLayoutTileIndex(), modelLayoutTileIndexes);
 
@@ -558,6 +648,39 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             }
         }
     }
+
+    public static int getOverlapLength(byte[] array1, byte[] array2) {
+        // 计算两个数组最大重合长度
+        int overlapLength = Math.min(array1.length, array2.length);
+
+        for (int index = overlapLength; index > 0; index--) {
+            // 当前重合长度
+            int sum = 0;
+            while (sum < index) {
+                if (array1[(array1.length - index) + sum] != array2[sum]) {
+                    sum = 0;
+                    break;
+                }
+                sum++;
+            }
+            if (sum != 0) {
+                // 匹配成功
+                return sum;
+            }
+        }
+        // 完全不重合
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        byte[][] data = {
+                {10, 20, 30, 20, 30, 10, 00},
+                {10, 00}
+        };
+        int len = getOverlapLength(data[0], data[1]);
+        System.out.println(len);
+    }
+
 
     public List<MonsterModel> getMonsterModels() {
         return monsterModels;

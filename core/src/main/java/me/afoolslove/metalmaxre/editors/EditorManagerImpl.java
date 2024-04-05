@@ -27,7 +27,9 @@ import me.afoolslove.metalmaxre.editors.player.IPlayerExpEditor;
 import me.afoolslove.metalmaxre.editors.player.PlayerEditorImpl;
 import me.afoolslove.metalmaxre.editors.player.PlayerExpEditorImpl;
 import me.afoolslove.metalmaxre.editors.sprite.ISpriteEditor;
+import me.afoolslove.metalmaxre.editors.sprite.ISpriteModelEditor;
 import me.afoolslove.metalmaxre.editors.sprite.SpriteEditorImpl;
+import me.afoolslove.metalmaxre.editors.sprite.SpriteModelEditorImpl;
 import me.afoolslove.metalmaxre.editors.sprite.script.ISpriteScriptEditor;
 import me.afoolslove.metalmaxre.editors.sprite.script.SpriteScriptEditorImpl;
 import me.afoolslove.metalmaxre.editors.tank.ITankEditor;
@@ -111,6 +113,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(MonsterModelImpl.class, MonsterModelImpl::new);
         register(IElevatorEditor.class, ElevatorEditorImpl::new);
         register(ISpriteScriptEditor.class, SpriteScriptEditorImpl::new);
+        register(ISpriteModelEditor.class, SpriteModelEditorImpl::new);
         register(IMonsterProbabilityEditor.class, MonsterProbabilityEditorImpl.class);
     }
 

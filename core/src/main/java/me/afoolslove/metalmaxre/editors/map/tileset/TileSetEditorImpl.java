@@ -9,9 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 
 /**
- * 图块集
- * <p>
- * *不兼容SuperHack版本，相关编辑器会得到错误的数据导致错误的结果
+ * 地图和精灵的图块集
  *
  * @author AFoolLove
  */

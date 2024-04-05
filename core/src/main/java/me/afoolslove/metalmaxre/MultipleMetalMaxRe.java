@@ -32,6 +32,15 @@ public class MultipleMetalMaxRe {
     }
 
     /**
+     * 获取全部实例
+     *
+     * @return 实例列表
+     */
+    public List<MetalMaxRe> getInstances() {
+        return metalMaxRes;
+    }
+
+    /**
      * 读取文件并创建一个实例
      *
      * @param version       rom版本，默认{@link RomVersion#getChinese()}

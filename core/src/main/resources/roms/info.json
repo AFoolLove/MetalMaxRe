@@ -1,11 +1,13 @@
 {
   "japanese": {
+    "builtIn": true,
     "path": "/roms/MetalMax_Japanese.nes",
     "name": "MetalMax Japanese",
     "size": 524304,
     "description": "日文原版"
   },
   "chinese": {
+    "builtIn": true,
     "path": "/roms/MetalMax_Chinese.nes",
     "name": "MetalMax Chinese",
     "size": 786448,
@@ -22,6 +24,7 @@
     ]
   },
   "super_hack": {
+    "builtIn": true,
     "path": "/roms/MetalMax_SuperHack.nes",
     "name": "MetalMax SuperHack",
     "size": 802832,
@@ -34,6 +37,7 @@
     ]
   },
   "super_hack_general": {
+    "builtIn": true,
     "path": "/roms/MetalMax_SuperHackGeneral.nes",
     "name": "MetalMax SuperHackGeneral",
     "size": 786448,

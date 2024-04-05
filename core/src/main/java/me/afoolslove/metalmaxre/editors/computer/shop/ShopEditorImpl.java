@@ -4,17 +4,18 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.ItemList;
+import me.afoolslove.metalmaxre.utils.ListSingleMap;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 售货机商品编辑器
  * <p>
- * 0x00 固定值 0x0D
+ * 0x00 固定值 0x0D 为数量
  * 0x01 - 0x06  商品类型
  * 0x07 - 0x0C  商品数量
  * 0x0D 中奖物品
@@ -27,94 +28,126 @@ import java.util.Map;
 public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IShopEditor {
     private final DataAddress shopIndexAddress;
     private final DataAddress shopAddress;
-    private final DataAddress vendorsAddress;
 
     /**
-     * 所有售货机的商品组合
+     * 索引指向的 商品/点唱机曲目/售货机 列表位置
      */
-    private final List<VendorItemList> vendorItemLists = new ArrayList<>();
-    private final Map<Integer, List<Byte>> shopLists = new HashMap<>();
+    private final ListSingleMap<Character, Integer> shopIndexes = new ListSingleMap<>();
+    /**
+     * 所有 商品/点唱机曲目/售货机 列表
+     */
+    private final List<ItemList<Object>> lists = new ArrayList<>();
 
     public ShopEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x23CA5 - 0x10, 0x23CC4 - 0x10),
-                DataAddress.fromPRG(0x23CC5 - 0x10, 0x23EC7 - 0x10),
-                DataAddress.fromPRG(0x23EC8 - 0x10, 0x23FC4 - 0x10));
+                DataAddress.fromPRG(0x23CC5 - 0x10, 0x2400F - 0x10));
     }
 
     public ShopEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                           @NotNull DataAddress shopIndexAddress,
-                          @NotNull DataAddress shopAddress,
-                          @NotNull DataAddress vendorsAddress) {
+                          @NotNull DataAddress shopAddress) {
         super(metalMaxRe);
         this.shopIndexAddress = shopIndexAddress;
         this.shopAddress = shopAddress;
-        this.vendorsAddress = vendorsAddress;
     }
 
     @Editor.Load
     public void onLoad() {
         // 读取前清空数据
+        getShopIndexes().clear();
         getShopLists().clear();
-        getVendorItemLists().clear();
 
         // 读取商店索引
-        // 不需要去重，都读取一次
         position(getShopIndexAddress());
-        char[] shopIndexes = new char[0x10];
-        for (int i = 0; i < shopIndexes.length; i++) {
-            // 添加商品列表实例
-            ArrayList<Byte> shopItems = new ArrayList<>();
-            getShopLists().put(i, shopItems);
-
-            // 读取商品索引
-            shopIndexes[i] = getBuffer().getChar();
-            // 得到PRG索引
-            int index = getShopAddress().getStartAddress(shopIndexes[i] - 0x9CB5);
-            // 商品数量
-            int count = getBuffer().getPrgToInt(index++);
-            // 读取商店物品
-            for (int c = 0; c < count; c++, index++) {
-                shopItems.add(getBuffer().getPrg(index));
-            }
+        for (int i = 0; i < 0x10; i++) {
+            // 占位
+            getShopIndexes().add(SingleMapEntry.create(getBuffer().getChar(), 0));
         }
 
         // 读取商品清单
         position(getShopAddress());
-        List<List<Byte>> ut = new ArrayList<>();
-        while (ut.size() != 0x10) {
+        List<ItemList<Object>> ut = new ArrayList<>();
+        while (getShopAddress().range(position() - 0x10)) {
             // 读取商品数量
             int count = getBuffer().getToInt();
+            if (count == 0xFF) {
+                // 读取结束
+                break;
+            }
+
+            // 判断索引是否为此
+            int index = (((position() - 1) - 0x10) % 0x2000) + 0x8000;
+            for (int i = 0; i < 0x10; i++) {
+                SingleMapEntry<Character, Integer> entry = getShopIndexes().get(i);
+                if (index == entry.getKey()) {
+                    entry.setValue(ut.size());
+                }
+            }
             // 读取商品
             byte[] items = new byte[count];
             getBuffer().get(items);
             // 将商品添加到list
-            List<Byte> list = new ArrayList<>();
+            ItemList<Object> list = new ItemList<>();
             for (byte item : items) {
                 list.add(item);
             }
             ut.add(list);
         }
+        getShopLists().addAll(ut);
 
-        byte[] items = new byte[getVendorTypeCount()];
-        byte[] counts = new byte[getVendorTypeCount()];
-        // 读取售货机的商品组合
-        // 0x0D 为每组数据固定头字节，非头字节视为读取完毕
-        position(getVendorsAddress());
-        while (getBuffer().get() == 0x0D) {
-            // 读取商品
-            getBuffer().get(items);
-            // 读取商品数量和是否有货
-            getBuffer().get(counts);
-
-            VendorItemList itemList = new VendorItemList();
-            // 添加商品
-            for (int i = 0; i < items.length; i++) {
-                itemList.add(new VendorItem(items[i], counts[i]));
+        // 将ItemList转换为VendorItemList
+        int vendorListOffset = -1;
+        // 将ItemList转换为JukeBoxItemList
+        int jukeBoxListOffset = -1;
+        for (SingleMapEntry<Character, Integer> entry : getShopIndexes()) {
+            switch (entry.getKey()) {
+                case 0x9EB8: // 售货机
+                    vendorListOffset = entry.getValue();
+                    break;
+                case 0x9EAB: // 点唱机
+                    jukeBoxListOffset = entry.getValue();
+                    break;
             }
-            // 获取中奖物品
-            itemList.setAward(getBuffer().get());
-            getVendorItemLists().add(itemList);
+        }
+
+        if (vendorListOffset != -1) {
+            // 转换
+            for (int i = vendorListOffset, size = getShopLists().size(); i < size; i++) {
+                ItemList<Object> itemList = getShopLists().get(i);
+                if (itemList.size() != 0x0D) {
+                    continue;
+                }
+                VendorItemList vendorItemList = new VendorItemList();
+                getShopLists().set(i, (ItemList) vendorItemList);
+
+                for (int j = 0; j < 0x06; j++) {
+                    // 商品
+                    Byte item = (Byte) itemList.getItem(j);
+                    // 商品数量和是否有货
+                    Byte count = (Byte) itemList.getItem(0x06 + j);
+                    vendorItemList.add(new VendorItem(item, count));
+                    // 中奖物品
+                    vendorItemList.setAward((Byte) itemList.getLast());
+                }
+            }
+        }
+
+        if (jukeBoxListOffset != -1) {
+            // 转换
+            for (int i = jukeBoxListOffset, size = getShopLists().size(); i < size; i++) {
+                ItemList<?> itemList = getShopLists().get(i);
+                if (itemList instanceof VendorItemList) {
+                    continue;
+                }
+                JukeBoxItemList jukeBoxItemList = new JukeBoxItemList();
+                for (Object o : itemList) {
+                    if (o instanceof Byte b) {
+                        jukeBoxItemList.add(b);
+                    }
+                }
+                getShopLists().set(i, (ItemList) jukeBoxItemList);
+            }
         }
     }
 
@@ -213,23 +246,21 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
     }
 
     @Override
-    public Map<Integer, List<Byte>> getShopLists() {
-        return shopLists;
+    public List<SingleMapEntry<Character, Integer>> getShopIndexes() {
+        return shopIndexes;
+    }
+
+    @Override
+    public List<ItemList<Object>> getShopLists() {
+        return lists;
     }
 
     @Override
     public List<VendorItemList> getVendorItemLists() {
-        return vendorItemLists;
-    }
-
-    @Override
-    public VendorItemList getVendorItemList(int vendor) {
-        return vendorItemLists.get(vendor);
-    }
-
-    @Override
-    public DataAddress getVendorsAddress() {
-        return vendorsAddress;
+        return getShopLists().stream()
+                .filter(VendorItemList.class::isInstance)
+                .map(VendorItemList.class::cast)
+                .toList();
     }
 
     @Override

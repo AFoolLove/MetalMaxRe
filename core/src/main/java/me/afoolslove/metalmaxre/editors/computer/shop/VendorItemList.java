@@ -1,15 +1,14 @@
 package me.afoolslove.metalmaxre.editors.computer.shop;
 
+import me.afoolslove.metalmaxre.utils.ItemList;
 import org.jetbrains.annotations.Range;
-
-import java.util.LinkedList;
 
 /**
  * 售货机全部商品
  *
  * @author AFoolLove
  */
-public class VendorItemList extends LinkedList<VendorItem> {
+public class VendorItemList extends ItemList<VendorItem> {
     /**
      * 售货机中奖后给予的奖品
      */

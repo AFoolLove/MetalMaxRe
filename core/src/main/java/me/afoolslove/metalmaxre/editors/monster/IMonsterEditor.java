@@ -127,6 +127,14 @@ public interface IMonsterEditor extends IRomEditor {
      */
     List<SingleMapEntry<Integer, Integer>> getAutoRestores();
 
+
+    /**
+     * 获取怪物组的组属性
+     *
+     * @return 组属性
+     */
+    List<byte[]> getMonsterGroupAttribute();
+
     /**
      * 获取指定位置的特殊怪物组合集
      *
@@ -157,12 +165,21 @@ public interface IMonsterEditor extends IRomEditor {
         return ((WantedMonster) getMonsters().get(monsterId & 0xFF));
     }
 
+    /**
+     * 获取世界地图所有怪物领域
+     * <p>
+     * 值为怪物组ID
+     *
+     * @return 世界地图怪物领域
+     */
     List<Byte> getWorldMapRealms();
 
     /**
      * 怪物的掉落物地址
      * <p>
      * 注：怪物ID范围为0x18-0x82才能设置有效的战利品
+     *
+     * @see MonsterGroup
      */
     DataAddress getMonsterDropItemsAddress();
 
@@ -282,5 +299,13 @@ public interface IMonsterEditor extends IRomEditor {
      *
      * @return 世界地图的怪物领域地址
      */
+
     DataAddress getWorldMapMonsterRealmsAddress();
+
+    /**
+     * 获取怪物组的四个组属性地址
+     *
+     * @return 怪物组的四个组属性地址
+     */
+    List<DataAddress> getMonsterGroupAttributeAddresses();
 }

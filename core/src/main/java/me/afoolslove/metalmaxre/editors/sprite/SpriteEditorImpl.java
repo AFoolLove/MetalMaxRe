@@ -18,7 +18,7 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
     private final DataAddress spritesAddress;
     /**
      * 地图的精灵<p>
-     * 0x0A是干嘛来的来着？<p>
+     * 0x0A为特殊精灵用作于剧情
      * K：Map<p>
      * V：sprites
      */

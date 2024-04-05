@@ -1,11 +1,15 @@
 package me.afoolslove.metalmaxre.editors.text;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
+import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,44 +31,44 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     private final DataAddress player2NamePoolAddress;
 
     private final Map<DataAddress, List<TextBuilder>> text = new HashMap<>();
-
-    public Map<DataAddress, List<TextBuilder>> getText() {
-        return text;
-    }
-
     private final Map<TextBuilder, List<TextBuilder>> easterEggNames = new LinkedHashMap<>();
     private final List<TextBuilder> player1NamePool = new ArrayList<>();
     private final List<TextBuilder> player2NamePool = new ArrayList<>();
 
     public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
-        this(metalMaxRe, Map.ofEntries(
-                        Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                        Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                        Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                        Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                        Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                        Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                        Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
-                        Map.entry(0x00, DataAddress.from(0x11A20 - 0x10, 0x1200F - 0x10)), //-
-                        Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
-                        Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
-                        Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
-                        Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
-                        Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)), //-
-                        Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                        Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
-                        Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
-                        Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                        Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                        Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
-                        Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
-                        Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                        Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
-                ),
+        this(metalMaxRe,
+                ResourceManager.getAsString("/text_addresses/chinese.json")
+        );
+    }
+
+    public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe, String jsonTextAddresses) {
+        this(metalMaxRe,
+                jsonTextAddresses,
                 DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
                 DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
                 DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10)
         );
+    }
+
+    public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                          @Nullable String jsonTextAddresses,
+                          @NotNull DataAddress easterEggNameAddress,
+                          @NotNull DataAddress player1NamePoolAddress,
+                          @NotNull DataAddress player2NamePoolAddress) {
+        this(metalMaxRe, new HashMap<>(), easterEggNameAddress, player1NamePoolAddress, player2NamePoolAddress);
+        if (jsonTextAddresses == null) {
+            return;
+        }
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(jsonTextAddresses, JsonObject.class);
+
+        for (String s : jsonObject.keySet()) {
+            int page = Integer.parseInt(s, 16) & 0xFF;
+            String[] split = jsonObject.get(s).getAsString().split("-", 2);
+            int startAddr = Integer.parseInt(split[0], 16) & 0xFFFFF;
+            int endAddr = Integer.parseInt(split[1], 16) & 0xFFFFF;
+            textAddresses.put(page, DataAddress.from(startAddr - 0x10, endAddr - 0x10));
+        }
     }
 
     public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe,
@@ -267,38 +271,26 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     }
 
     @Override
-    public void setEasterEggName(TextBuilder name, List<TextBuilder> easterEggName) {
-
+    public void setEasterEggNames(Map<TextBuilder, List<TextBuilder>> easterEggNames) {
+        this.easterEggNames.clear();
+        this.easterEggNames.putAll(easterEggNames);
     }
 
     @Override
     public void setPlayer1NamePool(List<TextBuilder> namePool) {
-
+        this.player1NamePool.clear();
+        this.player1NamePool.addAll(namePool);
     }
 
     @Override
     public void setPlayer2NamePool(List<TextBuilder> namePool) {
-
+        this.player2NamePool.clear();
+        this.player2NamePool.addAll(namePool);
     }
 
     @Override
     public Map<Integer, DataAddress> getTextAddresses() {
         return textAddresses;
-    }
-
-    @Override
-    public DataAddress getTownNameAddress() {
-        return getTextAddresses().get(0x0D);
-    }
-
-    @Override
-    public DataAddress getItemNameAddress() {
-        return getTextAddresses().get(0x00);
-    }
-
-    @Override
-    public DataAddress getMonsterNameAddress() {
-        return getTextAddresses().get(0x01);
     }
 
     @Override
@@ -320,33 +312,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     public static class JPTextEditorImpl extends TextEditorImpl {
 
         public JPTextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
-            super(metalMaxRe, Map.ofEntries(
-                            Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                            Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                            Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                            Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                            Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                            Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                            Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A25 - 0x10)), //-
-                            Map.entry(0x00, DataAddress.from(0x11A26 - 0x10, 0x1200F - 0x10)), //-
-                            Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120B5 - 0x10)), //-
-                            Map.entry(0x0D, DataAddress.from(0x120B6 - 0x10, 0x124ED - 0x10)), //-
-                            Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x13396 - 0x10)), //-
-                            Map.entry(0x10, DataAddress.from(0x13397 - 0x10, 0x1400F - 0x10)), //-
-                            Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x1600F - 0x10)), //-
-                            Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                            Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x17502 - 0x10)), //-
-                            Map.entry(0x0F, DataAddress.from(0x17503 - 0x10, 0x1800F - 0x10)), //-
-                            Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                            Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                            Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21ECC - 0x10)), //-
-                            Map.entry(0x08, DataAddress.from(0x21ECD - 0x10, 0x2200F - 0x10)), //-
-                            Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                            Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
-                    ),
-                    DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
-                    DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
-                    DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10));
+            this(metalMaxRe,
+                    ResourceManager.getAsString("/text_addresses/japanese.json")
+            );
+        }
+
+        public JPTextEditorImpl(@NotNull MetalMaxRe metalMaxRe, String jsonTextAddresses) {
+            super(metalMaxRe, jsonTextAddresses);
         }
 
         @Override
@@ -366,33 +338,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     public static class SHTextEditorImpl extends TextEditorImpl {
 
         public SHTextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
-            super(metalMaxRe, Map.ofEntries(
-                            Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                            Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                            Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                            Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                            Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                            Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                            Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
-                            Map.entry(0x00, DataAddress.from(0x7E010 - 0x10, 0x7E7AF - 0x10)), //-
-                            Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
-                            Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
-                            Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
-                            Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
-                            Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)), //-
-                            Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                            Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
-                            Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
-                            Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                            Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                            Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
-                            Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
-                            Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                            Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
-                    ),
-                    DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
-                    DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
-                    DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10));
+            this(metalMaxRe,
+                    ResourceManager.getAsString("/text_addresses/super_hack.json")
+            );
+        }
+
+        public SHTextEditorImpl(@NotNull MetalMaxRe metalMaxRe, String jsonTextAddresses) {
+            super(metalMaxRe, jsonTextAddresses);
         }
 
         @Override
@@ -412,33 +364,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     public static class SHGTextEditorImpl extends TextEditorImpl {
 
         public SHGTextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
-            super(metalMaxRe, Map.ofEntries(
-                            Map.entry(0x14, DataAddress.from(0x0BE90 - 0x10, 0x0C00F - 0x10)), //-
-                            Map.entry(0x09, DataAddress.from(0x10010 - 0x10, 0x10128 - 0x10)), //-
-                            Map.entry(0x02, DataAddress.from(0x10129 - 0x10, 0x10DB2 - 0x10)), //-
-                            Map.entry(0x03, DataAddress.from(0x10DB3 - 0x10, 0x112F1 - 0x10)), //-
-                            Map.entry(0x04, DataAddress.from(0x112F2 - 0x10, 0x1157B - 0x10)), //-
-                            Map.entry(0x12, DataAddress.from(0x1157C - 0x10, 0x11932 - 0x10)), //-
-                            Map.entry(0x13, DataAddress.from(0x11933 - 0x10, 0x11A1F - 0x10)), //-
-                            Map.entry(0x00, DataAddress.from(0x52010 - 0x10, 0x527AF - 0x10)), //-
-                            Map.entry(0x0C, DataAddress.from(0x12010 - 0x10, 0x120DF - 0x10)), //-
-                            Map.entry(0x0D, DataAddress.from(0x120E0 - 0x10, 0x124ED - 0x10)), //-
-                            Map.entry(0x06, DataAddress.from(0x124EE - 0x10, 0x1331F - 0x10)), //-
-                            Map.entry(0x10, DataAddress.from(0x13320 - 0x10, 0x1400F - 0x10)), //-
-                            Map.entry(0x05, DataAddress.from(0x14010 - 0x10, 0x15A9F - 0x10)), //-
-                            Map.entry(0x07, DataAddress.from(0x16010 - 0x10, 0x16BDC - 0x10)), //-
-                            Map.entry(0x0A, DataAddress.from(0x16BDD - 0x10, 0x1767F - 0x10)), //-
-                            Map.entry(0x0F, DataAddress.from(0x17680 - 0x10, 0x1800F - 0x10)), //-
-                            Map.entry(0x0E, DataAddress.from(0x18010 - 0x10, 0x1A00F - 0x10)), //-
-                            Map.entry(0x11, DataAddress.from(0x1F99A - 0x10, 0x2000F - 0x10)), //-
-                            Map.entry(0x01, DataAddress.from(0x21AF6 - 0x10, 0x21E80 - 0x10)), //-
-                            Map.entry(0x08, DataAddress.from(0x21E81 - 0x10, 0x2200F - 0x10)), //-
-                            Map.entry(0x0B, DataAddress.from(0x36010 - 0x10, 0x3800F - 0x10)), //-
-                            Map.entry(0x15, DataAddress.from(0x384B5 - 0x10, 0x3886D - 0x10))
-                    ),
-                    DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
-                    DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
-                    DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10));
+            this(metalMaxRe,
+                    ResourceManager.getAsString("/text_addresses/super_hack_general.json")
+            );
+        }
+
+        public SHGTextEditorImpl(@NotNull MetalMaxRe metalMaxRe, String jsonTextAddresses) {
+            super(metalMaxRe, jsonTextAddresses);
         }
 
         @Override

@@ -2,9 +2,10 @@ package me.afoolslove.metalmaxre.editors.computer.shop;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.ItemList;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 
 import java.util.List;
-import java.util.Map;
 
 public interface IShopEditor extends IRomEditor {
     @Override
@@ -13,23 +14,14 @@ public interface IShopEditor extends IRomEditor {
     }
 
     /**
-     * @return 售货机商品的最大组合数量
+     * 索引指向的 商品/点唱机曲目 列表位置
      */
-    default int getVendorMaxCount() {
-        return 0x12;
-    }
-
-    /**
-     * @return 售货机商品种类数量（可以重复
-     */
-    default int getVendorTypeCount() {
-        return 0x06;
-    }
+    List<SingleMapEntry<Character, Integer>> getShopIndexes();
 
     /**
      * @return 获取所有商店的商品列表
      */
-    Map<Integer, List<Byte>> getShopLists();
+    List<ItemList<Object>> getShopLists();
 
     /**
      * 通过索引获取商店的商品列表
@@ -37,7 +29,7 @@ public interface IShopEditor extends IRomEditor {
      * @param shop 商店索引
      * @return 某个商店的商品列表
      */
-    default List<Byte> getShopList(int shop) {
+    default ItemList<Object> getShopList(int shop) {
         return getShopLists().get(shop);
     }
 
@@ -67,10 +59,5 @@ public interface IShopEditor extends IRomEditor {
      * @return 商店数据索引地址
      */
     DataAddress getShopIndexAddress();
-
-    /**
-     * @return 售货机数据地址
-     */
-    DataAddress getVendorsAddress();
 
 }

@@ -7,6 +7,21 @@ import java.util.List;
 import java.util.Map;
 
 public interface ITextEditor extends IRomEditor {
+    /**
+     * 物品名称页
+     */
+    int ITEM_NAME_PAGE = 0x00;
+    /**
+     * 怪物名称页
+     */
+    int MONSTER_NAME_PAGE = 0x01;
+    /**
+     * 城镇名称页
+     */
+    int TOWN_NAME_PAGE = 0x0D;
+
+
+
     @Override
     default String getId() {
         return "textEditor";
@@ -135,7 +150,7 @@ public interface ITextEditor extends IRomEditor {
     /**
      * 设置彩蛋名称
      */
-    void setEasterEggName(TextBuilder name, List<TextBuilder> easterEggName);
+    void setEasterEggNames(Map<TextBuilder, List<TextBuilder>> easterEggNames);
 
     /**
      * 设置玩家二名称池
@@ -159,21 +174,27 @@ public interface ITextEditor extends IRomEditor {
      *
      * @return 城镇名称的地址
      */
-    DataAddress getTownNameAddress();
+    default DataAddress getTownNameAddress() {
+        return getTextAddresses().get(TOWN_NAME_PAGE);
+    }
 
     /**
      * 获取物品名称的地址
      *
      * @return 物品名称的地址
      */
-    DataAddress getItemNameAddress();
+    default DataAddress getItemNameAddress() {
+        return getTextAddresses().get(ITEM_NAME_PAGE);
+    }
 
     /**
      * 获取怪物名称的地址
      *
      * @return 怪物名称的地址
      */
-    DataAddress getMonsterNameAddress();
+    default DataAddress getMonsterNameAddress() {
+        return getTextAddresses().get(MONSTER_NAME_PAGE);
+    }
 
     /**
      * 获取彩蛋名称的地址

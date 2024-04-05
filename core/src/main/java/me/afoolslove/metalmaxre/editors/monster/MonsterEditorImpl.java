@@ -7,10 +7,7 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements IMonsterEditor {
     private final DataAddress monsterDropItemsAddress;
@@ -34,6 +31,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     private final DataAddress specialMonsterGroupAddress;
     private final DataAddress wantedMonsterBountyAddress;
     private final DataAddress worldMapMonsterRealmsAddress;
+
+    private final List<DataAddress> monsterGroupAttributeAddresses;
 
 
     /**
@@ -60,6 +59,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
     public final List<SingleMapEntry<Integer, Integer>> autoRestores = new ArrayList<>();
 
+    public final List<byte[]> groupAttributes = new ArrayList<>(0x04);
+
     public MonsterEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x2253F - 0x10, 0x225AA - 0x10),
@@ -83,7 +84,14 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                 DataAddress.fromPRG(0x39979 - 0x10, 0x39B38 - 0x10),
 //                DataAddress.fromPRG(0x7EBE0 - 0x10, 0x7EBEB - 0x10),
                 DataAddress.fromPRG(metalMaxRe.getBuffer().getHeader().getLastPrgRomLength() + 0x02BE0 - 0x10),
-                DataAddress.fromPRG(0x39243 - 0x10, 0x39342 - 0x10)
+                DataAddress.fromPRG(0x39243 - 0x10, 0x39342 - 0x10),
+                Arrays.asList(
+                        DataAddress.fromPRG(0x391E5 - 0x10, 0x39242 - 0x10),
+                        DataAddress.fromPRG(0x38FC3 - 0x10, 0x38FC5 - 0x10),
+                        DataAddress.fromPRG(0x39037 - 0x10, 0x3903A - 0x10),
+                        DataAddress.fromPRG(0x358F2 - 0x10, 0x358F5 - 0x10),
+                        DataAddress.fromPRG(0x398C9 - 0x10, 0x39900 - 0x10)
+                )
         );
     }
 
@@ -108,7 +116,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                              DataAddress monsterGroupAddress,
                              DataAddress specialMonsterGroupAddress,
                              DataAddress wantedMonsterBountyAddress,
-                             DataAddress worldMapMonsterRealmsAddress) {
+                             DataAddress worldMapMonsterRealmsAddress,
+                             List<DataAddress> monsterGroupAttributeAddresses) {
         super(metalMaxRe);
         this.monsterDropItemsAddress = monsterDropItemsAddress;
         this.monsterAttackModeGroupIndexAddress = monsterAttackModeGroupIndexAddress;
@@ -131,6 +140,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         this.specialMonsterGroupAddress = specialMonsterGroupAddress;
         this.wantedMonsterBountyAddress = wantedMonsterBountyAddress;
         this.worldMapMonsterRealmsAddress = worldMapMonsterRealmsAddress;
+        this.monsterGroupAttributeAddresses = monsterGroupAttributeAddresses;
     }
 
     @Editor.Load
@@ -139,6 +149,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         monsters.clear();
         worldMapRealms.clear();
         autoRestores.clear();
+        groupAttributes.clear();
 
         byte[] autoRestores = new byte[0x06];
         getBuffer().get(getMonsterResistanceAutoRestoreAddress(), autoRestores);
@@ -260,6 +271,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             byte[] monsters = new byte[0x0E];
             getBuffer().get(monsters);
             monsterGroups[i] = new MonsterGroup(monsters);
+            monsterGroups[i].setAttributeIndex(getBuffer().get(getMonsterGroupAttributeAddresses().get(0x00), i + 1)); // 跳过默认怪物组的组属性
         }
 
         // 读取特殊怪物组合数据
@@ -273,6 +285,15 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                 counts[j] = getBuffer().get();
             }
             specialMonsterGroups[i] = new SpecialMonsterGroup(monsters, counts);
+        }
+
+        // 读取怪物组的组属性
+        int[] groupAttributeLengths = {getMonsterGroupAttributeAddresses().get(0x00).length(), 6, 4, 4, 4};
+        for (int i = 0; i < groupAttributeLengths.length; i++) {
+            DataAddress monsterGroupAttributeAddress = getMonsterGroupAttributeAddresses().get(i);
+            byte[] bytes = new byte[groupAttributeLengths[i]];
+            getBuffer().get(monsterGroupAttributeAddress, bytes);
+            groupAttributes.add(bytes);
         }
     }
 
@@ -369,7 +390,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         position(getMonsterGroupAddress());
         for (int i = 0; i < getMonsterGroupMaxCount(); i++) {
             MonsterGroup monsterGroup = monsterGroups[i];
-            getBuffer().put(monsterGroup.monsters);
+            getBuffer().put(monsterGroup.monsters());
+            getBuffer().put(getMonsterGroupAttributeAddresses().get(0x00).getStartAddress(i + 1), monsterGroup.getAttributeIndex());
         }
 
         // 写入特殊怪物组合数据
@@ -377,13 +399,19 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         for (int i = 0; i < getSpecialMonsterGroupMaxCount(); i++) {
             SpecialMonsterGroup specialMonsterGroup = specialMonsterGroups[i];
             for (int j = 0; j < 0x04; j++) {
-                getBuffer().put(specialMonsterGroup.monsters[j]);
-                getBuffer().put(specialMonsterGroup.counts[j]);
+                getBuffer().put(specialMonsterGroup.getMonster(j));
+                getBuffer().put(specialMonsterGroup.getCount(j));
             }
         }
 
         // 写入赏金首的赏金数据
         getBuffer().put(getWantedMonsterBountyAddress(), bounty);
+
+        // 写入怪物组的组属性
+        for (int i = 0; i < 0x05; i++) {
+            DataAddress monsterGroupAttributeAddress = getMonsterGroupAttributeAddresses().get(i);
+            getBuffer().put(monsterGroupAttributeAddress, getMonsterGroupAttribute().get(i));
+        }
     }
 
     @Override
@@ -404,6 +432,11 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Override
     public List<SingleMapEntry<Integer, Integer>> getAutoRestores() {
         return autoRestores;
+    }
+
+    @Override
+    public List<byte[]> getMonsterGroupAttribute() {
+        return groupAttributes;
     }
 
     @Override
@@ -514,5 +547,10 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Override
     public DataAddress getWorldMapMonsterRealmsAddress() {
         return worldMapMonsterRealmsAddress;
+    }
+
+    @Override
+    public List<DataAddress> getMonsterGroupAttributeAddresses() {
+        return monsterGroupAttributeAddresses;
     }
 }

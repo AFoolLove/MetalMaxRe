@@ -101,9 +101,9 @@ public class VendorItem {
      */
     public void hasItems(boolean hasItems) {
         if (hasItems) {
-            count |= 0B1000_0000;
-        } else {
             count &= 0B0111_1111;
+        } else {
+            count |= (byte) 0B1000_0000;
         }
     }
 
@@ -112,7 +112,7 @@ public class VendorItem {
      * @see #hasItems(boolean)
      */
     public boolean hasItems() {
-        return (count & 0B1000_0000) != 0x00;
+        return (count & 0B1000_0000) == 0x00;
     }
 
     @Override
