@@ -73,7 +73,7 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
             getBuffer().put(spriteModel.getAttribute());
             getBuffer().put(spriteModel.getModel());
 
-            baseSpriteModelIndex += 2 + spriteModel.getModel().length;
+            baseSpriteModelIndex += spriteModel.length();
         }
 
         // 写入模型索引

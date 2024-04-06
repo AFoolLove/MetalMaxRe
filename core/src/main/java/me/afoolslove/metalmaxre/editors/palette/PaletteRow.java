@@ -87,8 +87,15 @@ public class PaletteRow {
      * @return 转换为颜色
      */
     public Color[] toColors(@NotNull SystemPalette systemPalette) {
+        return toColors(systemPalette, false);
+    }
+
+    /**
+     * @return 转换为颜色
+     */
+    public Color[] toColors(@NotNull SystemPalette systemPalette, boolean spriteMode) {
         Color[] colors = new Color[0x04];
-        colors[0x00] = systemPalette.getBlack();
+        colors[0x00] = spriteMode ? null : systemPalette.getBlack();
         colors[0x01] = systemPalette.getColor(paletteRow[0x01]);
         colors[0x02] = systemPalette.getColor(paletteRow[0x02]);
         colors[0x03] = systemPalette.getColor(paletteRow[0x03]);

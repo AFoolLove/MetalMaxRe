@@ -134,14 +134,10 @@ public class TileSetHelper {
      * <p>
      * 图片的大小为 128*128
      */
-    public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0) {
+    public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0, Color[] colors) {
         SystemPalette systemPalette = metalMaxRe.getSystemPalette();
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
 
-        // 只能是灰白色了
-        Color[] colors = new Color[]{
-                systemPalette.getBlack(), systemPalette.getWhite(), new Color(0xA1A1A1), new Color(0x585858)
-        };
         byte[][][] tiles = new byte[4][0x40][0x10];
         tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
         tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
@@ -172,6 +168,19 @@ public class TileSetHelper {
         return image;
     }
 
+    /**
+     * 生成一张没有组合过的 TileSet 图片
+     * 4个32*128直接拼接的图片
+     * <p>
+     * 图片的大小为 128*128
+     */
+    public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0) {
+        SystemPalette systemPalette = metalMaxRe.getSystemPalette();
+        return generateTileSet(metalMaxRe, x00, x40, x80, xC0, new Color[]{
+                systemPalette.getBlack(), systemPalette.getWhite(), new Color(0xA1A1A1), new Color(0x585858)
+        });
+    }
+
     public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, int xXX, int combinationA, int combinationB, @Nullable Color[][] palette) {
         return generateTileSet(metalMaxRe,
                 (xXX & 0xFF000000) >>> 24,
@@ -191,6 +200,14 @@ public class TileSetHelper {
                 (xXX & 0x00FF0000) >>> 16,
                 (xXX & 0x0000FF00) >>> 8,
                 xXX & 0x000000FF);
+    }
+
+    public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, int xXX, Color[] colors) {
+        return generateTileSet(metalMaxRe,
+                (xXX & 0xFF000000) >>> 24,
+                (xXX & 0x00FF0000) >>> 16,
+                (xXX & 0x0000FF00) >>> 8,
+                xXX & 0x000000FF, colors);
     }
 
     /**
@@ -257,6 +274,7 @@ public class TileSetHelper {
     public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, int sprite) {
         return generateSpriteTileSet(metalMaxRe, sprite, false);
     }
+
     /**
      * 生成一张精灵的 TileSet 图片
      * 该算法不完整，所以有部分错误的图像
@@ -539,6 +557,13 @@ public class TileSetHelper {
             }
         }
         return image;
+    }
+
+    /**
+     * 通过调色板进行调色
+     */
+    public static Color[][] palette(byte[][] imageData, @NotNull Color[] color) {
+        return palette(imageData, new Color[][]{color, color, color, color});
     }
 
     public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,

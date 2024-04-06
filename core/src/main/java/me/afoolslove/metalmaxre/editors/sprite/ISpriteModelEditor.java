@@ -18,13 +18,34 @@ public interface ISpriteModelEditor extends IRomEditor {
         return "spriteModelEditor";
     }
 
+    /**
+     * 获取所有精灵模型
+     *
+     * @return 所有精灵模型
+     */
     List<SpriteModel> getSpriteModels();
 
+    /**
+     * 获取精灵模型
+     *
+     * @param index 精灵模型索引
+     * @return 精灵模型
+     */
     default SpriteModel getSpriteModel(int index) {
         return getSpriteModels().get(index);
     }
 
+    /**
+     * 获取精灵模型索引地址
+     *
+     * @return 精灵模型索引地址
+     */
     DataAddress getSpriteModelIndexAddress();
 
+    /**
+     * 获取精灵模型数据地址
+     *
+     * @return 精灵模型数据地址
+     */
     DataAddress getSpriteModelAddress();
 }
