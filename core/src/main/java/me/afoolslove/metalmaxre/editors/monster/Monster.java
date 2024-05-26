@@ -38,9 +38,9 @@ public class Monster {
      */
     public byte hitRate;
     /**
-     * 战斗等级
+     * 回避率
      */
-    public byte battleLevel;
+    public byte evasionRate;
     /**
      * 经验值
      */
@@ -276,23 +276,23 @@ public class Monster {
     }
 
     /**
-     * 设置怪物的闪避率
+     * 设置怪物的闪避等级
      * <p>
      * 0（默认00<p>
      * 1（默认08<p>
      * 2（默认40<p>
      * 3（默认80
      *
-     * @param dodgeRate 闪避率
+     * @param dodgeLevel 闪避等级
      */
-    public void setDodgeRate(int dodgeRate) {
-        dodgeRate &= 0B0000_0011;
+    public void setDodgeLevel(int dodgeLevel) {
+        dodgeLevel &= 0B0000_0011;
 
         int ability = this.ability;
         // 清除闪避率
         ability &= 0B1111_1100;
         // 添加闪避率
-        ability |= dodgeRate;
+        ability |= dodgeLevel;
 
         setAbility(ability);
     }
@@ -370,7 +370,7 @@ public class Monster {
     }
 
     /**
-     * 设置怪物的防御力，实际防御力会根据战斗等级D7变化
+     * 设置怪物的防御力，实际防御力会根据回避率D7变化
      *
      * @param defense 防御力
      */
@@ -383,7 +383,7 @@ public class Monster {
     }
 
     /**
-     * 设置真实防御力，会影响战斗等级D7
+     * 设置真实防御力，会影响回避率D7
      *
      * @param defense 真实防御力
      */
@@ -391,9 +391,9 @@ public class Monster {
         if (defense > 0xFF) {
             defense &= 0B11_1111_1100;
             defense >>>= 0x02;
-            setBattleLevel(getBattleLevel() | 0B1000_0000);
+            setEvasionRate(getEvasionRate() | 0B1000_0000);
         } else {
-            setBattleLevel(getBattleLevel() & 0B0111_1111);
+            setEvasionRate(getEvasionRate() & 0B0111_1111);
         }
         setDefense(defense);
     }
@@ -442,20 +442,20 @@ public class Monster {
     }
 
     /**
-     * 设置怪物的战斗等级
-     * 0B0111_1111 战斗等级（0x00-0x7F）
-     * 0B1000_0000 影响 $72CC（未测试淦什么的），效果与命中率数据一致
+     * 设置怪物的回避率
+     * 0B0111_1111 回避率（0x00-0x7F）
+     * 0B1000_0000 怪物的防御力*4
      */
-    public void setRawBattleLevel(@Range(from = 0x00, to = 0xFF) int battleLevel) {
-        this.battleLevel = (byte) (battleLevel & 0xFF);
+    public void setRawEvasionRate(@Range(from = 0x00, to = 0xFF) int evasionRate) {
+        this.evasionRate = (byte) (evasionRate & 0xFF);
     }
 
-    public void setBattleLevel(@Range(from = 0x00, to = 0x7F) byte battleLevel) {
-        setRawBattleLevel(battleLevel & 0B0111_1111);
+    public void setEvasionRate(@Range(from = 0x00, to = 0x7F) byte evasionRate) {
+        setRawEvasionRate(evasionRate & 0B0111_1111);
     }
 
-    public void setBattleLevel(@Range(from = 0x00, to = 0x7F) int battleLevel) {
-        setBattleLevel((byte) (battleLevel & 0B0111_1111));
+    public void setEvasionRate(@Range(from = 0x00, to = 0x7F) int evasionRate) {
+        setEvasionRate((byte) (evasionRate & 0B0111_1111));
     }
 
     /**
@@ -719,7 +719,7 @@ public class Monster {
      * @return 怪物的真实防御力
      */
     public int getDefenseValue() {
-        if ((getBattleLevel() & 0B1000_0000) != 0x00) {
+        if ((getEvasionRate() & 0B1000_0000) != 0x00) {
             return intDefense() << 2;
         }
         return intDefense();
@@ -780,20 +780,20 @@ public class Monster {
     }
 
     /**
-     * @return 怪物的战斗等级
+     * @return 怪物的回避率
      */
-    public byte getBattleLevel() {
-        return battleLevel;
+    public byte getEvasionRate() {
+        return evasionRate;
     }
 
     @Range(from = 0x00, to = 0x7F)
-    public int intBattleLevel() {
-        return getBattleLevel() & 0x7F;
+    public int intEvasionRate() {
+        return getEvasionRate() & 0x7F;
     }
 
     @Range(from = 0x00, to = 0xFF)
-    public int intRawBattleLevel() {
-        return getBattleLevel() & 0xFF;
+    public int intRawEvasionRate() {
+        return getEvasionRate() & 0xFF;
     }
 
     /**

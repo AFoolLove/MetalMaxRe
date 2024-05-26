@@ -91,6 +91,7 @@ public class PaletteRow {
     }
 
     /**
+     * @param spriteMode 如果为true，0x00的颜色改为透明
      * @return 转换为颜色
      */
     public Color[] toColors(@NotNull SystemPalette systemPalette, boolean spriteMode) {

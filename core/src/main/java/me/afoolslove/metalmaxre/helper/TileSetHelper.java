@@ -71,6 +71,24 @@ public class TileSetHelper {
         }
     }
 
+    public static void horizontalFlip(byte[][] tile) {
+        for (byte[] bytes : tile) {
+            for (int x = 0, len = bytes.length / 2; x < len; x++) {
+                byte temp = bytes[x];
+                bytes[x] = bytes[bytes.length - 1 - x];
+                bytes[bytes.length - 1 - x] = temp;
+            }
+        }
+    }
+
+    public static void verticalFlip(byte[][] tile) {
+        for (int y = 0, len = tile.length / 2; y < len; y++) {
+            byte[] temp = tile[y];
+            tile[y] = tile[tile.length - 1 - y];
+            tile[tile.length - 1 - y] = temp;
+        }
+    }
+
 
     /**
      * @return 通过地图属性生成一张 TileSet 图片
@@ -566,10 +584,28 @@ public class TileSetHelper {
         return palette(imageData, new Color[][]{color, color, color, color});
     }
 
+
+    public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe, int xXX, Color[][] colors) {
+        int x00 = NumberR.at(xXX, 3) & 0xFF;
+        int x40 = NumberR.at(xXX, 2) & 0xFF;
+        int x80 = NumberR.at(xXX, 1) & 0xFF;
+        int xC0 = NumberR.at(xXX, 0) & 0xFF;
+        return generate(metalMaxRe, x00, x40, x80, xC0, colors[0x03]);
+    }
+
     public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,
                                      int x00, int x40, int x80, int xC0,
                                      Color[][] colors) {
         return generate(metalMaxRe, x00, x40, x80, xC0, colors[0x03]);
+    }
+
+    public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe, int xXX, Color[] colors) {
+
+        int x00 = NumberR.at(xXX, 3) & 0xFF;
+        int x40 = NumberR.at(xXX, 2) & 0xFF;
+        int x80 = NumberR.at(xXX, 1) & 0xFF;
+        int xC0 = NumberR.at(xXX, 0) & 0xFF;
+        return generate(metalMaxRe, x00, x40, x80, xC0, colors);
     }
 
     public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,
@@ -601,6 +637,15 @@ public class TileSetHelper {
         }
         return image;
     }
+
+    public static byte[][] generate(@NotNull MetalMaxRe metalMaxRe, int xXX) {
+        int x00 = NumberR.at(xXX, 3) & 0xFF;
+        int x40 = NumberR.at(xXX, 2) & 0xFF;
+        int x80 = NumberR.at(xXX, 1) & 0xFF;
+        int xC0 = NumberR.at(xXX, 0) & 0xFF;
+        return generate(metalMaxRe, x00, x40, x80, xC0);
+    }
+
 
     public static byte[][] generate(@NotNull MetalMaxRe metalMaxRe,
                                     int x00, int x40, int x80, int xC0) {

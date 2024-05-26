@@ -105,11 +105,16 @@ public interface IMonsterEditor extends IRomEditor {
 
     /**
      * 获取指定位置的怪物组合
+     * <p>
+     * *传入索引0x00会得到固定的{@link MonsterGroup.EmptyMonsterGroup#INSTANCE}对象
      *
      * @param index 索引
      * @return 怪物组合
      */
     default MonsterGroup getMonsterGroup(int index) {
+        if (index == 0x00) {
+            return MonsterGroup.EmptyMonsterGroup.INSTANCE;
+        }
         return getMonsterGroups()[index - 1];
     }
 
@@ -246,7 +251,7 @@ public interface IMonsterEditor extends IRomEditor {
     /**
      * 怪物的防御力地址
      * <p>
-     * *攻击力根据战斗等级D7变化
+     * *防御力根据回避率D7变化
      */
     DataAddress getMonsterDefensesAddress();
 
@@ -261,9 +266,9 @@ public interface IMonsterEditor extends IRomEditor {
     DataAddress getMonsterHitRatesAddress();
 
     /**
-     * 怪物的战斗等级地址
+     * 怪物的回避率地址
      */
-    DataAddress getMonsterBattleLevelAddress();
+    DataAddress getMonsterEvasionRateAddress();
 
     /**
      * 战斗结束玩家获得的经验值地址

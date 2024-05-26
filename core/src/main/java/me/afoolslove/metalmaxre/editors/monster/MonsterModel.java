@@ -344,6 +344,27 @@ public class MonsterModel {
     }
 
     /**
+     * 获取模型占用的图块数量
+     *
+     * @return 模型占用的图块数量
+     */
+    public int getModelDataCount() {
+        if (getModelType() == MonsterModelType.A) {
+            // 计算有多少个1
+            int count = 0x00;
+            for (byte modelDatum : getModelData()) {
+                int tmp = modelDatum & 0xFF;
+                while (tmp > 0x00) {
+                    tmp &= tmp - 1;
+                    count++;
+                }
+            }
+            return count;
+        }
+        return getModelData().length;
+    }
+
+    /**
      * 获取怪物模型数据的类型
      *
      * @return 怪物模型数据的类型

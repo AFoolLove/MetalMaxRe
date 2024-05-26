@@ -122,7 +122,6 @@
 实现类：[WorldMapEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/WorldMapEditorImpl.java)
 
 * 编辑世界地图
-* 修改出航/归航的航线，出航/归航航线的路径点各最大16条
 * 无歌村右边码头的地雷
 
 ### [IDogSystemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IDogSystemEditor.java)（犬系统编辑器）

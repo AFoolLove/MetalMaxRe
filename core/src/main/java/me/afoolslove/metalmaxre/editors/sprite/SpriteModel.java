@@ -59,7 +59,7 @@ public class SpriteModel {
      * <p>
      * 模型高度
      *
-     * @return
+     * @return 属性数据
      */
     public byte getAttribute() {
         return attribute;
@@ -80,6 +80,8 @@ public class SpriteModel {
 
     /**
      * 获取X坐标偏移
+     * <p>
+     * 偏移比率为：1:4像素
      *
      * @return X坐标偏移
      */
@@ -90,6 +92,8 @@ public class SpriteModel {
 
     /**
      * 获取Y坐标偏移
+     * <p>
+     * 偏移比率为：1:4像素
      *
      * @return Y坐标偏移
      */
@@ -216,6 +220,8 @@ public class SpriteModel {
 
     /**
      * 设置X坐标偏移
+     * <p>
+     * 偏移比率为：1:4像素
      *
      * @param offsetX X坐标偏移
      */
@@ -232,6 +238,8 @@ public class SpriteModel {
 
     /**
      * 设置Y坐标偏移
+     * <p>
+     * 偏移比率为：1:4像素
      *
      * @param offsetY Y坐标偏移
      */
@@ -248,6 +256,8 @@ public class SpriteModel {
 
     /**
      * 设置坐标偏移
+     * <p>
+     * 偏移比率为：1:4像素
      *
      * @param offsetX X坐标偏移
      * @param offsetY Y坐标偏移

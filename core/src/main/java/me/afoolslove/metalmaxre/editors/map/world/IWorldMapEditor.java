@@ -1,12 +1,10 @@
 package me.afoolslove.metalmaxre.editors.map.world;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.MapPoint;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
-import java.util.Map;
 
 public interface IWorldMapEditor extends IRomEditor {
     @Override
@@ -39,14 +37,6 @@ public interface IWorldMapEditor extends IRomEditor {
     byte[][] getMap();
 
     /**
-     * 航线最大路径点
-     */
-    default int getWorldMapLineMaxCount() {
-        return 0x10;
-    }
-
-
-    /**
      * 获取图块索引组的容量
      */
     default int[] getIndexesCapacity() {
@@ -57,16 +47,6 @@ public interface IWorldMapEditor extends IRomEditor {
      * @return 地雷坐标
      */
     List<MapPoint> getMines();
-
-    /**
-     * @return 出航路径点和目的地
-     */
-    Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineOut();
-
-    /**
-     * @return 归航路径点和目的地
-     */
-    Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineBack();
 
     /**
      * 世界地图图块索引偏移地址
@@ -99,17 +79,6 @@ public interface IWorldMapEditor extends IRomEditor {
      * 地雷坐标起始 4x + 4y
      */
     DataAddress getWorldMapMinesAddress();
-
-    /**
-     * 出航航线起始
-     */
-    DataAddress getWorldMapOutLineAddress();
-
-    /**
-     * 归航航线起始
-     */
-    DataAddress getWorldMapBackLineAddress();
-
 
     /**
      * 将0x10个byte以4*4的顺序写入map

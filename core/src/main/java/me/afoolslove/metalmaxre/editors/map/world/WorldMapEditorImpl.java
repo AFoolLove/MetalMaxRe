@@ -3,7 +3,6 @@ package me.afoolslove.metalmaxre.editors.map.world;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
-import me.afoolslove.metalmaxre.editors.map.CameraMapPoint;
 import me.afoolslove.metalmaxre.editors.map.MapPoint;
 import me.afoolslove.metalmaxre.editors.map.events.EventTile;
 import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
@@ -31,8 +30,6 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     private final List<DataAddress> worldMapIndexesAddress;
     private final DataAddress worldMapIndexAddress;
     private final DataAddress worldMapMinesAddress;
-    private final DataAddress worldMapOutLineAddress;
-    private final DataAddress worldMapBackLineAddress;
 
     /**
      * 图块集组合矩形化
@@ -78,27 +75,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
      */
     private final List<MapPoint> mines = new ArrayList<>();
 
-    /**
-     * 出航的航线<p>
-     * K: line<p>
-     * V：目的地
-     */
-    private final Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> shippingLineOut = Map.entry(new ArrayList<>(0x10), new CameraMapPoint());
-    /**
-     * 归航的航线<p>
-     * K: line<p>
-     * V：目的地
-     */
-    private final Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> shippingLineBack = Map.entry(new ArrayList<>(0x10), new CameraMapPoint());
-
     public WorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x00010 - 0x10, 0x0040F - 0x10),
                 DataAddress.fromPRG(0x00410 - 0x10, 0x0060F - 0x10),
                 DataAddress.fromCHR(0x3A010 - 0x10, 0x3B00F - 0x10),
-                DataAddress.fromPRG(0x35EC1 - 0x10),
-                DataAddress.fromPRG(0x258C6 - 0x10),
-                DataAddress.fromPRG(0x258EA - 0x10));
+                DataAddress.fromPRG(0x35EC1 - 0x10, 0x35EC8 - 0x10));
     }
 
     public WorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
@@ -106,16 +88,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                               DataAddress worldMapX00410Address,
                               DataAddress worldMapIndexAddress,
                               DataAddress worldMapMinesAddress,
-                              DataAddress worldMapOutLineAddress,
-                              DataAddress worldMapBackLineAddress,
                               List<DataAddress> worldMapIndexesAddress) {
         super(metalMaxRe);
         this.worldMapTilesIndexAddress = worldMapTilesIndexAddress;
         this.worldMapX00410Address = worldMapX00410Address;
         this.worldMapIndexAddress = worldMapIndexAddress;
         this.worldMapMinesAddress = worldMapMinesAddress;
-        this.worldMapOutLineAddress = worldMapOutLineAddress;
-        this.worldMapBackLineAddress = worldMapBackLineAddress;
         this.worldMapIndexesAddress = worldMapIndexesAddress;
     }
 
@@ -123,16 +101,12 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                               DataAddress worldMapTilesIndexAddress,
                               DataAddress worldMapX00410Address,
                               DataAddress worldMapIndexAddress,
-                              DataAddress worldMapMinesAddress,
-                              DataAddress worldMapOutLineAddress,
-                              DataAddress worldMapBackLineAddress) {
+                              DataAddress worldMapMinesAddress) {
         super(metalMaxRe);
         this.worldMapTilesIndexAddress = worldMapTilesIndexAddress;
         this.worldMapX00410Address = worldMapX00410Address;
         this.worldMapIndexAddress = worldMapIndexAddress;
         this.worldMapMinesAddress = worldMapMinesAddress;
-        this.worldMapOutLineAddress = worldMapOutLineAddress;
-        this.worldMapBackLineAddress = worldMapBackLineAddress;
 
         this.worldMapIndexesAddress = new ArrayList<>();
         int position = metalMaxRe.getBuffer().getHeader().getLastPrgRomLength() + 0x01E94;
@@ -230,58 +204,6 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         for (int i = 0; i < 0x04; i++) {
             getMines().add(new MapPoint(0x00, mineXs[i], mineYs[i]));
         }
-
-        // 读取出航航线
-        position(getWorldMapOutLineAddress());
-        // 坐标是相对路径，进入世界地图的坐标开始算起
-        List<Map.Entry<LineDirection, Byte>> linePoint = getShippingLineOut().getKey();
-        linePoint.clear();
-
-        // 读取0x10次方向
-        while (linePoint.size() < 0x10) {
-            byte action = getBuffer().get();
-            LineDirection direction = LineDirection.fromAction(action);
-            if (direction == null) {
-                // 航线错误
-                LOGGER.error("世界地图编辑器：出航航线读取错误：未知的操作码 {}", NumberR.toHex(action));
-                continue;
-            }
-            if (direction == LineDirection.END) {
-                // 读取到目的地数据，立即结束
-                break;
-            }
-            linePoint.add(Map.entry(direction, getBuffer().get()));
-        }
-        if (linePoint.size() == 0x10) {
-            getBuffer().get(); // 所有路径点全部使用，跳过 0x5E
-        }
-        // 读取出航目的地
-        getShippingLineOut().getValue().setCamera(getBuffer().get(), getBuffer().get(), getBuffer().get());
-
-        // 读取归航航线
-        position(getWorldMapBackLineAddress());
-        linePoint = getShippingLineBack().getKey();
-        linePoint.clear();
-
-        while (linePoint.size() < 0x10) {
-            byte action = getBuffer().get();
-            LineDirection direction = LineDirection.fromAction(action);
-            if (direction == null) {
-                // 航线错误
-                LOGGER.error("世界地图编辑器：归航航线读取错误：未知的操作码 {}", NumberR.toHex(action));
-                continue;
-            }
-            if (direction == LineDirection.END) {
-                // 读取到目的地数据，立即结束
-                break;
-            }
-            linePoint.add(Map.entry(direction, getBuffer().get()));
-        }
-        if (linePoint.size() == 0x10) {
-            getBuffer().get(); // 所有路径点全部使用，跳过 0xE5
-        }
-        // 读取归航目的地
-        getShippingLineBack().getValue().setCamera(getBuffer().get(), getBuffer().get(), getBuffer().get());
     }
 
     @Editor.Apply
@@ -525,34 +447,6 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
         getBuffer().put(mineXs);
         getBuffer().put(mineYs);
-
-        // 写入出航路径点和目的地
-        position(getWorldMapOutLineAddress());
-        for (int i = 0, size = Math.min(0x10, getShippingLineOut().getKey().size()); i < size; i++) {
-            Map.Entry<LineDirection, Byte> linePoint = getShippingLineOut().getKey().get(i);
-            getBuffer().put(linePoint.getKey().getAction());
-            getBuffer().put(linePoint.getValue());
-        }
-        // 航线结束标志
-        getBuffer().put(LineDirection.END.getAction());
-        // 写入出航目的地
-        getBuffer().put(getShippingLineOut().getValue().getMap());
-        getBuffer().put(getShippingLineOut().getValue().getCameraX());
-        getBuffer().put(getShippingLineOut().getValue().getCameraY());
-
-        // 写入归航路径点和目的地
-        position(getWorldMapBackLineAddress());
-        for (int i = 0, size = Math.min(0x10, getShippingLineBack().getKey().size()); i < size; i++) {
-            Map.Entry<LineDirection, Byte> linePoint = getShippingLineBack().getKey().get(i);
-            getBuffer().put(linePoint.getKey().getAction());
-            getBuffer().put(linePoint.getValue());
-        }
-        // 航线结束标志
-        getBuffer().put(LineDirection.END.getAction());
-        // 写入归航目的地
-        getBuffer().put(getShippingLineBack().getValue().getMap());
-        getBuffer().put(getShippingLineBack().getValue().getCameraX());
-        getBuffer().put(getShippingLineBack().getValue().getCameraY());
     }
 
     @Override
@@ -578,16 +472,6 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
     @Override
     public DataAddress getWorldMapMinesAddress() {
         return worldMapMinesAddress;
-    }
-
-    @Override
-    public DataAddress getWorldMapOutLineAddress() {
-        return worldMapOutLineAddress;
-    }
-
-    @Override
-    public DataAddress getWorldMapBackLineAddress() {
-        return worldMapBackLineAddress;
     }
 
     @Override
@@ -663,16 +547,6 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         return mines;
     }
 
-    @Override
-    public Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineOut() {
-        return shippingLineOut;
-    }
-
-    @Override
-    public Map.Entry<List<Map.Entry<LineDirection, Byte>>, CameraMapPoint> getShippingLineBack() {
-        return shippingLineBack;
-    }
-
     /**
      * 兼容SH和SHG版本
      */
@@ -684,9 +558,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                     DataAddress.fromPRG(0x00010 - 0x10, 0x0040F - 0x10),
                     DataAddress.fromPRG(0x00410 - 0x10, 0x0060F - 0x10),
                     DataAddress.fromCHR(0x3A010 - 0x10, 0x3B00F - 0x10),
-                    DataAddress.fromPRG(0x35EC1 - 0x10),
-                    DataAddress.fromPRG(0x25C10 - 0x10),
-                    DataAddress.fromPRG(0x25C34 - 0x10));
+                    DataAddress.fromPRG(0x35EC1 - 0x10, 0x35EC8 - 0x10));
         }
 
         public SHWorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
@@ -694,20 +566,16 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                                     DataAddress worldMapX00410Address,
                                     DataAddress worldMapIndexAddress,
                                     DataAddress worldMapMinesAddress,
-                                    DataAddress worldMapOutLineAddress,
-                                    DataAddress worldMapBackLineAddress,
                                     List<DataAddress> worldMapIndexesAddress) {
-            super(metalMaxRe, worldMapTilesIndexAddress, worldMapX00410Address, worldMapIndexAddress, worldMapMinesAddress, worldMapOutLineAddress, worldMapBackLineAddress, worldMapIndexesAddress);
+            super(metalMaxRe, worldMapTilesIndexAddress, worldMapX00410Address, worldMapIndexAddress, worldMapMinesAddress, worldMapIndexesAddress);
         }
 
         public SHWorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                                     DataAddress worldMapTilesIndexAddress,
                                     DataAddress worldMapX00410Address,
                                     DataAddress worldMapIndexAddress,
-                                    DataAddress worldMapMinesAddress,
-                                    DataAddress worldMapOutLineAddress,
-                                    DataAddress worldMapBackLineAddress) {
-            super(metalMaxRe, worldMapTilesIndexAddress, worldMapX00410Address, worldMapIndexAddress, worldMapMinesAddress, worldMapOutLineAddress, worldMapBackLineAddress);
+                                    DataAddress worldMapMinesAddress) {
+            super(metalMaxRe, worldMapTilesIndexAddress, worldMapX00410Address, worldMapIndexAddress, worldMapMinesAddress);
         }
 
         @Override

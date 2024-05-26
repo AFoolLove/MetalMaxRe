@@ -15,11 +15,16 @@ import java.util.Arrays;
  * @author AFoolLove
  */
 public class MonsterGroup {
-    private final byte[] monsters = new byte[0x0E];
+    private final byte[] monsters;
 
     private byte attributeIndex = 0x00;
 
+    protected MonsterGroup() {
+        this.monsters = null;
+    }
+
     public MonsterGroup(byte[] monsters) {
+        this.monsters = new byte[0x0E];
         setMonsters(monsters);
     }
 
@@ -345,5 +350,31 @@ public class MonsterGroup {
         temp &= 0B1111_1100;
         temp |= probabilityIndex;
         setAttributeIndex(temp);
+    }
+
+
+    /**
+     * 是否为空怪物组，不会遇敌的区域
+     *
+     * @return 是否为空怪物组
+     */
+    public boolean isEmptyMonsterGroup() {
+        return this instanceof EmptyMonsterGroup;
+    }
+
+    /**
+     * 空的怪物组，不要对其进行任何修改！
+     */
+    public static class EmptyMonsterGroup extends MonsterGroup {
+        public static final EmptyMonsterGroup INSTANCE = new EmptyMonsterGroup();
+
+        private EmptyMonsterGroup() {
+            super();
+        }
+
+        @Override
+        public boolean isEmptyMonsterGroup() {
+            return true;
+        }
     }
 }

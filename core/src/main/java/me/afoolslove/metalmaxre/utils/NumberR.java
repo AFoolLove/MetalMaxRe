@@ -63,7 +63,7 @@ public class NumberR {
     /**
      * 获取int中指定位置的byte
      * <p>
-     * e.g: at(0x10F001, 1) = (byte) 0xF0
+     * e.g: at(0x00_10_F0_01, 1) = (byte) 0xF0
      *
      * @param value 被获取的值
      * @param index 索引
@@ -103,8 +103,31 @@ public class NumberR {
         return value >>> index - length + 1; // value: 0B1111_0000 > 0B0000_1111
     }
 
+    public static int set(int srcValue, int value, int index, int length) {
+        int fill = 0xFF_FF_FF_FF;
+        fill >>>= 32 - length;        // 0B1111_1111 > 0B0000_1111
+        fill <<= index - length + 1;  // 0B0000_1111 > 0B1111_0000
+        srcValue &= ~fill;            // srcValue & 0B0000_1111
+
+        srcValue |= value << index - length + 1;
+
+        return srcValue;
+    }
+
+    public static byte set(byte srcValue, byte value, int index, int length) {
+        byte fill = (byte) 0xFF;
+        fill >>>= 8 - length;         // 0B1111_1111 > 0B0000_1111
+        fill <<= index - length + 1;  // 0B0000_1111 > 0B1111_0000
+        srcValue &= (byte) ~fill;     // srcValue & 0B0000_1111
+
+        srcValue |= (byte) (value << index - length + 1);
+
+        return srcValue;
+    }
+
     public static void main(String[] args) {
         int n = at(0B0101_0001, 6, 3, false);
+        n = set(n, 6, 6, 3);
         System.out.println(n);
     }
 

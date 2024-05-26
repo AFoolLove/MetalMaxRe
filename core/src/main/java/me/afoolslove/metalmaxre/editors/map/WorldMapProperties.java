@@ -20,6 +20,11 @@ public class WorldMapProperties extends MapProperties {
         super(properties);
     }
 
+    @Override
+    public int getIntSpriteTiles() {
+        return 0x95940504;
+    }
+
     /**
      * @return 世界地图一定拥有事件图块
      */

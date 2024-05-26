@@ -138,6 +138,13 @@ public class MapProperties {
         return NumberR.toInt(tilesIndexD, tilesIndexC, tilesIndexB, tilesIndexA);
     }
 
+    /**
+     * 将0x04、0x05、spriteIndex、spriteIndex+1合并为一个int
+     */
+    public int getIntSpriteTiles() {
+        return NumberR.toInt(intSpriteIndex() + 1, intSpriteIndex(), 0x05, 0x04);
+    }
+
     public byte getIntTile(int index) {
         return switch (index) {
             case 0x00 -> tilesIndexA;
