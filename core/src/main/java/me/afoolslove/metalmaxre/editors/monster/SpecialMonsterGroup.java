@@ -12,36 +12,22 @@ import java.util.Arrays;
  *
  * @author AFoolLove
  */
-public class SpecialMonsterGroup {
-    private final byte[] monsters;
+public class SpecialMonsterGroup extends AbstractMonsterGroup {
     private final byte[] counts;
 
+    protected SpecialMonsterGroup() {
+        super();
+        this.counts = null;
+    }
+
     public SpecialMonsterGroup(byte[] monsters) {
-        this.monsters = monsters;
-        this.counts = new byte[]{1, 1, 1, 1};
+        this(monsters, new byte[]{1, 1, 1, 1});
     }
 
     public SpecialMonsterGroup(byte[] monsters, byte[] counts) {
-        this.monsters = monsters;
+        super(new byte[0x04]);
+        setMonsters(monsters);
         this.counts = counts;
-    }
-
-    /**
-     * 获取所有特殊怪物ID
-     *
-     * @return 所有特殊怪物ID
-     */
-    public byte[] monsters() {
-        return Arrays.copyOf(monsters, monsters.length);
-    }
-
-    /**
-     * 获取所有特殊怪物对应的数量
-     *
-     * @return 所有特殊怪物对应的数量
-     */
-    public byte[] counts() {
-        return Arrays.copyOf(counts, counts.length);
     }
 
     /**
@@ -50,8 +36,45 @@ public class SpecialMonsterGroup {
      * @param index 索引
      * @return 特殊怪物ID
      */
+    @Override
     public byte getMonster(@Range(from = 0x00, to = 0x03) int index) {
-        return monsters[index];
+        return super.getMonster(index);
+    }
+
+    /**
+     * 通过怪物编辑器将特殊怪物组转换为{@link Monster}对象
+     * <p>
+     * 0x00-0x03 特殊怪物组ID
+     *
+     * @param monsterEditor 怪物编辑器
+     * @return 特殊怪物组怪物
+     */
+    public Monster getMonster(@NotNull IMonsterEditor monsterEditor,
+                              @Range(from = 0x00, to = 0x03) int index) {
+        return monsterEditor.getMonster(getMonster(index));
+    }
+
+    /**
+     * 通过怪物编辑器将特殊怪物转换为{@link Monster}对象
+     *
+     * @param monsterEditor 怪物编辑器
+     * @return 所有普通怪物
+     */
+    public Monster[] getMonsters(@NotNull IMonsterEditor monsterEditor) {
+        Monster[] monsters = new Monster[0x04];
+        for (int i = 0; i < monsters.length; i++) {
+            monsters[i] = getMonster(monsterEditor, i);
+        }
+        return monsters;
+    }
+
+    /**
+     * 获取所有特殊怪物对应的数量
+     *
+     * @return 所有特殊怪物对应的数量
+     */
+    public byte[] getCounts() {
+        return Arrays.copyOf(this.counts, this.counts.length);
     }
 
     /**
@@ -88,18 +111,57 @@ public class SpecialMonsterGroup {
     }
 
     /**
+     * 设置特殊怪物组
+     *
+     * @param monsters 特殊怪物组
+     */
+    @Override
+    public void setMonsters(byte[] monsters,
+                            @Range(from = 0x00, to = 0x03) int offset,
+                            @Range(from = 0x00, to = 0x04) int length) {
+        super.setMonsters(monsters, offset, length);
+    }
+
+    /**
      * 设置特殊怪物ID
      *
      * @param index   索引
      * @param monster 怪物ID
      */
+    @Override
     public void setMonster(@Range(from = 0x00, to = 0x03) int index, byte monster) {
-        monsters[index] = monster;
+        super.setMonster(index, monster);
     }
 
+    /**
+     * 通过GroupEntry设置怪物和怪物对应的数量
+     *
+     * @param index 索引
+     * @param entry GroupEntry
+     */
     public void setMonster(@Range(from = 0x00, to = 0x03) int index, @NotNull GroupEntry entry) {
         setMonster(index, entry.getKey());
         setCount(index, entry.getValue());
+    }
+
+    /**
+     * 设置特殊怪物对应的数量
+     *
+     * @param count 数量
+     */
+    public void setCounts(byte[] count) {
+        setCounts(count, 0x00, count.length);
+    }
+
+    /**
+     * 设置特殊怪物对应的数量
+     *
+     * @param count 数量
+     */
+    public void setCounts(byte[] count,
+                          @Range(from = 0x00, to = 0x03) int offset,
+                          @Range(from = 0x00, to = 0x04) int length) {
+        System.arraycopy(count, 0, this.counts, offset, length);
     }
 
     /**
@@ -109,7 +171,17 @@ public class SpecialMonsterGroup {
      * @param count 数量
      */
     public void setCount(@Range(from = 0x00, to = 0x03) int index, byte count) {
-        counts[index] = count;
+        this.counts[index] = count;
+    }
+
+    /**
+     * 是否为空怪物组，不会遇敌的区域
+     *
+     * @return 是否为空怪物组
+     */
+    @Override
+    public boolean isEmptyMonsterGroup() {
+        return this instanceof SpecialMonsterGroup.EmptySpecialMonsterGroup;
     }
 
     public static class GroupEntry extends SingleMapEntry<Byte, Byte> {
@@ -152,6 +224,22 @@ public class SpecialMonsterGroup {
          */
         public int intCount() {
             return getCount() & 0xFF;
+        }
+    }
+
+    /**
+     * 空的怪物组，不要对其进行任何修改！
+     */
+    public static class EmptySpecialMonsterGroup extends SpecialMonsterGroup {
+        public static final EmptySpecialMonsterGroup INSTANCE = new EmptySpecialMonsterGroup();
+
+        private EmptySpecialMonsterGroup() {
+            super();
+        }
+
+        @Override
+        public boolean isEmptyMonsterGroup() {
+            return true;
         }
     }
 }

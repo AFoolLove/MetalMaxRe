@@ -89,6 +89,8 @@ public class MonsterProbability {
 
     /**
      * 计算权重之和
+     * <p>
+     * 无论是否有怪物都会算作有效权重
      */
     public int getWeightSum() {
         int sum = 0;
@@ -100,6 +102,8 @@ public class MonsterProbability {
 
     /**
      * 计算权重之和
+     * <p>
+     * 根据是否存在怪物，计算有效权重
      */
     public int getWeightSum(byte[] monsters) {
         int sum = 0;
@@ -110,5 +114,18 @@ public class MonsterProbability {
             sum += weights[i];
         }
         return sum;
+    }
+
+    /**
+     * 通过怪物的权重获取出现概率
+     *
+     * @param monsters 怪物
+     * @param index    需要获取概率怪物索引
+     * @return 怪物出现概率，0~1
+     */
+    public float getWeightProbability(byte[] monsters, @Range(from = 0x00, to = 0x0E) int index) {
+        int weightSum = getWeightSum(monsters);
+        int weight = getWeight(index) & 0xFF;
+        return (1.F / weightSum) * weight;
     }
 }

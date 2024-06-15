@@ -89,11 +89,11 @@ public class MapProperties {
     public SingleMapEntry<Byte, Byte> redirect;
 
     /**
-     * 怪物组合索引
+     * 怪物领域索引
      * <p>
      * 地图ID 0x80及之后的地图才会拥有
      */
-    public byte monsterGroupIndex;
+    public byte monsterRealmIndex;
 
     public MapProperties(byte[] properties) {
         setProperties(properties);

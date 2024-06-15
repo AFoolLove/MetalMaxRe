@@ -65,9 +65,9 @@ public interface IMapPropertiesEditor extends IRomEditor {
     DataAddress getMapPropertiesRedirectAddress();
 
     /**
-     * @return 地图怪物组合索引
+     * @return 地图怪物领域索引
      */
-    DataAddress getMapPropertiesMonsterGroupIndexAddress();
+    DataAddress getMapPropertiesMonsterRealmIndexAddress();
 
     /**
      * @return 自定义地图通缉令地址

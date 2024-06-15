@@ -34,11 +34,11 @@ public interface IMonsterEditor extends IRomEditor {
     }
 
     /**
-     * 获取怪物组合的最大数量
+     * 获取怪物领域的最大数量
      *
-     * @return 怪物组合的最大数量
+     * @return 怪物领域的最大数量
      */
-    default int getMonsterGroupMaxCount() {
+    default int getMonsterRealmMaxCount() {
         return 0x5D;
     }
 
@@ -99,23 +99,20 @@ public interface IMonsterEditor extends IRomEditor {
     }
 
     /**
-     * @return 所有怪物组合集
+     * @return 所有怪物领域
      */
-    MonsterGroup[] getMonsterGroups();
+    MonsterRealm[] getMonsterRealms();
 
     /**
-     * 获取指定位置的怪物组合
+     * 获取指定位置的怪物领域
      * <p>
-     * *传入索引0x00会得到固定的{@link MonsterGroup.EmptyMonsterGroup#INSTANCE}对象
+     * *如果使用世界地图领域数据，需要将index-1，如果在-1之前为0时，不需要获取领域，也就是无怪区域
      *
      * @param index 索引
-     * @return 怪物组合
+     * @return 怪物领域
      */
-    default MonsterGroup getMonsterGroup(int index) {
-        if (index == 0x00) {
-            return MonsterGroup.EmptyMonsterGroup.INSTANCE;
-        }
-        return getMonsterGroups()[index - 1];
+    default MonsterRealm getMonsterRealm(int index) {
+        return getMonsterRealms()[index];
     }
 
     /**
@@ -134,11 +131,11 @@ public interface IMonsterEditor extends IRomEditor {
 
 
     /**
-     * 获取怪物组的组属性
+     * 获取领域属性的实际属性
      *
-     * @return 组属性
+     * @return 领域属性的实际属性
      */
-    List<byte[]> getMonsterGroupAttribute();
+    List<byte[]> getMonsterRealmAttribute();
 
     /**
      * 获取指定位置的特殊怪物组合集
@@ -147,6 +144,9 @@ public interface IMonsterEditor extends IRomEditor {
      * @return 特殊怪物组合集
      */
     default SpecialMonsterGroup getSpecialMonsterGroup(int index) {
+        if (index == 0x00) {
+            return SpecialMonsterGroup.EmptySpecialMonsterGroup.INSTANCE;
+        }
         return getSpecialMonsterGroups()[index - 1];
     }
 
@@ -183,8 +183,6 @@ public interface IMonsterEditor extends IRomEditor {
      * 怪物的掉落物地址
      * <p>
      * 注：怪物ID范围为0x18-0x82才能设置有效的战利品
-     *
-     * @see MonsterGroup
      */
     DataAddress getMonsterDropItemsAddress();
 
@@ -281,9 +279,9 @@ public interface IMonsterEditor extends IRomEditor {
     DataAddress getMonsterBattleGoldAddress();
 
     /**
-     * 怪物组合地址
+     * 怪物领域地址
      */
-    DataAddress getMonsterGroupAddress();
+    DataAddress getMonsterRealmAddress();
 
     /**
      * 特殊怪物组合地址
@@ -312,5 +310,5 @@ public interface IMonsterEditor extends IRomEditor {
      *
      * @return 怪物组的四个组属性地址
      */
-    List<DataAddress> getMonsterGroupAttributeAddresses();
+    List<DataAddress> getMonsterRealmAttributeAddresses();
 }

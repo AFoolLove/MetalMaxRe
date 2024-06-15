@@ -46,7 +46,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
     private final DataAddress mapPropertiesIndexDownRollAddress;
     private final DataAddress mapPropertiesAddress;
     private final DataAddress mapPropertiesRedirectAddress;
-    private final DataAddress mapPropertiesMonsterGroupIndexAddress;
+    private final DataAddress mapPropertiesMonsterRealmIndexAddress;
     private final DataAddress mapCustomWantedAddress;
 
 
@@ -74,7 +74,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
                                    @NotNull DataAddress mapPropertiesIndexDownRollAddress,
                                    @NotNull DataAddress mapPropertiesAddress,
                                    @NotNull DataAddress mapPropertiesRedirectAddress,
-                                   @NotNull DataAddress mapPropertiesMonsterGroupIndexAddress,
+                                   @NotNull DataAddress mapPropertiesMonsterRealmIndexAddress,
                                    @NotNull DataAddress mapCustomWantedAddress
     ) {
         super(metalMaxRe);
@@ -82,7 +82,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         this.mapPropertiesIndexDownRollAddress = mapPropertiesIndexDownRollAddress;
         this.mapPropertiesAddress = mapPropertiesAddress;
         this.mapPropertiesRedirectAddress = mapPropertiesRedirectAddress;
-        this.mapPropertiesMonsterGroupIndexAddress = mapPropertiesMonsterGroupIndexAddress;
+        this.mapPropertiesMonsterRealmIndexAddress = mapPropertiesMonsterRealmIndexAddress;
         this.mapCustomWantedAddress = mapCustomWantedAddress;
     }
 
@@ -147,9 +147,9 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
 
             MapProperties mapProperties = new MapProperties(properties);
             if (mapId >= 0x80) {
-                // 读取地图怪物组合索引
-                position(getMapPropertiesMonsterGroupIndexAddress(), mapId - 0x80);
-                mapProperties.monsterGroupIndex = getBuffer().get();
+                // 读取地图怪物领域索引
+                position(getMapPropertiesMonsterRealmIndexAddress(), mapId - 0x80);
+                mapProperties.monsterRealmIndex = getBuffer().get();
             }
             this.mapProperties.put(mapId, mapProperties);
 
@@ -280,11 +280,11 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         position(getMapPropertiesRedirectAddress());
         getBuffer().putAABytes(0, getMapPropertiesRedirectMaxCount(), redirectData);
 
-        // 写入地图怪物组合索引
-        position(getMapPropertiesMonsterGroupIndexAddress());
+        // 写入地图怪物领域索引
+        position(getMapPropertiesMonsterRealmIndexAddress());
         for (int mapId = 0x80; mapId < mapEditor.getMapMaxCount(); mapId++) {
             MapProperties mapProperties = this.mapProperties.get(mapId);
-            getBuffer().put(mapProperties.monsterGroupIndex);
+            getBuffer().put(mapProperties.monsterRealmIndex);
         }
 
         // 写入世界地图属性
@@ -359,8 +359,8 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
     }
 
     @Override
-    public DataAddress getMapPropertiesMonsterGroupIndexAddress() {
-        return mapPropertiesMonsterGroupIndexAddress;
+    public DataAddress getMapPropertiesMonsterRealmIndexAddress() {
+        return mapPropertiesMonsterRealmIndexAddress;
     }
 
     @Override
