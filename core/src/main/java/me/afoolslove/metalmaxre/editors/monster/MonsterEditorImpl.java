@@ -23,14 +23,15 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     private final DataAddress monsterAttacksAddress;
     private final DataAddress monsterDefensesAddress;
     private final DataAddress monsterSpeedsAddress;
-    private final DataAddress monsterHitRatesAddress;
-    private final DataAddress monsterEvasionRateAddress;
+    private final DataAddress monsterHitValuesAddress;
+    private final DataAddress monsterEvasionValuesAddress;
     private final DataAddress monsterBattleExperienceAddress;
     private final DataAddress monsterBattleGoldAddress;
     private final DataAddress monsterRealmAddress;
     private final DataAddress specialMonsterGroupAddress;
     private final DataAddress wantedMonsterBountyAddress;
     private final DataAddress worldMapMonsterRealmsAddress;
+    private final DataAddress monsterRealmAttributeIndexAddress;
 
     private final List<DataAddress> monsterRealmAttributeAddresses;
 
@@ -85,8 +86,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 //                DataAddress.fromPRG(0x7EBE0 - 0x10, 0x7EBEB - 0x10),
                 DataAddress.fromPRG(metalMaxRe.getBuffer().getHeader().getLastPrgRomLength() + 0x02BE0 - 0x10),
                 DataAddress.fromPRG(0x39243 - 0x10, 0x39342 - 0x10),
+                DataAddress.fromPRG(0x391E6 - 0x10, 0x39242 - 0x10),
                 Arrays.asList(
-                        DataAddress.fromPRG(0x391E5 - 0x10, 0x39242 - 0x10),
                         DataAddress.fromPRG(0x38FC3 - 0x10, 0x38FC5 - 0x10),
                         DataAddress.fromPRG(0x39037 - 0x10, 0x3903A - 0x10),
                         DataAddress.fromPRG(0x358F2 - 0x10, 0x358F5 - 0x10),
@@ -109,15 +110,16 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                              DataAddress monsterAttacksAddress,
                              DataAddress monsterDefensesAddress,
                              DataAddress monsterSpeedsAddress,
-                             DataAddress monsterHitRatesAddress,
-                             DataAddress monsterEvasionRateAddress,
+                             DataAddress monsterHitValuesAddress,
+                             DataAddress monsterEvasionValuesAddress,
                              DataAddress monsterBattleExperienceAddress,
                              DataAddress monsterBattleGoldAddress,
                              DataAddress monsterRealmAddress,
                              DataAddress specialMonsterGroupAddress,
                              DataAddress wantedMonsterBountyAddress,
                              DataAddress worldMapMonsterRealmsAddress,
-                             List<DataAddress> monsterGroupAttributeAddresses) {
+                             DataAddress monsterRealmAttributeIndexAddress,
+                             List<DataAddress> monsterRealmAttributeAddresses) {
         super(metalMaxRe);
         this.monsterDropItemsAddress = monsterDropItemsAddress;
         this.monsterAttackModeGroupIndexAddress = monsterAttackModeGroupIndexAddress;
@@ -132,15 +134,16 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         this.monsterAttacksAddress = monsterAttacksAddress;
         this.monsterDefensesAddress = monsterDefensesAddress;
         this.monsterSpeedsAddress = monsterSpeedsAddress;
-        this.monsterHitRatesAddress = monsterHitRatesAddress;
-        this.monsterEvasionRateAddress = monsterEvasionRateAddress;
+        this.monsterHitValuesAddress = monsterHitValuesAddress;
+        this.monsterEvasionValuesAddress = monsterEvasionValuesAddress;
         this.monsterBattleExperienceAddress = monsterBattleExperienceAddress;
         this.monsterBattleGoldAddress = monsterBattleGoldAddress;
         this.monsterRealmAddress = monsterRealmAddress;
         this.specialMonsterGroupAddress = specialMonsterGroupAddress;
         this.wantedMonsterBountyAddress = wantedMonsterBountyAddress;
         this.worldMapMonsterRealmsAddress = worldMapMonsterRealmsAddress;
-        this.monsterRealmAttributeAddresses = monsterGroupAttributeAddresses;
+        this.monsterRealmAttributeIndexAddress = monsterRealmAttributeIndexAddress;
+        this.monsterRealmAttributeAddresses = monsterRealmAttributeAddresses;
     }
 
     @Editor.Load
@@ -166,8 +169,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         byte[] attacks = new byte[getMonsterMaxCount()];
         byte[] defenses = new byte[getMonsterMaxCount()];
         byte[] speeds = new byte[getMonsterMaxCount()];
-        byte[] hitRates = new byte[getMonsterMaxCount()];
-        byte[] evasionRate = new byte[getMonsterMaxCount()];
+        byte[] hitValues = new byte[getMonsterMaxCount()];
+        byte[] evasionValues = new byte[getMonsterMaxCount()];
         byte[] experiences = new byte[getMonsterMaxCount()];
         byte[] golds = new byte[getMonsterMaxCount()];
         byte[] bounty = new byte[getWantedMonsterBountyMaxCount()];
@@ -195,10 +198,10 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         getBuffer().get(getMonsterDefensesAddress(), defenses);
         // 读取怪物出手攻击速度
         getBuffer().get(getMonsterSpeedsAddress(), speeds);
-        // 读取怪物命中率
-        getBuffer().get(getMonsterHitRatesAddress(), hitRates);
-        // 读取怪物的回避率
-        getBuffer().get(getMonsterEvasionRateAddress(), evasionRate);
+        // 读取怪物命中值
+        getBuffer().get(getMonsterHitValuesAddress(), hitValues);
+        // 读取怪物的回避值
+        getBuffer().get(getMonsterEvasionValuesAddress(), evasionValues);
         // 读取击败怪物后获得的经验值
         getBuffer().get(getMonsterBattleExperienceAddress(), experiences);
         // 读取击败怪物后获得的金钱
@@ -247,10 +250,10 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             monster.setDefense(defenses[monsterId]);
             // 设置速度
             monster.setSpeed(speeds[monsterId]);
-            // 设置命中率
-            monster.setRawHitRate(hitRates[monsterId]);
-            // 设置回避率
-            monster.setRawEvasionRate(evasionRate[monsterId]);
+            // 设置命中值
+            monster.setRawHitValue(hitValues[monsterId]);
+            // 设置回避值
+            monster.setRawEvasionValue(evasionValues[monsterId]);
             // 设置经验值
             monster.setExperience(experiences[monsterId]);
             // 设置金钱值
@@ -265,12 +268,15 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             worldMapRealms.add(getBuffer().get());
         }
 
+        // 读取领域属性索引
+        byte[] monsterRealmAttributeIndexes = new byte[getMonsterRealmMaxCount()];
+        getBuffer().get(getMonsterRealmAttributeIndexAddress(), monsterRealmAttributeIndexes);
         // 读取领域属性
         position(getMonsterRealmAddress());
         for (int i = 0; i < getMonsterRealmMaxCount(); i++) {
             byte[] monsters = new byte[0x0E];
             getBuffer().get(monsters);
-            byte attributeIndex = getBuffer().get(getMonsterRealmAttributeAddresses().get(0x00), i + 1); // 跳过默认怪物组的组属性
+            byte attributeIndex = monsterRealmAttributeIndexes[i];
             monsterRealms[i] = new MonsterRealm(attributeIndex, monsters);
             monsterRealms[i].setAttributeIndex(attributeIndex);
         }
@@ -289,7 +295,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 读取领域属性的实际属性
-        int[] realmAttributeLengths = {getMonsterRealmAttributeAddresses().get(0x00).length(), 6, 4, 4, 4};
+        int[] realmAttributeLengths = {6, 4, 4, 4};
         for (int i = 0; i < realmAttributeLengths.length; i++) {
             DataAddress monsterRealmAttributeAddress = getMonsterRealmAttributeAddresses().get(i);
             byte[] bytes = new byte[realmAttributeLengths[i]];
@@ -316,8 +322,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         byte[] attacks = new byte[getMonsterMaxCount()];
         byte[] defenses = new byte[getMonsterMaxCount()];
         byte[] speeds = new byte[getMonsterMaxCount()];
-        byte[] hitRates = new byte[getMonsterMaxCount()];
-        byte[] evasionRate = new byte[getMonsterMaxCount()];
+        byte[] hitValues = new byte[getMonsterMaxCount()];
+        byte[] evasionValue = new byte[getMonsterMaxCount()];
         byte[] experiences = new byte[getMonsterMaxCount()];
         byte[] golds = new byte[getMonsterMaxCount()];
 
@@ -334,8 +340,8 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             attacks[monsterId] = monster.attack;
             defenses[monsterId] = monster.defense;
             speeds[monsterId] = monster.speed;
-            hitRates[monsterId] = monster.hitRate;
-            evasionRate[monsterId] = monster.evasionRate;
+            hitValues[monsterId] = monster.hitValue;
+            evasionValue[monsterId] = monster.evasionValue;
             experiences[monsterId] = monster.experience;
             golds[monsterId] = monster.gold;
 
@@ -367,10 +373,10 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         // 写入怪物出手攻击的速度
         getBuffer().put(getMonsterSpeedsAddress(), speeds);
-        // 写入怪物的命中率
-        getBuffer().put(getMonsterHitRatesAddress(), hitRates);
-        // 写入怪物的回避率
-        getBuffer().put(getMonsterEvasionRateAddress(), evasionRate);
+        // 写入怪物的命中值
+        getBuffer().put(getMonsterHitValuesAddress(), hitValues);
+        // 写入怪物的回避值
+        getBuffer().put(getMonsterEvasionValuesAddress(), evasionValue);
         // 写入怪物被击败后玩家获取的经验
         getBuffer().put(getMonsterBattleExperienceAddress(), experiences);
         // 写入怪物被击败后玩家获取的金钱
@@ -387,13 +393,16 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             getBuffer().put(worldMapRealms.get(i));
         }
 
+        byte[] monsterRealmAttributeIndexes = new byte[getMonsterRealmMaxCount()];
         // 写入领域属性
         position(getMonsterRealmAddress());
         for (int i = 0; i < getMonsterRealmMaxCount(); i++) {
             MonsterRealm monsterRealm = monsterRealms[i];
-            getBuffer().put(monsterRealm.getMonsterGroup().getMonsters());
-            getBuffer().put(getMonsterRealmAttributeAddresses().get(0x00).getStartAddress(i + 1), monsterRealm.getAttributeIndex());
+            getBuffer().put(monsterRealm.toByteArray());
+            monsterRealmAttributeIndexes[i] = monsterRealm.getAttributeIndex();
         }
+        // 写入领域属性索引
+        getBuffer().put(getMonsterRealmAttributeIndexAddress(), monsterRealmAttributeIndexes);
 
         // 写入特殊怪物组合数据
         position(getSpecialMonsterGroupAddress());
@@ -409,7 +418,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         getBuffer().put(getWantedMonsterBountyAddress(), bounty);
 
         // 写入领域属性的实际属性
-        for (int i = 0; i < 0x05; i++) {
+        for (int i = 0; i < 0x04; i++) {
             DataAddress monsterRealmAttributeAddress = getMonsterRealmAttributeAddresses().get(i);
             getBuffer().put(monsterRealmAttributeAddress, getMonsterRealmAttribute().get(i));
         }
@@ -511,13 +520,13 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     }
 
     @Override
-    public DataAddress getMonsterHitRatesAddress() {
-        return monsterHitRatesAddress;
+    public DataAddress getMonsterHitValuesAddress() {
+        return monsterHitValuesAddress;
     }
 
     @Override
-    public DataAddress getMonsterEvasionRateAddress() {
-        return monsterEvasionRateAddress;
+    public DataAddress getMonsterEvasionValuesAddress() {
+        return monsterEvasionValuesAddress;
     }
 
     @Override
@@ -548,6 +557,11 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Override
     public DataAddress getWorldMapMonsterRealmsAddress() {
         return worldMapMonsterRealmsAddress;
+    }
+
+    @Override
+    public DataAddress getMonsterRealmAttributeIndexAddress() {
+        return monsterRealmAttributeIndexAddress;
     }
 
     @Override

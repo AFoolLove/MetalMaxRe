@@ -172,7 +172,7 @@ public interface ICharMap {
                 if (listener != null) {
                     // 通知监听器
                     byte[] bytes = listener.onUnknownChar(ch);
-                    if (bytes != null) {
+                    if (bytes != null && bytes.length > 0) {
                         outputStream.write(bytes, 0, bytes.length);
                     }
                 }
@@ -229,7 +229,7 @@ public interface ICharMap {
 
             Integer opcodeValue = charMap.getOpcodes().get(copy[i]);
             // 如果上一个是源字符结尾 ']' 就合并
-            if (text.length() > 0 && text.charAt(text.length() - 1) == ']') {
+            if (!text.isEmpty() && text.charAt(text.length() - 1) == ']') {
                 // 合并
                 text.setCharAt(text.length() - 1, ' ');
             } else {

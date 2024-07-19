@@ -6,11 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 /**
- * 坦克编辑器
- * <p>
- * 包含出租坦克
+ * 坦克初始属性
  *
  * @author AFoolLove
+ * @see TaxTankInitialAttribute
  */
 public class TankInitialAttribute extends MapPoint {
     /**

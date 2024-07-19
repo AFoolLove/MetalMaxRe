@@ -242,14 +242,14 @@ public interface IMonsterEditor extends IRomEditor {
     /**
      * 怪物的攻击力地址
      * <p>
-     * *攻击力根据命中率D7变化
+     * *攻击力根据命中值D7变化
      */
     DataAddress getMonsterAttacksAddress();
 
     /**
      * 怪物的防御力地址
      * <p>
-     * *防御力根据回避率D7变化
+     * *防御力根据回避值D7变化
      */
     DataAddress getMonsterDefensesAddress();
 
@@ -259,14 +259,14 @@ public interface IMonsterEditor extends IRomEditor {
     DataAddress getMonsterSpeedsAddress();
 
     /**
-     * 怪物的命中率地址
+     * 怪物的命中值地址
      */
-    DataAddress getMonsterHitRatesAddress();
+    DataAddress getMonsterHitValuesAddress();
 
     /**
-     * 怪物的回避率地址
+     * 怪物的回避值地址
      */
-    DataAddress getMonsterEvasionRateAddress();
+    DataAddress getMonsterEvasionValuesAddress();
 
     /**
      * 战斗结束玩家获得的经验值地址
@@ -304,6 +304,13 @@ public interface IMonsterEditor extends IRomEditor {
      */
 
     DataAddress getWorldMapMonsterRealmsAddress();
+
+    /**
+     * 获取怪物领域的领域属性中的属性索引数据
+     *
+     * @return 怪物领域的领域属性中的属性索引数据
+     */
+    DataAddress getMonsterRealmAttributeIndexAddress();
 
     /**
      * 获取怪物组的四个组属性地址

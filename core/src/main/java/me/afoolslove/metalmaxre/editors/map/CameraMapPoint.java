@@ -21,7 +21,7 @@ public class CameraMapPoint extends MapPoint {
         super(map, x, y);
     }
 
-    public CameraMapPoint(@Range(from = 0x00, to = 0xEF) int map,
+    public CameraMapPoint(@Range(from = 0x00, to = 0xFF) int map,
                           @Range(from = 0x00, to = 0xFF) int x,
                           @Range(from = 0x00, to = 0xFF) int y) {
         super(map, x, y);

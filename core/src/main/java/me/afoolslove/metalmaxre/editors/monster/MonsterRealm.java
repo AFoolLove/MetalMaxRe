@@ -109,10 +109,10 @@ public class MonsterRealm {
      * @param monster 普通怪物ID或特殊怪物组ID
      */
     public void setMonsterOrSpecial(@Range(from = 0x00, to = 0x0D) int index, byte monster) {
-        if (index <= 0x09) {
+        if (index < 0x0A) {
             this.monsters.setMonster(index, monster);
         } else {
-            this.specialMonsters[index - 0x09] = monster;
+            this.specialMonsters[index - 0x0A] = monster;
         }
     }
 

@@ -35,7 +35,7 @@ public class Computer extends MapPoint {
         setType(type);
     }
 
-    public Computer(@Range(from = 0x00, to = 0xEF) int map,
+    public Computer(@Range(from = 0x00, to = 0xFF) int map,
                     @Range(from = 0x00, to = 0xFF) int type,
                     @Range(from = 0x00, to = 0xFF) int x,
                     @Range(from = 0x00, to = 0xFF) int y) {

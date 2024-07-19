@@ -10,49 +10,49 @@ public enum Tank {
     /**
      * 默认WEN式
      */
-    NO_1(0x00),
+    NO_1(0x00, false),
     /**
      * 默认HOR式
      */
-    NO_2(0x01),
+    NO_2(0x01, false),
     /**
      * 默认CAR式
      */
-    NO_3(0x02),
+    NO_3(0x02, false),
     /**
      * 默认TAN式
      */
-    NO_4(0x03),
+    NO_4(0x03, false),
     /**
      * 默认BAO式
      */
-    NO_5(0x04),
+    NO_5(0x04, false),
     /**
      * 默认HU式
      */
-    NO_6(0x05),
+    NO_6(0x05, false),
     /**
      * 默认RLA式
      */
-    NO_7(0x06),
+    NO_7(0x06, false),
     /**
      * 默认KHU式
      */
-    NO_8(0x07),
+    NO_8(0x07, false),
 
     /**
      * 出租坦克
      */
-    TAX_1(0x08),
-    TAX_2(0x09),
-    TAX_3(0x0A),
-    TAX_4(0x0B),
-    TAX_5(0x0C),
-    TAX_6(0x0D),
-    TAX_7(0x0E),
-    TAX_8(0x0F),
-    TAX_9(0x10),
-    TAX_A(0x11);
+    TAX_1(0x08, true),
+    TAX_2(0x09, true),
+    TAX_3(0x0A, true),
+    TAX_4(0x0B, true),
+    TAX_5(0x0C, true),
+    TAX_6(0x0D, true),
+    TAX_7(0x0E, true),
+    TAX_8(0x0F, true),
+    TAX_9(0x10, true),
+    TAX_A(0x11, true);
 
     /**
      * 所有坦克总数量
@@ -72,13 +72,27 @@ public enum Tank {
     public static final int AVAILABLE_COUNT = 0x0B;
 
     private final byte id;
+    private final boolean isTax;
 
-    Tank(int id) {
+    Tank(int id, boolean isTax) {
         this.id = (byte) (id & 0xFF);
+        this.isTax = isTax;
     }
 
+    /**
+     * 获取坦克ID
+     *
+     * @return 坦克ID
+     */
     public byte getId() {
         return id;
+    }
+
+    /**
+     * @return 是否为出租坦克
+     */
+    public boolean isTax() {
+        return isTax;
     }
 
     /**

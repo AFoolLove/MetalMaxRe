@@ -38,14 +38,14 @@ public class MapPoint extends Point2B {
         setMap(map);
     }
 
-    public MapPoint(@Range(from = 0x00, to = 0xEF) Byte map,
+    public MapPoint(@Range(from = 0x00, to = 0xFF) Byte map,
                     @Range(from = 0x00, to = 0xFF) int x,
                     @Range(from = 0x00, to = 0xFF) int y) {
         super(x, y);
         setMap(map);
     }
 
-    public MapPoint(@Range(from = 0x00, to = 0xEF) int map,
+    public MapPoint(@Range(from = 0x00, to = 0xFF) int map,
                     @Range(from = 0x00, to = 0xFF) int x,
                     @Range(from = 0x00, to = 0xFF) int y) {
         super(x, y);
@@ -62,7 +62,7 @@ public class MapPoint extends Point2B {
     }
 
 
-    public void setMap(@Range(from = 0x00, to = 0xEF) int map) {
+    public void setMap(int map) {
         setMap(Byte.valueOf((byte) (map & 0xFF)));
     }
 
@@ -70,12 +70,10 @@ public class MapPoint extends Point2B {
         this.map = map;
     }
 
-    @Range(from = 0x00, to = 0xEF)
     public Byte getMap() {
         return map;
     }
 
-    @Range(from = 0x00, to = 0xEF)
     public Integer intMap() {
         if (getMap() == null) {
             return null;
@@ -96,7 +94,7 @@ public class MapPoint extends Point2B {
         return this;
     }
 
-    public MapPoint set(@Range(from = 0x00, to = 0xEF) int map,
+    public MapPoint set(@Range(from = 0x00, to = 0xFF) int map,
                         @Range(from = 0x00, to = 0xFF) int x,
                         @Range(from = 0x00, to = 0xFF) int y) {
         setMap(map);

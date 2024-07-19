@@ -117,4 +117,72 @@ public interface IWorldMapEditor extends IRomEditor {
         }
         return bytes;
     }
+
+    /**
+     * 格式化山脉，将山脉ID0x02格式化为游戏中不同的0x02和0x03与0x0A、0x0B
+     */
+    static void formatPeck(byte[][] map) {
+        if (map == null || map.length == 0x00) {
+            return;
+        }
+        // 连续山脉的计数器
+        int continuous = 0;
+        int h = map.length;
+        int w = map[0x00].length;
+        for (int index = 0; index < (w * h); index++) {
+            int x = index % w;
+            int y = index / h;
+
+//            int tile = map[y][x] & 0xFF;
+
+            int offset = (y & 1) == 1 ? 0 : 1;
+
+            // 在新行中，如果上一行的山脉未结束，立即结束并重置连续山脉计数器
+            if (x == 0x00) {
+                if (continuous > 1) {
+                    // 上一行未结束，立即结束山脉
+                    map[(index - 1) / h][(index - 1) % w] = 0x0B;
+                }
+                // 重置连续山脉计数器
+                continuous = 0x00;
+            }
+
+            // 获取当前图块是否为山脉
+            // 如果山脉刚开始计数，设置山脉起始
+            // 否则判断山脉是否结束，设置山脉结束
+            if (map[y][x] == 0x02) {
+                if (continuous == 0x00) {
+                    // 设置山脉起始
+                    map[y][x] = 0x0A;
+                } else {
+                    map[y][x] = (byte) (0x02 + ((x + offset) % 2));
+                }
+                continuous++;
+            } else {
+                if (continuous <= 1) {
+                    continue;
+                }
+                // 设置山脉结束
+                map[(index - 1) / h][(index - 1) % w] = 0x0B;
+                continuous = 0;
+            }
+        }
+    }
+
+    /**
+     * 恢复山脉，将图块ID 0x03、0x0A和0x0B替换为0x02
+     */
+    static void formatPeckRestore(byte[][] map) {
+        for (byte[] mapRow : map) {
+            for (int column = 0; column < mapRow.length; column++) {
+                switch (column) {
+                    case 0x03:
+                    case 0x0A:
+                    case 0x0B:
+                        mapRow[column] = 0x02;
+                        break;
+                }
+            }
+        }
+    }
 }

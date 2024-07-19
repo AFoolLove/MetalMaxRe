@@ -73,8 +73,13 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         // 创建新的初始坦克属性
         TankInitialAttribute[] tankInitialAttributes = new TankInitialAttribute[Tank.values().length];
         for (Tank tank : Tank.values()) {
-            // 添加
-            getTankInitAttributes().put(tank, tankInitialAttributes[tank.getId() & 0xFF] = new TankInitialAttribute());
+            TankInitialAttribute tankInitialAttribute;
+            if (!tank.isTax()) {
+                tankInitialAttribute = new TankInitialAttribute();
+            } else {
+                tankInitialAttribute = new TaxTankInitialAttribute();
+            }
+            getTankInitAttributes().put(tank, tankInitialAttributes[tank.getId() & 0xFF] = tankInitialAttribute);
         }
 
         // 读取坦克弹仓容量改造梯级

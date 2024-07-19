@@ -12,6 +12,27 @@ import org.jetbrains.annotations.Range;
  */
 public class Monster {
     /**
+     * 攻击次数
+     */
+    public static final int ABILITY_ATTACK_NUMBER = 0B1100_0000;
+    /**
+     * 优先攻击的玩家
+     */
+    public static final int ABILITY_ATTACK_PRIORITY = 0B0011_0000;
+    /**
+     * 分裂
+     */
+    public static final int ABILITY_SPLIT = 0B0000_1000;
+    /**
+     * 爆炸波及
+     */
+    public static final int ABILITY_DEATH_EXPLOSION = 0B0000_0100;
+    /**
+     * 闪避等级
+     */
+    public static final int ABILITY_DODGE_LEVEL = 0B0000_0011;
+
+    /**
      * 生命值
      */
     public byte health;
@@ -34,13 +55,13 @@ public class Monster {
      */
     public byte speed;
     /**
-     * 命中率
+     * 命中值
      */
-    public byte hitRate;
+    public byte hitValue;
     /**
-     * 回避率
+     * 回避值
      */
-    public byte evasionRate;
+    public byte evasionValue;
     /**
      * 经验值
      */
@@ -158,7 +179,7 @@ public class Monster {
      * 0B0011_0000 优先攻击老三<p>
      * 0B0000_1000 分裂<p>
      * 0B0000_0100 死亡后爆炸波及附近怪物，对其造成伤害<p>
-     * 0B0000_0011 闪避概率（默认00 08 40 80）
+     * 0B0000_0011 闪避等级（默认00 08 40 80）
      *
      * @param ability 特殊能力
      */
@@ -187,7 +208,7 @@ public class Monster {
 
         int ability = this.ability;
         // 清除原来的攻击次数
-        ability &= 0B0011_1111;
+        ability &= ~(ABILITY_ATTACK_NUMBER);
         // 设置新的攻击次数
         ability |= attackNumber;
 
@@ -204,7 +225,7 @@ public class Monster {
     public void setAttackPriority(@Nullable Player attackPriority) {
         int ability = this.ability;
         // 清除优先级
-        ability &= 0B1100_1111;
+        ability &= ~(ABILITY_ATTACK_PRIORITY);
         if (attackPriority != null) {
             switch (attackPriority) {
                 case PLAYER_0 -> ability |= 0B0001_0000; // 优先攻击老大
@@ -232,7 +253,7 @@ public class Monster {
 
         int ability = this.ability;
         // 清除优先级
-        ability &= 0B1100_1111;
+        ability &= (~ABILITY_ATTACK_PRIORITY);
         // 添加优先级
         ability |= attackPriority;
 
@@ -247,11 +268,11 @@ public class Monster {
     public void setCanSplit(boolean canSplit) {
         int ability = this.ability;
         // 清除可分裂
-        ability &= 0B1111_0111;
+        ability &= (~ABILITY_SPLIT);
 
         if (canSplit) {
             // 添加可分裂
-            ability |= 0B0000_1000;
+            ability |= ABILITY_SPLIT;
         }
 
         setAbility(ability);
@@ -265,11 +286,11 @@ public class Monster {
     public void setDeathExplosion(boolean deathExplosion) {
         int ability = this.ability;
         // 清除死亡爆炸波及附近怪物
-        ability &= 0B1111_1011;
+        ability &= (~ABILITY_DEATH_EXPLOSION);
 
         if (deathExplosion) {
             // 添加死亡爆炸波及附近怪物
-            ability |= 0B0000_0100;
+            ability |= ABILITY_DEATH_EXPLOSION;
         }
 
         setAbility(ability);
@@ -289,9 +310,9 @@ public class Monster {
         dodgeLevel &= 0B0000_0011;
 
         int ability = this.ability;
-        // 清除闪避率
-        ability &= 0B1111_1100;
-        // 添加闪避率
+        // 清除闪避等级
+        ability &= (~ABILITY_DODGE_LEVEL);
+        // 添加闪避等级
         ability |= dodgeLevel;
 
         setAbility(ability);
@@ -340,7 +361,7 @@ public class Monster {
 
 
     /**
-     * 设置怪物的攻击力，实际攻击力会根据命中率的D7变化
+     * 设置怪物的攻击力，实际攻击力会根据命中值的D7变化
      *
      * @param attack 攻击力
      */
@@ -353,7 +374,7 @@ public class Monster {
     }
 
     /**
-     * 设置怪物的真实攻击力，会影响命中率D7
+     * 设置怪物的真实攻击力，会影响命中值D7
      *
      * @param attack 真实攻击力
      */
@@ -362,15 +383,15 @@ public class Monster {
             attack &= 0B11_1111_1100;
             attack >>= 0x02;
 
-            setRawHitRate(getRawHitRate() | 0B1000_0000);
+            setRawHitValue(getRawHitValue() | 0B1000_0000);
         } else {
-            setHitRate(getHitRate());
+            setHitValue(getHitValue());
         }
         setAttack(attack);
     }
 
     /**
-     * 设置怪物的防御力，实际防御力会根据回避率D7变化
+     * 设置怪物的防御力，实际防御力会根据回避值D7变化
      *
      * @param defense 防御力
      */
@@ -383,7 +404,7 @@ public class Monster {
     }
 
     /**
-     * 设置真实防御力，会影响回避率D7
+     * 设置真实防御力，会影响回避值D7
      *
      * @param defense 真实防御力
      */
@@ -391,9 +412,9 @@ public class Monster {
         if (defense > 0xFF) {
             defense &= 0B11_1111_1100;
             defense >>>= 0x02;
-            setEvasionRate(getEvasionRate() | 0B1000_0000);
+            setEvasionValue(getEvasionValue() | 0B1000_0000);
         } else {
-            setEvasionRate(getEvasionRate() & 0B0111_1111);
+            setEvasionValue(getEvasionValue() & 0B0111_1111);
         }
         setDefense(defense);
     }
@@ -423,39 +444,39 @@ public class Monster {
     }
 
     /**
-     * 设置怪物的命中率
-     * 0B0111_1111  命中率（0x00-0x7F）
+     * 设置怪物的命中值
+     * 0B0111_1111  命中值（0x00-0x7F）
      * 0B1000_0000 怪物的高位攻击力左移1bit（高位攻击力*2）
      * 如果高位攻击力超过0xFF，怪物的低位防御力左移1bit（低位防御力*2）
-     * 如果存在0B0100_0000，上面的内容再来一次，不影响命中率
+     * 如果存在0B0100_0000，上面的内容再来一次，不影响命中值
      */
-    public void setRawHitRate(@Range(from = 0x00, to = 0xFF) int hitRate) {
-        this.hitRate = (byte) (hitRate & 0xFF);
+    public void setRawHitValue(@Range(from = 0x00, to = 0xFF) int hitValue) {
+        this.hitValue = (byte) (hitValue & 0xFF);
     }
 
-    public void setHitRate(@Range(from = 0x00, to = 0x7F) byte hitRate) {
-        setRawHitRate(hitRate & 0B0111_1111);
+    public void setHitValue(@Range(from = 0x00, to = 0x7F) byte hitValue) {
+        setRawHitValue(hitValue & 0B0111_1111);
     }
 
-    public void setHitRate(@Range(from = 0x00, to = 0x7F) int hitRate) {
-        setHitRate((byte) (hitRate & 0B0111_1111));
+    public void setHitValue(@Range(from = 0x00, to = 0x7F) int hitValue) {
+        setHitValue((byte) (hitValue & 0B0111_1111));
     }
 
     /**
-     * 设置怪物的回避率
-     * 0B0111_1111 回避率（0x00-0x7F）
+     * 设置怪物的回避值
+     * 0B0111_1111 回避值（0x00-0x7F）
      * 0B1000_0000 怪物的防御力*4
      */
-    public void setRawEvasionRate(@Range(from = 0x00, to = 0xFF) int evasionRate) {
-        this.evasionRate = (byte) (evasionRate & 0xFF);
+    public void setRawEvasionValue(@Range(from = 0x00, to = 0xFF) int evasionValue) {
+        this.evasionValue = (byte) (evasionValue & 0xFF);
     }
 
-    public void setEvasionRate(@Range(from = 0x00, to = 0x7F) byte evasionRate) {
-        setRawEvasionRate(evasionRate & 0B0111_1111);
+    public void setEvasionValue(@Range(from = 0x00, to = 0x7F) byte evasionValue) {
+        setRawEvasionValue(evasionValue & 0B0111_1111);
     }
 
-    public void setEvasionRate(@Range(from = 0x00, to = 0x7F) int evasionRate) {
-        setEvasionRate((byte) (evasionRate & 0B0111_1111));
+    public void setEvasionValue(@Range(from = 0x00, to = 0x7F) int evasionValue) {
+        setEvasionValue((byte) (evasionValue & 0B0111_1111));
     }
 
     /**
@@ -645,9 +666,9 @@ public class Monster {
     }
 
     /**
-     * @return 闪避率
+     * @return 闪避等级
      */
-    public int getDodgeRate() {
+    public int getDodgeLevel() {
         return intAbility() & 0B0000_0011;
     }
 
@@ -698,7 +719,7 @@ public class Monster {
      * @return 怪物的真实攻击力
      */
     public int getAttackValue() {
-        if ((getRawHitRate() & 0B1000_0000) != 0x00) {
+        if ((getRawHitValue() & 0B1000_0000) != 0x00) {
             return intAttack() << 2;
         }
         return intAttack();
@@ -719,7 +740,7 @@ public class Monster {
      * @return 怪物的真实防御力
      */
     public int getDefenseValue() {
-        if ((getEvasionRate() & 0B1000_0000) != 0x00) {
+        if ((getEvasionValue() & 0B1000_0000) != 0x00) {
             return intDefense() << 2;
         }
         return intDefense();
@@ -756,44 +777,44 @@ public class Monster {
     }
 
     /**
-     * @return 怪物的命中率（全
+     * @return 怪物的命中值（全
      */
-    public byte getRawHitRate() {
-        return hitRate;
+    public byte getRawHitValue() {
+        return hitValue;
     }
 
     /**
-     * @return 怪物的命中率（仅
+     * @return 怪物的命中值（仅
      */
-    public byte getHitRate() {
-        return (byte) (hitRate & 0x7F);
+    public byte getHitValue() {
+        return (byte) (hitValue & 0x7F);
     }
 
     @Range(from = 0x00, to = 0x7F)
-    public int intHitRate() {
-        return getHitRate() & 0x7F;
+    public int intHitValue() {
+        return getHitValue() & 0x7F;
     }
 
     @Range(from = 0x00, to = 0xFF)
-    public int intRawHitRate() {
-        return getRawHitRate() & 0xFF;
+    public int intRawHitValue() {
+        return getRawHitValue() & 0xFF;
     }
 
     /**
-     * @return 怪物的回避率
+     * @return 怪物的回避值
      */
-    public byte getEvasionRate() {
-        return evasionRate;
+    public byte getEvasionValue() {
+        return evasionValue;
     }
 
     @Range(from = 0x00, to = 0x7F)
-    public int intEvasionRate() {
-        return getEvasionRate() & 0x7F;
+    public int intEvasionValue() {
+        return getEvasionValue() & 0x7F;
     }
 
     @Range(from = 0x00, to = 0xFF)
-    public int intRawEvasionRate() {
-        return getEvasionRate() & 0xFF;
+    public int intRawEvasionValue() {
+        return getEvasionValue() & 0xFF;
     }
 
     /**

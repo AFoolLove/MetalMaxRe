@@ -27,7 +27,7 @@ public class Treasure extends MapPoint {
         setItem(item);
     }
 
-    public Treasure(@Range(from = 0x00, to = 0xEF) int map,
+    public Treasure(@Range(from = 0x00, to = 0xFF) int map,
                     @Range(from = 0x00, to = 0xFF) int x,
                     @Range(from = 0x00, to = 0xFF) int y,
                     @Range(from = 0x00, to = 0xFF) int item) {
