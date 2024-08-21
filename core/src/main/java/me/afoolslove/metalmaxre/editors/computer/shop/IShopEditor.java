@@ -21,7 +21,7 @@ public interface IShopEditor extends IRomEditor {
     /**
      * @return 获取所有商店的商品列表
      */
-    List<ItemList<Object>> getShopLists();
+    List<ItemList<ShopItem>> getShopLists();
 
     /**
      * 通过索引获取商店的商品列表
@@ -29,7 +29,7 @@ public interface IShopEditor extends IRomEditor {
      * @param shop 商店索引
      * @return 某个商店的商品列表
      */
-    default ItemList<Object> getShopList(int shop) {
+    default ItemList<ShopItem> getShopList(int shop) {
         return getShopLists().get(shop);
     }
 

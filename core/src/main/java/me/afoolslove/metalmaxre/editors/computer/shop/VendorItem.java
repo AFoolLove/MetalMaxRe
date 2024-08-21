@@ -9,12 +9,11 @@ import java.util.Objects;
  *
  * @author AFoolLove
  */
-public class VendorItem {
-    public byte item;
-    public byte count;
+public class VendorItem extends ShopItem {
+    private byte count;
 
     public VendorItem(byte item, byte count) {
-        this.item = item;
+        super(item);
         this.count = count;
     }
 
@@ -26,7 +25,7 @@ public class VendorItem {
      * @see #getItem()
      */
     public void setItem(@Range(from = 0x00, to = 0xFF) int item) {
-        this.item = (byte) (item & 0xFF);
+        super.setItem(item);
     }
 
     /**
@@ -37,7 +36,7 @@ public class VendorItem {
      * @see #getItem()
      */
     public void setItem(byte item) {
-        this.item = item;
+        super.setItem(item);
     }
 
     /**
@@ -66,10 +65,22 @@ public class VendorItem {
 
     /**
      * @return 商品
+     * @see #intItem()
+     * @see #setItem(byte)
      * @see #setItem(int)
      */
     public byte getItem() {
-        return item;
+        return super.getItem();
+    }
+
+    /**
+     * @return 商品
+     * @see #getItem()
+     * @see #setItem(byte)
+     * @see #setItem(int)
+     */
+    public int intItem() {
+        return super.intItem();
     }
 
     /**
@@ -117,7 +128,7 @@ public class VendorItem {
 
     @Override
     public String toString() {
-        return String.format("VendorItem{item=%02X, count=%02X}", item, count);
+        return String.format("VendorItem{item=%02X, count=%02X}", getItem(), getCount());
     }
 
     @Override

@@ -17,7 +17,11 @@ public enum AttackRange {
     /**
      * 全体攻击
      */
-    ALL(0B0001_0000);
+    ALL(0B0001_0000),
+    /**
+     * 未知
+     */
+    UNKNOWN(0B0001_1000);
 
     private final byte value;
 

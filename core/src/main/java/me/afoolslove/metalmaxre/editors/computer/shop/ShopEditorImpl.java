@@ -36,7 +36,7 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
     /**
      * 所有 商品/点唱机曲目/售货机 列表
      */
-    private final List<ItemList<Object>> lists = new ArrayList<>();
+    private final List<ItemList<ShopItem>> lists = new ArrayList<>();
 
     public ShopEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -67,7 +67,7 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
 
         // 读取商品清单
         position(getShopAddress());
-        List<ItemList<Object>> ut = new ArrayList<>();
+        List<ItemList<ShopItem>> ut = new ArrayList<>();
         while (getShopAddress().range(position() - 0x10)) {
             // 读取商品数量
             int count = getBuffer().getToInt();
@@ -88,9 +88,9 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
             byte[] items = new byte[count];
             getBuffer().get(items);
             // 将商品添加到list
-            ItemList<Object> list = new ItemList<>();
+            ItemList<ShopItem> list = new ItemList<>();
             for (byte item : items) {
-                list.add(item);
+                list.add(new ShopItem(item));
             }
             ut.add(list);
         }
@@ -114,7 +114,7 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
         if (vendorListOffset != -1) {
             // 转换
             for (int i = vendorListOffset, size = getShopLists().size(); i < size; i++) {
-                ItemList<Object> itemList = getShopLists().get(i);
+                ItemList<ShopItem> itemList = getShopLists().get(i);
                 if (itemList.size() != 0x0D) {
                     continue;
                 }
@@ -123,12 +123,12 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
 
                 for (int j = 0; j < 0x06; j++) {
                     // 商品
-                    Byte item = (Byte) itemList.getItem(j);
+                    Byte item = itemList.getItem(j).getItem();
                     // 商品数量和是否有货
-                    Byte count = (Byte) itemList.getItem(0x06 + j);
+                    Byte count = itemList.getItem(0x06 + j).getItem();
                     vendorItemList.add(new VendorItem(item, count));
                     // 中奖物品
-                    vendorItemList.setAward((Byte) itemList.getLast());
+                    vendorItemList.setAward(itemList.getLast().getItem());
                 }
             }
         }
@@ -143,7 +143,7 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
                 JukeBoxItemList jukeBoxItemList = new JukeBoxItemList();
                 for (Object o : itemList) {
                     if (o instanceof Byte b) {
-                        jukeBoxItemList.add(b);
+                        jukeBoxItemList.add(new ShopItem(b));
                     }
                 }
                 getShopLists().set(i, (ItemList) jukeBoxItemList);
@@ -251,7 +251,7 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
     }
 
     @Override
-    public List<ItemList<Object>> getShopLists() {
+    public List<ItemList<ShopItem>> getShopLists() {
         return lists;
     }
 

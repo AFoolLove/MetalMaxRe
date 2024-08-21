@@ -340,7 +340,7 @@ public interface ICharMap {
         OPCODES.put((byte) 0x32, 0);  // 在对话界面时（包括全屏界面），对话框两边中间分割的下方普通焊点变更为有层次感的焊点0xF7（$638B），缺陷为下一个字符会消失，如322400，文本会显示为“0”而不是正确的“眼”，所以通常后面连接FF使用
         OPCODES.put((byte) 0x33, 0);  // 对$2001写入0x0E，不显示精灵，缺陷为下一个字符会消失，如332400，文本会显示为“0”而不是正确的“眼”，所以通常后面连接00使用
         OPCODES.put((byte) 0x34, 0);  // $59D = 0x03
-        OPCODES.put((byte) 0x42, 0);  // 忽略字符
+        OPCODES.put((byte) 0x42, 0);  // 日语中 浊音和半浊音，汉化版中大部分情况没有效果，部分情况会死机或界面错乱
         OPCODES.put((byte) 0xE2, 0);  // ($DF,$E0,$E1) 三字节的数字
         OPCODES.put((byte) 0xE3, 0);  // 进行选择，但操作结果由系统程序接管（不是剧情指令接管）
         OPCODES.put((byte) 0xE4, 0);  // 等待确认后继续对话
@@ -364,7 +364,7 @@ public interface ICharMap {
         OPCODES.put((byte) 0xF6, 0);  // 后面的字符将直接显示，不进行转换为中文等
         OPCODES.put((byte) 0xF7, 2);  // 跨文本集引用文本段，第一字节为第几段文本，第二字节为哪一页的文本集
         OPCODES.put((byte) 0xF8, 2);  // 读取1-3个字节，变更为文本，向右对齐
-        OPCODES.put((byte) 0xF9, 2);  // 读取1-3个字节，变更为文本，向左对齐
+        OPCODES.put((byte) 0xF9, 2);  // 读取1-3个字节，变更为文本，向左对齐，静态文本或界面可用，在即使对话中无效
         OPCODES.put((byte) 0xFA, 1);  // 引用目标地址的文本
         OPCODES.put((byte) 0xFB, 1);  // 引用目标地址的文本，目标地址的第一位作为$CC文本段，目标地址的第二位作为$CD文本页
         OPCODES.put((byte) 0xFC, 1);  // 引用数据
