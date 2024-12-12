@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.patch;
 
+import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,9 +11,13 @@ import java.util.List;
 import java.util.Map;
 
 public class RomPatchImpl implements IRomPatch, Serializable {
+    @SerializedName("key")
     private final String key;
+    @SerializedName("description")
     private final String description;
+    @SerializedName("preKey")
     private final String preKey;
+    @SerializedName("patchSegments")
     private final Map<String, List<IPatchSegmentWrapper>> patchSegments = new HashMap<>();
 
     public RomPatchImpl(@NotNull String key, @NotNull IPatchSegmentWrapper segments) {

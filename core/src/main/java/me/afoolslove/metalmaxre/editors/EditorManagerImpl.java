@@ -530,6 +530,7 @@ public class EditorManagerImpl implements IEditorManager {
 
                     // 开始应用数据并计时
                     final long start = System.currentTimeMillis();
+                    applyMethod.setAccessible(true);
                     applyMethod.invoke(editor, pars);
                     final long end = System.currentTimeMillis() - start;
 
@@ -590,6 +591,7 @@ public class EditorManagerImpl implements IEditorManager {
 
                 // 开始加载并计时
                 start = System.currentTimeMillis();
+                loadMethod.setAccessible(true);
                 loadMethod.invoke(editor, pars);
                 final long end = System.currentTimeMillis() - start;
 

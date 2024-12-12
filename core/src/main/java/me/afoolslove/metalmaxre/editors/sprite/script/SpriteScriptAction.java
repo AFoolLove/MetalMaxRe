@@ -1,15 +1,27 @@
 package me.afoolslove.metalmaxre.editors.sprite.script;
 
+import com.google.gson.annotations.SerializedName;
+
 public class SpriteScriptAction {
+    @SerializedName("code")
     private int code;
+    @SerializedName("type")
     private SpriteScriptActionType type = SpriteScriptActionType.GENERAL_TYPE;
+    @SerializedName("name")
     private String name;
+    @SerializedName("length")
     private int length = 0;
+    @SerializedName("format")
     private String format;
+    @SerializedName("formatText")
     private String formatText;
+    @SerializedName("shortDescription")
     private String shortDescription;
+    @SerializedName("detailedDescription")
     private String detailedDescription;
+    @SerializedName("gotoIndex")
     private Integer gotoIndex;
+    @SerializedName("notLeaf")
     private Boolean notLeaf;
 
     public SpriteScriptAction(int code) {

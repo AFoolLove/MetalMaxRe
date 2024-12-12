@@ -17,6 +17,7 @@ public final class ExceptionUtils {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintWriter printWriter = new PrintWriter(out);
         e.printStackTrace(printWriter);
+        printWriter.flush();
         return out.toString();
     }
 }

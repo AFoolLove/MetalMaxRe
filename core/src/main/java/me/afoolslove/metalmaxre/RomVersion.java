@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.NotNull;
@@ -72,11 +73,17 @@ public class RomVersion {
     }
 
 
+    @SerializedName("name")
     private final String name;
+    @SerializedName("path")
     private final String path;
+    @SerializedName("size")
     private final int size;
+    @SerializedName("description")
     private final String description;
+    @SerializedName("modifyRecords")
     private final List<String> modifyRecords;
+    @SerializedName("builtIn")
     private final boolean builtIn;
 
     public RomVersion(String name, String path, int size, String description, List<String> modifyRecords) {

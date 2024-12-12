@@ -139,6 +139,10 @@ public class ResourceManager {
      */
     public static boolean isJar() {
         URL url = get("");
+        if (url == null) {
+            // 二次验证
+            url = ResourceManager.get("/%s.class".formatted(ResourceManager.class.getName().replace('.', '/')));
+        }
         return url != null && "jar".equalsIgnoreCase(url.getProtocol());
     }
 

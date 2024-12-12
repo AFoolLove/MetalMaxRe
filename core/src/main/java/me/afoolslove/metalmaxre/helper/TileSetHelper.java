@@ -231,7 +231,7 @@ public class TileSetHelper {
     /**
      * 生成一个世界地图的 TileSet 图片
      * 使用了3个0x40组合和颜色
-     * 图片的大小为 256*192
+     * 图片的大小为 256*256
      */
     public static Color[][] generateWorldTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0,
                                                  byte[][][] combinations, TileAttributes[] attributes,
@@ -242,7 +242,7 @@ public class TileSetHelper {
     /**
      * 生成一个世界地图的 TileSet 图片
      * 使用了3个0x40组合和颜色
-     * 图片的大小为 256*192
+     * 图片的大小为 256*256
      *
      * @param xXX 分割为4个，高位到低位分别为 x00、x40、x80、xC0
      */
@@ -259,7 +259,7 @@ public class TileSetHelper {
     /**
      * 生成一个世界地图的 TileSet 图片
      * 使用了3个0x40组合和颜色
-     * 图片的大小为 256*192
+     * 图片的大小为 256*256
      *
      * @param xXX 分割为4个，高位到低位分别为 x00、x40、x80、xC0
      */
