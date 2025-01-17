@@ -6,7 +6,9 @@ import me.afoolslove.metalmaxre.editors.map.IMapPropertiesEditor;
 import me.afoolslove.metalmaxre.editors.map.MapBuilder;
 import me.afoolslove.metalmaxre.editors.map.MapProperties;
 import me.afoolslove.metalmaxre.editors.map.tileset.ITileSetEditor;
-import me.afoolslove.metalmaxre.editors.map.tileset.TileAttributes;
+import me.afoolslove.metalmaxre.editors.map.tileset.TileAttributeSet;
+import me.afoolslove.metalmaxre.editors.map.tileset.TileCombinationSet;
+import me.afoolslove.metalmaxre.editors.map.tileset.XXTileSet;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
 import me.afoolslove.metalmaxre.editors.palette.Color;
@@ -65,7 +67,7 @@ public class TileSetHelper {
         for (int j = 0; j < tiles.length; j++) {
             temp = 0;
             for (int k = 7, h = 0x80; k >= 0; h >>>= 1, k--) {
-                temp |= ((tiles[j] & h) >>> k) << (7 - k);
+                temp |= (byte) (((tiles[j] & h) >>> k) << (7 - k));
             }
             tiles[j] = temp;
         }
@@ -140,8 +142,8 @@ public class TileSetHelper {
 
         return generate(metalMaxRe, 0x100, 0x80,
                 x00, x40, x80, xC0,
-                new byte[][][]{tileSetEditor.getCombinations()[combinationA], tileSetEditor.getCombinations()[combinationB]},
-                new TileAttributes[]{tileSetEditor.getAttributes()[combinationA], tileSetEditor.getAttributes()[combinationB]},
+                tileSetEditor.getCombinations(combinationA, combinationB),
+                tileSetEditor.getAttributes(combinationA, combinationB),
                 palette);
     }
 
@@ -153,21 +155,23 @@ public class TileSetHelper {
      * 图片的大小为 128*128
      */
     public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0, Color[] colors) {
-        SystemPalette systemPalette = metalMaxRe.getSystemPalette();
-        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
+        return generateTileSet(xXX2TileSet(metalMaxRe, x00, x40, x80, xC0), colors);
+    }
 
-        byte[][][] tiles = new byte[4][0x40][0x10];
-        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
-        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
-        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
-        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
 
+    /**
+     * 生成一张没有组合过的 TileSet 图片
+     * 4个32*128直接拼接的图片
+     * <p>
+     * 图片的大小为 128*128
+     */
+    public static Color[][] generateTileSet(XXTileSet[] tiles, Color[] colors) {
         Color[][] image = new Color[0x80][0x80];
 
         // 4个32*128直接拼接的图片
         for (int part = 0; part < 0x04; part++) {
             for (int tileX = 0; tileX < 0x40; tileX++) {
-                byte[] bytes = tiles[part][tileX];
+                byte[] bytes = tiles[part].getTile(tileX).getTileData();
                 for (int b = 0; b < 0x08; b++) { // byte
                     for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
                         int l = (bytes[b] & d) >>> (7 - k);
@@ -234,7 +238,7 @@ public class TileSetHelper {
      * 图片的大小为 256*256
      */
     public static Color[][] generateWorldTileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0,
-                                                 byte[][][] combinations, TileAttributes[] attributes,
+                                                 TileCombinationSet[] combinations, TileAttributeSet[] attributes,
                                                  Color[][] colors) {
         return generate(metalMaxRe, 0x100, 0x100, x00, x40, x80, xC0, combinations, attributes, colors);
     }
@@ -247,7 +251,7 @@ public class TileSetHelper {
      * @param xXX 分割为4个，高位到低位分别为 x00、x40、x80、xC0
      */
     public static Color[][] generateWorldTileSet(@NotNull MetalMaxRe metalMaxRe, int xXX,
-                                                 byte[][][] combinations, TileAttributes[] attributes,
+                                                 TileCombinationSet[] combinations, TileAttributeSet[] attributes,
                                                  Color[][] colors) {
         int x00 = NumberR.at(xXX, 3) & 0xFF;
         int x40 = NumberR.at(xXX, 2) & 0xFF;
@@ -296,7 +300,7 @@ public class TileSetHelper {
     /**
      * 生成一张精灵的 TileSet 图片
      * 该算法不完整，所以有部分错误的图像
-     * 图片的大小为
+     * 图片的大小为256*256
      */
     public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, int sprite, boolean running) {
         SystemPalette systemPalette = metalMaxRe.getSystemPalette();
@@ -304,7 +308,7 @@ public class TileSetHelper {
         IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
 
         // 获取精灵使用的图块表
-        byte[][][] spriteTiles = new byte[4][0x40][0x10];
+        XXTileSet[] spriteTiles = new XXTileSet[4];
         spriteTiles[0] = tileSetEditor.getTiles()[0x04]; // $00-$3F
         spriteTiles[1] = tileSetEditor.getTiles()[0x05]; // $40-$7F
         // 上面两个为固定的精灵表
@@ -371,10 +375,10 @@ public class TileSetHelper {
 
                 // 读取精灵材质
                 byte[][] texture = new byte[0x04][0x10];
-                texture[0x00] = Arrays.copyOf(spriteTiles[up1 / 0x40][up1 % 0x40], 0x10);
-                texture[0x01] = Arrays.copyOf(spriteTiles[up2 / 0x40][up2 % 0x40], 0x10);
-                texture[0x02] = Arrays.copyOf(spriteTiles[down1 / 0x40][down1 % 0x40], 0x10);
-                texture[0x03] = Arrays.copyOf(spriteTiles[down2 / 0x40][down2 % 0x40], 0x10);
+                texture[0x00] = Arrays.copyOf(spriteTiles[up1 / 0x40].getTile(up1 % 0x40).getTileData(), 0x10);
+                texture[0x01] = Arrays.copyOf(spriteTiles[up2 / 0x40].getTile(up2 % 0x40).getTileData(), 0x10);
+                texture[0x02] = Arrays.copyOf(spriteTiles[down1 / 0x40].getTile(down1 % 0x40).getTileData(), 0x10);
+                texture[0x03] = Arrays.copyOf(spriteTiles[down2 / 0x40].getTile(down2 % 0x40).getTileData(), 0x10);
 
                 // 精灵姿态
 
@@ -490,14 +494,8 @@ public class TileSetHelper {
      */
     private static byte[][] generate(@NotNull MetalMaxRe metalMaxRe, int width, int height,
                                      int x00, int x40, int x80, int xC0,
-                                     byte[][][] combinations, TileAttributes[] attributes) {
-        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
-
-        byte[][][] tiles = new byte[4][0x40][0x10];
-        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
-        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
-        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
-        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
+                                     TileCombinationSet[] combinations, TileAttributeSet[] attributes) {
+        XXTileSet[] tiles = xXX2TileSet(metalMaxRe, x00, x40, x80, xC0);
 
         byte[][] image = new byte[height][width];
 
@@ -505,7 +503,7 @@ public class TileSetHelper {
         // 怎么写出来的？别问，问就是不知道
         for (int part = 0; part < combinations.length; part++) {
             // 获取该部分的组合集
-            byte[][] combination = combinations[part];
+            TileCombinationSet combinationSet = combinations[part];
             // 获取该部分的颜色
             byte[] color = attributes[part].getAttributes();
 
@@ -518,8 +516,8 @@ public class TileSetHelper {
                     // tile由4个小tile组成
                     for (int smallTile = 0; smallTile < 0x04; smallTile++) {
                         // 得到tile图像
-                        int b1 = combination[(y % 0x04 * 0x10) + tileX][smallTile] & 0xFF;
-                        byte[] bytes = tiles[b1 / 0x40][b1 % 0x40];
+                        int b1 = combinationSet.getCombination((y % 0x04 * 0x10) + tileX).getCombinationData()[smallTile] & 0xFF;
+                        byte[] bytes = tiles[b1 / 0x40].getTile(b1 % 0x40).getTileData();
                         // 得到调色板
                         int b2 = color[(y % 0x04 * 0x10) + tileX] & 0xFF;
 
@@ -554,7 +552,7 @@ public class TileSetHelper {
 
     private static Color[][] generate(@NotNull MetalMaxRe metalMaxRe, int width, int height,
                                       int x00, int x40, int x80, int xC0,
-                                      byte[][][] combinations, TileAttributes[] attributes,
+                                      TileCombinationSet[] combinations, TileAttributeSet[] attributes,
                                       Color[][] colors) {
         return palette(generate(metalMaxRe, width, height, x00, x40, x80, xC0, combinations, attributes), colors);
     }
@@ -600,7 +598,6 @@ public class TileSetHelper {
     }
 
     public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe, int xXX, Color[] colors) {
-
         int x00 = NumberR.at(xXX, 3) & 0xFF;
         int x40 = NumberR.at(xXX, 2) & 0xFF;
         int x80 = NumberR.at(xXX, 1) & 0xFF;
@@ -611,18 +608,18 @@ public class TileSetHelper {
     public static Color[][] generate(@NotNull MetalMaxRe metalMaxRe,
                                      int x00, int x40, int x80, int xC0,
                                      Color[] colors) {
+        return generate(xXX2TileSet(metalMaxRe, x00, x40, x80, xC0), colors);
+    }
+
+    public static Color[][] generate(@NotNull XXTileSet[] tiles, Color[][] colors) {
+        return generate(tiles, colors[0x03]);
+    }
+
+    public static Color[][] generate(@NotNull XXTileSet[] tiles, Color[] colors) {
         final Color[][] image = new Color[0x80][0x80];
-        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
-
-        byte[][][] tiles = new byte[4][0x40][0x10];
-        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
-        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
-        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
-        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
-
         for (int i = 0; i < tiles.length; i++) { //
-            for (int j = 0; j < tiles[i].length; j++) { // 0x40 size
-                final byte[] bytes = tiles[i][j]; // 0x10 size
+            for (int j = 0; j < XXTileSet.TILE_SET_LENGTH; j++) { // 0x40 size
+                final byte[] bytes = tiles[i].getTile(j).getTileData(); // 0x10 size
                 for (int b = 0; b < 0x08; b++) { // byte
                     for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
                         int l = (bytes[b] & d) >>> (7 - k);
@@ -649,18 +646,14 @@ public class TileSetHelper {
 
     public static byte[][] generate(@NotNull MetalMaxRe metalMaxRe,
                                     int x00, int x40, int x80, int xC0) {
+        return generate(xXX2TileSet(metalMaxRe, x00, x40, x80, xC0));
+    }
+
+    public static byte[][] generate(@NotNull XXTileSet[] tiles) {
         final byte[][] image = new byte[0x80][0x80];
-        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
-
-        byte[][][] tiles = new byte[4][0x40][0x10];
-        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
-        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
-        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
-        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
-
-        for (int i = 0; i < tiles.length; i++) { //
-            for (int j = 0; j < tiles[i].length; j++) { // 0x40 size
-                final byte[] bytes = tiles[i][j]; // 0x10 size
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < XXTileSet.TILE_SET_LENGTH; j++) { // 0x40 size
+                final byte[] bytes = tiles[i].getTile(j).getTileData(); // 0x10 size
                 for (int b = 0; b < 0x08; b++) { // byte
                     for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
                         int l = (bytes[b] & d) >>> (7 - k);
@@ -679,17 +672,11 @@ public class TileSetHelper {
     public static byte[][] generateMonsterModel(@NotNull MetalMaxRe metalMaxRe,
                                                 int x00, int x40, int x80, int xC0) {
         final byte[][] image = new byte[0x80][0x80];
-        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
-
-        byte[][][] tiles = new byte[4][0x40][0x10];
-        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
-        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
-        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
-        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
+        XXTileSet[] tiles = xXX2TileSet(metalMaxRe, x00, x40, x80, xC0);
 
         for (int i = 0; i < tiles.length; i++) { //
-            for (int j = 0; j < tiles[i].length; j++) { // 0x40 size
-                final byte[] bytes = tiles[i][j]; // 0x10 size
+            for (int j = 0; j < XXTileSet.TILE_SET_LENGTH; j++) { // 0x40 size
+                final byte[] bytes = tiles[i].getTile(j).getTileData(); // 0x10 size
                 for (int b = 0; b < 0x08; b++) { // byte
                     for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
                         int l = (bytes[b] & d) >>> (7 - k);
@@ -836,4 +823,32 @@ public class TileSetHelper {
         return value;
     }
 
+    public static List<Color[][]> diced(int w, int h, Color[][] data) {
+        List<Color[][]> value = new ArrayList<>();
+        int tW = data[0x00].length / w;
+        int tH = data.length / h;
+        for (int y = 0; y < tH; y++) {
+            for (int x = 0; x < tW; x++) {
+                Color[][] bytes = new Color[h][w];
+
+                for (int offsetY = 0; offsetY < h; offsetY++) {
+                    for (int offsetX = 0; offsetX < w; offsetX++) {
+                        bytes[offsetY][offsetX] = data[(y * h) + offsetY][(x * w) + offsetX];
+                    }
+                }
+                value.add(bytes);
+            }
+        }
+        return value;
+    }
+
+    private static XXTileSet[] xXX2TileSet(@NotNull MetalMaxRe metalMaxRe, int x00, int x40, int x80, int xC0) {
+        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
+        XXTileSet[] tiles = new XXTileSet[4];
+        tiles[0] = tileSetEditor.getTiles()[x00]; // $00-$3F
+        tiles[1] = tileSetEditor.getTiles()[x40]; // $40-$7F
+        tiles[2] = tileSetEditor.getTiles()[x80]; // $80-$BF
+        tiles[3] = tileSetEditor.getTiles()[xC0]; // $C0-$FF
+        return tiles;
+    }
 }

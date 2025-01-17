@@ -12,28 +12,41 @@ public interface ITileSetEditor extends IRomEditor {
         return "tileSetEditor";
     }
 
-    byte[][][] getTiles();
+    XXTileSet[] getTiles();
 
-    byte[][][] getCombinations();
+    TileCombinationSet[] getCombinations();
 
-    TileAttributes[] getAttributes();
+    default TileCombinationSet getCombinations(int index) {
+        return getCombinations()[index];
+    }
 
-    default TileAttributes getAttributes(int xXX) {
+    TileCombinationSet[] getCombinations(int... indexes);
+
+    default TileCombinationSet[] getCombinations(@NotNull MapProperties mapProperties) {
+        if (mapProperties instanceof WorldMapProperties) {
+            return getWorldCombinations();
+        }
+        return getCombinations(mapProperties.combinationA, mapProperties.combinationB);
+    }
+
+    TileAttributeSet[] getAttributes();
+
+    default TileAttributeSet getAttributes(int xXX) {
         return getAttributes()[xXX];
     }
 
-    TileAttributes[] getAttributes(int... xXXs);
+    TileAttributeSet[] getAttributes(int... xXXs);
 
-    default TileAttributes[] getAttributes(@NotNull MapProperties mapProperties) {
+    default TileAttributeSet[] getAttributes(@NotNull MapProperties mapProperties) {
         if (mapProperties instanceof WorldMapProperties) {
             return getWorldAttributes();
         }
         return getAttributes(mapProperties.combinationA, mapProperties.combinationB);
     }
 
-    byte[][][] getWorldCombinations();
+    TileCombinationSet[] getWorldCombinations();
 
-    TileAttributes[] getWorldAttributes();
+    TileAttributeSet[] getWorldAttributes();
 
     byte[] getXA597();
 

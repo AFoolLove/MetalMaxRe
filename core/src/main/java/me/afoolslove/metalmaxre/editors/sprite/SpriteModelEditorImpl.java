@@ -121,7 +121,12 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
         bankOffset = getBattleSpriteModelAddress().getBankOffset();
         for (int i = 0; i < indexes.length; i++) {
-            int position = indexes[i] - 0x8000 - bankOffset;
+            char modelIndex = indexes[i];
+            if (modelIndex == 0xFFFF) {
+                getBattleSpriteModels().add(BattleSpriteModel.createEmptyModel());
+                continue;
+            }
+            int position = modelIndex - 0x8000 - bankOffset;
             position += getBattleSpriteModelAddress().getAbsStartAddress(getBuffer());
             BattleSpriteModel battleSpriteModel = new BattleSpriteModel(modelAttributes[i], (byte) 0, null);
 
@@ -188,8 +193,13 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         baseSpriteModelIndex = 0x8000 + getBattleSpriteModelAddress().getBankOffset();
         position(getBattleSpriteModelAddress());
         for (int i = 0; i < indexes.length; i++) {
-            indexes[i] = (char) baseSpriteModelIndex;
             BattleSpriteModel battleSpriteModel = getBattleSpriteModels().get(i);
+            if (battleSpriteModel.isEmptyModel()) {
+                indexes[i] = 0xFFFF;
+                continue;
+            }
+
+            indexes[i] = (char) baseSpriteModelIndex;
             attributes[i] = battleSpriteModel.getAttribute();
             getBuffer().put(battleSpriteModel.getOffset());
             getBuffer().put(battleSpriteModel.getModel());

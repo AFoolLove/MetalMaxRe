@@ -20,18 +20,18 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
     private final DataAddress worldTileSetCombinationsAddress;
     private final DataAddress worldTileSetAttributesAddress;
 
-    private byte[][][] tiles = new byte[0xD4][0x40][0x10]; // 0x04 = CHR表的四分之一
-    private byte[][][] combinations = new byte[0x37][0x40][0x04]; // 每4byte一组，0x37个组合，0x40个4byte组
-    private TileAttributes[] attributes = new TileAttributes[0x37]; // 每0x40byte一组，0x37个组合，每byte对应一个图块的特性和调色板索引
+    private XXTileSet[] tiles = new XXTileSet[0xD4]; // 0x04 = CHR表的四分之一
+    private TileCombinationSet[] combinations = new TileCombinationSet[0x37]; // 每4byte一组，0x37个组合，0x40个4byte组
+    private TileAttributeSet[] attributes = new TileAttributeSet[0x37]; // 每0x40byte一组，0x37个组合，每byte对应一个图块的特性和调色板索引
 
     /**
      * 世界地图图块的组合数据，全局固定
      */
-    private byte[][][] worldCombinations = new byte[0x04][0x40][0x04];
+    private TileCombinationSet[] worldCombinations = new TileCombinationSet[0x04];
     /**
      * 世界地图图块的特性和调色板
      */
-    private TileAttributes[] worldAttributes = new TileAttributes[0x04];
+    private TileAttributeSet[] worldAttributes = new TileAttributeSet[0x04];
 
 
     private byte[] xA597 = new byte[0x004]; // 精灵的朝向帧，全局属性（移动和未移动的图像
@@ -41,9 +41,9 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
 
     private byte[] x83F2 = new byte[0x008]; // 精灵上半部分两个图像块的差值
     private byte[] x83FA = new byte[0x008]; // 精灵下半部分两个图像块的差值
-    private byte[] x847B = new byte[0x100]; // 精灵图像块差值索引等，该数据大小待验证
-    private byte[] x8552 = new byte[0x100]; // 精灵图像上半部分的图像索引，该数据大小待验证
-    private byte[] x8629 = new byte[0x100]; // 精灵图像下半部分的图像索引，该数据大小待验证
+    private byte[] x847B = new byte[0x0D9]; // 精灵图像块差值索引等，该数据大小待验证
+    private byte[] x8552 = new byte[0x0D9]; // 精灵图像上半部分的图像索引，该数据大小待验证
+    private byte[] x8629 = new byte[0x0D9]; // 精灵图像下半部分的图像索引，该数据大小待验证
 
     public TileSetEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -72,30 +72,36 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
     public void onLoad() {
         // 读取前清空数据
         // 所有tile
-        for (byte[][] tile : tiles) {
-            for (byte[] bytes : tile) {
-                Arrays.fill(bytes, (byte) 0x00);
+        for (int i = 0; i < tiles.length; i++) {
+            XXTileSet xxTileSet = tiles[i];
+            if (xxTileSet == null) {
+                tiles[i] = new XXTileSet();
             }
+            tiles[i].fillZero();
         }
         // tile组合
-        for (byte[][] combination : combinations) {
-            for (byte[] bytes : combination) {
-                Arrays.fill(bytes, (byte) 0x00);
+        for (int i = 0; i < combinations.length; i++) {
+            TileCombinationSet combinationSet = combinations[i];
+            if (combinationSet == null) {
+                combinations[i] = new TileCombinationSet();
             }
+            combinations[i].fillZero();
         }
         // tile特性和调色板
         for (int i = 0; i < attributes.length; i++) {
-            attributes[i] = new TileAttributes();
+            attributes[i] = new TileAttributeSet();
         }
         // 世界地图的tile组合
-        for (byte[][] worldCombination : worldCombinations) {
-            for (byte[] bytes : worldCombination) {
-                Arrays.fill(bytes, (byte) 0x00);
+        for (int i = 0; i < worldCombinations.length; i++) {
+            TileCombinationSet worldCombination = worldCombinations[i];
+            if (worldCombination == null) {
+                worldCombinations[i] = new TileCombinationSet();
             }
+            worldCombinations[i].fillZero();
         }
         // 世界地图的特性和调色板
         for (int i = 0; i < worldAttributes.length; i++) {
-            worldAttributes[i] = new TileAttributes();
+            worldAttributes[i] = new TileAttributeSet();
         }
 
         // 精灵相关数据
@@ -115,16 +121,13 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 0x40tile = x40（0x00、0x80、0xC0）
         position(getTileSetsAddress());
         // 一共0x100个 x40
-        for (int count = 0; count < tiles.length; count++) {
-            byte[][] x40 = tiles[count] != null ? tiles[count] : new byte[0x40][0x10];
-            tiles[count] = x40;
+        for (XXTileSet x40 : tiles) {
             // 读取 x40
             for (int i = 0; i < 0x40; i++) {
                 // 读取 tile
-                byte[] tile = x40[i] != null ? x40[i] : new byte[0x10];
-                x40[i] = tile;
+                TileImage tile = x40.getTile(i);
                 // 读取
-                getBuffer().get(tile);
+                getBuffer().get(tile.getTileData());
             }
         }
 
@@ -132,15 +135,12 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 0x04byte = 1tile combination
         // 0x40tile = x40（0x00、0x80、0xC0）
         position(getTileSetCombinationsAddress());
-        for (int count = 0; count < combinations.length; count++) {
-            // 0x40 tile combination
-            byte[][] tileCombinations = combinations[count] != null ? combinations[count] : new byte[0x40][0x04];
-            combinations[count] = tileCombinations;
-            for (int i = 0; i < 0x40; i++) {
+        for (TileCombinationSet tileCombinations : combinations) {
+            // 0x40 tile combinationSet
+            for (int i = 0; i < TileCombinationSet.TILE_COMBINATIONS_LENGTH; i++) {
                 // tile combination
-                byte[] tileCombination = tileCombinations[i] != null ? tileCombinations[i] : new byte[0x04];
-                tileCombinations[i] = tileCombination;
-                getBuffer().get(tileCombination);
+                TileCombination tileCombination = tileCombinations.getCombination(i);
+                getBuffer().get(tileCombination.getCombinationData());
             }
         }
 
@@ -148,28 +148,25 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 0x01byte = 1tile特性和调色板
         // 0x40tile = 0x40（0x00、0x80、0xC0）
         position(getTileSetAttributesAddress());
-        for (TileAttributes attribute : attributes) {
+        for (TileAttributeSet attribute : attributes) {
             // 读取 x40 tile特性和调色板
             getBuffer().get(attribute.getAttributes());
         }
 
         // 读取世界地图的tile组合
         position(getWorldTileSetCombinationsAddress());
-        for (int count = 0; count < worldCombinations.length; count++) {
+        for (TileCombinationSet tileCombinations : worldCombinations) {
             // 0x40 tile combination
-            byte[][] tileCombinations = worldCombinations[count] != null ? worldCombinations[count] : new byte[0x40][0x04];
-            worldCombinations[count] = tileCombinations;
             for (int i = 0; i < 0x40; i++) {
                 // tile combination
-                byte[] tileCombination = tileCombinations[i] != null ? tileCombinations[i] : new byte[0x04];
-                tileCombinations[i] = tileCombination;
-                getBuffer().get(tileCombination);
+                TileCombination tileCombination = tileCombinations.getCombination(i);
+                getBuffer().get(tileCombination.getCombinationData());
             }
         }
 
         // 读取世界地图的特性和调色板
         position(getWorldTileSetAttributesAddress());
-        for (TileAttributes worldAttribute : worldAttributes) {
+        for (TileAttributeSet worldAttribute : worldAttributes) {
             // 读取 x40 tile特性和调色板
             getBuffer().get(worldAttribute.getAttributes());
         }
@@ -220,37 +217,37 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
     public void onApply() {
         // 写入所有tile
         position(getTileSetsAddress());
-        for (byte[][] tile : tiles) {
-            for (byte[] bytes : tile) {
-                getBuffer().put(bytes);
+        for (XXTileSet xxTileSet : tiles) {
+            for (TileImage t : xxTileSet.getTiles()) {
+                getBuffer().put(t.getTileData());
             }
         }
 
         // 写入tile组合
         position(getTileSetCombinationsAddress());
-        for (byte[][] combination : combinations) {
-            for (byte[] bytes : combination) {
-                getBuffer().put(bytes);
+        for (TileCombinationSet combinationSet : combinations) {
+            for (TileCombination c : combinationSet.getCombinations()) {
+                getBuffer().put(c.getCombinationData());
             }
         }
 
         // 写入tile的特性和调色板
         position(getTileSetAttributesAddress());
-        for (TileAttributes tileAttributes : attributes) {
-            getBuffer().put(tileAttributes.getAttributes());
+        for (TileAttributeSet tileAttributeSet : attributes) {
+            getBuffer().put(tileAttributeSet.getAttributes());
         }
 
         // 写入世界地图tile组合
         position(getWorldTileSetCombinationsAddress());
-        for (byte[][] combination : worldCombinations) {
-            for (byte[] bytes : combination) {
-                getBuffer().put(bytes);
+        for (TileCombinationSet combinationSet : worldCombinations) {
+            for (TileCombination c : combinationSet.getCombinations()) {
+                getBuffer().put(c.getCombinationData());
             }
         }
 
         // 写入世界地图tile的特性和调色板
         position(getWorldTileSetAttributesAddress());
-        for (TileAttributes worldAttribute : worldAttributes) {
+        for (TileAttributeSet worldAttribute : worldAttributes) {
             getBuffer().put(worldAttribute.getAttributes());
         }
 
@@ -317,33 +314,42 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
     }
 
     @Override
-    public byte[][][] getTiles() {
+    public XXTileSet[] getTiles() {
         return tiles;
     }
 
     @Override
-    public byte[][][] getCombinations() {
+    public TileCombinationSet[] getCombinations() {
         return combinations;
     }
 
     @Override
-    public TileAttributes[] getAttributes() {
+    public TileCombinationSet[] getCombinations(int... indexes) {
+        TileCombinationSet[] tileCombinations = new TileCombinationSet[indexes.length];
+        for (int i = 0; i < indexes.length; i++) {
+            tileCombinations[i] = getCombinations()[indexes[i]];
+        }
+        return tileCombinations;
+    }
+
+    @Override
+    public TileAttributeSet[] getAttributes() {
         return attributes;
     }
 
     @Override
-    public byte[][][] getWorldCombinations() {
+    public TileCombinationSet[] getWorldCombinations() {
         return worldCombinations;
     }
 
     @Override
-    public TileAttributes[] getWorldAttributes() {
+    public TileAttributeSet[] getWorldAttributes() {
         return worldAttributes;
     }
 
     @Override
-    public TileAttributes[] getAttributes(int... xXXs) {
-        TileAttributes[] tileAttributes = new TileAttributes[xXXs.length];
+    public TileAttributeSet[] getAttributes(int... xXXs) {
+        TileAttributeSet[] tileAttributes = new TileAttributeSet[xXXs.length];
         for (int i = 0; i < xXXs.length; i++) {
             tileAttributes[i] = getAttributes()[xXXs[i]];
         }

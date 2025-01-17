@@ -51,6 +51,8 @@
 | [ITextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/ITextEditor.java)                  | 文本编辑器    | 完成          |
 | [ITreasureEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/ITreasureEditor.java)      | 宝藏编辑器    | 完成          |
 | [IElevatorEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/elevator/IElevatorEditor.java)      | 电梯编辑器    | 完成          |
+| [ISpriteModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteModelEditor.java)  | 精灵模型编辑器  | 完成          |
+| [ITitleEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/title/ITitleEditor.java)               | 标题编辑器    | 完成          |
 
 ## 编辑器可编辑内容
 
@@ -288,3 +290,16 @@
 
 * 设置每个电梯的楼层和数量
 * 设置触发每个电梯的地图id范围
+
+### [ISpriteModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteModelEditor.java)（精灵模型编辑器）
+
+实现类：[SpriteModelEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/SpriteModelEditorImpl.java)
+
+* 地图精灵模型和特殊模型数据、战斗时精灵模型数据
+
+### [ITitleEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/title/ITitleEditor.java)（标题编辑器）
+
+实现类：[ITitleEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/title/TitleEditorImpl.java)
+
+* 标题界面数据和调色板
+* LOGO界面数据和调色板

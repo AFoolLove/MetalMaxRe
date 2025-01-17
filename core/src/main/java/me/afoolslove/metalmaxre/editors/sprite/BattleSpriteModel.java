@@ -85,4 +85,21 @@ public class BattleSpriteModel {
         this.model = model;
     }
 
+    public boolean isEmptyModel() {
+        return this instanceof EmptyBattleSpriteModel;
+    }
+
+    public static EmptyBattleSpriteModel createEmptyModel() {
+        return new EmptyBattleSpriteModel();
+    }
+
+    /**
+     * 空的战斗精灵模型
+     */
+    public static class EmptyBattleSpriteModel extends BattleSpriteModel {
+
+        public EmptyBattleSpriteModel() {
+            super((byte) 0, (byte) 0, null);
+        }
+    }
 }

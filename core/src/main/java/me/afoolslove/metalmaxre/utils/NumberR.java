@@ -103,6 +103,19 @@ public class NumberR {
         return value >>> index - length + 1; // value: 0B1111_0000 > 0B0000_1111
     }
 
+    /**
+     * 获取byte中指定bit位和长度的数据
+     *
+     * @param value  被获取的值
+     * @param index  bit位索引
+     * @param length 获取的bit长度
+     * @param reset  是否将值右位移到D0开始
+     * @return 获取的值
+     */
+    public static byte at(byte value, int index, int length, boolean reset) {
+        return (byte) at(value & 0xFF, index, length, reset);
+    }
+
     public static int set(int srcValue, int value, int index, int length) {
         int fill = 0xFF_FF_FF_FF;
         fill >>>= 32 - length;        // 0B1111_1111 > 0B0000_1111
