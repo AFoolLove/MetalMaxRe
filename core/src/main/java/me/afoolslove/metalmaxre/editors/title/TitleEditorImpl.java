@@ -129,9 +129,9 @@ public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements I
             }
         }
         getBuffer().put(getTitleTileSetPaletteIndexAddress(), titlePaletteIndexes);
-        getBuffer().put(getTitleTileSetPaletteIndexAddress(), logoPaletteIndexes);
+        getBuffer().put(getLogoTileSetPaletteIndexAddress(), logoPaletteIndexes);
 
-        // 写入logo的额外图块
+        // 写入logo的额外图块图像
         position(getLogoTileImageAddress());
         for (XXTileSet xxTileSet : logoTileSet) {
             for (TileImage tile : xxTileSet.getTiles()) {

@@ -156,16 +156,15 @@ public interface ICharMap {
             }
 
             // 获取字符映射
-            Object[] values = charMap.getValues(ch);
-            if (values != null && values.length > 0) {
+            Object value = charMap.getValue(ch);
+            if (value != null) {
                 // 找到映射
-                Object tmp = values[0];
-                if (tmp instanceof byte[] bytes) {
+                if (value instanceof byte[] bytes) {
                     // 写入多字节
                     outputStream.write(bytes, 0, bytes.length);
                 } else {
                     // 写入单字节
-                    outputStream.write((byte) tmp);
+                    outputStream.write((byte) value);
                 }
             } else {
                 // 未找到映射

@@ -275,7 +275,17 @@ public class MapBuilder extends LinkedList<MapTile> {
      * @return 当前地图共计多少个图块
      */
     public int getTileCount() {
-        return stream().mapToInt(value -> value.getCount() == 0 ? 0x100 : value.getCount()).sum();
+        int sum = 0;
+        for (MapTile mapTile : this) {
+            if (mapTile.getCount() == 0) {
+                return 0x100;
+            } else {
+                sum += mapTile.getCount();
+            }
+        }
+        return sum;
+
+        // return stream().mapToInt(value -> value.getCount() == 0 ? 0x100 : value.getCount()).sum();
     }
 
     /**

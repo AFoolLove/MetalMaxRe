@@ -14,11 +14,6 @@
         </layout>
     </appender>
 
-    <logger name="system_logger_out">
-        <appender-ref ref="STDOUT"/>
-        <appender-ref ref="STRING_LIST"/>
-    </logger>
-
     <!-- 日志输出级别 -->
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>

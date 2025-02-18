@@ -23,6 +23,7 @@ public class TileAttributeSet {
     public static final int TILE_ATTRIBUTE_WANTED_A = 0B1111_0100;
     public static final int TILE_ATTRIBUTE_WANTED_B = 0B1111_1000;
     public static final int TILE_ATTRIBUTE_TREASURE = 0B1110_0100;
+    public static final int TILE_ATTRIBUTE_FUNCTION = 0B0111_1100;
 
 
     private final byte[] attributes;
@@ -184,5 +185,16 @@ public class TileAttributeSet {
      */
     public static boolean isTreasure(int attribute) {
         return (attribute & 0B1111_1100) == TILE_ATTRIBUTE_TREASURE;
+    }
+
+    /**
+     * 判断是否为功能图块
+     * <p>
+     * *原版功能：白菜地、裂缝、是否开炮、部分告示等需要调查的图块
+     *
+     * @return 是否为功能图块
+     */
+    public static boolean isFunction(int attribute) {
+        return (attribute & 0B1111_1100) == TILE_ATTRIBUTE_FUNCTION;
     }
 }

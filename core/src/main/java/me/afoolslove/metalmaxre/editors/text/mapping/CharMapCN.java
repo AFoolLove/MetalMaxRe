@@ -1,6 +1,5 @@
 package me.afoolslove.metalmaxre.editors.text.mapping;
 
-import me.afoolslove.metalmaxre.utils.ExceptionUtils;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.Nullable;
@@ -158,6 +157,7 @@ public class CharMapCN implements ICharMap {
                         if (FONTS.containsKey(key)) {
                             // 如果已经添加过，添加进重复Map中
                             FONTS_REPEATED.put(key, value);
+                            LOGGER.warn("字库出现重复字符：{}", key);
                         } else {
                             // 直接添加
                             FONTS.putIfAbsent(key, value);
@@ -166,7 +166,7 @@ public class CharMapCN implements ICharMap {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("字库加载失败：" + ExceptionUtils.toString(e));
+            LOGGER.error("字库加载失败：", e);
         }
 
         values.addAll(FONTS.entrySet().stream().map(SingleMapEntry::create).toList());

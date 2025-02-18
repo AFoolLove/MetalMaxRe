@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import me.afoolslove.metalmaxre.utils.ResourceManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -99,34 +100,80 @@ public class RomVersion {
         this.modifyRecords = modifyRecords;
     }
 
+    /**
+     * 是否为内置的ROM
+     * @return 内置的ROM
+     */
     public boolean isBuiltIn() {
         return builtIn;
     }
 
+    /**
+     * ROM版本名称
+     * @return ROM版本名称
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * ROM文件路径
+     * @return ROM文件路径
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * ROM文件大小
+     * @return ROM文件大小
+     */
     public int getSize() {
         return size;
     }
 
+    /**
+     * ROM版本描述
+     * @return ROM版本描述
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * ROM修改记录
+     * @return ROM修改记录
+     */
     public List<String> getModifyRecords() {
         return modifyRecords;
     }
 
+    /**
+     * ROM版本ID
+     * @return ROM版本ID
+     */
     public String getId() {
         return idFromInstance(this);
     }
 
+    /**
+     * 判断是否为相同ROM版本
+     */
+    public boolean isSameVersion(@Nullable RomVersion version) {
+        if (version == null) {
+            return false;
+        }
+        if (this == version) {
+            return true;
+        }
+        return this.getId().equals(version.getId());
+    }
+
+    /**
+     * 通过RomVersion的实例获取ID
+     * @param instance RomVersion的实例
+     * @return 通过RomVersion的实例获取ID，可能为{@code null}
+     */
     public static String idFromInstance(@NotNull RomVersion instance) {
         for (Map.Entry<String, RomVersion> entry : VERSIONS.entrySet()) {
             if (entry.getValue() == instance) {
