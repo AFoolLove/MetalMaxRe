@@ -28,6 +28,16 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> implements Ser
         this.type = type;
     }
 
+    @Override
+    public void set(Integer key, Integer value) {
+        if (value != null) {
+            // 需要先将值设置为null，否则在设置key时可能会因为验证问题设置失败
+            setValue(null);
+        }
+        setKey(key);
+        setValue(value);
+    }
+
     /**
      * key不能大于value
      *

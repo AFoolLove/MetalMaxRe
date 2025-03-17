@@ -4,6 +4,9 @@ import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class MonsterModel {
     public byte width;
     public byte height;
@@ -395,5 +398,27 @@ public class MonsterModel {
      */
     public byte[] getCustomPaletteYs() {
         return customPaletteYs;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MonsterModel that)) return false;
+        return getWidth() == that.getWidth()
+               && getHeight() == that.getHeight()
+               && isDoublePalette() == that.isDoublePalette()
+               && getModelIndex() == that.getModelIndex()
+               && getChrIndex() == that.getChrIndex()
+               && isChrIndexIncremental() == that.isChrIndexIncremental()
+               && Objects.deepEquals(palettes, that.palettes)
+               && Objects.deepEquals(getModelData(), that.getModelData())
+               && getModelType() == that.getModelType()
+               && Objects.equals(getTileIndex(), that.getTileIndex())
+               && Objects.deepEquals(getCustomPaletteYs(), that.getCustomPaletteYs());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getWidth(), getHeight(), isDoublePalette(), Arrays.hashCode(palettes), getModelIndex(), getChrIndex(), isChrIndexIncremental(), Arrays.hashCode(getModelData()), getModelType(), getTileIndex(), Arrays.hashCode(getCustomPaletteYs()));
     }
 }

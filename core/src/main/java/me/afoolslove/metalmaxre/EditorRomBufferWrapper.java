@@ -1,14 +1,8 @@
 package me.afoolslove.metalmaxre;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
+import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
 
 /**
  * 添加了编辑器支持的 {@link RomBuffer}
@@ -95,6 +89,25 @@ public class EditorRomBufferWrapper extends RomBufferWrapper {
     public synchronized void putChar(char c) {
         putChar(editor.position(), c);
         editor.offsetPosition(2); // char占2字节
+    }
+
+    public synchronized void putChars(char[] cs) {
+        for (char c : cs) {
+            putChar(editor.position(), c);
+        }
+        editor.offsetPosition(cs.length * 2); // char占2字节
+    }
+
+    public synchronized void putCharR(char c) {
+        putChar(editor.position(), NumberR.toChar(c));
+        editor.offsetPosition(2); // char占2字节
+    }
+
+    public synchronized void putCharsR(char[] cs) {
+        for (char c : cs) {
+            putChar(editor.position(), NumberR.toChar(c));
+        }
+        editor.offsetPosition(cs.length * 2); // char占2字节
     }
 
     public synchronized void getWholeBytes(int offset, int length, byte[]... aaBytes) {

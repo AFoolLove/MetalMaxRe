@@ -38,7 +38,7 @@ public class BattleSpriteModel {
     }
 
     public int getWidth() {
-        return NumberR.at(attribute, 1, 2, true) + 1;
+        return NumberR.at(attribute, 7, 3, true) + 1;
     }
 
     public int getHeight() {
@@ -55,6 +55,24 @@ public class BattleSpriteModel {
 
     public byte[] getModel() {
         return model;
+    }
+
+    /**
+     * 获取全部数据长度
+     *
+     * @return 全部数据长度
+     */
+    public int length() {
+        return 2 + modelLength();
+    }
+
+    /**
+     * 获取模型数据长度
+     *
+     * @return 模型数据长度
+     */
+    public int modelLength() {
+        return getWidth() * getHeight();
     }
 
     public void setOffset(byte offset) {

@@ -7,11 +7,14 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.SystemSprite;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteModelEditor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpriteModelEditorImpl.class);
     private final DataAddress spriteModelIndexAddress;
     private final DataAddress spriteModelAddress;
 
@@ -47,7 +50,7 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
                                  @NotNull DataAddress battleSpriteModelIndexAddress,
                                  @NotNull DataAddress battleSpriteModelAttributeAddress,
                                  @NotNull DataAddress battleSpriteModelAddress) {
-        super(metalMaxRe);
+        super(metalMaxRe, false);
         this.spriteModelIndexAddress = spriteModelIndexAddress;
         this.spriteModelAddress = spriteModelAddress;
         this.systemSpriteModelIndexAddress = systemSpriteModelIndexAddress;
@@ -142,6 +145,9 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
 
     @Editor.Apply
     public void onApply() {
+        // 溢出标志
+        boolean overflow = false;
+
         char[] indexes = new char[getSpriteModelIndexAddress().length() / 0x02];
 
         // 写入模型数据
@@ -151,6 +157,12 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
             indexes[i] = (char) baseSpriteModelIndex;
 
             SpriteModel spriteModel = getSpriteModel(i);
+            overflow = overflow || !getSpriteModelAddress().range(position() - 0x10 + spriteModel.length());
+            if (overflow) {
+                // 写不下了
+                LOGGER.error("精灵模型编辑器：精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), spriteModel.length());
+                continue;
+            }
             getBuffer().put(spriteModel.getHead());
             getBuffer().put(spriteModel.getAttribute());
             getBuffer().put(spriteModel.getModel());
@@ -169,10 +181,18 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         // 写入系统精灵模型数据
         baseSpriteModelIndex = 0x8000 + getSystemSpriteModelAddress().getBankOffset();
         position(getSystemSpriteModelAddress());
+        overflow = false;
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = (char) baseSpriteModelIndex;
 
             List<SystemSprite> systemSpriteModel = getSystemSpriteModel(i);
+
+            overflow = overflow || !getSystemSpriteModelAddress().range(position() - 0x10 + (systemSpriteModel.size() * 0x04));
+            if (overflow) {
+                // 写不下了
+                LOGGER.error("精灵模型编辑器：系统精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), systemSpriteModel.size() * 0x04);
+                continue;
+            }
             // 数量
             getBuffer().put(systemSpriteModel.size());
             for (SystemSprite systemSprite : systemSpriteModel) {
@@ -192,14 +212,21 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         byte[] attributes = new byte[getBattleSpriteModelAttributeAddress().length()];
         baseSpriteModelIndex = 0x8000 + getBattleSpriteModelAddress().getBankOffset();
         position(getBattleSpriteModelAddress());
+        overflow = false;
         for (int i = 0; i < indexes.length; i++) {
             BattleSpriteModel battleSpriteModel = getBattleSpriteModels().get(i);
             if (battleSpriteModel.isEmptyModel()) {
                 indexes[i] = 0xFFFF;
                 continue;
             }
-
             indexes[i] = (char) baseSpriteModelIndex;
+
+            overflow = overflow || !getBattleSpriteModelAddress().range(position() - 0x10 + battleSpriteModel.length());
+            if (overflow) {
+                // 写不下了
+                LOGGER.error("精灵模型编辑器：战斗精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), battleSpriteModel.length());
+                continue;
+            }
             attributes[i] = battleSpriteModel.getAttribute();
             getBuffer().put(battleSpriteModel.getOffset());
             getBuffer().put(battleSpriteModel.getModel());
