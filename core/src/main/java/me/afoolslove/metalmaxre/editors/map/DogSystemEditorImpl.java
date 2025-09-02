@@ -22,12 +22,18 @@ import java.util.List;
  * @author AFoolLove
  */
 public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implements IDogSystemEditor {
-    @NotNull
-    protected DataAddress townsAddress;
-    @NotNull
-    protected DataAddress townLocationsAddress;
-    @NotNull
-    protected DataAddress teleportLocationAddress;
+    /**
+     * 地图和进入地图的事件代码
+     */
+    public static final String TOWNS_ADDRESS = "towns";
+    /**
+     * 犬系统传送的目的地址
+     */
+    public static final String TOWN_LOCATIONS_ADDRESS = "townLocations";
+    /**
+     * 时空隧道机器目的地地址
+     */
+    public static final String TELEPORT_LOCATIONS_ADDRESS = "teleportLocation";
 
     private final List<CameraMapPoint> townLocations = new ArrayList<>(getTownMaxCount());
     private final List<CameraMapPoint> teleportLocations = new ArrayList<>(getTownMaxCount());
@@ -44,11 +50,11 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
     public DogSystemEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                                @NotNull DataAddress townsAddress,
                                @NotNull DataAddress townLocationsAddress,
-                               @NotNull DataAddress teleportLocationAddress) {
+                               @NotNull DataAddress teleportLocationsAddress) {
         super(metalMaxRe);
-        this.townsAddress = townsAddress;
-        this.townLocationsAddress = townLocationsAddress;
-        this.teleportLocationAddress = teleportLocationAddress;
+        putDataAddress(TOWNS_ADDRESS, townsAddress);
+        putDataAddress(TOWN_LOCATIONS_ADDRESS, townLocationsAddress);
+        putDataAddress(TELEPORT_LOCATIONS_ADDRESS, teleportLocationsAddress);
     }
 
     @Editor.Load
@@ -68,7 +74,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
 
         // 读取城镇和进城镇后开启的事件（包含开启犬系统城镇）
         byte[][] towns = new byte[2][0x17];
-        getBuffer().getAABytes(getTownsAddress(), 0, 0x17, towns);
+        getBuffer().getAABytes(getDataAddress(TOWNS_ADDRESS), 0, 0x17, towns);
         for (int i = 0; i < 0x17; i++) {
             getTowns().add(SingleMapEntry.create(towns[0][i], towns[1][i]));
         }
@@ -76,7 +82,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
 
         // 读取x和y并储存
         final byte[][] points = new byte[2][getTownMaxCount()];
-        getBuffer().getAABytes(getTownLocationsAddress(), 0, getTownMaxCount(), points);
+        getBuffer().getAABytes(getDataAddress(TOWN_LOCATIONS_ADDRESS), 0, getTownMaxCount(), points);
         for (int i = 0; i < getTownMaxCount(); i++) {
             getTownLocation(i).setCamera(points[0][i], points[1][i]);
         }
@@ -86,7 +92,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
         final byte[] teleportMaps = new byte[getTeleportMaxCount() - 0x03];
         // x、y，包含多余的三个未知数据
         final byte[][] teleportPoints = new byte[2][getTeleportMaxCount()];
-        position(getTeleportLocationAddress());
+        position(getDataAddress(TELEPORT_LOCATIONS_ADDRESS));
         getBuffer().get(teleportMaps);
         getBuffer().getAABytes(0, getTeleportMaxCount(), teleportPoints);
         for (int i = 0; i < getTeleportMaxCount(); i++) {
@@ -107,7 +113,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
             towns[0][i] = entry.getKey();
             towns[1][i] = entry.getValue();
         }
-        getBuffer().putAABytes(getTownsAddress(), 0, 0x17, towns);
+        getBuffer().putAABytes(getDataAddress(TOWNS_ADDRESS), 0, 0x17, towns);
 
         // x、y
         final byte[][] townPoints = new byte[2][getTownMaxCount()];
@@ -116,7 +122,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
             townPoints[0][i] = townLocation.getCameraX();
             townPoints[1][i] = townLocation.getCameraY();
         }
-        getBuffer().putAABytes(getTownLocationsAddress(), 0, getTownMaxCount(), townPoints);
+        getBuffer().putAABytes(getDataAddress(TOWN_LOCATIONS_ADDRESS), 0, getTownMaxCount(), townPoints);
 
         // map
         final byte[] teleportMaps = new byte[getTeleportMaxCount() - 0x03];
@@ -132,7 +138,7 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
             getTeleportLocation(i).setCamera(teleportPoints[0][i], teleportPoints[1][i]);
         }
         // 写入时空隧道机器的目的地
-        position(getTeleportLocationAddress());
+        position(getDataAddress(TELEPORT_LOCATIONS_ADDRESS));
         getBuffer().put(teleportMaps);
         getBuffer().putAABytes(0, getTeleportMaxCount(), teleportPoints);
     }
@@ -150,20 +156,5 @@ public class DogSystemEditorImpl extends RomBufferWrapperAbstractEditor implemen
     @Override
     public @NotNull List<SingleMapEntry<Byte, Byte>> getTowns() {
         return towns;
-    }
-
-    @Override
-    public @NotNull DataAddress getTownsAddress() {
-        return townsAddress;
-    }
-
-    @Override
-    public @NotNull DataAddress getTownLocationsAddress() {
-        return townLocationsAddress;
-    }
-
-    @Override
-    public @NotNull DataAddress getTeleportLocationAddress() {
-        return teleportLocationAddress;
     }
 }

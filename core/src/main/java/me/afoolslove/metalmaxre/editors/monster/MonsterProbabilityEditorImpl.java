@@ -7,8 +7,14 @@ import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
 public class MonsterProbabilityEditorImpl extends AbstractEditor implements IMonsterProbabilityEditor {
-    private final DataAddress monsterWeightsAddress;
-    private final DataAddress monsterNumbersAddress;
+    /**
+     * 怪物权重地址
+     */
+    public static final String MONSTER_WEIGHTS_ADDRESS = "monsterWeights";
+    /**
+     * 怪物数量地址
+     */
+    public static final String MONSTER_NUMBERS_ADDRESS = "monsterNumbers";
 
     private final MonsterProbability[] monsterProbability = new MonsterProbability[0x04];
 
@@ -23,8 +29,8 @@ public class MonsterProbabilityEditorImpl extends AbstractEditor implements IMon
                                         @NotNull DataAddress monsterWeightsAddress,
                                         @NotNull DataAddress monsterNumbersAddress) {
         super(metalMaxRe);
-        this.monsterWeightsAddress = monsterWeightsAddress;
-        this.monsterNumbersAddress = monsterNumbersAddress;
+        putDataAddress(MONSTER_WEIGHTS_ADDRESS, monsterWeightsAddress);
+        putDataAddress(MONSTER_NUMBERS_ADDRESS, monsterNumbersAddress);
     }
 
     @Editor.Load
@@ -37,14 +43,14 @@ public class MonsterProbabilityEditorImpl extends AbstractEditor implements IMon
 
         // 读取4组不同权重
         byte[][] weights = new byte[0x04][getMonsterWeightCount()];
-        getBuffer().getAABytes(getMonsterWeightsAddress(), 0, getMonsterWeightCount(), weights);
+        getBuffer().getAABytes(getDataAddress(MONSTER_WEIGHTS_ADDRESS), 0, getMonsterWeightCount(), weights);
         for (int i = 0; i < monsterProbability.length; i++) {
             monsterProbability[i].setWeights(weights[i]);
         }
 
         // 读取4组怪物数量
         byte[][] numbers = new byte[0x04][getMonsterNumberCount()];
-        getBuffer().getAABytes(getMonsterNumbersAddress(), 0, getMonsterNumberCount(), numbers);
+        getBuffer().getAABytes(getDataAddress(MONSTER_NUMBERS_ADDRESS), 0, getMonsterNumberCount(), numbers);
         for (int i = 0; i < monsterProbability.length; i++) {
             monsterProbability[i].setNumbers(numbers[i]);
         }
@@ -58,29 +64,19 @@ public class MonsterProbabilityEditorImpl extends AbstractEditor implements IMon
         for (int i = 0; i < monsterProbability.length; i++) {
             weights[i] = monsterProbability[i].getWeights();
         }
-        getBuffer().putAABytes(getMonsterWeightsAddress(), 0, getMonsterWeightCount(), weights);
+        getBuffer().putAABytes(getDataAddress(MONSTER_WEIGHTS_ADDRESS), 0, getMonsterWeightCount(), weights);
 
         // 写入4组怪物数量
         byte[][] numbers = new byte[0x04][getMonsterNumberCount()];
         for (int i = 0; i < monsterProbability.length; i++) {
             numbers[i] = monsterProbability[i].getNumbers();
         }
-        getBuffer().putAABytes(getMonsterNumbersAddress(), 0, getMonsterNumberCount(), numbers);
+        getBuffer().putAABytes(getDataAddress(MONSTER_NUMBERS_ADDRESS), 0, getMonsterNumberCount(), numbers);
 
     }
 
     @Override
     public MonsterProbability[] getMonsterProbability() {
         return monsterProbability;
-    }
-
-    @Override
-    public DataAddress getMonsterWeightsAddress() {
-        return monsterWeightsAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterNumbersAddress() {
-        return monsterNumbersAddress;
     }
 }

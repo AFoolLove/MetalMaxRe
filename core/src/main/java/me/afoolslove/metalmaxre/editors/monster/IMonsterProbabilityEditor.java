@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.monster;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 /**
  * 怪物概率编辑器
@@ -32,14 +31,4 @@ public interface IMonsterProbabilityEditor extends IRomEditor {
      * 获取4组概率
      */
     MonsterProbability[] getMonsterProbability();
-
-    /**
-     * 怪物权重地址
-     */
-    DataAddress getMonsterWeightsAddress();
-
-    /**
-     * 怪物数量地址
-     */
-    DataAddress getMonsterNumbersAddress();
 }

@@ -5,6 +5,9 @@ import me.afoolslove.metalmaxre.event.editors.editor.EditorDisabledEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorEnabledEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 实现了部分基本功能的编辑器
  *
@@ -14,6 +17,8 @@ public abstract class AbstractEditor implements IRomEditor {
     private final MetalMaxRe metalMaxRe;
     private boolean enabled;
     private int position = 0;
+
+    private final Map<String, Object> addresses = new HashMap<>();
 
     protected AbstractEditor(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe, true);
@@ -84,5 +89,10 @@ public abstract class AbstractEditor implements IRomEditor {
     @Override
     public synchronized int offsetPosition(int offset) {
         return IRomEditor.super.offsetPosition(offset);
+    }
+
+    @Override
+    public Map<String, Object> getDataAddresses() {
+        return this.addresses;
     }
 }

@@ -10,6 +10,9 @@ import me.afoolslove.metalmaxre.utils.PreferencesUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 /**
@@ -136,6 +139,68 @@ public interface IRomEditor extends Serializable {
      */
     default int offsetPosition(int offset) {
         return position(position() + offset);
+    }
+
+    /**
+     * 编辑器的所有数据地址
+     *
+     * @return 所有数据地址
+     */
+    default Map<String, Object> getDataAddresses() {
+        return Collections.emptyMap();
+    }
+
+    /**
+     * 添加数据地址
+     *
+     * @param dataAddressKey 数据地址键
+     * @param dataAddress    数据地址，可传入 {@link DataAddress}和 {@link List<DataAddress>}
+     */
+    default void putDataAddress(@NotNull String dataAddressKey, @NotNull Object dataAddress) {
+        getDataAddresses().put(dataAddressKey, dataAddress);
+    }
+
+    /**
+     * 获取数据地址对象
+     *
+     * @param dataAddressKey 数据地址键
+     * @return 数据地址
+     */
+    default Object getDataAddressObject(@NotNull String dataAddressKey) {
+        return getDataAddresses().get(dataAddressKey);
+    }
+
+    /**
+     * 获取数据地址
+     *
+     * @param dataAddressKey 数据地址键
+     * @return 数据地址
+     */
+    default DataAddress getDataAddress(@NotNull String dataAddressKey) {
+        Object address = getDataAddressObject(dataAddressKey);
+        return address instanceof DataAddress ? (DataAddress) address : null;
+    }
+
+    /**
+     * 获取数据地址列表
+     *
+     * @param dataAddressKey 数据地址键
+     * @return
+     */
+    default List<DataAddress> getDataAddressList(@NotNull String dataAddressKey) {
+        Object address = getDataAddressObject(dataAddressKey);
+        return address instanceof List<?> ? (List<DataAddress>) address : null;
+    }
+
+    /**
+     * 获取数据地址列表
+     *
+     * @param dataAddressKey 数据地址键
+     * @return
+     */
+    default <K, V> Map<K, V> getDataAddressMap(@NotNull String dataAddressKey) {
+        Object address = getDataAddressObject(dataAddressKey);
+        return address instanceof Map<?, ?> ? (Map<K, V>) address : null;
     }
 
     @NotNull

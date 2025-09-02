@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editors.monster;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
@@ -10,30 +11,121 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements IMonsterEditor {
-    private final DataAddress monsterDropItemsAddress;
-    private final DataAddress monsterAttackModeGroupIndexAddress;
-    private final DataAddress monsterAttackModeGroupsAddress;
-    private final DataAddress monsterResistanceAutoRestoreAddress;
-    private final DataAddress monsterAttributesAddress;
-    private final DataAddress monsterResistanceAddress;
-    private final DataAddress monsterAbilityAddress;
-    private final DataAddress monsterArmorsAddress;
-    private final DataAddress monsterHasArmorsAddress;
-    private final DataAddress monsterHealthsAddress;
-    private final DataAddress monsterAttacksAddress;
-    private final DataAddress monsterDefensesAddress;
-    private final DataAddress monsterSpeedsAddress;
-    private final DataAddress monsterHitValuesAddress;
-    private final DataAddress monsterEvasionValuesAddress;
-    private final DataAddress monsterBattleExperienceAddress;
-    private final DataAddress monsterBattleGoldAddress;
-    private final DataAddress monsterRealmAddress;
-    private final DataAddress specialMonsterGroupAddress;
-    private final DataAddress wantedMonsterBountyAddress;
-    private final DataAddress worldMapMonsterRealmsAddress;
-    private final DataAddress monsterRealmAttributeIndexAddress;
-
-    private final List<DataAddress> monsterRealmAttributeAddresses;
+    /**
+     * 怪物的掉落物地址
+     * <p>
+     * 注：怪物ID范围为0x18-0x82才能设置有效的战利品
+     */
+    public static final String MONSTER_DROP_ITEMS_ADDRESS = "monsterDropItems";
+    /**
+     * 怪物的攻击组合索引地址
+     */
+    public static final String MONSTER_ATTACK_MODE_GROUP_INDEX_ADDRESS = "monsterAttackModeGroupIndex";
+    /**
+     * 怪物的攻击组合地址
+     */
+    public static final String MONSTER_ATTACK_MODE_GROUPS_ADDRESS = "monsterAttackModeGroups";
+    /**
+     * 怪物属性中的每回合自动恢复量
+     */
+    public static final String MONSTER_RESISTANCE_AUTO_RESTORE_ADDRESS = "monsterResistanceAutoRestore";
+    /**
+     * 怪物的属性地址
+     *
+     * @see Monster#getAttribute()
+     * @see Monster#setAttribute(int)
+     */
+    public static final String MONSTER_ATTRIBUTES_ADDRESS = "monsterAttributes";
+    /**
+     * 怪物的抗性
+     * <p>
+     * 怪物自动恢复HP
+     */
+    public static final String MONSTER_RESISTANCE_ADDRESS = "monsterResistance";
+    /**
+     * 怪物的特殊能力地址
+     */
+    public static final String MONSTER_ABILITY_ADDRESS = "monsterAbility";
+    /**
+     * 怪物的护甲值地址
+     */
+    public static final String MONSTER_ARMORS_ADDRESS = "monsterArmors";
+    /**
+     * 拥有护甲值的怪物id地址
+     */
+    public static final String MONSTER_HAS_ARMORS_ADDRESS = "monsterHasArmors";
+    /**
+     * 怪物的生命值地址
+     * <p>
+     * *生命值根据怪物类型不同而不同
+     */
+    public static final String MONSTER_HEALTHS_ADDRESS = "monsterHealths";
+    /**
+     * 怪物的攻击力地址
+     * <p>
+     * *攻击力根据命中值D7变化
+     */
+    public static final String MONSTER_ATTACKS_ADDRESS = "monsterAttacks";
+    /**
+     * 怪物的防御力地址
+     * <p>
+     * *防御力根据回避值D7变化
+     */
+    public static final String MONSTER_DEFENSES_ADDRESS = "monsterDefenses";
+    /**
+     * 怪物的出手速度地址
+     */
+    public static final String MONSTER_SPEEDS_ADDRESS = "monsterSpeeds";
+    /**
+     * 怪物的命中值地址
+     */
+    public static final String MONSTER_HIT_VALUES_ADDRESS = "monsterHitValues";
+    /**
+     * 怪物的回避值地址
+     */
+    public static final String MONSTER_EVASION_VALUES_ADDRESS = "monsterEvasionValues";
+    /**
+     * 战斗结束玩家获得的经验值地址
+     */
+    public static final String MONSTER_BATTLE_EXPERIENCE_ADDRESS = "monsterBattleExperience";
+    /**
+     * 战斗结束玩家获得的金钱地址
+     */
+    public static final String MONSTER_BATTLE_GOLD_ADDRESS = "monsterBattleGold";
+    /**
+     * 怪物领域地址
+     */
+    public static final String MONSTER_REALM_ADDRESS = "monsterRealm";
+    /**
+     * 特殊怪物组合地址
+     */
+    public static final String SPECIAL_MONSTER_GROUP_ADDRESS = "specialMonsterGroup";
+    /**
+     * 赏金首赏金地址
+     *
+     * @see IDataValueEditor#get3ByteValues()
+     */
+    public static final String WANTED_MONSTER_BOUNTY_ADDRESS = "wantedMonsterBounty";
+    /**
+     * 获取世界地图的怪物领域地址
+     * <p>
+     * 1Byte = 16*16小块 = 256个领域，固定无法变更
+     *
+     * @return 世界地图的怪物领域地址
+     */
+    public static final String WORLD_MAP_MONSTER_REALMS_ADDRESS = "worldMapMonsterRealms";
+    /**
+     * 获取怪物领域的领域属性中的属性索引数据
+     *
+     * @return 怪物领域的领域属性中的属性索引数据
+     */
+    public static final String MONSTER_REALM_ATTRIBUTE_INDEX_ADDRESS = "monsterRealmAttributeIndex";
+    /**
+     * 获取怪物组的四个组属性地址
+     *
+     * @return 怪物组的四个组属性地址
+     */
+    public static final String MONSTER_REALM_ATTRIBUTE_LIST_ADDRESS = "monsterRealmAttribute";
 
 
     /**
@@ -119,31 +211,31 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
                              DataAddress wantedMonsterBountyAddress,
                              DataAddress worldMapMonsterRealmsAddress,
                              DataAddress monsterRealmAttributeIndexAddress,
-                             List<DataAddress> monsterRealmAttributeAddresses) {
+                             List<DataAddress> monsterRealmAttributeAddressList) {
         super(metalMaxRe);
-        this.monsterDropItemsAddress = monsterDropItemsAddress;
-        this.monsterAttackModeGroupIndexAddress = monsterAttackModeGroupIndexAddress;
-        this.monsterAttackModeGroupsAddress = monsterAttackModeGroupsAddress;
-        this.monsterResistanceAutoRestoreAddress = monsterResistanceAutoRestoreAddress;
-        this.monsterAttributesAddress = monsterAttributesAddress;
-        this.monsterResistanceAddress = monsterResistanceAddress;
-        this.monsterAbilityAddress = monsterAbilityAddress;
-        this.monsterArmorsAddress = monsterArmorsAddress;
-        this.monsterHasArmorsAddress = monsterHasArmorsAddress;
-        this.monsterHealthsAddress = monsterHealthsAddress;
-        this.monsterAttacksAddress = monsterAttacksAddress;
-        this.monsterDefensesAddress = monsterDefensesAddress;
-        this.monsterSpeedsAddress = monsterSpeedsAddress;
-        this.monsterHitValuesAddress = monsterHitValuesAddress;
-        this.monsterEvasionValuesAddress = monsterEvasionValuesAddress;
-        this.monsterBattleExperienceAddress = monsterBattleExperienceAddress;
-        this.monsterBattleGoldAddress = monsterBattleGoldAddress;
-        this.monsterRealmAddress = monsterRealmAddress;
-        this.specialMonsterGroupAddress = specialMonsterGroupAddress;
-        this.wantedMonsterBountyAddress = wantedMonsterBountyAddress;
-        this.worldMapMonsterRealmsAddress = worldMapMonsterRealmsAddress;
-        this.monsterRealmAttributeIndexAddress = monsterRealmAttributeIndexAddress;
-        this.monsterRealmAttributeAddresses = monsterRealmAttributeAddresses;
+        putDataAddress(MONSTER_DROP_ITEMS_ADDRESS, monsterDropItemsAddress);
+        putDataAddress(MONSTER_ATTACK_MODE_GROUP_INDEX_ADDRESS, monsterAttackModeGroupIndexAddress);
+        putDataAddress(MONSTER_ATTACK_MODE_GROUPS_ADDRESS, monsterAttackModeGroupsAddress);
+        putDataAddress(MONSTER_RESISTANCE_AUTO_RESTORE_ADDRESS, monsterResistanceAutoRestoreAddress);
+        putDataAddress(MONSTER_ATTRIBUTES_ADDRESS, monsterAttributesAddress);
+        putDataAddress(MONSTER_RESISTANCE_ADDRESS, monsterResistanceAddress);
+        putDataAddress(MONSTER_ABILITY_ADDRESS, monsterAbilityAddress);
+        putDataAddress(MONSTER_ARMORS_ADDRESS, monsterArmorsAddress);
+        putDataAddress(MONSTER_HAS_ARMORS_ADDRESS, monsterHasArmorsAddress);
+        putDataAddress(MONSTER_HEALTHS_ADDRESS, monsterHealthsAddress);
+        putDataAddress(MONSTER_ATTACKS_ADDRESS, monsterAttacksAddress);
+        putDataAddress(MONSTER_DEFENSES_ADDRESS, monsterDefensesAddress);
+        putDataAddress(MONSTER_SPEEDS_ADDRESS, monsterSpeedsAddress);
+        putDataAddress(MONSTER_HIT_VALUES_ADDRESS, monsterHitValuesAddress);
+        putDataAddress(MONSTER_EVASION_VALUES_ADDRESS, monsterEvasionValuesAddress);
+        putDataAddress(MONSTER_BATTLE_EXPERIENCE_ADDRESS, monsterBattleExperienceAddress);
+        putDataAddress(MONSTER_BATTLE_GOLD_ADDRESS, monsterBattleGoldAddress);
+        putDataAddress(MONSTER_REALM_ADDRESS, monsterRealmAddress);
+        putDataAddress(SPECIAL_MONSTER_GROUP_ADDRESS, specialMonsterGroupAddress);
+        putDataAddress(WANTED_MONSTER_BOUNTY_ADDRESS, wantedMonsterBountyAddress);
+        putDataAddress(WORLD_MAP_MONSTER_REALMS_ADDRESS, worldMapMonsterRealmsAddress);
+        putDataAddress(MONSTER_REALM_ATTRIBUTE_INDEX_ADDRESS, monsterRealmAttributeIndexAddress);
+        putDataAddress(MONSTER_REALM_ATTRIBUTE_LIST_ADDRESS, monsterRealmAttributeAddressList);
     }
 
     @Editor.Load
@@ -155,7 +247,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         realmAttributes.clear();
 
         byte[] autoRestores = new byte[0x06];
-        getBuffer().get(getMonsterResistanceAutoRestoreAddress(), autoRestores);
+        getBuffer().get(getDataAddress(MONSTER_RESISTANCE_AUTO_RESTORE_ADDRESS), autoRestores);
         for (int i = 0; i < 0x03; i++) {
             this.autoRestores.add(SingleMapEntry.create(autoRestores[i * 2] & 0xFF, autoRestores[i * 2 + 1] & 0xFF));
         }
@@ -178,40 +270,40 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         byte[] attackModeGroupIndexes = new byte[getMonsterMaxCount()];
 
         // 读取怪物的属性
-        getBuffer().get(getMonsterAttributesAddress(), attributes);
+        getBuffer().get(getDataAddress(MONSTER_ATTRIBUTES_ADDRESS), attributes);
 
         // 读取怪物的抗性和自动恢复HP
-        getBuffer().get(getMonsterResistanceAddress(), resistances);
+        getBuffer().get(getDataAddress(MONSTER_RESISTANCE_ADDRESS), resistances);
         // 读取怪物的特殊能力
-        getBuffer().get(getMonsterAbilityAddress(), abilities);
+        getBuffer().get(getDataAddress(MONSTER_ABILITY_ADDRESS), abilities);
 
         // 读取怪物的护甲值
-        getBuffer().get(getMonsterArmorsAddress(), armors);
+        getBuffer().get(getDataAddress(MONSTER_ARMORS_ADDRESS), armors);
 
         // 读取拥有护甲的怪物
-        getBuffer().get(getMonsterHasArmorsAddress(), hasArmorMonsters);
+        getBuffer().get(getDataAddress(MONSTER_HAS_ARMORS_ADDRESS), hasArmorMonsters);
         // 读取怪物的生命值
-        getBuffer().get(getMonsterHealthsAddress(), healths);
+        getBuffer().get(getDataAddress(MONSTER_HEALTHS_ADDRESS), healths);
         // 读取怪物的攻击力
-        getBuffer().get(getMonsterAttacksAddress(), attacks);
+        getBuffer().get(getDataAddress(MONSTER_ATTACKS_ADDRESS), attacks);
         // 读取怪物的防御力
-        getBuffer().get(getMonsterDefensesAddress(), defenses);
+        getBuffer().get(getDataAddress(MONSTER_DEFENSES_ADDRESS), defenses);
         // 读取怪物出手攻击速度
-        getBuffer().get(getMonsterSpeedsAddress(), speeds);
+        getBuffer().get(getDataAddress(MONSTER_SPEEDS_ADDRESS), speeds);
         // 读取怪物命中值
-        getBuffer().get(getMonsterHitValuesAddress(), hitValues);
+        getBuffer().get(getDataAddress(MONSTER_HIT_VALUES_ADDRESS), hitValues);
         // 读取怪物的回避值
-        getBuffer().get(getMonsterEvasionValuesAddress(), evasionValues);
+        getBuffer().get(getDataAddress(MONSTER_EVASION_VALUES_ADDRESS), evasionValues);
         // 读取击败怪物后获得的经验值
-        getBuffer().get(getMonsterBattleExperienceAddress(), experiences);
+        getBuffer().get(getDataAddress(MONSTER_BATTLE_EXPERIENCE_ADDRESS), experiences);
         // 读取击败怪物后获得的金钱
-        getBuffer().get(getMonsterBattleGoldAddress(), golds);
+        getBuffer().get(getDataAddress(MONSTER_BATTLE_GOLD_ADDRESS), golds);
         // 读取赏金首的赏金
-        getBuffer().get(getWantedMonsterBountyAddress(), bounty);
+        getBuffer().get(getDataAddress(WANTED_MONSTER_BOUNTY_ADDRESS), bounty);
         // 读取怪物掉落物
-        getBuffer().get(getMonsterDropItemsAddress(), dropsItems);
+        getBuffer().get(getDataAddress(MONSTER_DROP_ITEMS_ADDRESS), dropsItems);
         // 读取怪物的攻击模式组索引
-        getBuffer().get(getMonsterAttackModeGroupIndexAddress(), attackModeGroupIndexes);
+        getBuffer().get(getDataAddress(MONSTER_ATTACK_MODE_GROUP_INDEX_ADDRESS), attackModeGroupIndexes);
 
         for (int monsterId = 0; monsterId < getMonsterMaxCount(); monsterId++) {
             Monster monster;
@@ -263,16 +355,16 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 读取世界地图领域索引
-        position(getWorldMapMonsterRealmsAddress());
+        position(getDataAddress(WORLD_MAP_MONSTER_REALMS_ADDRESS));
         for (int i = 0; i < getWorldMapMonsterRealmMaxCount(); i++) {
             worldMapRealms.add(getBuffer().get());
         }
 
         // 读取领域属性索引
         byte[] monsterRealmAttributeIndexes = new byte[getMonsterRealmMaxCount()];
-        getBuffer().get(getMonsterRealmAttributeIndexAddress(), monsterRealmAttributeIndexes);
+        getBuffer().get(getDataAddress(MONSTER_REALM_ATTRIBUTE_INDEX_ADDRESS), monsterRealmAttributeIndexes);
         // 读取领域属性
-        position(getMonsterRealmAddress());
+        position(getDataAddress(MONSTER_REALM_ADDRESS));
         for (int i = 0; i < getMonsterRealmMaxCount(); i++) {
             byte[] monsters = new byte[0x0E];
             getBuffer().get(monsters);
@@ -283,7 +375,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
 
         // 读取特殊怪物组合数据
         // 覆盖式读取，不需要保留现有的数据
-        position(getSpecialMonsterGroupAddress());
+        position(getDataAddress(SPECIAL_MONSTER_GROUP_ADDRESS));
         for (int i = 0; i < getSpecialMonsterGroupMaxCount(); i++) {
             byte[] monsters = new byte[0x04];
             byte[] counts = new byte[0x04];
@@ -295,9 +387,10 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 读取领域属性的实际属性
+        List<DataAddress> monsterRealmAttributeAddressList = getDataAddressList(MONSTER_REALM_ATTRIBUTE_LIST_ADDRESS);
         int[] realmAttributeLengths = {6, 4, 4, 4};
         for (int i = 0; i < realmAttributeLengths.length; i++) {
-            DataAddress monsterRealmAttributeAddress = getMonsterRealmAttributeAddresses().get(i);
+            DataAddress monsterRealmAttributeAddress = monsterRealmAttributeAddressList.get(i);
             byte[] bytes = new byte[realmAttributeLengths[i]];
             getBuffer().get(monsterRealmAttributeAddress, bytes);
             realmAttributes.add(bytes);
@@ -312,7 +405,7 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
             autoRestores[i * 2] = ((Number) entry.getKey()).byteValue();
             autoRestores[i * 2 + 1] = ((Number) entry.getValue()).byteValue();
         }
-        position(getMonsterResistanceAutoRestoreAddress());
+        position(getDataAddress(MONSTER_RESISTANCE_AUTO_RESTORE_ADDRESS));
         getBuffer().put(autoRestores);
 
         byte[] attributes = new byte[getMonsterMaxCount()];
@@ -357,55 +450,55 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 写入怪物的属性
-        getBuffer().put(getMonsterAttributesAddress(), attributes);
+        getBuffer().put(getDataAddress(MONSTER_ATTRIBUTES_ADDRESS), attributes);
 
         // 写入怪物的抗性和自动恢复HP
-        getBuffer().put(getMonsterResistanceAddress(), resistances);
+        getBuffer().put(getDataAddress(MONSTER_RESISTANCE_ADDRESS), resistances);
         // 写入怪物的特殊能力
-        getBuffer().put(getMonsterAbilityAddress(), abilities);
+        getBuffer().put(getDataAddress(MONSTER_ABILITY_ADDRESS), abilities);
 
         // 写入怪物的生命值
-        getBuffer().put(getMonsterHealthsAddress(), healths);
+        getBuffer().put(getDataAddress(MONSTER_HEALTHS_ADDRESS), healths);
         // 写入怪物的攻击力
-        getBuffer().put(getMonsterAttacksAddress(), attacks);
+        getBuffer().put(getDataAddress(MONSTER_ATTACKS_ADDRESS), attacks);
         // 写入怪物的防御力
-        getBuffer().put(getMonsterDefensesAddress(), defenses);
+        getBuffer().put(getDataAddress(MONSTER_DEFENSES_ADDRESS), defenses);
 
         // 写入怪物出手攻击的速度
-        getBuffer().put(getMonsterSpeedsAddress(), speeds);
+        getBuffer().put(getDataAddress(MONSTER_SPEEDS_ADDRESS), speeds);
         // 写入怪物的命中值
-        getBuffer().put(getMonsterHitValuesAddress(), hitValues);
+        getBuffer().put(getDataAddress(MONSTER_HIT_VALUES_ADDRESS), hitValues);
         // 写入怪物的回避值
-        getBuffer().put(getMonsterEvasionValuesAddress(), evasionValue);
+        getBuffer().put(getDataAddress(MONSTER_EVASION_VALUES_ADDRESS), evasionValue);
         // 写入怪物被击败后玩家获取的经验
-        getBuffer().put(getMonsterBattleExperienceAddress(), experiences);
+        getBuffer().put(getDataAddress(MONSTER_BATTLE_EXPERIENCE_ADDRESS), experiences);
         // 写入怪物被击败后玩家获取的金钱
-        getBuffer().put(getMonsterBattleGoldAddress(), golds);
+        getBuffer().put(getDataAddress(MONSTER_BATTLE_GOLD_ADDRESS), golds);
 
         // 写入怪物的掉落物
-        getBuffer().put(getMonsterDropItemsAddress(), dropsItems);
+        getBuffer().put(getDataAddress(MONSTER_DROP_ITEMS_ADDRESS), dropsItems);
         // 写入怪物的攻击模式组索引
-        getBuffer().put(getMonsterAttackModeGroupIndexAddress(), attackModeGroupIndexes);
+        getBuffer().put(getDataAddress(MONSTER_ATTACK_MODE_GROUP_INDEX_ADDRESS), attackModeGroupIndexes);
 
         // 写入世界地图的领域索引
-        position(getWorldMapMonsterRealmsAddress());
+        position(getDataAddress(WORLD_MAP_MONSTER_REALMS_ADDRESS));
         for (int i = 0; i < getWorldMapMonsterRealmMaxCount(); i++) {
             getBuffer().put(worldMapRealms.get(i));
         }
 
         byte[] monsterRealmAttributeIndexes = new byte[getMonsterRealmMaxCount()];
         // 写入领域属性
-        position(getMonsterRealmAddress());
+        position(getDataAddress(MONSTER_REALM_ADDRESS));
         for (int i = 0; i < getMonsterRealmMaxCount(); i++) {
             MonsterRealm monsterRealm = monsterRealms[i];
             getBuffer().put(monsterRealm.toByteArray());
             monsterRealmAttributeIndexes[i] = monsterRealm.getAttributeIndex();
         }
         // 写入领域属性索引
-        getBuffer().put(getMonsterRealmAttributeIndexAddress(), monsterRealmAttributeIndexes);
+        getBuffer().put(getDataAddress(MONSTER_REALM_ATTRIBUTE_INDEX_ADDRESS), monsterRealmAttributeIndexes);
 
         // 写入特殊怪物组合数据
-        position(getSpecialMonsterGroupAddress());
+        position(getDataAddress(SPECIAL_MONSTER_GROUP_ADDRESS));
         for (int i = 0; i < getSpecialMonsterGroupMaxCount(); i++) {
             SpecialMonsterGroup specialMonsterGroup = specialMonsterGroups[i];
             for (int j = 0; j < 0x04; j++) {
@@ -415,11 +508,12 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 写入赏金首的赏金数据
-        getBuffer().put(getWantedMonsterBountyAddress(), bounty);
+        getBuffer().put(getDataAddress(WANTED_MONSTER_BOUNTY_ADDRESS), bounty);
 
         // 写入领域属性的实际属性
+        List<DataAddress> monsterRealmAttributeAddressList = getDataAddressList(MONSTER_REALM_ATTRIBUTE_LIST_ADDRESS);
         for (int i = 0; i < 0x04; i++) {
-            DataAddress monsterRealmAttributeAddress = getMonsterRealmAttributeAddresses().get(i);
+            DataAddress monsterRealmAttributeAddress = monsterRealmAttributeAddressList.get(i);
             getBuffer().put(monsterRealmAttributeAddress, getMonsterRealmAttribute().get(i));
         }
     }
@@ -452,120 +546,5 @@ public class MonsterEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Override
     public List<Byte> getWorldMapRealms() {
         return worldMapRealms;
-    }
-
-    @Override
-    public DataAddress getMonsterDropItemsAddress() {
-        return monsterDropItemsAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterAttackModeGroupIndexAddress() {
-        return monsterAttackModeGroupIndexAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterAttackModeGroupsAddress() {
-        return monsterAttackModeGroupsAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterResistanceAutoRestoreAddress() {
-        return monsterResistanceAutoRestoreAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterAttributesAddress() {
-        return monsterAttributesAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterResistanceAddress() {
-        return monsterResistanceAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterAbilityAddress() {
-        return monsterAbilityAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterArmorsAddress() {
-        return monsterArmorsAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterHasArmorsAddress() {
-        return monsterHasArmorsAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterHealthsAddress() {
-        return monsterHealthsAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterAttacksAddress() {
-        return monsterAttacksAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterDefensesAddress() {
-        return monsterDefensesAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterSpeedsAddress() {
-        return monsterSpeedsAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterHitValuesAddress() {
-        return monsterHitValuesAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterEvasionValuesAddress() {
-        return monsterEvasionValuesAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterBattleExperienceAddress() {
-        return monsterBattleExperienceAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterBattleGoldAddress() {
-        return monsterBattleGoldAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterRealmAddress() {
-        return monsterRealmAddress;
-    }
-
-    @Override
-    public DataAddress getSpecialMonsterGroupAddress() {
-        return specialMonsterGroupAddress;
-    }
-
-    @Override
-    public DataAddress getWantedMonsterBountyAddress() {
-        return wantedMonsterBountyAddress;
-    }
-
-    @Override
-    public DataAddress getWorldMapMonsterRealmsAddress() {
-        return worldMapMonsterRealmsAddress;
-    }
-
-    @Override
-    public DataAddress getMonsterRealmAttributeIndexAddress() {
-        return monsterRealmAttributeIndexAddress;
-    }
-
-    @Override
-    public List<DataAddress> getMonsterRealmAttributeAddresses() {
-        return monsterRealmAttributeAddresses;
     }
 }

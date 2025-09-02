@@ -34,10 +34,9 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
      * [FF 123456789]
      */
     public static final Pattern STRING_VALUE_PATTERN = Pattern.compile("^([0-9a-fA-F]{1,2}) [0-9]+");
-
-    private final DataAddress x1ByteAddress;
-    private final DataAddress x2ByteAddress;
-    private final DataAddress x3ByteAddress;
+    public static final String X_1_BYTE_ADDRESS = "x1byte";
+    public static final String X_2_BYTE_ADDRESS = "x2byte";
+    public static final String X_3_BYTE_ADDRESS = "x3byte";
 
     private final Map<Integer, Number> VALUES = new HashMap<>();
 
@@ -54,9 +53,9 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
                                @NotNull DataAddress x2ByteAddress,
                                @NotNull DataAddress x3ByteAddress) {
         super(metalMaxRe);
-        this.x1ByteAddress = x1ByteAddress;
-        this.x2ByteAddress = x2ByteAddress;
-        this.x3ByteAddress = x3ByteAddress;
+        putDataAddress(X_1_BYTE_ADDRESS, x1ByteAddress);
+        putDataAddress(X_2_BYTE_ADDRESS, x2ByteAddress);
+        putDataAddress(X_3_BYTE_ADDRESS, x3ByteAddress);
     }
 
     @Editor.Load
@@ -65,19 +64,19 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
 
 
         byte[] x1Bytes = new byte[get1ByteMaxCount()];
-        getBuffer().get(get1ByteAddress(), x1Bytes);
+        getBuffer().get(getDataAddress(X_1_BYTE_ADDRESS), x1Bytes);
         for (byte x1Byte : x1Bytes) {
             getUnsafeValues().put(getUnsafeValues().size(), x1Byte & 0xFF);
         }
 
         byte[] x2Bytes = new byte[get2ByteMaxCount() * 2];
-        getBuffer().get(get2ByteAddress(), x2Bytes);
+        getBuffer().get(getDataAddress(X_2_BYTE_ADDRESS), x2Bytes);
         for (int i = 0; i < get2ByteMaxCount(); i++) {
             getUnsafeValues().put(getUnsafeValues().size(), NumberR.toInt(x2Bytes[i * 2], x2Bytes[(i * 2) + 1]));
         }
 
         byte[] x3Bytes = new byte[get3ByteMaxCount() * 2];
-        getBuffer().get(get3ByteAddress(), x3Bytes);
+        getBuffer().get(getDataAddress(X_3_BYTE_ADDRESS), x3Bytes);
 
         for (int i = 0; i < get3ByteMaxCount(); i++) {
             if (i < 0x24) {
@@ -126,24 +125,9 @@ public class DataValueEditorImpl extends RomBufferWrapperAbstractEditor implemen
             x3Bytes[(index * 2) + 1] = (byte) x09;
         }
 
-        getBuffer().put(get1ByteAddress(), x1Bytes);
-        getBuffer().put(get2ByteAddress(), x2Bytes);
-        getBuffer().put(get3ByteAddress(), x3Bytes);
-    }
-
-    @Override
-    public DataAddress get1ByteAddress() {
-        return x1ByteAddress;
-    }
-
-    @Override
-    public DataAddress get2ByteAddress() {
-        return x2ByteAddress;
-    }
-
-    @Override
-    public DataAddress get3ByteAddress() {
-        return x3ByteAddress;
+        getBuffer().put(getDataAddress(X_1_BYTE_ADDRESS), x1Bytes);
+        getBuffer().put(getDataAddress(X_2_BYTE_ADDRESS), x2Bytes);
+        getBuffer().put(getDataAddress(X_3_BYTE_ADDRESS), x3Bytes);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.map;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.Map;
 
@@ -41,36 +40,4 @@ public interface IMapPropertiesEditor extends IRomEditor {
     default WorldMapProperties getWorldMapProperties() {
         return ((WorldMapProperties) getMapProperties(0x00));
     }
-
-    /**
-     * @return 地图属性索引上卷地址
-     */
-    DataAddress getMapPropertiesIndexUpRollAddress();
-
-    /**
-     * @return 地图属性索引下卷地址
-     */
-    DataAddress getMapPropertiesIndexDownRollAddress();
-
-    /**
-     * @return 地图属性地址
-     */
-    DataAddress getMapPropertiesAddress();
-
-    /**
-     * 进入地图时根据条件是否重定向到其它地图，保留坐标
-     *
-     * @return 进入地图时根据条件是否重定向到其它地图地址
-     */
-    DataAddress getMapPropertiesRedirectAddress();
-
-    /**
-     * @return 地图怪物领域索引
-     */
-    DataAddress getMapPropertiesMonsterRealmIndexAddress();
-
-    /**
-     * @return 自定义地图通缉令地址
-     */
-    DataAddress getCustomMapWantedAddress();
 }

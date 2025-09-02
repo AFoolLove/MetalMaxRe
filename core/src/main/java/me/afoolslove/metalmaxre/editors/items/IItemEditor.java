@@ -5,7 +5,6 @@ import me.afoolslove.metalmaxre.editors.player.PlayerArmor;
 import me.afoolslove.metalmaxre.editors.player.PlayerItem;
 import me.afoolslove.metalmaxre.editors.player.PlayerWeapon;
 import me.afoolslove.metalmaxre.editors.tank.*;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -206,33 +205,4 @@ public interface IItemEditor extends IRomEditor {
      * @return 所有物品
      */
     List<Item> getItems();
-
-
-    /**
-     * 获取坦克引擎装备的最大载重地址
-     *
-     * @return 所有坦克引擎装备的最大载重地址
-     */
-    DataAddress getTankEnginesMaxCapacityAddress();
-
-    /**
-     * 获取坦克引擎是否能被改造地址
-     *
-     * @return 坦克引擎是否能被改造地址
-     */
-    DataAddress getTankEnginesImprovableAddress();
-
-    /**
-     * 获取玩家装备可穿戴状态地址
-     *
-     * @return 玩家装备可穿戴状态地址
-     */
-    DataAddress getPlayerEquipmentCanEquippedStartAddress();
-
-    /**
-     * 获取所有物品的类型地址
-     *
-     * @return 所有物品的类型地址
-     */
-    DataAddress getItemTypesAddress();
 }

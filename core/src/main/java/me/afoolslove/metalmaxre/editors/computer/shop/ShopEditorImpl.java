@@ -26,8 +26,14 @@ import java.util.List;
  * @author AFoolLove
  */
 public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IShopEditor {
-    private final DataAddress shopIndexAddress;
-    private final DataAddress shopAddress;
+    /**
+     * 商店数据索引
+     */
+    public static final String SHOP_INDEX_ADDRESS = "shopIndex";
+    /**
+     * 商品数据
+     */
+    public static final String SHOP_ADDRESS = "shop";
 
     /**
      * 索引指向的 商品/点唱机曲目/售货机 列表位置
@@ -48,8 +54,8 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
                           @NotNull DataAddress shopIndexAddress,
                           @NotNull DataAddress shopAddress) {
         super(metalMaxRe);
-        this.shopIndexAddress = shopIndexAddress;
-        this.shopAddress = shopAddress;
+        putDataAddress(SHOP_INDEX_ADDRESS, shopIndexAddress);
+        putDataAddress(SHOP_ADDRESS, shopAddress);
     }
 
     @Editor.Load
@@ -59,16 +65,17 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
         getShopLists().clear();
 
         // 读取商店索引
-        position(getShopIndexAddress());
+        position(getDataAddress(SHOP_INDEX_ADDRESS));
         for (int i = 0; i < 0x10; i++) {
             // 占位
             getShopIndexes().add(SingleMapEntry.create(getBuffer().getChar(), 0));
         }
 
         // 读取商品清单
-        position(getShopAddress());
+        DataAddress shopAddress = getDataAddress(SHOP_ADDRESS);
+        position(shopAddress);
         List<ItemList<ShopItem>> ut = new ArrayList<>();
-        while (getShopAddress().range(position() - 0x10)) {
+        while (shopAddress.range(position() - 0x10)) {
             // 读取商品数量
             int count = getBuffer().getToInt();
             if (count == 0xFF) {
@@ -123,9 +130,9 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
 
                 for (int j = 0; j < 0x06; j++) {
                     // 商品
-                    Byte item = itemList.getItem(j).getItem();
+                    byte item = itemList.getItem(j).getItem();
                     // 商品数量和是否有货
-                    Byte count = itemList.getItem(0x06 + j).getItem();
+                    byte count = itemList.getItem(0x06 + j).getItem();
                     vendorItemList.add(new VendorItem(item, count));
                     // 中奖物品
                     vendorItemList.setAward(itemList.getLast().getItem());
@@ -261,15 +268,5 @@ public class ShopEditorImpl extends RomBufferWrapperAbstractEditor implements IS
                 .filter(VendorItemList.class::isInstance)
                 .map(VendorItemList.class::cast)
                 .toList();
-    }
-
-    @Override
-    public DataAddress getShopAddress() {
-        return shopAddress;
-    }
-
-    @Override
-    public DataAddress getShopIndexAddress() {
-        return shopIndexAddress;
     }
 }

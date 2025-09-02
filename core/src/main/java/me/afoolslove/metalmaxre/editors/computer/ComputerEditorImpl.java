@@ -35,18 +35,17 @@ import java.util.List;
  */
 public class ComputerEditorImpl extends AbstractEditor implements IComputerEditor<Computer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputerEditorImpl.class);
-    protected final DataAddress computerAddress;
+    public static final String COMPUTER_ADDRESS = "computer";
     private final List<Computer> computers = new ArrayList<>(getMaxCount());
 
     public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
-        super(metalMaxRe);
-        // 通用地址，兼容已知的版本
-        this.computerAddress = DataAddress.fromPRG(0x39DD2 - 0x10, 0x39FBD - 0x10);
+        this(metalMaxRe,
+                DataAddress.fromPRG(0x39DD2 - 0x10, 0x39FBD - 0x10));
     }
 
-    public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress dataAddress) {
+    public ComputerEditorImpl(@NotNull MetalMaxRe metalMaxRe, @NotNull DataAddress computerAddress) {
         super(metalMaxRe);
-        this.computerAddress = dataAddress;
+        putDataAddress(COMPUTER_ADDRESS, computerAddress);
     }
 
     @Editor.Load
@@ -59,7 +58,7 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
         // data[2] = x
         // data[3] = y
         byte[][] data = new byte[4][getMaxCount()];
-        getBuffer().getAABytes(getComputerAddress(), 0, getMaxCount(), data);
+        getBuffer().getAABytes(getDataAddress(COMPUTER_ADDRESS), 0, getMaxCount(), data);
 
         for (int i = 0; i < getMaxCount(); i++) {
             getUnsafeComputers().add(new Computer(data[0][i], data[1][i], data[2][i], data[3][i]));
@@ -91,21 +90,19 @@ public class ComputerEditorImpl extends AbstractEditor implements IComputerEdito
             Arrays.fill(data[0], count, getMaxCount(), (byte) 0xFF);
         }
         // 写入计算机
-        getBuffer().put(getComputerAddress(), data);
+        getBuffer().put(getDataAddress(COMPUTER_ADDRESS), data);
 
+        List<Computer> overflowComputers = null;
         if (computers.size() > count) {
             LOGGER.error("计算机编辑器：计算机未写入{}个", computers.size() - count);
-            for (Computer computer : computers.subList(count, computers.size())) {
+            overflowComputers = computers.subList(count, computers.size());
+            for (Computer computer : overflowComputers) {
                 LOGGER.error("计算机编辑器：计算机未写入 {}", computer);
             }
         } else if (computers.size() < count) {
             LOGGER.info("计算机编辑器：剩余{}个计算机空闲空间", count - computers.size());
         }
-    }
-
-    @Override
-    public DataAddress getComputerAddress() {
-        return computerAddress;
+        callEvent(new EditorComputerEvent.OverflowComputer(getMetalMaxRe(), this, overflowComputers));
     }
 
     @Override

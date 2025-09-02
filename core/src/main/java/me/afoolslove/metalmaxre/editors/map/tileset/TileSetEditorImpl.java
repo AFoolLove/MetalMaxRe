@@ -14,11 +14,32 @@ import java.util.Arrays;
  * @author AFoolLove
  */
 public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements ITileSetEditor {
-    private final DataAddress tileSetsAddress;
-    private final DataAddress tileSetCombinationsAddress;
-    private final DataAddress tileSetAttributesAddress;
-    private final DataAddress worldTileSetCombinationsAddress;
-    private final DataAddress worldTileSetAttributesAddress;
+    /**
+     * 图块数据起始地址
+     * <p>
+     * CHR ROM
+     */
+    public static final String TILE_SETS_ADDRESS = "tileSets";
+    /**
+     * 图块组合数据地址
+     * <p>
+     * CHR ROM
+     */
+    public static final String TILE_SET_COMBINATIONS_ADDRESS = "tileSetCombinations";
+    /**
+     * 图块颜色和图块的特性数据地址
+     * <p>
+     * CHR ROM
+     */
+    public static final String TILE_SET_ATTRIBUTES_ADDRESS = "tileSetAttributes";
+    /**
+     * 世界地图图块组合数据地址
+     */
+    public static final String WORLD_TILE_SET_COMBINATIONS_ADDRESS = "worldTileSetCombinations";
+    /**
+     * 世界地图图块颜色和图块的特性数据地址
+     */
+    public static final String WORLD_TILE_SET_ATTRIBUTES_ADDRESS = "worldTileSetAttributes";
 
     private XXTileSet[] tiles = new XXTileSet[0xD4]; // 0x04 = CHR表的四分之一
     private TileCombinationSet[] combinations = new TileCombinationSet[0x37]; // 每4byte一组，0x37个组合，0x40个4byte组
@@ -61,11 +82,11 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
                              @NotNull DataAddress worldTileSetCombinationsAddress,
                              @NotNull DataAddress worldTileSetAttributesAddress) {
         super(metalMaxRe);
-        this.tileSetsAddress = tileSetsAddress;
-        this.tileSetCombinationsAddress = tileSetCombinationsAddress;
-        this.tileSetAttributesAddress = tileSetAttributesAddress;
-        this.worldTileSetCombinationsAddress = worldTileSetCombinationsAddress;
-        this.worldTileSetAttributesAddress = worldTileSetAttributesAddress;
+        putDataAddress(TILE_SETS_ADDRESS, tileSetsAddress);
+        putDataAddress(TILE_SET_COMBINATIONS_ADDRESS, tileSetCombinationsAddress);
+        putDataAddress(TILE_SET_ATTRIBUTES_ADDRESS, tileSetAttributesAddress);
+        putDataAddress(WORLD_TILE_SET_COMBINATIONS_ADDRESS, worldTileSetCombinationsAddress);
+        putDataAddress(WORLD_TILE_SET_ATTRIBUTES_ADDRESS, worldTileSetAttributesAddress);
     }
 
     @Editor.Load
@@ -119,7 +140,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 读取所有 tile：0x00-0xFF
         // 0x10byte = 1tile
         // 0x40tile = x40（0x00、0x80、0xC0）
-        position(getTileSetsAddress());
+        position(getDataAddress(TILE_SETS_ADDRESS));
         // 一共0x100个 x40
         for (XXTileSet x40 : tiles) {
             // 读取 x40
@@ -134,7 +155,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 读取所有Tile组合 0x00-0x37
         // 0x04byte = 1tile combination
         // 0x40tile = x40（0x00、0x80、0xC0）
-        position(getTileSetCombinationsAddress());
+        position(getDataAddress(TILE_SET_COMBINATIONS_ADDRESS));
         for (TileCombinationSet tileCombinations : combinations) {
             // 0x40 tile combinationSet
             for (int i = 0; i < TileCombinationSet.TILE_COMBINATIONS_LENGTH; i++) {
@@ -147,14 +168,14 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 读取tile的特性和调色板 0x00-0x37
         // 0x01byte = 1tile特性和调色板
         // 0x40tile = 0x40（0x00、0x80、0xC0）
-        position(getTileSetAttributesAddress());
+        position(getDataAddress(TILE_SET_ATTRIBUTES_ADDRESS));
         for (TileAttributeSet attribute : attributes) {
             // 读取 x40 tile特性和调色板
             getBuffer().get(attribute.getAttributes());
         }
 
         // 读取世界地图的tile组合
-        position(getWorldTileSetCombinationsAddress());
+        position(getDataAddress(WORLD_TILE_SET_COMBINATIONS_ADDRESS));
         for (TileCombinationSet tileCombinations : worldCombinations) {
             // 0x40 tile combination
             for (int i = 0; i < 0x40; i++) {
@@ -165,7 +186,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 读取世界地图的特性和调色板
-        position(getWorldTileSetAttributesAddress());
+        position(getDataAddress(WORLD_TILE_SET_ATTRIBUTES_ADDRESS));
         for (TileAttributeSet worldAttribute : worldAttributes) {
             // 读取 x40 tile特性和调色板
             getBuffer().get(worldAttribute.getAttributes());
@@ -216,7 +237,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Editor.Apply
     public void onApply() {
         // 写入所有tile
-        position(getTileSetsAddress());
+        position(getDataAddress(TILE_SETS_ADDRESS));
         for (XXTileSet xxTileSet : tiles) {
             for (TileImage t : xxTileSet.getTiles()) {
                 getBuffer().put(t.getTileData());
@@ -224,7 +245,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 写入tile组合
-        position(getTileSetCombinationsAddress());
+        position(getDataAddress(TILE_SET_COMBINATIONS_ADDRESS));
         for (TileCombinationSet combinationSet : combinations) {
             for (TileCombination c : combinationSet.getCombinations()) {
                 getBuffer().put(c.getCombinationData());
@@ -232,13 +253,13 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 写入tile的特性和调色板
-        position(getTileSetAttributesAddress());
+        position(getDataAddress(TILE_SET_ATTRIBUTES_ADDRESS));
         for (TileAttributeSet tileAttributeSet : attributes) {
             getBuffer().put(tileAttributeSet.getAttributes());
         }
 
         // 写入世界地图tile组合
-        position(getWorldTileSetCombinationsAddress());
+        position(getDataAddress(WORLD_TILE_SET_COMBINATIONS_ADDRESS));
         for (TileCombinationSet combinationSet : worldCombinations) {
             for (TileCombination c : combinationSet.getCombinations()) {
                 getBuffer().put(c.getCombinationData());
@@ -246,7 +267,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 写入世界地图tile的特性和调色板
-        position(getWorldTileSetAttributesAddress());
+        position(getDataAddress(WORLD_TILE_SET_ATTRIBUTES_ADDRESS));
         for (TileAttributeSet worldAttribute : worldAttributes) {
             getBuffer().put(worldAttribute.getAttributes());
         }
@@ -286,31 +307,6 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 第一个数据为无效数据
         prgPosition(0x2662A);
         getBuffer().put(x8629, 1, x8629.length - 1);
-    }
-
-    @Override
-    public DataAddress getTileSetsAddress() {
-        return tileSetsAddress;
-    }
-
-    @Override
-    public DataAddress getTileSetCombinationsAddress() {
-        return tileSetCombinationsAddress;
-    }
-
-    @Override
-    public DataAddress getTileSetAttributesAddress() {
-        return tileSetAttributesAddress;
-    }
-
-    @Override
-    public DataAddress getWorldTileSetCombinationsAddress() {
-        return worldTileSetCombinationsAddress;
-    }
-
-    @Override
-    public DataAddress getWorldTileSetAttributesAddress() {
-        return worldTileSetAttributesAddress;
     }
 
     @Override
@@ -400,5 +396,4 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
     public byte[] getX8629() {
         return x8629;
     }
-
 }

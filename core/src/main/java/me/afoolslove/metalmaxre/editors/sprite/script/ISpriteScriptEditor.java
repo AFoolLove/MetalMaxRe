@@ -2,7 +2,6 @@ package me.afoolslove.metalmaxre.editors.sprite.script;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.sprite.Sprite;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -45,18 +44,4 @@ public interface ISpriteScriptEditor extends IRomEditor {
     default SpriteScript getSpriteScript(@NotNull Sprite sprite) {
         return getSpriteScript(sprite.intAction());
     }
-
-    /**
-     * 获取精灵脚本地址
-     *
-     * @return 精灵脚本地址
-     */
-    DataAddress getSpriteScriptIndexAddress();
-
-    /**
-     * 获取精灵脚本地址
-     *
-     * @return 精灵脚本地址
-     */
-    DataAddress getSpriteScriptAddress();
 }

@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.computer.shop;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.ItemList;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 
@@ -49,15 +48,5 @@ public interface IShopEditor extends IRomEditor {
     default VendorItemList getVendorItemList(int vendor) {
         return getVendorItemLists().get(vendor);
     }
-
-    /**
-     * @return 商店数据地址
-     */
-    DataAddress getShopAddress();
-
-    /**
-     * @return 商店数据索引地址
-     */
-    DataAddress getShopIndexAddress();
 
 }

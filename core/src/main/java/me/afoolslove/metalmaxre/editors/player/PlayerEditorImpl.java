@@ -20,7 +20,7 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements IPlayerEditor {
-    private final DataAddress playerAddress;
+    public static final String PLAYER_ADDRESS = "player";
     /**
      * 初始属性
      */
@@ -38,7 +38,7 @@ public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements 
 
     public PlayerEditorImpl(@NotNull MetalMaxRe metalMaxRe, @NotNull DataAddress playerAddress) {
         super(metalMaxRe);
-        this.playerAddress = playerAddress;
+        putDataAddress(PLAYER_ADDRESS, playerAddress);
     }
 
     @Editor.Load
@@ -54,7 +54,7 @@ public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements 
         }
 
         // 从初始金钱开始读取
-        position(getPlayerAddress());
+        position(getDataAddress(PLAYER_ADDRESS));
         money = NumberR.toInt(getBuffer().get(), getBuffer().get(), getBuffer().get());
 
         // 读取初始最大生命值
@@ -146,7 +146,7 @@ public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements 
         }
 
         // 从初始金钱开始写入
-        position(getPlayerAddress());
+        position(getDataAddress(PLAYER_ADDRESS));
         getBuffer().put(getMoneyByteArray());
         // 写入初始最大生命值
         for (int i = 0; i < 0x03; i++) {
@@ -220,11 +220,6 @@ public class PlayerEditorImpl extends RomBufferWrapperAbstractEditor implements 
         for (int i = 0; i < 0x03; i++) {
             getBuffer().put(playerInitialAttributes[i].getBytesExperience());
         }
-    }
-
-    @Override
-    public DataAddress getPlayerAddress() {
-        return playerAddress;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.computer;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,11 +78,4 @@ public interface IComputerEditor<C extends Computer> extends IRomEditor {
      * @param computer 被包含的计算机
      */
     boolean containsComputer(@NotNull C computer);
-
-    /**
-     * 获取计算机数据的起始地址
-     *
-     * @return 计算机数据的起始地址
-     */
-    DataAddress getComputerAddress();
 }

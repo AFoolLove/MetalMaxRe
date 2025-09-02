@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.player;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.Range;
 
 import java.util.Map;
@@ -33,13 +32,4 @@ public interface IPlayerExpEditor extends IRomEditor {
      * @return 指定等级所需的经验值
      */
     int getLevelExp(int level);
-
-    /**
-     * 玩家升级所需的经验值地址
-     * <p>
-     * 每级都包含上一级的经验
-     *
-     * @return 玩家升级所需的经验值地址
-     */
-    DataAddress getPlayerLevelExpAddress();
 }

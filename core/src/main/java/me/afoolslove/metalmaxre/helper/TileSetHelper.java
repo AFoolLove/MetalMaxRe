@@ -299,8 +299,8 @@ public class TileSetHelper {
 
     /**
      * 生成一张精灵的 TileSet 图片
-     * 该算法不完整，所以有部分错误的图像
      * 图片的大小为256*256
+     * 该算法不适用于特殊的精灵，特殊的精灵使用 {@link me.afoolslove.metalmaxre.editors.sprite.SpriteModel} 显示
      */
     public static Color[][] generateSpriteTileSet(@NotNull MetalMaxRe metalMaxRe, int sprite, boolean running) {
         SystemPalette systemPalette = metalMaxRe.getSystemPalette();
@@ -484,6 +484,155 @@ public class TileSetHelper {
             }
         }
         return image;
+    }
+
+    /**
+     * 解析玩家行走图像
+     * <p>
+     * <p>
+     * playerId = 0x24为玩家
+     */
+    public static void parsePlayerMoveImage(@NotNull MetalMaxRe metalMaxRe, BufferedImage bufferedImage, int playerId) {
+        // 行走图内容为 下、左、右、上，每个动作两帧，一个完整的图像为2*8+2*8=16*16
+        // 宽为：16*2=32，高为：16*4=64
+        // 调色板：1像素在顶部，固定2个调色板
+        // 最终行走图图像大小为 32*65
+
+        if (bufferedImage == null || bufferedImage.getWidth() < 32 || bufferedImage.getHeight() < 65) {
+            return;
+        }
+        // 图像调色板
+        int[][] palettes = {
+                {
+                        bufferedImage.getRGB(0x00, 0x00),
+                        bufferedImage.getRGB(0x01, 0x00),
+                        bufferedImage.getRGB(0x02, 0x00),
+                        bufferedImage.getRGB(0x03, 0x00),
+                },
+                {
+                        bufferedImage.getRGB(0x04, 0x00),
+                        bufferedImage.getRGB(0x05, 0x00),
+                        bufferedImage.getRGB(0x06, 0x00),
+                        bufferedImage.getRGB(0x07, 0x00),
+                },
+        };
+
+        ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
+
+        // 获取精灵使用的图块表
+        XXTileSet[] spriteTiles = new XXTileSet[4];
+        // 上面两个为固定的精灵表
+        spriteTiles[0] = tileSetEditor.getTiles()[0x04]; // $00-$3F
+        spriteTiles[1] = tileSetEditor.getTiles()[0x05]; // $40-$7F
+        // 上面两个为固定的精灵表
+        spriteTiles[2] = tileSetEditor.getTiles()[0x94]; // $80-$BF
+        spriteTiles[3] = tileSetEditor.getTiles()[0x94 + 1]; // $C0-$FF
+
+        final byte[] xA597 = tileSetEditor.getXA597();
+        final byte[] xA59E = tileSetEditor.getXA59E();
+        final byte[] xA59B = tileSetEditor.getXA59B();
+        final byte[] xA5DD = tileSetEditor.getXA5DD();
+        final byte[] x847B = tileSetEditor.getX847B();
+        final byte[] x8552 = tileSetEditor.getX8552();
+        final byte[] x8629 = tileSetEditor.getX8629();
+        final byte[] x83F2 = tileSetEditor.getX83F2();
+        final byte[] x83FA = tileSetEditor.getX83FA();
+
+        // 精灵的的图像一共有 0x100 / 0x04 = 0x40 种
+        // 0x04 为精灵的四个朝向
+        // 精灵的id为0时，不显示精灵，所以直接跳过
+        // 顺序为：上、下、左、右
+        for (int running = 0; running < 0x02; running++) {
+            for (int direction = 0; direction < 0x04; direction++) {
+                // 模拟内存地址$0150-$015F的数据
+                byte bA597 = xA597[direction];
+                byte bA59E = xA59E[playerId];
+                int x0150 = (bA59E & 0xFF) + (bA597 & 0xFF) + running;
+                // 模拟内存地址$0160-$016F的数据
+                byte bA59B = xA59B[direction];
+                byte bA5DD = xA5DD[playerId];
+                int x0160 = (bA5DD & 0xFF) | (bA59B & 0xFF);
+
+                // 得到精灵图像差值索引
+                byte b847B = (byte) (x847B[x0150] & 0B0000_0111);
+
+                // 精灵图像上半部分的图像索引
+                byte b8552 = x8552[x0150];
+                // 精灵图像下半部分的图像索引
+                byte b8629 = x8629[x0150];
+                // 精灵上半部分两个图像块的差值
+                byte b83F2 = x83F2[b847B];
+                // 精灵下半部分两个图像块的差值
+                byte b83FA = x83FA[b847B];
+
+                // 获取上半部分图像索引
+                int up1 = b8552 & 0xFF;
+                int up2 = (b8552 + b83F2) & 0xFF;
+                // 获取下半部分图像索引
+                int down1 = b8629 & 0xFF;
+                int down2 = ((byte) (b8629 + b83FA)) & 0xFF;
+
+                // 0x10为精灵大小，0x04为精灵四个朝向
+                // 0x100为画布大小
+                // id + direction = 这个精灵的朝向
+
+                // 读取精灵材质
+                byte[][] texture = new byte[0x04][0x10];
+
+                for (int y = 0; y < 2; y++) {
+                    int[] palette = palettes[y];
+                    for (int x = 0; x < 2; x++) {
+                        int x2 = running * 16;
+                        int y2 = direction * 16;
+                        x2 += x * 0x08;
+                        y2 += y * 0x08;
+
+                        byte[] tile = null;
+
+                        // 遍历 8*8，一个图块
+                        for (int pixelY = 0; pixelY < 8; pixelY++) {
+                            for (int pixelX = 0; pixelX < 8; pixelX++) {
+                                int x3 = x2 + pixelX;
+                                int y3 = y2 + pixelY;
+                                int rgb = bufferedImage.getRGB(x3, y3 + 1);
+                                if ((rgb & 0xFF000000) == 0x00) {
+                                    // 透明
+                                    continue;
+                                }
+
+                                int index = -1;
+                                for (int j = 1; j < palette.length; j++) {
+                                    if (palette[j] == rgb) {
+                                        index = j;
+                                        break;
+                                    }
+                                }
+                                if (index < 0) {
+                                    // 调色板未找到
+                                    continue;
+                                }
+
+                                if (tile == null) {
+                                    tile = new byte[0x10];
+                                }
+                                if ((index % 2) != 0x00) {
+                                    tile[pixelY] |= 0x80 >>> pixelX;
+                                }
+                                if ((index / 2) != 0x00) {
+                                    tile[0x08 + pixelY] |= 0x80 >>> pixelX;
+                                }
+                            }
+                        }
+                        texture[y * 2 + x] = tile;
+                    }
+                }
+
+                spriteTiles[up1 / 0x40].getTile(up1 % 0x40).setTileData(texture[0x00]);
+                spriteTiles[up2 / 0x40].getTile(up2 % 0x40).setTileData(texture[0x01]);
+                spriteTiles[down1 / 0x40].getTile(down1 % 0x40).setTileData(texture[0x02]);
+                spriteTiles[down2 / 0x40].getTile(down2 % 0x40).setTileData(texture[0x03]);
+            }
+        }
     }
 
     /**

@@ -19,7 +19,12 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class PlayerExpEditorImpl extends RomBufferWrapperAbstractEditor implements IPlayerExpEditor {
-    private final DataAddress playerLevelExpAddress;
+    /**
+     * 玩家升级所需的经验值地址
+     * <p>
+     * 每级都包含上一级的经验
+     */
+    public static final String PLAYER_LEVEL_EXP_ADDRESS = "playerLevelExp";
 
     /**
      * K：Level<p>
@@ -34,7 +39,7 @@ public class PlayerExpEditorImpl extends RomBufferWrapperAbstractEditor implemen
 
     public PlayerExpEditorImpl(@NotNull MetalMaxRe metalMaxRe, DataAddress playerLevelExpAddress) {
         super(metalMaxRe);
-        this.playerLevelExpAddress = playerLevelExpAddress;
+        putDataAddress(PLAYER_LEVEL_EXP_ADDRESS, playerLevelExpAddress);
     }
 
     @Editor.Load
@@ -45,7 +50,7 @@ public class PlayerExpEditorImpl extends RomBufferWrapperAbstractEditor implemen
         // 读取升级到2-99级的所需经验，默认等级至少为1，0级和1级的经验值数据无法修改（会破坏ROM程序）
         // 一个等级经验值用3个字节表示
         byte[] levelExps = new byte[(playerEditor.getMaxLevel() - 1) * 3];
-        getBuffer().get(getPlayerLevelExpAddress(), levelExps);
+        getBuffer().get(getDataAddress(PLAYER_LEVEL_EXP_ADDRESS), levelExps);
         for (int i = 0, maxLevel = playerEditor.getMaxLevel() - 2; i <= maxLevel; i++) {
             experiences.put(i + 2, NumberR.toInt(levelExps[i * 3], levelExps[(i * 3) + 1], levelExps[(i * 3) + 2]));
         }
@@ -63,7 +68,7 @@ public class PlayerExpEditorImpl extends RomBufferWrapperAbstractEditor implemen
             byte[] levelExp = NumberR.toByteArray(experience, 3, false);
             System.arraycopy(levelExp, 0, levelExps, index, 3);
         }
-        getBuffer().put(getPlayerLevelExpAddress(), levelExps);
+        getBuffer().put(getDataAddress(PLAYER_LEVEL_EXP_ADDRESS), levelExps);
     }
 
     /**
@@ -88,10 +93,5 @@ public class PlayerExpEditorImpl extends RomBufferWrapperAbstractEditor implemen
     @Override
     public int getLevelExp(int level) {
         return experiences.get(level);
-    }
-
-    @Override
-    public DataAddress getPlayerLevelExpAddress() {
-        return playerLevelExpAddress;
     }
 }

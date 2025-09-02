@@ -42,13 +42,31 @@ import java.util.*;
 @Editor.TargetVersions
 public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor implements IMapPropertiesEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(MapPropertiesEditorImpl.class);
-    private final DataAddress mapPropertiesIndexUpRollAddress;
-    private final DataAddress mapPropertiesIndexDownRollAddress;
-    private final DataAddress mapPropertiesAddress;
-    private final DataAddress mapPropertiesRedirectAddress;
-    private final DataAddress mapPropertiesMonsterRealmIndexAddress;
-    private final DataAddress mapCustomWantedAddress;
 
+    /**
+     * 地图属性索引上卷地址
+     */
+    public static final String MAP_PROPERTIES_INDEX_UP_ROLL_ADDRESS = "mapPropertiesIndexUpRoll";
+    /**
+     * 地图属性索引下卷地址
+     */
+    public static final String MAP_PROPERTIES_INDEX_DOWN_ROLL_ADDRESS = "mapPropertiesIndexDownRoll";
+    /**
+     * 地图属性地址
+     */
+    public static final String MAP_PROPERTIES_ADDRESS = "mapProperties";
+    /**
+     * 进入地图时根据条件是否重定向到其它地图地址
+     */
+    public static final String MAP_PROPERTIES_REDIRECT_ADDRESS = "mapPropertiesRedirect";
+    /**
+     * 地图怪物领域索引
+     */
+    public static final String MAP_PROPERTIES_MONSTER_REALM_INDEX_ADDRESS = "mapPropertiesMonsterRealmIndex";
+    /**
+     * 自定义地图通缉令地址
+     */
+    public static final String MAP_CUSTOM_WANTED_ADDRESS = "mapCustomWanted";
 
     private final LinkedHashMap<Integer, MapProperties> mapProperties = new LinkedHashMap<>();
 
@@ -78,12 +96,12 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
                                    @NotNull DataAddress mapCustomWantedAddress
     ) {
         super(metalMaxRe);
-        this.mapPropertiesIndexUpRollAddress = mapPropertiesIndexUpRollAddress;
-        this.mapPropertiesIndexDownRollAddress = mapPropertiesIndexDownRollAddress;
-        this.mapPropertiesAddress = mapPropertiesAddress;
-        this.mapPropertiesRedirectAddress = mapPropertiesRedirectAddress;
-        this.mapPropertiesMonsterRealmIndexAddress = mapPropertiesMonsterRealmIndexAddress;
-        this.mapCustomWantedAddress = mapCustomWantedAddress;
+        putDataAddress(MAP_PROPERTIES_INDEX_UP_ROLL_ADDRESS, mapPropertiesIndexUpRollAddress);
+        putDataAddress(MAP_PROPERTIES_INDEX_DOWN_ROLL_ADDRESS, mapPropertiesIndexDownRollAddress);
+        putDataAddress(MAP_PROPERTIES_ADDRESS, mapPropertiesAddress);
+        putDataAddress(MAP_PROPERTIES_REDIRECT_ADDRESS, mapPropertiesRedirectAddress);
+        putDataAddress(MAP_PROPERTIES_MONSTER_REALM_INDEX_ADDRESS, mapPropertiesMonsterRealmIndexAddress);
+        putDataAddress(MAP_CUSTOM_WANTED_ADDRESS, mapCustomWantedAddress);
     }
 
     @Editor.Load
@@ -117,18 +135,18 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         // 读取地图属性索引，上卷 0x40、下卷 0xB0
         // 地图属性索引不需要并且不建议被编辑！！所以不提供修改功能！！
         char[] mapIndexRoll = new char[0x40 + 0xB0];
-        position(getMapPropertiesIndexUpRollAddress());
+        position(getDataAddress(MAP_PROPERTIES_INDEX_UP_ROLL_ADDRESS));
         for (int i = 0; i < 0x40; i++) {
             mapIndexRoll[i] = getBuffer().getChar();
         }
-        position(getMapPropertiesIndexDownRollAddress());
+        position(getDataAddress(MAP_PROPERTIES_INDEX_DOWN_ROLL_ADDRESS));
         for (int i = 0; i < 0xB0; i++) {
             mapIndexRoll[0x40 + i] = getBuffer().getChar();
         }
 
         // 通过地图属性索引读取地图属性
         // MapID从1开始，0是世界地图
-        final int mapPropertiesOffset = getMapPropertiesAddress().getStartAddress() - 0x08500;
+        final int mapPropertiesOffset = getDataAddress(MAP_PROPERTIES_ADDRESS).getStartAddress() - 0x08500;
         for (int mapId = 1; mapId < mapIndexRoll.length; mapId++) {
             char index = mapIndexRoll[mapId];
             prgPosition(mapPropertiesOffset + index);
@@ -148,7 +166,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             MapProperties mapProperties = new MapProperties(properties);
             if (mapId >= 0x80) {
                 // 读取地图怪物领域索引
-                position(getMapPropertiesMonsterRealmIndexAddress(), mapId - 0x80);
+                position(getDataAddress(MAP_PROPERTIES_MONSTER_REALM_INDEX_ADDRESS), mapId - 0x80);
                 mapProperties.monsterRealmIndex = getBuffer().get();
             }
             this.mapProperties.put(mapId, mapProperties);
@@ -161,7 +179,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         }
 
         // 读取重定向的条件数据和地图
-        position(getMapPropertiesRedirectAddress());
+        position(getDataAddress(MAP_PROPERTIES_REDIRECT_ADDRESS));
         // data[0] = fromMaps
         // data[1] = data
         // data[2] = toMaps
@@ -175,7 +193,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         }
 
         // 读取自定义通缉令的地图和数据
-        position(getCustomMapWantedAddress());
+        position(getDataAddress(MAP_CUSTOM_WANTED_ADDRESS));
         byte[][] customWantedData = new byte[0x02][0x0D];
         getBuffer().getAABytes(0, 0x0D, customWantedData);
         for (int i = 0; i < 0x0D; i++) {
@@ -231,7 +249,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             mapIndexUpRoll[(i * 0x02) + 0x00] = NumberR.at(value, 0);
             mapIndexUpRoll[(i * 0x02) + 0x01] = NumberR.at(value, 1);
         }
-        position(getMapPropertiesIndexUpRollAddress());
+        position(getDataAddress(MAP_PROPERTIES_INDEX_UP_ROLL_ADDRESS));
         getBuffer().put(mapIndexUpRoll);
 
         // 应用下卷的索引
@@ -241,16 +259,17 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             mapIndexDownRoll[((i - 0x40) * 0x02) + 0x00] = NumberR.at(value, 0);
             mapIndexDownRoll[((i - 0x40) * 0x02) + 0x01] = NumberR.at(value, 1);
         }
-        position(getMapPropertiesIndexDownRollAddress());
+        position(getDataAddress(MAP_PROPERTIES_INDEX_DOWN_ROLL_ADDRESS));
         getBuffer().put(mapIndexDownRoll);
 
         // 写入地图属性
-        position(getMapPropertiesAddress());
+        DataAddress mapPropertiesAddress = getDataAddress(MAP_PROPERTIES_ADDRESS);
+        position(mapPropertiesAddress);
         for (byte[] property : propertiesData) {
             getBuffer().put(property);
         }
 
-        int end = getMapPropertiesAddress().getEndAddress(-position() + 0x10 + 1);
+        int end = mapPropertiesAddress.getEndAddress(-position() + 0x10 + 1);
         if (end >= 0) {
             LOGGER.info("地图属性编辑器：剩余{}个空闲字节", end);
         } else {
@@ -277,11 +296,11 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
         }
 
         // 写入地图重定向数据
-        position(getMapPropertiesRedirectAddress());
+        position(getDataAddress(MAP_PROPERTIES_REDIRECT_ADDRESS));
         getBuffer().putAABytes(0, getMapPropertiesRedirectMaxCount(), redirectData);
 
         // 写入地图怪物领域索引
-        position(getMapPropertiesMonsterRealmIndexAddress());
+        position(getDataAddress(MAP_PROPERTIES_MONSTER_REALM_INDEX_ADDRESS));
         for (int mapId = 0x80; mapId < mapEditor.getMapMaxCount(); mapId++) {
             MapProperties mapProperties = this.mapProperties.get(mapId);
             getBuffer().put(mapProperties.monsterRealmIndex);
@@ -313,7 +332,7 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
             customWantedData[0x00][i] = (byte) (entry.getKey() & 0xFF);
             customWantedData[0x01][i] = entry.getValue();
         }
-        position(getCustomMapWantedAddress());
+        position(getDataAddress(MAP_CUSTOM_WANTED_ADDRESS));
         getBuffer().put(customWantedData);
     }
 
@@ -336,36 +355,6 @@ public class MapPropertiesEditorImpl extends RomBufferWrapperAbstractEditor impl
     @Override
     public WorldMapProperties getWorldMapProperties() {
         return ((WorldMapProperties) mapProperties.get(0x00));
-    }
-
-    @Override
-    public DataAddress getMapPropertiesIndexUpRollAddress() {
-        return mapPropertiesIndexUpRollAddress;
-    }
-
-    @Override
-    public DataAddress getMapPropertiesIndexDownRollAddress() {
-        return mapPropertiesIndexDownRollAddress;
-    }
-
-    @Override
-    public DataAddress getMapPropertiesAddress() {
-        return mapPropertiesAddress;
-    }
-
-    @Override
-    public DataAddress getMapPropertiesRedirectAddress() {
-        return mapPropertiesRedirectAddress;
-    }
-
-    @Override
-    public DataAddress getMapPropertiesMonsterRealmIndexAddress() {
-        return mapPropertiesMonsterRealmIndexAddress;
-    }
-
-    @Override
-    public DataAddress getCustomMapWantedAddress() {
-        return mapCustomWantedAddress;
     }
 
     /**

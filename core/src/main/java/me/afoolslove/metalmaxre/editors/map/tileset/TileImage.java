@@ -1,5 +1,6 @@
 package me.afoolslove.metalmaxre.editors.map.tileset;
 
+import me.afoolslove.metalmaxre.editors.palette.Color;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -48,6 +49,19 @@ public class TileImage {
 
     public void setTileData(byte[] tileData) {
         setTileData(tileData, 0);
+    }
+
+    public Color[][] toColors(Color[] colors) {
+        Color[][] image = new Color[0x08][0x08];
+        final byte[] bytes = getTileData(); // 0x10 size
+        for (int b = 0; b < 0x08; b++) { // byte
+            for (int k = 0, d = 0x80; k < 0x08; k++, d >>>= 1) { // D7-D0
+                int l = (bytes[b] & d) >>> (7 - k);
+                l += ((bytes[b + 0x08] & d) >>> (7 - k)) << 1;
+                image[b][k] = colors[l];
+            }
+        }
+        return image;
     }
 
     public byte[] cloneTileData() {

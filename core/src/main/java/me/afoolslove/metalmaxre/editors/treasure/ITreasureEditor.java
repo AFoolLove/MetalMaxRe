@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.treasure;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
 import java.util.Map;
@@ -70,25 +69,4 @@ public interface ITreasureEditor extends IRomEditor {
      * @return 默认和其它宝藏的概率
      */
     Map.Entry<Byte, Byte> getDefaultRandomTreasure();
-
-    /**
-     * 随机宝藏相关数据
-     *
-     * @return 随机宝藏相关数据
-     */
-    DataAddress getRandomTreasureAddress();
-
-    /**
-     * 特殊调查点
-     *
-     * @return 特殊调查点
-     */
-    DataAddress getCheckPointsAddress();
-
-    /**
-     * 宝藏数据地址
-     *
-     * @return 宝藏数据地址
-     */
-    DataAddress getTreasureAddress();
 }

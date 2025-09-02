@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.data;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -53,12 +52,6 @@ public interface IDataValueEditor extends IRomEditor {
     default int get3ByteMaxCount() {
         return 0x3D;
     }
-
-    DataAddress get1ByteAddress();
-
-    DataAddress get2ByteAddress();
-
-    DataAddress get3ByteAddress();
 
 //    /**
 //     * @return 该值的所有key

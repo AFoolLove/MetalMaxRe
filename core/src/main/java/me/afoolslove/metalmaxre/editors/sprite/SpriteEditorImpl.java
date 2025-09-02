@@ -14,8 +14,14 @@ import java.util.*;
 
 public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpriteEditorImpl.class);
-    private final DataAddress spritesIndexAddress;
-    private final DataAddress spritesAddress;
+    /**
+     * 获取精灵数据的索引
+     */
+    public static final String SPRITES_INDEX_ADDRESS = "spriteIndex";
+    /**
+     * 获取精灵的属性数据
+     */
+    public static final String SPRITES_ADDRESS = "sprite";
     /**
      * 地图的精灵<p>
      * 0x0A为特殊精灵用作于剧情
@@ -32,8 +38,8 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
 
     public SpriteEditorImpl(@NotNull MetalMaxRe metalMaxRe, @NotNull DataAddress spritesIndexAddress, @NotNull DataAddress spritesAddress) {
         super(metalMaxRe);
-        this.spritesIndexAddress = spritesIndexAddress;
-        this.spritesAddress = spritesAddress;
+        putDataAddress(SPRITES_INDEX_ADDRESS, spritesIndexAddress);
+        putDataAddress(SPRITES_ADDRESS, spritesAddress);
     }
 
     @Editor.Load
@@ -44,7 +50,7 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
         sprites.clear();
 
         // 读取精灵数据索引
-        position(getSpriteIndexAddress());
+        position(getDataAddress(SPRITES_INDEX_ADDRESS));
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
 
         for (int i = 0; i < 0xF0 + 0x0A; i++) {
@@ -95,9 +101,10 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
         // 精灵索引
         Character[] spritesIndexes = new Character[0xF0 + 0x0A];
         // 精灵索引起始
+        DataAddress spriteAddress = getDataAddress(SPRITES_ADDRESS);
 //        char spriteIndex = 0x81F4;
-        char spriteIndex = (char) (getSpriteAddress().getStartAddress() - 0x24000 + 0x8000);
-        final char endSpriteIndex = (char) (spriteIndex + getSpriteAddress().length());
+        char spriteIndex = (char) (spriteAddress.getStartAddress() - 0x24000 + 0x8000);
+        final char endSpriteIndex = (char) (spriteIndex + spriteAddress.length());
 
         for (int mapId = 0, count = 0xF0 + 0x0A; mapId < count; mapId++) {
             if (spritesIndexes[mapId] != null) {
@@ -146,7 +153,7 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
         }
 
         // 写入精灵数据索引
-        position(getSpriteIndexAddress());
+        position(getDataAddress(SPRITES_INDEX_ADDRESS));
         for (Character spritesIndex : spritesIndexes) {
             if (spritesIndex == null) {
                 // 没有精灵
@@ -156,12 +163,12 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
         }
 
         // 写入精灵数据
-        position(getSpriteAddress());
+        position(spriteAddress);
         for (byte[] spritesDatum : spritesData) {
             getBuffer().put(spritesDatum);
         }
 
-        int end = getSpriteAddress().getEndAddress(-position() + 0x10 + 1);
+        int end = spriteAddress.getEndAddress(-position() + 0x10 + 1);
         if (end >= 0) {
             if (end > 0) {
                 // 使用0xFF填充未使用的数据
@@ -183,15 +190,5 @@ public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements 
     @Override
     public List<Sprite> getWorldSprites() {
         return getSprites().get(0x00);
-    }
-
-    @Override
-    public DataAddress getSpriteIndexAddress() {
-        return spritesIndexAddress;
-    }
-
-    @Override
-    public DataAddress getSpriteAddress() {
-        return spritesAddress;
     }
 }

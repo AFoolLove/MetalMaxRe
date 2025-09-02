@@ -495,10 +495,28 @@ public class Monster {
     }
 
     /**
+     * 获取怪物的真实经验值
+     * <p>
+     * 自动配置{@link #setHundredfoldExp(boolean)}属性
+     *
+     * @param experience 真实经验值
+     */
+    public void setExperienceValue(int experience) {
+        if (experience < 0x100) {
+            setHundredfoldExp(false);
+            setExperience(experience);
+        } else {
+            setHundredfoldExp(true);
+            setExperience(experience / 100);
+        }
+    }
+
+    /**
      * 设置怪物的类型等数据
      * 0B1100_0000 怪物的类型
      * 0B0010_0000 怪物的经验值*100
      * 0B0001_0000 怪物的金钱值*100
+     * 0B0000_1111 怪物的行动模式
      *
      * @param attribute 属性
      */
@@ -540,6 +558,20 @@ public class Monster {
     }
 
     /**
+     * 设置行动模式
+     *
+     * @param actionMode 行动模式
+     */
+    public void setActionMode(byte actionMode) {
+        this.attribute &= 0B0000_1111;
+        this.attribute |= (byte) (actionMode & 0B0000_1111);
+    }
+
+    public void setActionMode(@Range(from = 0x00, to = 0x0F) int actionMode) {
+        setActionMode((byte) (actionMode & 0x0F));
+    }
+
+    /**
      * 设置被击败后玩家获取的金钱
      *
      * @param gold 金钱
@@ -550,6 +582,23 @@ public class Monster {
 
     public void setGold(@Range(from = 0x00, to = 0xFF) int gold) {
         this.gold = (byte) (gold & 0xFF);
+    }
+
+    /**
+     * 获取怪物掉落的真实金钱
+     * <p>
+     * 自动配置{@link #setHundredfoldGold(boolean)} (boolean)}属性
+     *
+     * @param gold 真实金钱
+     */
+    public void setGoldValue(int gold) {
+        if (gold < 0x100) {
+            setHundredfoldGold(false);
+            setGold(gold);
+        } else {
+            setHundredfoldGold(true);
+            setGold(gold / 100);
+        }
     }
 
     /**
@@ -858,6 +907,17 @@ public class Monster {
      */
     public boolean isHundredfoldExp() {
         return (this.attribute & 0B0010_0000) != 0x00;
+    }
+
+    /**
+     * @return 怪物的行动模式
+     */
+    public byte getActionMode() {
+        return (byte) (this.attribute & 0B0000_1111);
+    }
+
+    public int intActionMode() {
+        return getActionMode() & 0x0F;
     }
 
     /**

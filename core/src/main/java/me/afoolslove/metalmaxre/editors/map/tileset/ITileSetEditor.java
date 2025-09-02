@@ -3,7 +3,6 @@ package me.afoolslove.metalmaxre.editors.map.tileset;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.map.MapProperties;
 import me.afoolslove.metalmaxre.editors.map.WorldMapProperties;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
 public interface ITileSetEditor extends IRomEditor {
@@ -65,35 +64,4 @@ public interface ITileSetEditor extends IRomEditor {
     byte[] getX8552();
 
     byte[] getX8629();
-
-    /**
-     * 图块数据起始地址
-     * <p>
-     * CHR ROM
-     */
-    DataAddress getTileSetsAddress();
-
-    /**
-     * 图块组合数据地址
-     * <p>
-     * CHR ROM
-     */
-    DataAddress getTileSetCombinationsAddress();
-
-    /**
-     * 图块颜色和图块的特性数据地址
-     * <p>
-     * CHR ROM
-     */
-    DataAddress getTileSetAttributesAddress();
-
-    /**
-     * 世界地图图块组合数据地址
-     */
-    DataAddress getWorldTileSetCombinationsAddress();
-
-    /**
-     * 世界地图图块颜色和图块的特性数据地址
-     */
-    DataAddress getWorldTileSetAttributesAddress();
 }

@@ -15,38 +15,70 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
-    @Override
-    public String getId() {
-        return "monsterModelEditor";
-    }
-
+public class MonsterModelImpl extends RomBufferWrapperAbstractEditor implements IMonsterModelEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(MonsterModelImpl.class);
-
-    private final DataAddress monsterModelPaletteIndex = DataAddress.fromPRG(0x229CF - 0x10, 0x22A51 - 0x10);
-    private final DataAddress monsterModelDoublePalette = DataAddress.fromPRG(0x22A52 - 0x10, 0x22A87 - 0x10);
-    private final DataAddress monsterModelPalette = DataAddress.fromPRG(0x22A88 - 0x10, 0x22B65 - 0x10);
-    private final DataAddress monsterModelDoublePaletteDataIndex = DataAddress.fromPRG(0x22BC6 - 0x10, 0x22C30 - 0x10);
-    private final DataAddress monsterModelIndex = DataAddress.fromPRG(0x22C31 - 0x10, 0x22CB3 - 0x10);
-    private final DataAddress monsterModelTileSet = DataAddress.fromPRG(0x22CB4 - 0x10, 0x22D02 - 0x10);
-    private final DataAddress monsterModelIncrementalTileSet = DataAddress.fromPRG(0x22D03 - 0x10, 0x22D09 - 0x10);
-    private final DataAddress monsterModelSize = DataAddress.fromPRG(0x22D0A - 0x10, 0x22D57 - 0x10);
-    private final DataAddress monsterModelLayoutIndex = DataAddress.fromPRG(0x22EB4 - 0x10, 0x22F51 - 0x10);
-    //    private final DataAddress monsterModelLayout = DataAddress.fromPRG(0x22F52 - 0x10, 0x23223 - 0x10);
-    private final DataAddress monsterModelLayout = DataAddress.fromPRG(0x22F52 - 0x10, 0x232AF - 0x10);
-
-    private final DataAddress monsterModelLayoutTileIndex = DataAddress.fromPRG(0x22D59 - 0x10, 0x22DA0 - 0x10);
+    public static final String MONSTER_MODEL_PALETTE_INDEX_ADDRESS = "monsterModelPaletteIndex";
+    public static final String MONSTER_MODEL_DOUBLE_PALETTE_ADDRESS = "monsterModelDoublePalette";
+    public static final String MONSTER_MODEL_PALETTE_ADDRESS = "monsterModelPalette";
+    public static final String MONSTER_MODEL_DOUBLE_PALETTE_DATA_INDEX_ADDRESS = "monsterModelDoublePaletteDataIndex";
+    public static final String MONSTER_MODEL_INDEX_ADDRESS = "monsterModelIndex";
+    public static final String MONSTER_MODEL_TILE_SET_ADDRESS = "monsterModelTileSet";
+    public static final String MONSTER_MODEL_INCREMENTAL_TILE_SET_ADDRESS = "monsterModelIncrementalTileSet";
+    public static final String MONSTER_MODEL_SIZE_ADDRESS = "monsterModelSize";
+    public static final String MONSTER_MODEL_LAYOUT_INDEX_ADDRESS = "monsterModelLayoutIndex";
+    public static final String MONSTER_MODEL_LAYOUT_ADDRESS = "monsterModelLayout";
+    public static final String MONSTER_MODEL_LAYOUT_TILE_INDEX_ADDRESS = "monsterModelLayoutTileIndex";
 
     private final List<MonsterModel> monsterModels = new ArrayList<>();
 
-
     public MonsterModelImpl(@NotNull MetalMaxRe metalMaxRe) {
-        super(metalMaxRe, false);
+        this(metalMaxRe,
+                DataAddress.fromPRG(0x229CF - 0x10, 0x22A51 - 0x10),
+                DataAddress.fromPRG(0x22A52 - 0x10, 0x22A87 - 0x10),
+                DataAddress.fromPRG(0x22A88 - 0x10, 0x22B65 - 0x10),
+                DataAddress.fromPRG(0x22BC6 - 0x10, 0x22C30 - 0x10),
+                DataAddress.fromPRG(0x22C31 - 0x10, 0x22CB3 - 0x10),
+                DataAddress.fromPRG(0x22CB4 - 0x10, 0x22D02 - 0x10),
+                DataAddress.fromPRG(0x22D03 - 0x10, 0x22D09 - 0x10),
+                DataAddress.fromPRG(0x22D0A - 0x10, 0x22D57 - 0x10),
+                DataAddress.fromPRG(0x22EB4 - 0x10, 0x22F51 - 0x10),
+                DataAddress.fromPRG(0x22F52 - 0x10, 0x232AF - 0x10),
+                DataAddress.fromPRG(0x22D59 - 0x10, 0x22DA0 - 0x10)
+        );
     }
+
+    public MonsterModelImpl(@NotNull MetalMaxRe metalMaxRe,
+                            DataAddress monsterModelPaletteIndex,
+                            DataAddress monsterModelDoublePalette,
+                            DataAddress monsterModelPalette,
+                            DataAddress monsterModelDoublePaletteDataIndex,
+                            DataAddress monsterModelIndex,
+                            DataAddress monsterModelTileSet,
+                            DataAddress monsterModelIncrementalTileSet,
+                            DataAddress monsterModelSize,
+                            DataAddress monsterModelLayoutIndex,
+                            DataAddress monsterModelLayout,
+                            DataAddress monsterModelLayoutTileIndex) {
+        super(metalMaxRe, false);
+        putDataAddress(MONSTER_MODEL_PALETTE_INDEX_ADDRESS, monsterModelPaletteIndex);
+        putDataAddress(MONSTER_MODEL_DOUBLE_PALETTE_ADDRESS, monsterModelDoublePalette);
+        putDataAddress(MONSTER_MODEL_PALETTE_ADDRESS, monsterModelPalette);
+        putDataAddress(MONSTER_MODEL_DOUBLE_PALETTE_DATA_INDEX_ADDRESS, monsterModelDoublePaletteDataIndex);
+        putDataAddress(MONSTER_MODEL_INDEX_ADDRESS, monsterModelIndex);
+        putDataAddress(MONSTER_MODEL_TILE_SET_ADDRESS, monsterModelTileSet);
+        putDataAddress(MONSTER_MODEL_INCREMENTAL_TILE_SET_ADDRESS, monsterModelIncrementalTileSet);
+        putDataAddress(MONSTER_MODEL_SIZE_ADDRESS, monsterModelSize);
+        putDataAddress(MONSTER_MODEL_LAYOUT_INDEX_ADDRESS, monsterModelLayoutIndex);
+        putDataAddress(MONSTER_MODEL_LAYOUT_ADDRESS, monsterModelLayout);
+        putDataAddress(MONSTER_MODEL_LAYOUT_TILE_INDEX_ADDRESS, monsterModelLayoutTileIndex);
+    }
+
 
     @Editor.Load
     public void onLoad() {
         getMonsterModels().clear();
+
+        DataAddress monsterModelLayout = getDataAddress(MONSTER_MODEL_LAYOUT_ADDRESS);
 
         byte[] modelPaletteIndexes = new byte[0x83];
         byte[] modelDoublePalettes = new byte[0x1B * 0x02];
@@ -55,35 +87,36 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         byte[] modelTileSets = new byte[0x4F];
         byte[] incrementalTileSet = new byte[0x07];
         byte[] modelSizes = new byte[0x4F];
-        byte[] modelLayouts = new byte[getMonsterModelLayout().length()];
+        byte[] modelLayouts = new byte[monsterModelLayout.length()];
         char[] modelLayoutIndexes = new char[0x4F];
         byte[] modelLayoutTileIndexes = new byte[0x48];
 
 
-        getBuffer().get(getMonsterModelPaletteIndex(), modelPaletteIndexes);
-        getBuffer().get(getMonsterModelDoublePalette(), modelDoublePalettes);
-        position(getMonsterModelPalette());
+        getBuffer().get(getDataAddress(MONSTER_MODEL_PALETTE_INDEX_ADDRESS), modelPaletteIndexes);
+        getBuffer().get(getDataAddress(MONSTER_MODEL_DOUBLE_PALETTE_ADDRESS), modelDoublePalettes);
+        position(getDataAddress(MONSTER_MODEL_PALETTE_ADDRESS));
         for (int i = 0; i < modelPalettes.length; i++) {
             modelPalettes[i] = new PaletteRow(getBuffer(), position());
             offsetPosition(3);
         }
-        getBuffer().get(getMonsterModelIndex(), modelIndexes);
-        getBuffer().get(getMonsterModelTileSet(), modelTileSets);
-        getBuffer().get(getMonsterModelIncrementalTileSet(), incrementalTileSet);
-        getBuffer().get(getMonsterModelSize(), modelSizes);
-        getBuffer().get(getMonsterModelLayout(), modelLayouts);
-        getBuffer().get(getMonsterModelLayoutTileIndex(), modelLayoutTileIndexes);
+        getBuffer().get(getDataAddress(MONSTER_MODEL_INDEX_ADDRESS), modelIndexes);
+        getBuffer().get(getDataAddress(MONSTER_MODEL_TILE_SET_ADDRESS), modelTileSets);
+        getBuffer().get(getDataAddress(MONSTER_MODEL_INCREMENTAL_TILE_SET_ADDRESS), incrementalTileSet);
+        getBuffer().get(getDataAddress(MONSTER_MODEL_SIZE_ADDRESS), modelSizes);
+        getBuffer().get(monsterModelLayout, modelLayouts);
+        getBuffer().get(getDataAddress(MONSTER_MODEL_LAYOUT_TILE_INDEX_ADDRESS), modelLayoutTileIndexes);
 
-        position(getMonsterModelLayoutIndex());
+        position(getDataAddress(MONSTER_MODEL_LAYOUT_INDEX_ADDRESS));
         for (int i = 0; i < modelLayoutIndexes.length; i++) {
             modelLayoutIndexes[i] = getBuffer().getChar();
         }
 
-        position(getMonsterModelDoublePaletteDataIndex());
+        DataAddress monsterModelDoublePaletteDataIndex = getDataAddress(MONSTER_MODEL_DOUBLE_PALETTE_DATA_INDEX_ADDRESS);
+        position(monsterModelDoublePaletteDataIndex);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         List<byte[]> customPaletteYsList = new ArrayList<>();
-        while (getMonsterModelDoublePaletteDataIndex().range(position() - 0x10)) {
+        while (monsterModelDoublePaletteDataIndex.range(position() - 0x10)) {
             int b;
             while ((b = getBuffer().getToInt()) != 0xFF) {
                 outputStream.write(b);
@@ -99,7 +132,7 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
 //        for (char datum : data) {
 //            int modelLayoutIndex = datum - (0x8000 + 0x0F52 - 0x10);
 //            LOGGER.debug("{}",
-//                    NumberR.toHex(5, getMonsterModelLayout().getStartAddress(modelLayoutIndex + 1) + 0x10)
+//                    NumberR.toHex(5, monsterModelLayout.getStartAddress(modelLayoutIndex + 1) + 0x10)
 //            );
 //        }
 
@@ -147,8 +180,8 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             }
             int modelLayoutIndex = modelLayoutIndexes[modelIndex] - (0x8000 + 0x0F52 - 0x10);
 
-            int srcPos = Math.min(getMonsterModelLayout().length(), modelLayoutIndex + 1);
-            int length = Math.min(getMonsterModelLayout().length() - (modelLayoutIndex + 1), modelData.length);
+            int srcPos = Math.min(monsterModelLayout.length(), modelLayoutIndex + 1);
+            int length = Math.min(monsterModelLayout.length() - (modelLayoutIndex + 1), modelData.length);
             length = Math.max(0, length);
             System.arraycopy(modelLayouts, srcPos, modelData, 0x00, length);
             monsterModel.setModelData(modelData);
@@ -180,11 +213,9 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         byte[] modelLayoutTileIndexes = new byte[0x48];
 
         // 基本怪物模型属性
-        MonsterModel[] monsterAModels = new MonsterModel[0x48];
-        MonsterModel[] monsterBModels = new MonsterModel[0x07];
+        List<MonsterModel> monsterAModels = new ArrayList<>(0x48);
+        List<MonsterModel> monsterBModels = new ArrayList<>(0x07);
 
-        int modelALength = 0x00;
-        int modelBLength = 0x00;
         for (int monsterId = 0; monsterId < getMonsterModels().size(); monsterId++) {
             MonsterModel model = getMonsterModels().get(monsterId);
             boolean hasModel = false;
@@ -228,35 +259,40 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             if (!hasModel) {
                 if (model.getModelType() == MonsterModelType.A) {
                     // 新的怪物模型属性
-                    monsterAModels[modelALength++] = model;
+                    monsterAModels.add(model);
                     // 设置怪物模型
 //                    modelIndexes[monsterId] = (byte) (modelALength - 1);
                 } else if (model.getModelType() == MonsterModelType.B) {
                     // 新的怪物模型属性
-                    monsterBModels[modelBLength++] = model;
+                    monsterBModels.add(model);
                     // 设置怪物模型
 //                    modelIndexes[monsterId] = (byte) (modelBLength - 1);
                 }
             }
         }
-        // 填充空的模型
-        for (int i = 0; i < monsterAModels.length; i++) {
-            MonsterModel monsterModel = monsterAModels[i];
-            if (monsterModel == null) {
-                monsterAModels[i] = new MonsterModel((byte) 0x00);
-                monsterAModels[i].setModelData(MonsterModelType.A, new byte[0x00]);
-            }
+
+        if (monsterAModels.size() >= 0x48) {
+            monsterAModels = new ArrayList<>(monsterAModels.subList(0, 0x48));
+            LOGGER.error("怪物模型编辑器：怪物模型一超出限制{}个", 0x48 - (monsterAModels.size() - 1));
         }
-        for (int i = 0; i < monsterBModels.length; i++) {
-            MonsterModel monsterModel = monsterBModels[i];
-            if (monsterModel == null) {
-                monsterBModels[i] = new MonsterModel((byte) 0x00);
-                monsterBModels[i].setModelData(MonsterModelType.B, new byte[0x00]);
-            }
+        if (monsterBModels.size() >= 0x07) {
+            monsterBModels = new ArrayList<>(monsterBModels.subList(0, 0x07));
+            LOGGER.error("怪物模型编辑器：怪物模型二超出限制{}个", 0x48 - (monsterBModels.size() - 1));
+        }
+        // 填充空的模型
+        for (int i = 0x48 - monsterAModels.size(); i > 0; i--) {
+            MonsterModel monsterModel = new MonsterModel((byte) 0x00);
+            monsterModel.setModelData(MonsterModelType.A, new byte[0x00]);
+            monsterAModels.add(monsterModel);
+        }
+        for (int i = 0x07 - monsterBModels.size(); i > 0; i--) {
+            MonsterModel monsterModel = new MonsterModel((byte) 0x00);
+            monsterModel.setModelData(MonsterModelType.B, new byte[0x00]);
+            monsterBModels.add(monsterModel);
         }
 
         // 将自定义调色板Y值排在前面
-        Arrays.sort(monsterAModels, (o1, o2) -> {
+        monsterAModels.sort((o1, o2) -> {
             if (o1.getCustomPaletteYs() == null && o2.getCustomPaletteYs() == null) {
                 return 0;
             }
@@ -270,8 +306,8 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         for (int monsterId = 0; monsterId < getMonsterModels().size(); monsterId++) {
             MonsterModel model = getMonsterModels().get(monsterId);
             if (model.getModelType() == MonsterModelType.A) {
-                for (int modelIndex = 0; modelIndex < monsterAModels.length; modelIndex++) {
-                    MonsterModel monsterModel = monsterAModels[modelIndex];
+                for (int modelIndex = 0; modelIndex < 0x48; modelIndex++) {
+                    MonsterModel monsterModel = monsterAModels.get(modelIndex);
                     if (model.getChrIndex() == monsterModel.getChrIndex()
                         && model.isChrIndexIncremental() == monsterModel.isChrIndexIncremental()
                         && model.getModelSize() == monsterModel.getModelSize()
@@ -284,8 +320,8 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
                     }
                 }
             } else if (model.getModelType() == MonsterModelType.B) {
-                for (int modelIndex = 0; modelIndex < monsterBModels.length; modelIndex++) {
-                    MonsterModel monsterModel = monsterBModels[modelIndex];
+                for (int modelIndex = 0; modelIndex < 0x07; modelIndex++) {
+                    MonsterModel monsterModel = monsterBModels.get(modelIndex);
                     if (model.getChrIndex() == monsterModel.getChrIndex()
                         && model.isChrIndexIncremental() == monsterModel.isChrIndexIncremental()
                         && model.getModelSize() == monsterModel.getModelSize()
@@ -300,16 +336,16 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         }
 
         // 将两种模型数据类型合并
-        MonsterModel[] monsterModels = new MonsterModel[0x48 + 0x07];
-        System.arraycopy(monsterAModels, 0x00, monsterModels, 0x00, monsterAModels.length);
-        System.arraycopy(monsterBModels, 0x00, monsterModels, 0x48, monsterBModels.length);
+        List<MonsterModel> monsterModels = new ArrayList<>(0x48 + 0x07);
+        monsterModels.addAll(monsterAModels);
+        monsterModels.addAll(monsterBModels);
 
         int chrIncrementalLength = 0x00;
         // 所有模型数据
         Map<Integer, byte[]> modelData = new HashMap<>();
         // 将属性转换为数据
-        for (int modelIndex = 0; modelIndex < monsterModels.length; modelIndex++) {
-            MonsterModel monsterModel = monsterModels[modelIndex];
+        for (int modelIndex = 0; modelIndex < (0x48 + 0x07); modelIndex++) {
+            MonsterModel monsterModel = monsterModels.get(modelIndex);
             if (monsterModel == null) {
                 // 模型数量少于原版数量
                 // 暂不处理
@@ -403,8 +439,8 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             layoutBuffer.position(layoutBuffer.position() - overlapLength);
 
             // 更新所有相同模型数据索引
-            for (int modelIndex = 0; modelIndex < monsterModels.length; modelIndex++) {
-                MonsterModel monsterModel = monsterModels[modelIndex];
+            for (int modelIndex = 0; modelIndex < (0x48 + 0x07); modelIndex++) {
+                MonsterModel monsterModel = monsterModels.get(modelIndex);
                 if (monsterModel == null) {
                     continue;
                 }
@@ -534,38 +570,39 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
         }
 
         // 写入所有怪物的调色板索引
-        getBuffer().put(getMonsterModelPaletteIndex(), modelPaletteIndexes);
+        getBuffer().put(getDataAddress(MONSTER_MODEL_PALETTE_INDEX_ADDRESS), modelPaletteIndexes);
         // 写入怪物使用的双调色板索引集
-        getBuffer().put(getMonsterModelDoublePalette(), modelDoublePaletteIndexes);
+        getBuffer().put(getDataAddress(MONSTER_MODEL_DOUBLE_PALETTE_ADDRESS), modelDoublePaletteIndexes);
         // 写入所有怪物的调色板
-        position(getMonsterModelPalette());
+        position(getDataAddress(MONSTER_MODEL_PALETTE_ADDRESS));
         for (PaletteRow modelPalette : modelPalettes) {
             if (modelPalette != null) {
                 getBuffer().put(modelPalette.toPalette());
             }
         }
         // 写入怪物使用的模型索引
-        getBuffer().put(getMonsterModelIndex(), modelIndexes);
+        getBuffer().put(getDataAddress(MONSTER_MODEL_INDEX_ADDRESS), modelIndexes);
         // 写入怪物模型使用的chr
-        getBuffer().put(getMonsterModelTileSet(), modelTileSets);
+        getBuffer().put(getDataAddress(MONSTER_MODEL_TILE_SET_ADDRESS), modelTileSets);
         // 写入怪物自增chr
-        getBuffer().put(getMonsterModelIncrementalTileSet(), incrementalTileSet);
+        getBuffer().put(getDataAddress(MONSTER_MODEL_INCREMENTAL_TILE_SET_ADDRESS), incrementalTileSet);
         // 写入怪物模型的大小
-        getBuffer().put(getMonsterModelSize(), modelSizes);
+        getBuffer().put(getDataAddress(MONSTER_MODEL_SIZE_ADDRESS), modelSizes);
         // 写入所有怪物模型数据
-        position(getMonsterModelLayout());
-        int maxModelLayoutLength = Math.min(getMonsterModelLayout().length(), layoutBuffer.position());
+        DataAddress monsterModelLayout = getDataAddress(MONSTER_MODEL_LAYOUT_ADDRESS);
+        position(monsterModelLayout);
+        int maxModelLayoutLength = Math.min(monsterModelLayout.length(), layoutBuffer.position());
         getBuffer().put(layoutBuffer.array(), 0, maxModelLayoutLength);
-        if (getMonsterModelLayout().length() < layoutBuffer.position()) {
-            int length = getMonsterModelLayout().length();
-            for (int modelIndex = 0; modelIndex < monsterModels.length; modelIndex++) {
+        if (monsterModelLayout.length() < layoutBuffer.position()) {
+            int length = monsterModelLayout.length();
+            for (int modelIndex = 0; modelIndex < (0x48 + 0x07); modelIndex++) {
                 // TODO
-                MonsterModel monsterModel = monsterModels[modelIndex];
+                MonsterModel monsterModel = monsterModels.get(modelIndex);
                 if (length - (modelLayoutIndexes[modelIndex] - baseLayoutIndex) < monsterModel.getModelData().length) {
                     LOGGER.error("怪物模型编辑器：索引({})模型数据写入失败({}/{})，没有多余的空间写入", NumberR.toHex(2, modelIndex), length - (modelLayoutIndexes[modelIndex] - baseLayoutIndex), monsterModel.getModelData().length);
                 }
             }
-            LOGGER.error("怪物模型编辑器：模型数据长度不足！无法写入 {} 字节的模型数据", layoutBuffer.position() - getMonsterModelLayout().length());
+            LOGGER.error("怪物模型编辑器：模型数据剩余空间不足！无法写入 {} 字节的模型数据", layoutBuffer.position() - monsterModelLayout.length());
         }
 
 //        ArrayList<Map.Entry<Integer, byte[]>> modelLayouts = new ArrayList<>(sortModelData);
@@ -609,21 +646,21 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
 //                    // 包含，跳过写入
 //                    continue;
 //                }
-//                if (getMonsterModelLayout().range((position() - 0x10) + modelLayout.length)) {
+//                if (monsterModelLayout.range((position() - 0x10) + modelLayout.length)) {
 //                    getBuffer().put(modelLayout);
 //                    newModelLayouts.add(modelLayout);
 //                } else {
 //                    LOGGER.error("模型索引({})写入失败，没有多余的空间写入{}/{}", NumberR.toHex(2, i),
-//                            modelLayout.length, getMonsterModelLayout().getEndAddress() - (position() - 0x10));
+//                            modelLayout.length, monsterModelLayout.getEndAddress() - (position() - 0x10));
 //                }
 //
 //            }
 //        }
         // 写入怪物图像起始id
-        getBuffer().put(getMonsterModelLayoutTileIndex(), modelLayoutTileIndexes);
+        getBuffer().put(getDataAddress(MONSTER_MODEL_LAYOUT_TILE_INDEX_ADDRESS), modelLayoutTileIndexes);
 
         // 写入所有怪物模型数据索引
-        position(getMonsterModelLayoutIndex());
+        position(getDataAddress(MONSTER_MODEL_LAYOUT_INDEX_ADDRESS));
         for (char modelLayoutIndex : modelLayoutIndexes) {
             getBuffer().putChar(NumberR.toChar(modelLayoutIndex));
         }
@@ -636,8 +673,9 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
             }
             customPaletteYsList.add(monsterModel.getCustomPaletteYs());
         }
-        position(getMonsterModelDoublePaletteDataIndex());
-        int ysLength = getMonsterModelDoublePaletteDataIndex().length();
+        DataAddress monsterModelDoublePaletteDataIndex = getDataAddress(MONSTER_MODEL_DOUBLE_PALETTE_DATA_INDEX_ADDRESS);
+        position(monsterModelDoublePaletteDataIndex);
+        int ysLength = monsterModelDoublePaletteDataIndex.length();
         for (byte[] bytes : customPaletteYsList) {
             ysLength -= bytes.length + 1;
             if (ysLength >= 0x00) {
@@ -688,49 +726,5 @@ public class MonsterModelImpl extends RomBufferWrapperAbstractEditor {
 
     public MonsterModel getMonsterModel(int monsterId) {
         return monsterModels.get(monsterId);
-    }
-
-    public DataAddress getMonsterModelIndex() {
-        return monsterModelIndex;
-    }
-
-    public DataAddress getMonsterModelPaletteIndex() {
-        return monsterModelPaletteIndex;
-    }
-
-    public DataAddress getMonsterModelDoublePalette() {
-        return monsterModelDoublePalette;
-    }
-
-    public DataAddress getMonsterModelPalette() {
-        return monsterModelPalette;
-    }
-
-    public DataAddress getMonsterModelDoublePaletteDataIndex() {
-        return monsterModelDoublePaletteDataIndex;
-    }
-
-    public DataAddress getMonsterModelTileSet() {
-        return monsterModelTileSet;
-    }
-
-    public DataAddress getMonsterModelIncrementalTileSet() {
-        return monsterModelIncrementalTileSet;
-    }
-
-    public DataAddress getMonsterModelSize() {
-        return monsterModelSize;
-    }
-
-    public DataAddress getMonsterModelLayoutIndex() {
-        return monsterModelLayoutIndex;
-    }
-
-    public DataAddress getMonsterModelLayout() {
-        return monsterModelLayout;
-    }
-
-    public DataAddress getMonsterModelLayoutTileIndex() {
-        return monsterModelLayoutTileIndex;
     }
 }

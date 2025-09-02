@@ -2,7 +2,6 @@ package me.afoolslove.metalmaxre.editors.map.world;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.map.MapPoint;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
 
@@ -40,45 +39,13 @@ public interface IWorldMapEditor extends IRomEditor {
      * 获取图块索引组的容量
      */
     default int[] getIndexesCapacity() {
-        return getWorldMapIndexesAddress().stream().mapToInt(m -> m.getStartAddress() == (7 * 0x2000) ? 0x50 : 0x200).toArray();
+        return getDataAddressList(WorldMapEditorImpl.WORLD_MAP_INDEXES_ADDRESS).stream().mapToInt(m -> m.getStartAddress() == (7 * 0x2000) ? 0x50 : 0x200).toArray();
     }
 
     /**
      * @return 地雷坐标
      */
     List<MapPoint> getMines();
-
-    /**
-     * 世界地图图块索引偏移地址
-     * <p>
-     * 0x01 = 0x1000 byte
-     */
-    DataAddress getWorldMapTilesIndexAddress();
-
-    /**
-     * 图块组索引地址<p>
-     * 0B0101_0101<p>
-     * 0(bit)：使用图块组A<p>
-     * 1(bit)：使用图块组B
-     */
-    DataAddress getWorldMapX00410Address();
-
-    /**
-     * 图块组，一组16（byte）个图块
-     */
-    List<DataAddress> getWorldMapIndexesAddress();
-
-    /**
-     * 相对图块索引
-     * <p>
-     * CHR ROM
-     */
-    DataAddress getWorldMapIndexAddress();
-
-    /**
-     * 地雷坐标起始 4x + 4y
-     */
-    DataAddress getWorldMapMinesAddress();
 
     /**
      * 将0x10个byte以4*4的顺序写入map

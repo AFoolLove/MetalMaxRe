@@ -5,6 +5,7 @@ import me.afoolslove.metalmaxre.editors.computer.Computer;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
 import me.afoolslove.metalmaxre.event.editors.EditorEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -125,6 +126,38 @@ public class EditorComputerEvent extends EditorEvent {
 
         public Computer getReplaceComputer() {
             return replace;
+        }
+    }
+
+    /**
+     * 应用时溢出的计算机事件
+     * <p>
+     * 无论是否溢出都会触发该事件
+     */
+    public static class OverflowComputer extends EditorComputerEvent {
+        private final List<Computer> overflowComputers;
+
+        public OverflowComputer(@NotNull MetalMaxRe metalMaxRe, @NotNull IComputerEditor<Computer> editor, @Nullable List<Computer> overflowComputers) {
+            super(metalMaxRe, editor, Computer.EMPTY_COMPUTER);
+            this.overflowComputers = overflowComputers == null ? Collections.emptyList() : Collections.unmodifiableList(overflowComputers);
+        }
+
+        /**
+         * 应用时，溢出的计算机列表
+         *
+         * @return 溢出的计算机列表
+         */
+        public List<Computer> getOverflowComputers() {
+            return overflowComputers;
+        }
+
+        /**
+         * 是否存在溢出的计算机
+         *
+         * @return 是否存在溢出的计算机
+         */
+        public boolean isOverflow() {
+            return !overflowComputers.isEmpty();
         }
     }
 }

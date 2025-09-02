@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.palette;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
 
@@ -51,19 +50,4 @@ public interface IPaletteEditor extends IRomEditor {
         int index = (position - (0x8000 + 0x1AD0)) / 9;
         return getPalettes().get(index);
     }
-
-    /**
-     * @return 调色板数据地址
-     */
-    DataAddress getPaletteAddress();
-
-    /**
-     * @return 全局精灵调色板（非战斗时）
-     */
-    DataAddress getGlobalSpritePalettesAddress();
-
-    /**
-     * @return 全局精灵调色板（战斗时）
-     */
-    DataAddress getBattleGlobalSpritePalettesAddress();
 }

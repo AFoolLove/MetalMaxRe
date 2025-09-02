@@ -21,10 +21,22 @@ import java.util.*;
 public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements IItemEditor {
     public static final List<ItemType> TYPES = Arrays.stream(ItemType.values()).toList();
 
-    private final DataAddress tankEnginesMaxCapacityAddress;
-    private final DataAddress tankEnginesImprovableAddress;
-    private final DataAddress playerEquipmentCanEquippedStartAddress;
-    private final DataAddress itemTypesAddress;
+    /**
+     * 坦克引擎装备的最大载重地址
+     */
+    public static final String TANK_ENGINE_MAX_CAPACITY_ADDRESS = "tankEngineMaxCapacity";
+    /**
+     * 坦克引擎是否能被改造地址
+     */
+    public static final String TANK_ENGINE_IMPROVABLE_ADDRESS = "tankEngineImprovable";
+    /**
+     * 玩家装备可穿戴状态地址
+     */
+    public static final String PLAYER_EQUIPMENT_CAN_EQUIPPED_START_ADDRESS = "playerEquipmentCanEquippedStart";
+    /**
+     * 所有物品的类型地址
+     */
+    public static final String ITEM_TYPES_ADDRESS = "itemTypes";
 
     private final List<PlayerArmor> playerArmors = new ArrayList<>(getPlayerArmorMaxCount());
     private final List<PlayerWeapon> playerWeapons = new ArrayList<>(getPlayerWeaponMaxCount());
@@ -71,10 +83,10 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
                           @NotNull DataAddress itemTypesAddress
     ) {
         super(metalMaxRe);
-        this.tankEnginesMaxCapacityAddress = tankEnginesMaxCapacityAddress;
-        this.tankEnginesImprovableAddress = tankEnginesImprovableAddress;
-        this.playerEquipmentCanEquippedStartAddress = playerEquipmentCanEquippedStartAddress;
-        this.itemTypesAddress = itemTypesAddress;
+        putDataAddress(TANK_ENGINE_MAX_CAPACITY_ADDRESS, tankEnginesMaxCapacityAddress);
+        putDataAddress(TANK_ENGINE_IMPROVABLE_ADDRESS, tankEnginesImprovableAddress);
+        putDataAddress(PLAYER_EQUIPMENT_CAN_EQUIPPED_START_ADDRESS, playerEquipmentCanEquippedStartAddress);
+        putDataAddress(ITEM_TYPES_ADDRESS, itemTypesAddress);
     }
 
     @Editor.Load
@@ -93,8 +105,9 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
 
 
         // 读取所有物品类型
-        position(getItemTypesAddress());
-        byte[] itemTypes = new byte[getItemTypesAddress().length()];
+        DataAddress itemTypesAddress = getDataAddress(ITEM_TYPES_ADDRESS);
+        position(itemTypesAddress);
+        byte[] itemTypes = new byte[itemTypesAddress.length()];
         getBuffer().get(itemTypes);
 
         // 物品的顺序为
@@ -149,13 +162,13 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         }
 
         // 读取坦克引擎的最大载重
-        position(getTankEnginesMaxCapacityAddress());
+        position(getDataAddress(TANK_ENGINE_MAX_CAPACITY_ADDRESS));
         for (int i = 0; i < getTankEngineMaxCount(); i++) {
             getTankEngines().get(i).setCapacity(getBuffer().get());
         }
 
         // 读取人类防具的可装备角色的数据
-        position(getPlayerEquipmentCanEquippedStartAddress());
+        position(getDataAddress(PLAYER_EQUIPMENT_CAN_EQUIPPED_START_ADDRESS));
         for (int i = 0; i < getPlayerArmorMaxCount(); i++) {
             getPlayerArmors().get(i).setCanEquipped(getBuffer().get());
         }
@@ -249,7 +262,7 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         }
 
         // 读取不可改造的引擎
-        position(getTankEnginesImprovableAddress());
+        position(getDataAddress(TANK_ENGINE_IMPROVABLE_ADDRESS));
         List<Item> items = getItems();
         for (int i = 0; i < 0x08; i++) {
             Item item = items.get(getBuffer().getToInt() - 1);
@@ -261,13 +274,13 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
 
     @Editor.Apply
     public void onApply() {
-        position(getTankEnginesMaxCapacityAddress());
+        position(getDataAddress(TANK_ENGINE_MAX_CAPACITY_ADDRESS));
         // 写入战车引擎的最大载重
         for (int i = 0; i < getTankEngineMaxCount(); i++) {
             getBuffer().put(getTankEngines().get(i).getCapacity());
         }
 
-        position(getPlayerEquipmentCanEquippedStartAddress());
+        position(getDataAddress(PLAYER_EQUIPMENT_CAN_EQUIPPED_START_ADDRESS));
         // 写入人类防具的可装备角色的数据
         for (int i = 0; i < getPlayerArmorMaxCount(); i++) {
             getBuffer().put(getPlayerArmors().get(i).getCanEquipped());
@@ -361,7 +374,7 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
         }
 
         // 写入不可改造的引擎
-        position(getTankEnginesImprovableAddress());
+        position(getDataAddress(TANK_ENGINE_IMPROVABLE_ADDRESS));
         byte[] improvable = new byte[0x08];
         List<Item> items = getItems();
         for (int i = 0, j = 0; j < 0x08 && i < items.size(); i++) {
@@ -482,25 +495,5 @@ public class ItemEditorImpl extends RomBufferWrapperAbstractEditor implements II
     @Override
     public List<TankItem> getTankItems() {
         return tankItems;
-    }
-
-    @Override
-    public DataAddress getTankEnginesMaxCapacityAddress() {
-        return tankEnginesMaxCapacityAddress;
-    }
-
-    @Override
-    public DataAddress getTankEnginesImprovableAddress() {
-        return tankEnginesImprovableAddress;
-    }
-
-    @Override
-    public DataAddress getPlayerEquipmentCanEquippedStartAddress() {
-        return playerEquipmentCanEquippedStartAddress;
-    }
-
-    @Override
-    public DataAddress getItemTypesAddress() {
-        return itemTypesAddress;
     }
 }

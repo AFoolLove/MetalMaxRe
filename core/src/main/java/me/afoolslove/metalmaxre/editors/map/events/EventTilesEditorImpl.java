@@ -38,7 +38,11 @@ import java.util.stream.Collectors;
  */
 public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor implements IEventTilesEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventTilesEditorImpl.class);
-    private final DataAddress eventTilesAddress;
+
+    /**
+     * 事件图块数据地址
+     */
+    public static final String EVENT_TILES_ADDRESS = "eventTiles";
     private final HashMap<Integer, Map<Integer, List<EventTile>>> eventTiles = new HashMap<>();
     @Nullable
     private WorldMapInteractiveEvent worldMapInteractiveEvent;
@@ -53,7 +57,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                                 @NotNull DataAddress eventTilesAddress,
                                 @Nullable WorldMapInteractiveEvent worldMapInteractiveEvent) {
         super(metalMaxRe);
-        this.eventTilesAddress = eventTilesAddress;
+        putDataAddress(EVENT_TILES_ADDRESS, eventTilesAddress);
         this.worldMapInteractiveEvent = worldMapInteractiveEvent;
     }
 
@@ -65,7 +69,7 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
         getEventTiles().clear();
         worldMapInteractiveEvent = null;
 
-        position(getEventTilesAddress());
+        position(getDataAddress(EVENT_TILES_ADDRESS));
         TreeSet<Map.Entry<Integer, MapProperties>> map = new HashMap<>(mapPropertiesEditor.getMapProperties())
                 .entrySet().parallelStream()
                 .filter(entry -> entry.getValue().hasEventTile()) // 移除没有事件图块属性的地图
@@ -221,8 +225,9 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
         }
 
         // 事件图块索引
-        char eventTilesIndex = (char) (getEventTilesAddress().getStartAddress() - 0x1C000 + 0x8000);
-        final char endEventTilesIndex = (char) (eventTilesIndex + getEventTilesAddress().length());
+        DataAddress eventTilesAddress = getDataAddress(EVENT_TILES_ADDRESS);
+        char eventTilesIndex = (char) (eventTilesAddress.getStartAddress() - 0x1C000 + 0x8000);
+        final char endEventTilesIndex = (char) (eventTilesIndex + eventTilesAddress.length());
         for (int mapId = 0, count = mapEditor.getMapMaxCount(); mapId < count; mapId++) {
             byte[] eventTile = eventTiles[mapId];
             if (eventTile == null || eventTile.length == 0) {
@@ -279,12 +284,12 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
         }
 
         // 写入数据
-        position(getEventTilesAddress());
+        position(eventTilesAddress);
         for (byte[] eventTilesDatum : eventTilesData) {
             getBuffer().put(eventTilesDatum);
         }
 
-        int end = getEventTilesAddress().getEndAddress(-position() + 0x10 + 1);
+        int end = eventTilesAddress.getEndAddress(-position() + 0x10 + 1);
         if (end >= 0) {
             if (end > 0) {
                 // 使用0xFF填充未使用的数据
@@ -354,11 +359,6 @@ public class EventTilesEditorImpl extends RomBufferWrapperAbstractEditor impleme
                 getBuffer().putChar(NumberR.toChar(worldMapInteractiveEventB));
             }
         }
-    }
-
-    @Override
-    public DataAddress getEventTilesAddress() {
-        return eventTilesAddress;
     }
 
     @Override

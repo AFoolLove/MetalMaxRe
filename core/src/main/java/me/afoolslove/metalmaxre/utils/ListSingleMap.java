@@ -17,6 +17,16 @@ public class ListSingleMap<K, V> extends ArrayList<SingleMapEntry<K, V>> {
         super(initialCapacity);
     }
 
+    public ListSingleMap(int initialCapacity, boolean create) {
+        super(initialCapacity);
+        if (create) {
+            for (int i = 0; i < initialCapacity; i++) {
+                add(SingleMapEntry.createEmpty());
+                add(SingleMapEntry.createEmpty());
+            }
+        }
+    }
+
     public ListSingleMap() {
     }
 

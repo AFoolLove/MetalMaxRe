@@ -15,15 +15,37 @@ import java.util.List;
 
 public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteModelEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpriteModelEditorImpl.class);
-    private final DataAddress spriteModelIndexAddress;
-    private final DataAddress spriteModelAddress;
 
-    private final DataAddress systemSpriteModelIndexAddress;
-    private final DataAddress systemSpriteModelAddress;
+    /**
+     * 获取精灵模型索引地址
+     */
+    public static final String SPRITE_MODEL_INDEX_ADDRESS = "spriteModelIndex";
+    /**
+     * 获取精灵模型数据地址
+     */
+    public static final String SPRITE_MODEL_ADDRESS = "spriteModel";
 
-    private final DataAddress battleSpriteModelAttributeAddress;
-    private final DataAddress battleSpriteModelIndexAddress;
-    private final DataAddress battleSpriteModelAddress;
+    /**
+     * 获取系统精灵模型索引地址
+     */
+    public static final String SYSTEM_SPRITE_MODEL_INDEX_ADDRESS = "systemSpriteModelIndex";
+    /**
+     * 获取系统精灵模型数据地址
+     */
+    public static final String SYSTEM_SPRITE_MODEL_ADDRESS = "systemSpriteModel";
+
+    /**
+     * 获取战斗精灵模型索引地址
+     */
+    public static final String BATTLE_SPRITE_MODEL_INDEX_ADDRESS = "battleSpriteModelIndex";
+    /**
+     * 获取战斗精灵模型属性地址
+     */
+    public static final String BATTLE_SPRITE_MODEL_ATTRIBUTE_ADDRESS = "battleSpriteModelAttribute";
+    /**
+     * 获取战斗精灵模型数据地址
+     */
+    public static final String BATTLE_SPRITE_MODEL_ADDRESS = "battleSpriteModel";
 
 
     private final List<SpriteModel> spriteModels = new ArrayList<>();
@@ -51,13 +73,13 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
                                  @NotNull DataAddress battleSpriteModelAttributeAddress,
                                  @NotNull DataAddress battleSpriteModelAddress) {
         super(metalMaxRe, false);
-        this.spriteModelIndexAddress = spriteModelIndexAddress;
-        this.spriteModelAddress = spriteModelAddress;
-        this.systemSpriteModelIndexAddress = systemSpriteModelIndexAddress;
-        this.systemSpriteModelAddress = systemSpriteModelAddress;
-        this.battleSpriteModelIndexAddress = battleSpriteModelIndexAddress;
-        this.battleSpriteModelAttributeAddress = battleSpriteModelAttributeAddress;
-        this.battleSpriteModelAddress = battleSpriteModelAddress;
+        putDataAddress(SPRITE_MODEL_INDEX_ADDRESS, spriteModelIndexAddress);
+        putDataAddress(SPRITE_MODEL_ADDRESS, spriteModelAddress);
+        putDataAddress(SYSTEM_SPRITE_MODEL_INDEX_ADDRESS, systemSpriteModelIndexAddress);
+        putDataAddress(SYSTEM_SPRITE_MODEL_ADDRESS, systemSpriteModelAddress);
+        putDataAddress(BATTLE_SPRITE_MODEL_INDEX_ADDRESS, battleSpriteModelIndexAddress);
+        putDataAddress(BATTLE_SPRITE_MODEL_ATTRIBUTE_ADDRESS, battleSpriteModelAttributeAddress);
+        putDataAddress(BATTLE_SPRITE_MODEL_ADDRESS, battleSpriteModelAddress);
     }
 
     @Editor.Load
@@ -67,16 +89,18 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         getSystemSpriteModels().clear();
         getBattleSpriteModels().clear();
 
-        char[] indexes = new char[getSpriteModelIndexAddress().length() / 0x02];
-        position(getSpriteModelIndexAddress());
+        DataAddress spriteModelIndexAddress = getDataAddress(SPRITE_MODEL_INDEX_ADDRESS);
+        char[] indexes = new char[spriteModelIndexAddress.length() / 0x02];
+        position(spriteModelIndexAddress);
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = getBuffer().getChar();
         }
 
-        int bankOffset = getSpriteModelAddress().getBankOffset();
+        DataAddress spriteModelAddress = getDataAddress(SPRITE_MODEL_ADDRESS);
+        int bankOffset = spriteModelAddress.getBankOffset();
         for (int i = 0; i < indexes.length; i++) {
             int position = indexes[i] - 0x8000 - bankOffset;
-            position += getSpriteModelAddress().getAbsStartAddress(getBuffer());
+            position += spriteModelAddress.getAbsStartAddress(getBuffer());
 
             int head = getBuffer().get(position++);
             int attribute = getBuffer().get(position++);
@@ -89,16 +113,18 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
             getSpriteModels().add(spriteModel);
         }
 
-        indexes = new char[getSystemSpriteModelIndexAddress().length() / 0x02];
-        position(getSystemSpriteModelIndexAddress());
+        DataAddress systemSpriteModelIndexAddress = getDataAddress(SYSTEM_SPRITE_MODEL_INDEX_ADDRESS);
+        indexes = new char[systemSpriteModelIndexAddress.length() / 0x02];
+        position(systemSpriteModelIndexAddress);
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = getBuffer().getChar();
         }
 
-        bankOffset = getSystemSpriteModelAddress().getBankOffset();
+        DataAddress systemSpriteModelAddress = getDataAddress(SYSTEM_SPRITE_MODEL_ADDRESS);
+        bankOffset = systemSpriteModelAddress.getBankOffset();
         for (int i = 0; i < indexes.length; i++) {
             int position = indexes[i] - 0x8000 - bankOffset;
-            position += getSystemSpriteModelAddress().getAbsStartAddress(getBuffer());
+            position += systemSpriteModelAddress.getAbsStartAddress(getBuffer());
 
             int count = getBuffer().get(position++);
             SystemSpriteModel systemSpriteModel = new SystemSpriteModel();
@@ -114,15 +140,17 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
 
         // 获取战斗精灵模型数据
-        byte[] modelAttributes = new byte[getBattleSpriteModelAttributeAddress().length()];
-        getBuffer().get(getBattleSpriteModelAttributeAddress(), modelAttributes);
+        DataAddress battleSpriteModelAddress = getDataAddress(BATTLE_SPRITE_MODEL_ADDRESS);
+        byte[] modelAttributes = new byte[battleSpriteModelAddress.length()];
+        getBuffer().get(battleSpriteModelAddress, modelAttributes);
 
-        indexes = new char[getBattleSpriteModelIndexAddress().length() / 0x02];
-        position(getBattleSpriteModelIndexAddress());
+        DataAddress battleSpriteModelIndexAddress = getDataAddress(BATTLE_SPRITE_MODEL_INDEX_ADDRESS);
+        indexes = new char[battleSpriteModelIndexAddress.length() / 0x02];
+        position(battleSpriteModelIndexAddress);
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = getBuffer().getChar();
         }
-        bankOffset = getBattleSpriteModelAddress().getBankOffset();
+        bankOffset = battleSpriteModelAddress.getBankOffset();
         for (int i = 0; i < indexes.length; i++) {
             char modelIndex = indexes[i];
             if (modelIndex == 0xFFFF) {
@@ -130,7 +158,7 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
                 continue;
             }
             int position = modelIndex - 0x8000 - bankOffset;
-            position += getBattleSpriteModelAddress().getAbsStartAddress(getBuffer());
+            position += battleSpriteModelAddress.getAbsStartAddress(getBuffer());
             BattleSpriteModel battleSpriteModel = new BattleSpriteModel(modelAttributes[i], (byte) 0, null);
 
             byte offset = getBuffer().get(position++);
@@ -148,16 +176,18 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         // 溢出标志
         boolean overflow = false;
 
-        char[] indexes = new char[getSpriteModelIndexAddress().length() / 0x02];
+        DataAddress spriteModelIndexAddress = getDataAddress(SPRITE_MODEL_INDEX_ADDRESS);
+        char[] indexes = new char[spriteModelIndexAddress.length() / 0x02];
 
         // 写入模型数据
-        int baseSpriteModelIndex = 0x8000 + getSpriteModelAddress().getBankOffset();
-        position(getSpriteModelAddress());
+        DataAddress spriteModelAddress = getDataAddress(SPRITE_MODEL_ADDRESS);
+        int baseSpriteModelIndex = 0x8000 + spriteModelAddress.getBankOffset();
+        position(spriteModelAddress);
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = (char) baseSpriteModelIndex;
 
             SpriteModel spriteModel = getSpriteModel(i);
-            overflow = overflow || !getSpriteModelAddress().range(position() - 0x10 + spriteModel.length());
+            overflow = overflow || !spriteModelAddress.range(position() - 0x10 + spriteModel.length());
             if (overflow) {
                 // 写不下了
                 LOGGER.error("精灵模型编辑器：精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), spriteModel.length());
@@ -171,23 +201,24 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
 
         // 写入模型索引
-        position(getSpriteModelIndexAddress());
+        position(spriteModelIndexAddress);
         for (char index : indexes) {
             getBuffer().putChar(NumberR.toChar(index));
         }
 
-
-        indexes = new char[getSystemSpriteModelIndexAddress().length() / 0x02];
+        DataAddress systemSpriteModelIndexAddress = getDataAddress(SYSTEM_SPRITE_MODEL_INDEX_ADDRESS);
+        indexes = new char[systemSpriteModelIndexAddress.length() / 0x02];
         // 写入系统精灵模型数据
-        baseSpriteModelIndex = 0x8000 + getSystemSpriteModelAddress().getBankOffset();
-        position(getSystemSpriteModelAddress());
+        DataAddress systemSpriteModelAddress = getDataAddress(SYSTEM_SPRITE_MODEL_ADDRESS);
+        baseSpriteModelIndex = 0x8000 + systemSpriteModelAddress.getBankOffset();
+        position(systemSpriteModelAddress);
         overflow = false;
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = (char) baseSpriteModelIndex;
 
             List<SystemSprite> systemSpriteModel = getSystemSpriteModel(i);
 
-            overflow = overflow || !getSystemSpriteModelAddress().range(position() - 0x10 + (systemSpriteModel.size() * 0x04));
+            overflow = overflow || !systemSpriteModelAddress.range(position() - 0x10 + (systemSpriteModel.size() * 0x04));
             if (overflow) {
                 // 写不下了
                 LOGGER.error("精灵模型编辑器：系统精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), systemSpriteModel.size() * 0x04);
@@ -202,16 +233,20 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
 
         // 写入模型索引
-        position(getSystemSpriteModelIndexAddress());
+        position(systemSpriteModelIndexAddress);
         for (char index : indexes) {
             getBuffer().putChar(NumberR.toChar(index));
         }
 
         // 写入战斗精灵模型数据
-        indexes = new char[getBattleSpriteModelIndexAddress().length() / 0x02];
-        byte[] attributes = new byte[getBattleSpriteModelAttributeAddress().length()];
-        baseSpriteModelIndex = 0x8000 + getBattleSpriteModelAddress().getBankOffset();
-        position(getBattleSpriteModelAddress());
+        DataAddress battleSpriteModelIndexAddress = getDataAddress(BATTLE_SPRITE_MODEL_INDEX_ADDRESS);
+        DataAddress battleSpriteModelAttributeAddress = getDataAddress(BATTLE_SPRITE_MODEL_ATTRIBUTE_ADDRESS);
+        DataAddress battleSpriteModelAddress = getDataAddress(BATTLE_SPRITE_MODEL_ADDRESS);
+
+        indexes = new char[battleSpriteModelIndexAddress.length() / 0x02];
+        byte[] attributes = new byte[battleSpriteModelAttributeAddress.length()];
+        baseSpriteModelIndex = 0x8000 + battleSpriteModelAddress.getBankOffset();
+        position(battleSpriteModelAddress);
         overflow = false;
         for (int i = 0; i < indexes.length; i++) {
             BattleSpriteModel battleSpriteModel = getBattleSpriteModels().get(i);
@@ -221,7 +256,7 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
             }
             indexes[i] = (char) baseSpriteModelIndex;
 
-            overflow = overflow || !getBattleSpriteModelAddress().range(position() - 0x10 + battleSpriteModel.length());
+            overflow = overflow || !battleSpriteModelAddress.range(position() - 0x10 + battleSpriteModel.length());
             if (overflow) {
                 // 写不下了
                 LOGGER.error("精灵模型编辑器：战斗精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), battleSpriteModel.length());
@@ -234,10 +269,10 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
 
         // 写入战斗精灵模型属性
-        position(getBattleSpriteModelAttributeAddress());
+        position(battleSpriteModelAttributeAddress);
         getBuffer().put(attributes);
         // 写入战斗精灵模型索引
-        position(getBattleSpriteModelIndexAddress());
+        position(battleSpriteModelIndexAddress);
         for (char index : indexes) {
             getBuffer().putChar(NumberR.toChar(index));
         }
@@ -256,41 +291,5 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
     @Override
     public List<BattleSpriteModel> getBattleSpriteModels() {
         return battleSpriteModels;
-    }
-
-    @Override
-    public DataAddress getSpriteModelIndexAddress() {
-        return spriteModelIndexAddress;
-    }
-
-    @Override
-    public DataAddress getSpriteModelAddress() {
-        return spriteModelAddress;
-    }
-
-    @Override
-    public DataAddress getSystemSpriteModelIndexAddress() {
-        return systemSpriteModelIndexAddress;
-    }
-
-    @Override
-    public DataAddress getSystemSpriteModelAddress() {
-        return systemSpriteModelAddress;
-    }
-
-
-    @Override
-    public DataAddress getBattleSpriteModelIndexAddress() {
-        return battleSpriteModelIndexAddress;
-    }
-
-    @Override
-    public DataAddress getBattleSpriteModelAttributeAddress() {
-        return battleSpriteModelAttributeAddress;
-    }
-
-    @Override
-    public DataAddress getBattleSpriteModelAddress() {
-        return battleSpriteModelAddress;
     }
 }

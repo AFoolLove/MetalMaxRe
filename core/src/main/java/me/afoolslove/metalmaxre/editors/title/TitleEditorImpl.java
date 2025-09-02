@@ -11,23 +11,53 @@ import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 
 public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements ITitleEditor {
-    private final DataAddress logoTileSetAddress;
-    private final DataAddress logoTileSetPaletteIndexAddress;
-    private final DataAddress titleTileSetAddress;
-    private final DataAddress titleTileSetPaletteIndexAddress;
-    private final DataAddress logoTileImageAddress;
+    /**
+     * 标题图块集地址
+     */
+    public static final String LOGO_TILE_SET_ADDRESS = "logoTileSet";
+    /**
+     * 标题图块集颜色索引地址
+     */
+    public static final String LOGO_TILE_SET_PALETTE_INDEX_ADDRESS = "logoTileSetPaletteIndex";
+    /**
+     * logo图块集地址
+     */
+    public static final String TITLE_TILE_SET_ADDRESS = "titleTileSet";
+    /**
+     * logo图块集颜色索引地址
+     */
+    public static final String TITLE_TILE_SET_PALETTE_INDEX_ADDRESS = "titleTileSetPaletteIndex";
+    /**
+     * logo图块图像集地址
+     */
+    public static final String LOGO_TILE_IMAGE_ADDRESS = "logoTileImage";
 
     private final Tile[][] titleTiles = new Tile[30][32];
     private final Tile[][] logoTiles = new Tile[30][32];
     private final XXTileSet[] logoTileSet = new XXTileSet[0x02];
 
     public TitleEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
+        this(metalMaxRe,
+                DataAddress.fromCHR(0x3F000, 0x3F3BF),
+                DataAddress.fromCHR(0x3F3C0, 0x3F3FF),
+                DataAddress.fromCHR(0x3F400, 0x3F7BF),
+                DataAddress.fromCHR(0x3F7C0, 0x3F7FF),
+                DataAddress.fromPRG(0x47810 - 0x10, 0x48010 - 0x10));
+    }
+
+    public TitleEditorImpl(@NotNull MetalMaxRe metalMaxRe,
+                           @NotNull DataAddress logoTileSetAddress,
+                           @NotNull DataAddress logoTileSetPaletteIndexAddress,
+                           @NotNull DataAddress titleTileSetAddress,
+                           @NotNull DataAddress titleTileSetPaletteIndexAddress,
+                           @NotNull DataAddress logoTileImageAddress
+    ) {
         super(metalMaxRe);
-        this.logoTileSetAddress = DataAddress.fromCHR(0x3F000, 0x3F3BF);
-        this.logoTileSetPaletteIndexAddress = DataAddress.fromCHR(0x3F3C0, 0x3F3FF);
-        this.titleTileSetAddress = DataAddress.fromCHR(0x3F400, 0x3F7BF);
-        this.titleTileSetPaletteIndexAddress = DataAddress.fromCHR(0x3F7C0, 0x3F7FF);
-        this.logoTileImageAddress = DataAddress.fromPRG(0x47810 - 0x10, 0x48010 - 0x10);
+        putDataAddress(LOGO_TILE_SET_ADDRESS, logoTileSetAddress);
+        putDataAddress(LOGO_TILE_SET_PALETTE_INDEX_ADDRESS, logoTileSetPaletteIndexAddress);
+        putDataAddress(TITLE_TILE_SET_ADDRESS, titleTileSetAddress);
+        putDataAddress(TITLE_TILE_SET_PALETTE_INDEX_ADDRESS, titleTileSetPaletteIndexAddress);
+        putDataAddress(LOGO_TILE_IMAGE_ADDRESS, logoTileImageAddress);
     }
 
     @Editor.Load
@@ -43,15 +73,15 @@ public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements I
 
 
         byte[][] titleTiles = new byte[30][32];
-        getBuffer().getAABytes(getTitleTileSetAddress(), 0, 32, titleTiles);
+        getBuffer().getAABytes(getDataAddress(TITLE_TILE_SET_ADDRESS), 0, 32, titleTiles);
 
         byte[] titlePaletteIndexes = new byte[64];
-        getBuffer().get(getTitleTileSetPaletteIndexAddress(), titlePaletteIndexes);
+        getBuffer().get(getDataAddress(TITLE_TILE_SET_PALETTE_INDEX_ADDRESS), titlePaletteIndexes);
 
         byte[][] logoTiles = new byte[30][32];
-        getBuffer().getAABytes(getLogoTileSetAddress(), 0, 32, logoTiles);
+        getBuffer().getAABytes(getDataAddress(LOGO_TILE_SET_ADDRESS), 0, 32, logoTiles);
         byte[] logoPaletteIndexes = new byte[64];
-        getBuffer().get(getLogoTileSetPaletteIndexAddress(), logoPaletteIndexes);
+        getBuffer().get(getDataAddress(LOGO_TILE_SET_PALETTE_INDEX_ADDRESS), logoPaletteIndexes);
 
         for (int y = 0; y < 30; y++) {
             for (int x = 0; x < 32; x++) {
@@ -86,7 +116,7 @@ public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements I
         }
 
         // 读取logo的额外图块
-        position(getLogoTileImageAddress());
+        position(getDataAddress(LOGO_TILE_IMAGE_ADDRESS));
         for (XXTileSet xxTileSet : logoTileSet) {
             for (TileImage tile : xxTileSet.getTiles()) {
                 getBuffer().get(tile.getTileData());
@@ -102,7 +132,7 @@ public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements I
                 titleTiles[y][x] = this.titleTiles[y][x].getTile();
             }
         }
-        getBuffer().putAABytes(getTitleTileSetAddress(), 0, 32, titleTiles);
+        getBuffer().putAABytes(getDataAddress(TITLE_TILE_SET_ADDRESS), 0, 32, titleTiles);
 
         byte[][] logoTiles = new byte[30][32];
         for (int y = 0; y < 30; y++) {
@@ -110,7 +140,7 @@ public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements I
                 logoTiles[y][x] = this.logoTiles[y][x].getTile();
             }
         }
-        getBuffer().putAABytes(getLogoTileSetAddress(), 0, 32, logoTiles);
+        getBuffer().putAABytes(getDataAddress(LOGO_TILE_SET_ADDRESS), 0, 32, logoTiles);
 
 
         byte[] titlePaletteIndexes = new byte[64];
@@ -128,11 +158,11 @@ public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements I
                 }
             }
         }
-        getBuffer().put(getTitleTileSetPaletteIndexAddress(), titlePaletteIndexes);
-        getBuffer().put(getLogoTileSetPaletteIndexAddress(), logoPaletteIndexes);
+        getBuffer().put(getDataAddress(TITLE_TILE_SET_PALETTE_INDEX_ADDRESS), titlePaletteIndexes);
+        getBuffer().put(getDataAddress(LOGO_TILE_SET_PALETTE_INDEX_ADDRESS), logoPaletteIndexes);
 
         // 写入logo的额外图块图像
-        position(getLogoTileImageAddress());
+        position(getDataAddress(LOGO_TILE_IMAGE_ADDRESS));
         for (XXTileSet xxTileSet : logoTileSet) {
             for (TileImage tile : xxTileSet.getTiles()) {
                 getBuffer().put(tile.getTileData());
@@ -153,30 +183,5 @@ public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements I
     @Override
     public XXTileSet[] getLogoTileSet() {
         return logoTileSet;
-    }
-
-    @Override
-    public DataAddress getTitleTileSetAddress() {
-        return titleTileSetAddress;
-    }
-
-    @Override
-    public DataAddress getTitleTileSetPaletteIndexAddress() {
-        return titleTileSetPaletteIndexAddress;
-    }
-
-    @Override
-    public DataAddress getLogoTileSetAddress() {
-        return logoTileSetAddress;
-    }
-
-    @Override
-    public DataAddress getLogoTileSetPaletteIndexAddress() {
-        return logoTileSetPaletteIndexAddress;
-    }
-
-    @Override
-    public DataAddress getLogoTileImageAddress() {
-        return logoTileImageAddress;
     }
 }

@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.text;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
 import java.util.Map;
@@ -161,59 +160,4 @@ public interface ITextEditor extends IRomEditor {
      * 设置玩家三名称池
      */
     void setPlayer2NamePool(List<TextBuilder> namePool);
-
-    /**
-     * 获取已知的文本段的地址
-     *
-     * @return 已知的文本段的地址
-     */
-    Map<Integer, DataAddress> getTextAddresses();
-
-    /**
-     * 获取城镇名称的地址
-     *
-     * @return 城镇名称的地址
-     */
-    default DataAddress getTownNameAddress() {
-        return getTextAddresses().get(TOWN_NAME_PAGE);
-    }
-
-    /**
-     * 获取物品名称的地址
-     *
-     * @return 物品名称的地址
-     */
-    default DataAddress getItemNameAddress() {
-        return getTextAddresses().get(ITEM_NAME_PAGE);
-    }
-
-    /**
-     * 获取怪物名称的地址
-     *
-     * @return 怪物名称的地址
-     */
-    default DataAddress getMonsterNameAddress() {
-        return getTextAddresses().get(MONSTER_NAME_PAGE);
-    }
-
-    /**
-     * 获取彩蛋名称的地址
-     *
-     * @return 彩蛋名称的地址
-     */
-    DataAddress getEasterEggNameAddress();
-
-    /**
-     * 获取玩家二名称池的地址
-     *
-     * @return 玩家二名称池的地址
-     */
-    DataAddress getPlayer1NamePoolAddress();
-
-    /**
-     * 获取玩家三名称池的地址
-     *
-     * @return 玩家三名称池的地址
-     */
-    DataAddress getPlayer2NamePoolAddress();
 }

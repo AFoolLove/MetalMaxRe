@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.map;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.Map;
 
@@ -29,10 +28,4 @@ public interface IMapEntranceEditor extends IRomEditor {
     default MapEntrance getWorldMapEntrance() {
         return getMapEntrances().get(0x00);
     }
-
-
-    /**
-     * @return 地图边界和出入口数据地址
-     */
-    DataAddress getMapEntranceAddress();
 }

@@ -71,9 +71,14 @@ public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor imple
             return spriteScriptAction;
         }
     }).create();
-
-    private final DataAddress spriteScriptIndexAddress;
-    private final DataAddress spriteScriptAddress;
+    /**
+     * 获取精灵脚本索引地址
+     */
+    public static final String SPRITE_SCRIPT_INDEX_ADDRESS = "spriteScriptIndex";
+    /**
+     * 获取精灵脚本地址
+     */
+    public static final String SPRITE_SCRIPT_ADDRESS = "spriteScript";
 
     private final Map<Integer, SpriteScript> spriteScripts = new HashMap<>();
 
@@ -90,8 +95,8 @@ public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor imple
                                   @NotNull DataAddress spriteScriptIndexAddress,
                                   @NotNull DataAddress spriteScriptAddress) {
         super(metalMaxRe, false);
-        this.spriteScriptAddress = spriteScriptAddress;
-        this.spriteScriptIndexAddress = spriteScriptIndexAddress;
+        putDataAddress(SPRITE_SCRIPT_ADDRESS, spriteScriptAddress);
+        putDataAddress(SPRITE_SCRIPT_INDEX_ADDRESS, spriteScriptIndexAddress);
 
         byte[] bytes = ResourceManager.getAsBytes("/sprite_script_actions.json");
         SpriteScriptAction[] spriteScriptActions = SPRITE_SCRIPT_GSON.fromJson(new String(bytes, StandardCharsets.UTF_8), new TypeToken<>() {
@@ -106,7 +111,7 @@ public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor imple
         getSpriteScripts().clear();
 
         char[] indexes = new char[getSpriteScriptMaxCount()];
-        position(getSpriteScriptIndexAddress());
+        position(getDataAddress(SPRITE_SCRIPT_INDEX_ADDRESS));
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = getBuffer().getChar();
         }
@@ -127,15 +132,5 @@ public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor imple
     @Override
     public Map<Integer, SpriteScript> getSpriteScripts() {
         return spriteScripts;
-    }
-
-    @Override
-    public DataAddress getSpriteScriptIndexAddress() {
-        return spriteScriptIndexAddress;
-    }
-
-    @Override
-    public DataAddress getSpriteScriptAddress() {
-        return spriteScriptAddress;
     }
 }

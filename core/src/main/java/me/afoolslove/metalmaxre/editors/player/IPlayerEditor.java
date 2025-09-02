@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.player;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.Range;
 
 import java.util.Map;
@@ -54,6 +53,4 @@ public interface IPlayerEditor extends IRomEditor {
      * @return 数组形式的金钱
      */
     byte[] getMoneyByteArray();
-
-    DataAddress getPlayerAddress();
 }

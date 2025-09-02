@@ -23,11 +23,28 @@ import java.util.Map;
  * @author AFoolLove
  */
 public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements ITankEditor {
-    private final DataAddress tankInitEquipmentsAddress;
-    private final DataAddress taxTankInitChassisWeightsAddress;
-    private final DataAddress tankInitChassisWeightsAddress;
-    private final DataAddress tankInitSPAddress;
-    private final DataAddress tankInitLocationsAddress;
+    /**
+     * 坦克的初始装备
+     * <p>
+     * *包含出租坦克
+     */
+    public static final String TANK_INIT_EQUIPMENTS_ADDRESS = "tankInitEquipments";
+    /**
+     * 出租坦克的底盘重量地址（TAX1 - TAXA
+     */
+    public static final String TAX_TANK_INIT_CHASSIS_WEIGHTS_ADDRESS = "taxTankInitChassisWeights";
+    /**
+     * 坦克的底盘重量地址（NO.1 - NO.8
+     */
+    public static final String TANK_INIT_CHASSIS_WEIGHTS_ADDRESS = "tankInitChassisWeights";
+    /**
+     * 坦克的初始SP地址（NO.1 - NO.8
+     */
+    public static final String TANK_INIT_SP_ADDRESS = "tankInitSP";
+    /**
+     * 坦克的初始坐标地址（NO.1 - NO.8 +（TAX1 map - TAXA map）
+     */
+    public static final String TANK_INIT_LOCATIONS_ADDRESS = "tankInitLocations";
 
     private byte defenseUpStep;
     private byte shellsUpStep;
@@ -57,11 +74,11 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                           @NotNull DataAddress tankInitSPAddress,
                           @NotNull DataAddress tankInitLocationsAddress) {
         super(metalMaxRe);
-        this.tankInitEquipmentsAddress = tankInitEquipmentsAddress;
-        this.taxTankInitChassisWeightsAddress = taxTankInitChassisWeightsAddress;
-        this.tankInitChassisWeightsAddress = tankInitChassisWeightsAddress;
-        this.tankInitSPAddress = tankInitSPAddress;
-        this.tankInitLocationsAddress = tankInitLocationsAddress;
+        putDataAddress(TANK_INIT_EQUIPMENTS_ADDRESS, tankInitEquipmentsAddress);
+        putDataAddress(TAX_TANK_INIT_CHASSIS_WEIGHTS_ADDRESS, taxTankInitChassisWeightsAddress);
+        putDataAddress(TANK_INIT_CHASSIS_WEIGHTS_ADDRESS, tankInitChassisWeightsAddress);
+        putDataAddress(TANK_INIT_SP_ADDRESS, tankInitSPAddress);
+        putDataAddress(TANK_INIT_LOCATIONS_ADDRESS, tankInitLocationsAddress);
     }
 
     @Editor.Load
@@ -92,7 +109,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         getBuffer().getLastPrg(0x26F7 - 0x10, weaponShellCapacities);
 
         // 读取坦克初始装备（6byte）
-        position(getTankInitEquipmentsAddress());
+        position(getDataAddress(TANK_INIT_EQUIPMENTS_ADDRESS));
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
             byte[] equipment = new byte[0x06];
             getBuffer().get(equipment);
@@ -115,7 +132,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
             tankInitialAttributes[tank].setMaxDefense(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
         // 读取出租坦克的底盘重量（2byte）
-//        position(getTaxTankInitChassisWeightsAddress());
+//        position(getDataAddress(TAX_TANK_INIT_CHASSIS_WEIGHTS_ADDRESS));
         for (int taxTank = 0; taxTank < Tank.TAX_TANK_COUNT; taxTank++) {
             tankInitialAttributes[Tank.PLAYER_TANK_COUNT + taxTank].setWeight(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
@@ -125,19 +142,19 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         }
 
         // 读取坦克的底盘重量
-        position(getTankInitChassisWeightsAddress());
+        position(getDataAddress(TANK_INIT_CHASSIS_WEIGHTS_ADDRESS));
         for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
             tankInitialAttributes[playerTank].setWeight(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
 
         // 读取坦克的初始SP
-        position(getTankInitSPAddress());
+        position(getDataAddress(TANK_INIT_SP_ADDRESS));
         for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
             tankInitialAttributes[playerTank].setSp(NumberR.toInt(getBuffer().get(), getBuffer().get()));
         }
 
         // 读取坦克的初始坐标
-        position(getTankInitLocationsAddress());
+        position(getDataAddress(TANK_INIT_LOCATIONS_ADDRESS));
         byte[] maps = new byte[Tank.AVAILABLE_COUNT];
         byte[] xs = new byte[Tank.PLAYER_TANK_COUNT];
         byte[] ys = new byte[Tank.PLAYER_TANK_COUNT];
@@ -172,7 +189,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         }
 
         // 写入坦克初始装备（6byte）
-        position(getTankInitEquipmentsAddress());
+        position(getDataAddress(TANK_INIT_EQUIPMENTS_ADDRESS));
         for (int tank = 0; tank < Tank.ALL_COUNT; tank++) {
             getBuffer().put(tankInitialAttributes[tank].getEquipment());
         }
@@ -193,7 +210,7 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
             getBuffer().put(tankInitialAttributes[tank].getMaxDefenseByteArray());
         }
         // 写入出租坦克的底盘重量（2byte）
-//        position(getTaxTankInitChassisWeightsAddress());
+//        position(getDataAddress(TAX_TANK_INIT_CHASSIS_WEIGHTS_ADDRESS));
         for (int taxTank = 0; taxTank < Tank.TAX_TANK_COUNT; taxTank++) {
             getBuffer().put(tankInitialAttributes[Tank.PLAYER_TANK_COUNT + taxTank].getWeightByteArray());
         }
@@ -203,19 +220,19 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         }
 
         // 写入坦克的底盘重量
-        position(getTankInitChassisWeightsAddress());
+        position(getDataAddress(TANK_INIT_CHASSIS_WEIGHTS_ADDRESS));
         for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
             getBuffer().put(tankInitialAttributes[playerTank].getWeightByteArray());
         }
 
         // 写入坦克的初始SP
-        position(getTankInitSPAddress());
+        position(getDataAddress(TANK_INIT_SP_ADDRESS));
         for (int playerTank = 0; playerTank < Tank.PLAYER_TANK_COUNT; playerTank++) {
             getBuffer().put(tankInitialAttributes[playerTank].getSpByteArray());
         }
 
         // 写入坦克的初始坐标
-        position(getTankInitLocationsAddress());
+        position(getDataAddress(TANK_INIT_LOCATIONS_ADDRESS));
         byte[] maps = new byte[Tank.AVAILABLE_COUNT];
         byte[] xs = new byte[Tank.PLAYER_TANK_COUNT];
         byte[] ys = new byte[Tank.PLAYER_TANK_COUNT];
@@ -266,31 +283,6 @@ public class TankEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     @Override
     public byte[] getWeaponShellCapacities() {
         return weaponShellCapacities;
-    }
-
-    @Override
-    public DataAddress getTankInitEquipmentsAddress() {
-        return tankInitEquipmentsAddress;
-    }
-
-    @Override
-    public DataAddress getTaxTankInitChassisWeightsAddress() {
-        return taxTankInitChassisWeightsAddress;
-    }
-
-    @Override
-    public DataAddress getTankInitChassisWeightsAddress() {
-        return tankInitChassisWeightsAddress;
-    }
-
-    @Override
-    public DataAddress getTankInitSPAddress() {
-        return tankInitSPAddress;
-    }
-
-    @Override
-    public DataAddress getTankInitLocationsAddress() {
-        return tankInitLocationsAddress;
     }
 
     @Override

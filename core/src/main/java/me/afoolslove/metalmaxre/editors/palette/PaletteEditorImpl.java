@@ -24,9 +24,18 @@ import java.util.List;
  */
 @Editor.TargetVersions
 public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements IPaletteEditor {
-    private final DataAddress paletteAddress;
-    private final DataAddress globalSpritePalettesAddress;
-    private final DataAddress battleGlobalSpritePalettesAddress;
+    /**
+     * 调色板数据地址
+     */
+    public static final String PALETTE_ADDRESS = "palette";
+    /**
+     * 全局精灵调色板（非战斗时）
+     */
+    public static final String GLOBAL_SPRITE_PALETTES_ADDRESS = "globalSpritePalettes";
+    /**
+     * 全局精灵调色板（战斗时）
+     */
+    public static final String BATTLE_GLOBAL_SPRITE_PALETTES_ADDRESS = "battleGlobalSpritePalettes";
 
     /**
      * 所有调色板
@@ -54,9 +63,9 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
                              @NotNull DataAddress globalSpritePalettesAddress,
                              @NotNull DataAddress battleGlobalSpritePalettesAddress) {
         super(metalMaxRe);
-        this.paletteAddress = paletteAddress;
-        this.globalSpritePalettesAddress = globalSpritePalettesAddress;
-        this.battleGlobalSpritePalettesAddress = battleGlobalSpritePalettesAddress;
+        putDataAddress(PALETTE_ADDRESS, paletteAddress);
+        putDataAddress(GLOBAL_SPRITE_PALETTES_ADDRESS, globalSpritePalettesAddress);
+        putDataAddress(BATTLE_GLOBAL_SPRITE_PALETTES_ADDRESS, battleGlobalSpritePalettesAddress);
     }
 
     @Editor.Load
@@ -66,7 +75,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
         getSpritePalette().clear();
         getBattleSpritePalette().clear();
 
-        position(getPaletteAddress());
+        position(getDataAddress(PALETTE_ADDRESS));
         // 读取所有调色板集（(3+3+3)byte ）
         for (int i = 0, maxCount = getPaletteMaxCount() / 0x03; i < maxCount; i++) {
             List<PaletteRow> palettes = new ArrayList<>();
@@ -82,7 +91,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 读取精灵调色板，固定数值
-        position(getGlobalSpritePalettesAddress());
+        position(getDataAddress(GLOBAL_SPRITE_PALETTES_ADDRESS));
         for (int i = 0; i < 0x04; i++) {
             offsetPosition(1); // 跳过 0x0F
             spritePalette.add(new PaletteRow(getBuffer(), position()));
@@ -90,7 +99,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
 
         // 读取战斗时的精灵调色板
-        position(getBattleGlobalSpritePalettesAddress());
+        position(getDataAddress(BATTLE_GLOBAL_SPRITE_PALETTES_ADDRESS));
         for (int i = 0; i < 0x04; i++) {
             battleSpritePalette.add(new PaletteRow(getBuffer(), position()));
             offsetPosition(3);
@@ -100,7 +109,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Editor.Apply
     public void onApply() {
         // 写入调色板
-        position(getPaletteAddress());
+        position(getDataAddress(PALETTE_ADDRESS));
         for (int i = 0, maxCount = getPaletteMaxCount() / 0x03; i < maxCount; i++) {
             List<PaletteRow> paletteRows = getPalettes().get(i);
             // 3个调色板，1个调色板3byte
@@ -117,13 +126,13 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
 //        }
 
         // 写入精灵调色板
-        position(getGlobalSpritePalettesAddress());
+        position(getDataAddress(GLOBAL_SPRITE_PALETTES_ADDRESS));
         for (int i = 0; i < 0x04; i++) {
             getBuffer().put(getSpritePalette().get(i).getPaletteRow());
         }
 
         // 写入战斗时的精灵调色板
-        position(getBattleGlobalSpritePalettesAddress());
+        position(getDataAddress(BATTLE_GLOBAL_SPRITE_PALETTES_ADDRESS));
         for (int i = 0; i < 0x04; i++) {
             // 只写入后三位
             getBuffer().put(getBattleSpritePalette().get(i).getPaletteRow(), 1, 3);
@@ -142,21 +151,6 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
     @Override
     public List<PaletteRow> getBattleSpritePalette() {
         return battleSpritePalette;
-    }
-
-    @Override
-    public DataAddress getPaletteAddress() {
-        return paletteAddress;
-    }
-
-    @Override
-    public DataAddress getGlobalSpritePalettesAddress() {
-        return globalSpritePalettesAddress;
-    }
-
-    @Override
-    public DataAddress getBattleGlobalSpritePalettesAddress() {
-        return battleGlobalSpritePalettesAddress;
     }
 
     /**

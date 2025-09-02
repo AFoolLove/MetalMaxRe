@@ -25,11 +25,34 @@ import java.util.*;
 @Editor.TargetVersions
 public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implements IWorldMapEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldMapEditorImpl.class);
-    private final DataAddress worldMapTilesIndexAddress;
-    private final DataAddress worldMapX00410Address;
-    private final List<DataAddress> worldMapIndexesAddress;
-    private final DataAddress worldMapIndexAddress;
-    private final DataAddress worldMapMinesAddress;
+
+    /**
+     * 世界地图图块索引偏移地址
+     * <p>
+     * 0x01 = 0x1000 byte
+     */
+    public static final String WORLD_MAP_TILES_INDEX_ADDRESS = "worldMapTilesIndex";
+    /**
+     * 图块组索引地址<p>
+     * 0B0101_0101<p>
+     * 0(bit)：使用图块组A<p>
+     * 1(bit)：使用图块组B
+     */
+    public static final String WORLD_MAP_X00410_ADDRESS = "worldMapX00410";
+    /**
+     * 图块组，一组16（byte）个图块
+     */
+    public static final String WORLD_MAP_INDEXES_ADDRESS = "worldMapIndexes";
+    /**
+     * 相对图块索引
+     * <p>
+     * CHR ROM
+     */
+    public static final String WORLD_MAP_INDEX_ADDRESS = "worldMapIndex";
+    /**
+     * 地雷坐标起始 4x + 4y
+     */
+    public static final String WORLD_MAP_MINE_ADDRESS = "worldMapMine";
 
     /**
      * 图块集组合矩形化
@@ -90,11 +113,11 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                               DataAddress worldMapMinesAddress,
                               List<DataAddress> worldMapIndexesAddress) {
         super(metalMaxRe);
-        this.worldMapTilesIndexAddress = worldMapTilesIndexAddress;
-        this.worldMapX00410Address = worldMapX00410Address;
-        this.worldMapIndexAddress = worldMapIndexAddress;
-        this.worldMapMinesAddress = worldMapMinesAddress;
-        this.worldMapIndexesAddress = worldMapIndexesAddress;
+        putDataAddress(WORLD_MAP_TILES_INDEX_ADDRESS, worldMapTilesIndexAddress);
+        putDataAddress(WORLD_MAP_X00410_ADDRESS, worldMapX00410Address);
+        putDataAddress(WORLD_MAP_INDEX_ADDRESS, worldMapIndexAddress);
+        putDataAddress(WORLD_MAP_MINE_ADDRESS, worldMapMinesAddress);
+        putDataAddress(WORLD_MAP_INDEXES_ADDRESS, worldMapIndexesAddress);
     }
 
     public WorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
@@ -103,12 +126,13 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
                               DataAddress worldMapIndexAddress,
                               DataAddress worldMapMinesAddress) {
         super(metalMaxRe);
-        this.worldMapTilesIndexAddress = worldMapTilesIndexAddress;
-        this.worldMapX00410Address = worldMapX00410Address;
-        this.worldMapIndexAddress = worldMapIndexAddress;
-        this.worldMapMinesAddress = worldMapMinesAddress;
+        putDataAddress(WORLD_MAP_TILES_INDEX_ADDRESS, worldMapTilesIndexAddress);
+        putDataAddress(WORLD_MAP_X00410_ADDRESS, worldMapX00410Address);
+        putDataAddress(WORLD_MAP_INDEX_ADDRESS, worldMapIndexAddress);
+        putDataAddress(WORLD_MAP_MINE_ADDRESS, worldMapMinesAddress);
 
-        this.worldMapIndexesAddress = new ArrayList<>();
+        List<DataAddress> worldMapIndexesAddress = new ArrayList<>();
+        putDataAddress(WORLD_MAP_INDEXES_ADDRESS, worldMapIndexesAddress);
         int position = metalMaxRe.getBuffer().getHeader().getLastPrgRomLength() + 0x01E94;
 
         worldMapIndexesAddress.add(DataAddress.fromPRG(metalMaxRe.getBuffer().getToInt(position++) * 0x2000));
@@ -134,18 +158,19 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         mines.clear();
 
         // 读取世界地图图块索引偏移
-        getBuffer().get(getWorldMapTilesIndexAddress(), indexOffsets);
+        getBuffer().get(getDataAddress(WORLD_MAP_TILES_INDEX_ADDRESS), indexOffsets);
         // 读取图块组索引
-        getBuffer().get(getWorldMapX00410Address(), x00410);
+        getBuffer().get(getDataAddress(WORLD_MAP_X00410_ADDRESS), x00410);
         // 读取图块组
-        for (int i = 0; i < getWorldMapIndexesAddress().size(); i++) {
-            position(getWorldMapIndexesAddress().get(i));
+        List<DataAddress> worldMapIndexesAddress = getDataAddressList(WORLD_MAP_INDEXES_ADDRESS);
+        for (int i = 0; i < worldMapIndexesAddress.size(); i++) {
+            position(worldMapIndexesAddress.get(i));
             for (byte[] bytes : indexes[i]) {
                 getBuffer().get(bytes);
             }
         }
         // 读取图块索引
-        position(getWorldMapIndexAddress());
+        position(getDataAddress(WORLD_MAP_INDEX_ADDRESS));
         getBuffer().get(index);
 
         byte[][][] indexes = getIndexes();
@@ -196,7 +221,7 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
 
         // 读取地雷
-        position(getWorldMapMinesAddress());
+        position(getDataAddress(WORLD_MAP_MINE_ADDRESS));
         byte[] mineXs = new byte[0x04];
         byte[] mineYs = new byte[0x04];
         getBuffer().get(mineXs);
@@ -422,22 +447,23 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
 
         // 写入世界地图图块索引偏移
-        getBuffer().put(getWorldMapTilesIndexAddress(), indexOffsets);
+        getBuffer().put(getDataAddress(WORLD_MAP_TILES_INDEX_ADDRESS), indexOffsets);
         // 写入图块组索引
-        getBuffer().put(getWorldMapX00410Address(), x00410);
+        getBuffer().put(getDataAddress(WORLD_MAP_X00410_ADDRESS), x00410);
         // 写入图块组
-        for (int i = 0; i < getWorldMapIndexesAddress().size(); i++) {
-            position(getWorldMapIndexesAddress().get(i));
+        List<DataAddress> worldMapIndexesAddress = getDataAddressList(WORLD_MAP_INDEXES_ADDRESS);
+        for (int i = 0; i < worldMapIndexesAddress.size(); i++) {
+            position(worldMapIndexesAddress.get(i));
             for (int j = 0; j < indexesCapacity[i]; j++) {
                 getBuffer().put(getIndexes()[i][j]);
             }
         }
         // 写入图块索引
-        position(getWorldMapIndexAddress());
+        position(getDataAddress(WORLD_MAP_INDEX_ADDRESS));
         getBuffer().put(index);
 
         // 写入4个地雷坐标
-        position(getWorldMapMinesAddress());
+        position(getDataAddress(WORLD_MAP_MINE_ADDRESS));
         byte[] mineXs = new byte[0x04];
         byte[] mineYs = new byte[0x04];
         for (int i = 0, size = Math.min(0x04, mines.size()); i < size; i++) {
@@ -447,31 +473,6 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
         getBuffer().put(mineXs);
         getBuffer().put(mineYs);
-    }
-
-    @Override
-    public DataAddress getWorldMapTilesIndexAddress() {
-        return worldMapTilesIndexAddress;
-    }
-
-    @Override
-    public DataAddress getWorldMapX00410Address() {
-        return worldMapX00410Address;
-    }
-
-    @Override
-    public List<DataAddress> getWorldMapIndexesAddress() {
-        return worldMapIndexesAddress;
-    }
-
-    @Override
-    public DataAddress getWorldMapIndexAddress() {
-        return worldMapIndexAddress;
-    }
-
-    @Override
-    public DataAddress getWorldMapMinesAddress() {
-        return worldMapMinesAddress;
     }
 
     @Override

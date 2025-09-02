@@ -25,7 +25,11 @@ import java.util.*;
 @Editor.TargetVersions
 public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implements IMapEntranceEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(MapEntranceEditorImpl.class);
-    private final DataAddress mapEntranceAddress;
+
+    /**
+     * 地图边界和出入口数据地址
+     */
+    public static final String MAP_ENTRANCE_ADDRESS = "mapEntrance";
 
     public MapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -35,7 +39,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
     public MapEntranceEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                                  DataAddress mapEntranceAddress) {
         super(metalMaxRe);
-        this.mapEntranceAddress = mapEntranceAddress;
+        putDataAddress(MAP_ENTRANCE_ADDRESS, mapEntranceAddress);
     }
 
     /**
@@ -48,6 +52,8 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         // 读取前清空数据
         getMapEntrances().clear();
 
+        DataAddress mapEntranceAddress = getDataAddress(MAP_ENTRANCE_ADDRESS);
+
         for (int mapId = 0, maxMapCount = mapPropertiesEditor.getMapProperties().size(); mapId < maxMapCount; mapId++) {
             MapProperties mapProperties = mapPropertiesEditor.getMapProperties(mapId);
 
@@ -58,7 +64,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
             // 索引到数据
             // 兼容SH和SHG，只用0xFF000中的FF，后三个无用
-            prgPosition((getMapEntranceAddress().getStartAddress() & 0xFF000) + mapProperties.getEntrance() - 0x8000);
+            prgPosition((mapEntranceAddress.getStartAddress() & 0xFF000) + mapProperties.getEntrance() - 0x8000);
 //            System.out.printf("%02X. %05X ",map, position());
 
             MapEntrance mapEntrance = readBorderAndEntrance(mapId);
@@ -114,9 +120,10 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         // 将会储存的边界和出入口数据
         List<byte[]> mapEntrancesData = new ArrayList<>();
 
+        DataAddress mapEntranceAddress = getDataAddress(MAP_ENTRANCE_ADDRESS);
         // 边界和出入口数据索引
         char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().getEntrance();
-        final char endMapEntranceIndex = (char) (mapEntranceIndex + (getMapEntranceAddress().length() - 1));
+        final char endMapEntranceIndex = (char) (mapEntranceIndex + (mapEntranceAddress.length() - 1));
         for (int mapId = 0, count = mapEditor.getMapMaxCount(); mapId < count; mapId++) {
             byte[] mapEntrance = mapEntrances[mapId];
             if (mapEntrance == null) {
@@ -168,12 +175,12 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
 
         // 写入出入口
-        position(getMapEntranceAddress());
+        position(mapEntranceAddress);
         for (byte[] mapEntrancesDatum : mapEntrancesData) {
             getBuffer().put(mapEntrancesDatum);
         }
 
-        int end = getMapEntranceAddress().getEndAddress(-position() + 0x10 + 1);
+        int end = mapEntranceAddress.getEndAddress(-position() + 0x10 + 1);
         if (end >= 0) {
             if (end > 0) {
                 // 使用0xFF填充未使用的数据
@@ -234,12 +241,6 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
         return mapEntrance;
     }
-
-    @Override
-    public DataAddress getMapEntranceAddress() {
-        return mapEntranceAddress;
-    }
-
     @Override
     public Map<Integer, MapEntrance> getMapEntrances() {
         return mapEntrances;
@@ -313,9 +314,10 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             // 将会储存的边界和出入口数据
             List<byte[]> mapEntrancesData = new ArrayList<>();
 
+            DataAddress mapEntranceAddress = getDataAddress(MAP_ENTRANCE_ADDRESS);
             // 边界和出入口数据索引
             char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().getEntrance();
-            final char endMapEntranceIndex = (char) (mapEntranceIndex + (getMapEntranceAddress().length() - 1));
+            final char endMapEntranceIndex = (char) (mapEntranceIndex + (mapEntranceAddress.length() - 1));
             // 排除世界地图，在SH中，世界地图为独立数据，不参与其中
             for (int mapId = 0x00, count = mapEditor.getMapMaxCount(); mapId < count; mapId++) {
                 byte[] mapEntrance = mapEntrances[mapId];
@@ -370,11 +372,11 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             }
 
             // 写入出入口，排除世界地图
-            position(getMapEntranceAddress());
+            position(mapEntranceAddress);
             for (int i = 0x01; i < mapEntrancesData.size(); i++) {
                 getBuffer().put(mapEntrancesData.get(i));
             }
-            int end = getMapEntranceAddress().getEndAddress(-position() + 0x10 + 1);
+            int end = mapEntranceAddress.getEndAddress(-position() + 0x10 + 1);
             if (end >= 0) {
                 if (end > 0) {
                     // 使用0xFF填充未使用的数据
@@ -471,9 +473,10 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             // 将会储存的边界和出入口数据
             List<byte[]> mapEntrancesData = new ArrayList<>();
 
+            DataAddress mapEntranceAddress = getDataAddress(MAP_ENTRANCE_ADDRESS);
             // 边界和出入口数据索引
             char mapEntranceIndex = mapPropertiesEditor.getWorldMapProperties().getEntrance();
-            final char endMapEntranceIndex = (char) (mapEntranceIndex + (getMapEntranceAddress().length() - 1));
+            final char endMapEntranceIndex = (char) (mapEntranceIndex + (mapEntranceAddress.length() - 1));
             // 排除世界地图，在SH中，世界地图为独立数据，不参与其中
             for (int mapId = 0x00, count = mapEditor.getMapMaxCount(); mapId < count; mapId++) {
                 byte[] mapEntrance = mapEntrances[mapId];
@@ -528,11 +531,11 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             }
 
             // 写入出入口，排除世界地图
-            position(getMapEntranceAddress());
+            position(mapEntranceAddress);
             for (int i = 0x01; i < mapEntrancesData.size(); i++) {
                 getBuffer().put(mapEntrancesData.get(i));
             }
-            int end = getMapEntranceAddress().getEndAddress(-position() + 0x10 + 1);
+            int end = mapEntranceAddress.getEndAddress(-position() + 0x10 + 1);
             if (end >= 0) {
                 if (end > 0) {
                     // 使用0xFF填充未使用的数据

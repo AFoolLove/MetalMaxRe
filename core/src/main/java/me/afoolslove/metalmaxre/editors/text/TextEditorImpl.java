@@ -24,11 +24,24 @@ import java.util.*;
 @Editor.TargetVersions
 public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements ITextEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(TextEditorImpl.class);
-    private final Map<Integer, DataAddress> textAddresses;
-
-    private final DataAddress easterEggNameAddress;
-    private final DataAddress player1NamePoolAddress;
-    private final DataAddress player2NamePoolAddress;
+    /**
+     * 已知的文本段的地址
+     * <p>
+     * Integer, DataAddress
+     */
+    public static final String TEXT_MAP_ADDRESS = "textMap";
+    /**
+     * 彩蛋名称的地址
+     */
+    public static final String EASTER_EGG_NAME_ADDRESS = "easterEggName";
+    /**
+     * 玩家二名称池的地址
+     */
+    public static final String PLAYER_1_NAME_POOL_ADDRESS = "player1NamePool";
+    /**
+     * 玩家三名称池的地址
+     */
+    public static final String PLAYER_2_NAME_POOL_ADDRESS = "player2NamePool";
 
     private final Map<DataAddress, List<TextBuilder>> text = new HashMap<>();
     private final Map<TextBuilder, List<TextBuilder>> easterEggNames = new LinkedHashMap<>();
@@ -62,12 +75,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         Gson gson = new Gson();
         JsonObject jsonObject = gson.fromJson(jsonTextAddresses, JsonObject.class);
 
+        Map<Integer, DataAddress> dataAddressList = getDataAddressMap(TEXT_MAP_ADDRESS);
         for (String s : jsonObject.keySet()) {
             int page = Integer.parseInt(s, 16) & 0xFF;
             String[] split = jsonObject.get(s).getAsString().split("-", 2);
             int startAddr = Integer.parseInt(split[0], 16) & 0xFFFFF;
             int endAddr = Integer.parseInt(split[1], 16) & 0xFFFFF;
-            textAddresses.put(page, DataAddress.from(startAddr - 0x10, endAddr - 0x10));
+            dataAddressList.put(page, DataAddress.from(startAddr - 0x10, endAddr - 0x10));
         }
     }
 
@@ -77,10 +91,10 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
                           @NotNull DataAddress player1NamePoolAddress,
                           @NotNull DataAddress player2NamePoolAddress) {
         super(metalMaxRe);
-        this.textAddresses = textAddresses;
-        this.easterEggNameAddress = easterEggNameAddress;
-        this.player1NamePoolAddress = player1NamePoolAddress;
-        this.player2NamePoolAddress = player2NamePoolAddress;
+        putDataAddress(TEXT_MAP_ADDRESS, textAddresses);
+        putDataAddress(EASTER_EGG_NAME_ADDRESS, easterEggNameAddress);
+        putDataAddress(PLAYER_1_NAME_POOL_ADDRESS, player1NamePoolAddress);
+        putDataAddress(PLAYER_2_NAME_POOL_ADDRESS, player2NamePoolAddress);
     }
 
     @Editor.Load
@@ -90,7 +104,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         player1NamePool.clear();
         player2NamePool.clear();
 
-        textAddresses.values().parallelStream().forEach(textAddress -> {
+        Map<Integer, DataAddress> dataAddressMap = getDataAddressMap(TEXT_MAP_ADDRESS);
+        dataAddressMap.values().parallelStream().forEach(textAddress -> {
             // 得到这段文本的数据长度
             final byte[] bytes = new byte[textAddress.length()];
             // 定位，读取
@@ -100,7 +115,7 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         });
 
 
-        position(getEasterEggNameAddress());
+        position(getDataAddress(EASTER_EGG_NAME_ADDRESS));
         byte[][] easterEggNameBytes = new byte[0x04][0x04];
         for (int easterEggName = 0; easterEggName < 0x05; easterEggName++) {
             getBuffer().getAABytes(0, 0x04, easterEggNameBytes);
@@ -113,13 +128,13 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
             easterEggNames.put(key, value);
         }
 
-        position(getPlayer1NamePoolAddress());
+        position(getDataAddress(PLAYER_1_NAME_POOL_ADDRESS));
         byte[] bytes = new byte[0x04];
         for (int i = 0; i < 0x0B; i++) {
             getBuffer().get(bytes);
             player1NamePool.add(TextBuilder.fromBytes(bytes, getCharMap()).get(0));
         }
-        position(getPlayer2NamePoolAddress());
+        position(getDataAddress(PLAYER_2_NAME_POOL_ADDRESS));
         for (int i = 0; i < 0x0B; i++) {
             getBuffer().get(bytes);
             player2NamePool.add(TextBuilder.fromBytes(bytes, getCharMap()).get(0));
@@ -151,7 +166,7 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
             }
         });
 
-        position(getEasterEggNameAddress());
+        position(getDataAddress(EASTER_EGG_NAME_ADDRESS));
         byte[] bytes = new byte[0x04];
         byte[] tmpBytes;
         for (Map.Entry<TextBuilder, List<TextBuilder>> entry : easterEggNames.entrySet()) {
@@ -166,14 +181,14 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
             }
         }
 
-        position(getPlayer1NamePoolAddress());
+        position(getDataAddress(PLAYER_1_NAME_POOL_ADDRESS));
         for (int i = 0; i < 0x0B; i++) {
             TextBuilder textBuilder = player1NamePool.get(i);
             tmpBytes = textBuilder.toByteArray(getCharMap());
             copyArrayTo(tmpBytes, bytes, 0x04, (byte) 0x9F);
             getBuffer().put(bytes);
         }
-        position(getPlayer2NamePoolAddress());
+        position(getDataAddress(PLAYER_2_NAME_POOL_ADDRESS));
         for (int i = 0; i < 0x0B; i++) {
             TextBuilder textBuilder = player2NamePool.get(i);
             tmpBytes = textBuilder.toByteArray(getCharMap());
@@ -190,7 +205,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     @Override
     public Map<Integer, List<TextBuilder>> getPages() {
         Map<Integer, List<TextBuilder>> map = new HashMap<>();
-        for (Map.Entry<Integer, DataAddress> entry : getTextAddresses().entrySet()) {
+        Map<Integer, DataAddress> textMapAddress = getDataAddressMap(TEXT_MAP_ADDRESS);
+        for (Map.Entry<Integer, DataAddress> entry : textMapAddress.entrySet()) {
             map.put(entry.getKey(), text.get(entry.getValue()));
         }
         return map;
@@ -198,12 +214,14 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public List<TextBuilder> getPage(int page) {
-        return text.get(getTextAddresses().get(page));
+        Map<Integer, DataAddress> textMapAddress = getDataAddressMap(TEXT_MAP_ADDRESS);
+        return text.get(textMapAddress.get(page));
     }
 
     @Override
     public String getTownName(int townId) {
-        List<TextBuilder> textBuilders = text.get(getTownNameAddress());
+        Map<Integer, DataAddress> textMapAddress = getDataAddressMap(TEXT_MAP_ADDRESS);
+        List<TextBuilder> textBuilders = text.get(textMapAddress.get(TOWN_NAME_PAGE));
         if (textBuilders == null || (0x30 + townId) >= textBuilders.size()) {
             return "null";
         }
@@ -212,7 +230,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public String getItemName(int itemId) {
-        List<TextBuilder> textBuilders = text.get(getItemNameAddress());
+        Map<Integer, DataAddress> textMapAddress = getDataAddressMap(TEXT_MAP_ADDRESS);
+        List<TextBuilder> textBuilders = text.get(textMapAddress.get(ITEM_NAME_PAGE));
         if (textBuilders == null || itemId >= textBuilders.size()) {
             return "null";
         }
@@ -221,7 +240,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public String getMonsterName(int monsterId) {
-        List<TextBuilder> textBuilders = text.get(getMonsterNameAddress());
+        Map<Integer, DataAddress> textMapAddress = getDataAddressMap(TEXT_MAP_ADDRESS);
+        List<TextBuilder> textBuilders = text.get(textMapAddress.get(MONSTER_NAME_PAGE));
         if (textBuilders == null || monsterId >= textBuilders.size()) {
             return "null";
         }
@@ -245,7 +265,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public void setTownName(int townId, String newName) {
-        List<TextBuilder> textBuilders = text.get(getTownNameAddress());
+        Map<Integer, DataAddress> textMapAddress = getDataAddressMap(TEXT_MAP_ADDRESS);
+        List<TextBuilder> textBuilders = text.get(textMapAddress.get(TOWN_NAME_PAGE));
         if (textBuilders == null || (0x30 + townId) >= textBuilders.size()) {
             return;
         }
@@ -254,7 +275,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public void setItemName(int itemId, String newName) {
-        List<TextBuilder> textBuilders = text.get(getItemNameAddress());
+        Map<Integer, DataAddress> textMapAddress = getDataAddressMap(TEXT_MAP_ADDRESS);
+        List<TextBuilder> textBuilders = text.get(textMapAddress.get(ITEM_NAME_PAGE));
         if (textBuilders == null || itemId >= textBuilders.size()) {
             return;
         }
@@ -263,7 +285,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     @Override
     public void setMonsterName(int monsterId, String newName) {
-        List<TextBuilder> textBuilders = text.get(getItemNameAddress());
+        Map<Integer, DataAddress> textMapAddress = getDataAddressMap(TEXT_MAP_ADDRESS);
+        List<TextBuilder> textBuilders = text.get(textMapAddress.get(MONSTER_NAME_PAGE));
         if (textBuilders == null || monsterId >= textBuilders.size()) {
             return;
         }
@@ -286,26 +309,6 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     public void setPlayer2NamePool(List<TextBuilder> namePool) {
         this.player2NamePool.clear();
         this.player2NamePool.addAll(namePool);
-    }
-
-    @Override
-    public Map<Integer, DataAddress> getTextAddresses() {
-        return textAddresses;
-    }
-
-    @Override
-    public DataAddress getEasterEggNameAddress() {
-        return easterEggNameAddress;
-    }
-
-    @Override
-    public DataAddress getPlayer1NamePoolAddress() {
-        return player1NamePoolAddress;
-    }
-
-    @Override
-    public DataAddress getPlayer2NamePoolAddress() {
-        return player2NamePoolAddress;
     }
 
     @Editor.TargetVersion("japanese")

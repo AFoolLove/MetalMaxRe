@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.map;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 
@@ -90,28 +89,4 @@ public interface IDogSystemEditor extends IRomEditor {
     default SingleMapEntry<Byte, Byte> getTown(int townIndex) {
         return getTowns().get(townIndex);
     }
-
-    /**
-     * 获取地图和进入地图后开启的事件代码
-     *
-     * @return 地图和进入地图的事件代码
-     */
-    @NotNull
-    DataAddress getTownsAddress();
-
-    /**
-     * 获取使用犬系统传送的目的地址
-     *
-     * @return 犬系统传送的目的地址
-     */
-    @NotNull
-    DataAddress getTownLocationsAddress();
-
-    /**
-     * 获取使用时空隧道机器传送的目的地地址
-     *
-     * @return 时空隧道机器目的地地址
-     */
-    @NotNull
-    DataAddress getTeleportLocationAddress();
 }

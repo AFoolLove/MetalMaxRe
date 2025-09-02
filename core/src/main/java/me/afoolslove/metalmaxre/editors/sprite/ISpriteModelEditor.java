@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.sprite;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -99,55 +98,4 @@ public interface ISpriteModelEditor extends IRomEditor {
     default BattleSpriteModel getBattleSpriteModel(int index) {
         return getBattleSpriteModels().get(index);
     }
-
-    /**
-     * 获取精灵模型索引地址
-     *
-     * @return 精灵模型索引地址
-     */
-    DataAddress getSpriteModelIndexAddress();
-
-    /**
-     * 获取精灵模型数据地址
-     *
-     * @return 精灵模型数据地址
-     */
-    DataAddress getSpriteModelAddress();
-
-    /**
-     * 获取系统精灵模型索引地址
-     *
-     * @return 系统精灵模型索引地址
-     */
-    DataAddress getSystemSpriteModelIndexAddress();
-
-    /**
-     * 获取系统精灵模型数据地址
-     *
-     * @return 系统精灵模型数据地址
-     */
-    DataAddress getSystemSpriteModelAddress();
-
-    /**
-     * 获取战斗精灵模型索引地址
-     *
-     * @return 战斗精灵模型索引地址
-     */
-    DataAddress getBattleSpriteModelIndexAddress();
-
-    /**
-     * 获取战斗精灵模型属性地址
-     *
-     * @return 战斗精灵模型属性地址
-     */
-    DataAddress getBattleSpriteModelAttributeAddress();
-
-    /**
-     * 获取战斗精灵模型数据地址
-     *
-     * @return 战斗精灵模型数据地址
-     */
-    DataAddress getBattleSpriteModelAddress();
-
-
 }

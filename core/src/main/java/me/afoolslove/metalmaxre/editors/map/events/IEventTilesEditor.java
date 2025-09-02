@@ -1,7 +1,6 @@
 package me.afoolslove.metalmaxre.editors.map.events;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 import java.util.List;
 import java.util.Map;
@@ -11,11 +10,6 @@ public interface IEventTilesEditor extends IRomEditor {
     default String getId() {
         return "eventTilesEditor";
     }
-
-    /**
-     * @return 事件图块数据地址
-     */
-    DataAddress getEventTilesAddress();
 
     /**
      * K：Map<p>

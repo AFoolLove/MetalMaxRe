@@ -122,7 +122,7 @@ public interface ISaveEditor {
     void setTrunkItems(byte[] items);
 
     /**
-     * 设置拖动战车火物体
+     * 设置拖动战车或物体
      *
      * @param object 被托走的物体
      */

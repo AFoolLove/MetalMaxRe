@@ -3,7 +3,6 @@ package me.afoolslove.metalmaxre.editors.title;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.editors.map.tileset.Tile;
 import me.afoolslove.metalmaxre.editors.map.tileset.XXTileSet;
-import me.afoolslove.metalmaxre.utils.DataAddress;
 
 /**
  * 标题/Logo界面编辑器
@@ -38,39 +37,4 @@ public interface ITitleEditor extends IRomEditor {
      * @return logo图块数据
      */
     XXTileSet[] getLogoTileSet();
-
-    /**
-     * 标题图块集地址
-     *
-     * @return 标题图块集地址
-     */
-    DataAddress getTitleTileSetAddress();
-
-    /**
-     * 标题图块集颜色索引地址
-     *
-     * @return 标题图块集颜色索引地址
-     */
-    DataAddress getTitleTileSetPaletteIndexAddress();
-
-    /**
-     * logo图块集地址
-     *
-     * @return logo图块集地址
-     */
-    DataAddress getLogoTileSetAddress();
-
-    /**
-     * logo图块集颜色索引地址
-     *
-     * @return logo图块集颜色索引地址
-     */
-    DataAddress getLogoTileSetPaletteIndexAddress();
-
-    /**
-     * logo图块图像集地址
-     *
-     * @return logo图块图像集地址
-     */
-    DataAddress getLogoTileImageAddress();
 }

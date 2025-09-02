@@ -23,9 +23,18 @@ import java.util.List;
  */
 public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implements ITreasureEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(TreasureEditorImpl.class);
-    private final DataAddress randomTreasureAddress;
-    private final DataAddress checkPointsAddress;
-    private final DataAddress treasureAddress;
+    /**
+     * 随机宝藏相关数据
+     */
+    public static final String RANDOM_TREASURE_ADDRESS = "randomTreasure";
+    /**
+     * 特殊调查点
+     */
+    public static final String CHECK_POINTS_ADDRESS = "checkPoints";
+    /**
+     * 宝藏数据地址
+     */
+    public static final String TREASURE_ADDRESS = "treasure";
 
     private final List<Treasure> treasures = new ArrayList<>(getTreasureMaxCount());
     /**
@@ -63,9 +72,9 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
                               DataAddress checkPointsAddress,
                               DataAddress treasureAddress) {
         super(metalMaxRe);
-        this.randomTreasureAddress = randomTreasureAddress;
-        this.checkPointsAddress = checkPointsAddress;
-        this.treasureAddress = treasureAddress;
+        putDataAddress(RANDOM_TREASURE_ADDRESS, randomTreasureAddress);
+        putDataAddress(CHECK_POINTS_ADDRESS, checkPointsAddress);
+        putDataAddress(TREASURE_ADDRESS, treasureAddress);
     }
 
     @Editor.Load
@@ -81,7 +90,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         // data[2] = y
         // data[3] = item
         byte[][] data = new byte[4][getTreasureMaxCount()];
-        getBuffer().getAABytes(getTreasureAddress(), 0, getTreasureMaxCount(), data);
+        getBuffer().getAABytes(getDataAddress(TREASURE_ADDRESS), 0, getTreasureMaxCount(), data);
 
         for (int i = 0; i < getTreasureMaxCount(); i++) {
             Treasure treasure = new Treasure(data[0][i], data[1][i], data[2][i], data[3][i]);
@@ -105,8 +114,8 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         // data[0] = map
         // data[1] = x
         // data[2] = y
-        position(getCheckPointsAddress());
-        getBuffer().getAABytes(getCheckPointsAddress(), 0, getCheckPointMaxCount(), data[0], data[1], data[2]);
+        position(getDataAddress(CHECK_POINTS_ADDRESS));
+        getBuffer().getAABytes(getDataAddress(CHECK_POINTS_ADDRESS), 0, getCheckPointMaxCount(), data[0], data[1], data[2]);
 
         mapCheckPoints.entrance.getKey().set(data[0][0x00], data[1][0x00], data[2][0x00]);
         mapCheckPoints.text.getKey().set(data[0][0x01], data[1][0x01], data[2][0x01]);
@@ -130,7 +139,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         // 读取随机宝藏相关数据
 
         // 读取默认的随机宝藏和其它随机宝藏的概率
-        position(getRandomTreasureAddress());
+        position(getDataAddress(RANDOM_TREASURE_ADDRESS));
         defaultRandomTreasure.setKey(getBuffer().get()); // 0x35AE4 - 0x10
         defaultRandomTreasure.setValue(getBuffer().getPrg(0x35ACD - 0x10));
         // 读取其它随机宝藏和概率
@@ -169,7 +178,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
             Arrays.fill(data[0], count, getTreasureMaxCount(), (byte) 0xFF);
         }
         // 写入宝藏
-        getBuffer().put(getTreasureAddress(), data);
+        getBuffer().put(getDataAddress(TREASURE_ADDRESS), data);
 
         if (treasures.size() > count) {
             for (Treasure treasure : treasures.subList(count, treasures.size())) {
@@ -180,7 +189,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         }
 
         // 写入地图的调查点
-        position(getCheckPointsAddress());
+        position(getDataAddress(CHECK_POINTS_ADDRESS));
         List<MapPoint> checkPoints = Arrays.asList(mapCheckPoints.entrance.getKey(),
                 mapCheckPoints.text.getKey(),
                 mapCheckPoints.reviveCapsule.getKey(),
@@ -197,7 +206,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
             data[1][index] = checkPoint.getX();
             data[2][index] = checkPoint.getY();
         }
-        getBuffer().putAABytes(getCheckPointsAddress(), 0, getCheckPointMaxCount(), data[0], data[1], data[2]);
+        getBuffer().putAABytes(getDataAddress(CHECK_POINTS_ADDRESS), 0, getCheckPointMaxCount(), data[0], data[1], data[2]);
 
         getBuffer().putPrg(0x35CDD - 0x10, mapCheckPoints.entrance.getValue().getMap());
         getBuffer().putPrg(0x35CE1 - 0x10, mapCheckPoints.entrance.getValue().getCameraX());
@@ -216,7 +225,7 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
         // 写入随机宝藏相关数据
 
         // 写入默认的随机宝藏和其它随机宝藏的概率
-        position(getRandomTreasureAddress());
+        position(getDataAddress(RANDOM_TREASURE_ADDRESS));
         getBuffer().put(getDefaultRandomTreasure().getKey()); // 0x35AE4 - 0x10
         getBuffer().putPrg(0x35ACD - 0x10, getDefaultRandomTreasure().getValue());
         // 写入其它随机宝藏和概率
@@ -251,20 +260,5 @@ public class TreasureEditorImpl extends RomBufferWrapperAbstractEditor implement
     @Override
     public SingleMapEntry<Byte, Byte> getDefaultRandomTreasure() {
         return defaultRandomTreasure;
-    }
-
-    @Override
-    public DataAddress getRandomTreasureAddress() {
-        return randomTreasureAddress;
-    }
-
-    @Override
-    public DataAddress getCheckPointsAddress() {
-        return checkPointsAddress;
-    }
-
-    @Override
-    public DataAddress getTreasureAddress() {
-        return treasureAddress;
     }
 }
