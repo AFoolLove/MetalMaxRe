@@ -4,6 +4,8 @@ import me.afoolslove.metalmaxre.editors.IRomEditor;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Function;
+
 /**
  * 添加了编辑器支持的 {@link RomBuffer}
  * <p>
@@ -51,6 +53,12 @@ public class EditorRomBufferWrapper extends RomBufferWrapper {
         return b;
     }
 
+    public synchronized void getCharArray(char[] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = getChar();
+        }
+    }
+
     public synchronized void put(byte[] bytes, int offset, int length) {
         put(editor.position(), bytes, offset, length);
         editor.offsetPosition(length);
@@ -94,8 +102,8 @@ public class EditorRomBufferWrapper extends RomBufferWrapper {
     public synchronized void putChars(char[] cs) {
         for (char c : cs) {
             putChar(editor.position(), c);
+            editor.offsetPosition(2); // char占2字节
         }
-        editor.offsetPosition(cs.length * 2); // char占2字节
     }
 
     public synchronized void putCharR(char c) {
@@ -106,8 +114,32 @@ public class EditorRomBufferWrapper extends RomBufferWrapper {
     public synchronized void putCharsR(char[] cs) {
         for (char c : cs) {
             putChar(editor.position(), NumberR.toChar(c));
+            editor.offsetPosition(2); // char占2字节
         }
-        editor.offsetPosition(cs.length * 2); // char占2字节
+    }
+
+    public synchronized <T> void put(T[] bytes, int count, Function<T, Byte> f) {
+        byte[] tmp = new byte[count];
+        for (int i = 0; i < count; i++) {
+            tmp[i] = f.apply(bytes[i]);
+        }
+        put(tmp);
+    }
+
+    public synchronized <T> void put(T[] bytes, Function<T, Byte> f) {
+        put(bytes, bytes.length, f);
+    }
+
+    public synchronized <T> void putChars(T[] cs, int count, Function<T, Character> f) {
+        char[] tmp = new char[count];
+        for (int i = 0; i < count; i++) {
+            tmp[i] = f.apply(cs[i]);
+        }
+        putChars(tmp);
+    }
+
+    public synchronized <T> void putChars(T[] cs, Function<T, Character> f) {
+        putChars(cs, cs.length, f);
     }
 
     public synchronized void getWholeBytes(int offset, int length, byte[]... aaBytes) {

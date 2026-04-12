@@ -1,8 +1,6 @@
 package me.afoolslove.metalmaxre.editors.monster;
 
-import me.afoolslove.metalmaxre.editors.player.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 /**
@@ -16,9 +14,13 @@ public class Monster {
      */
     public static final int ABILITY_ATTACK_NUMBER = 0B1100_0000;
     /**
-     * 优先攻击的玩家
+     * 固定攻击模式（招式）
      */
-    public static final int ABILITY_ATTACK_PRIORITY = 0B0011_0000;
+    public static final int ABILITY_LOCK_ATTACK_MODE = 0B0010_0000;
+    /**
+     * 固定攻击目标（目标玩家）
+     */
+    public static final int ABILITY_LOCK_ATTACK_TARGET = 0B0001_0000;
     /**
      * 分裂
      */
@@ -216,47 +218,28 @@ public class Monster {
     }
 
     /**
-     * 设置攻击优先级
-     * <p>
-     * 传入 {@code null} 没有攻击优先级
-     *
-     * @param attackPriority 攻击优先级
+     * 设置固定攻击模式
      */
-    public void setAttackPriority(@Nullable Player attackPriority) {
+    public void setLockAttackMode(boolean lockAttackMode) {
         int ability = this.ability;
-        // 清除优先级
-        ability &= ~(ABILITY_ATTACK_PRIORITY);
-        if (attackPriority != null) {
-            switch (attackPriority) {
-                case PLAYER_0 -> ability |= 0B0001_0000; // 优先攻击老大
-                case PLAYER_1 -> ability |= 0B0010_0000; // 优先攻击老二
-                case PLAYER_2 -> ability |= 0B0011_0000; // 优先攻击老三
-            }
+        // 清除固定攻击模式
+        ability &= ~(ABILITY_LOCK_ATTACK_MODE);
+        if (!lockAttackMode) { // 游戏中与这里的意思相反
+            ability |= ABILITY_LOCK_ATTACK_MODE;
         }
-
         setAbility(ability);
     }
 
     /**
-     * 设置攻击优先级
-     * <p>
-     * 0 无优先级<p>
-     * 1 优先攻击老大<p>
-     * 2 优先攻击老二<p>
-     * 3 优先攻击老三
-     *
-     * @param attackPriority 攻击优先级
+     * 设置固定攻击目标
      */
-    public void setAttackPriority(int attackPriority) {
-        attackPriority &= 0B0000_0011;
-        attackPriority <<= 4;
-
+    public void setLockAttackTarget(boolean lockAttackTarget) {
         int ability = this.ability;
-        // 清除优先级
-        ability &= (~ABILITY_ATTACK_PRIORITY);
-        // 添加优先级
-        ability |= attackPriority;
-
+        // 清除固定攻击目标
+        ability &= ~(ABILITY_LOCK_ATTACK_TARGET);
+        if (lockAttackTarget) {
+            ability |= ABILITY_LOCK_ATTACK_TARGET;
+        }
         setAbility(ability);
     }
 
@@ -676,28 +659,17 @@ public class Monster {
     }
 
     /**
-     * @return 攻击优先级
+     * @return 锁定攻击模式
      */
-    public int getAttackPriority() {
-        int ability = intAbility();
-        ability &= 0B0011_0000;
-        ability >>>= 4;
-
-        return ability;
+    public boolean isLockAttackMode() {
+        return (intAbility() & ABILITY_LOCK_ATTACK_MODE) == 0x00; // 游戏中0为锁定攻击模式，1为不同攻击模式
     }
 
     /**
-     * @return 攻击优先级，返回{#code null}时无攻击优先级
+     * @return 锁定攻击目标
      */
-    @Nullable
-    public Player getAttackPriorityToPlayer() {
-        int attackPriority = getAttackPriority();
-        if (attackPriority == 0) {
-            // 无优先级
-            return null;
-        }
-        // 减一后得到玩家id
-        return Player.formId(attackPriority - 1);
+    public boolean isLockAttackTarget() {
+        return (intAbility() & ABILITY_LOCK_ATTACK_TARGET) != 0x00;
     }
 
     /**

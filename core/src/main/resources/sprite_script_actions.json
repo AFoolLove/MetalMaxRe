@@ -605,9 +605,9 @@
     "code": "48",
     "length": 1,
     "type": "STATIC_TYPE",
-    "name": "显示0E页的文本",
+    "name": "显示0B页的文本",
     "format": "48 XX",
-    "formatText": "显示文本，0E页%02X段：%s",
+    "formatText": "显示文本，0B页%02X段：%s",
     "shortDescription": "???"
   },
   {
@@ -812,10 +812,10 @@
   },
   {
     "code": "61",
-    "length": 2,
+    "length": 0,
     "name": "取消牵引",
-    "format": "61 XX YY",
-    "formatText": "将牵引的物体放置到坐标[%02X,%02X]",
+    "format": "61",
+    "formatText": "将牵引的物体放置到坐标",
     "shortDescription": "将牵引的物体放置到指定坐标"
   },
   {
@@ -938,25 +938,25 @@
   {
     "code": "70",
     "length": 0,
-    "name": "延时 XX0",
+    "name": "延时 1E",
     "format": "70",
-    "formatText": "延时，时间为XX0",
+    "formatText": "延时，时间为1E",
     "shortDescription": "延时，持续指定时间"
   },
   {
     "code": "71",
     "length": 0,
-    "name": "延时 XX1",
+    "name": "延时 3C",
     "format": "71",
-    "formatText": "延时，时间为XX1",
+    "formatText": "延时，时间为3C",
     "shortDescription": "延时，持续指定时间"
   },
   {
     "code": "72",
     "length": 0,
-    "name": "延时 7B",
+    "name": "延时 78",
     "format": "72",
-    "formatText": "延时，时间为7B",
+    "formatText": "延时，时间为78",
     "shortDescription": "延时，持续指定时间"
   },
   {

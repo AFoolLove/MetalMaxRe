@@ -1,8 +1,6 @@
 package me.afoolslove.metalmaxre.editors.sprite.script;
 
 import me.afoolslove.metalmaxre.editors.IRomEditor;
-import me.afoolslove.metalmaxre.editors.sprite.Sprite;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -13,35 +11,34 @@ public interface ISpriteScriptEditor extends IRomEditor {
     }
 
     /**
-     * 获取精灵脚本的最大数量
      *
-     * @return 精灵脚本的最大数量
+     * @return 动态精灵脚本的最大数量
      */
-    default int getSpriteScriptMaxCount() {
+    default int getDynamicScriptMaxCount() {
         return 0xA9;
     }
+
+    /**
+     *
+     * @return 静态精灵脚本的最大数量
+     */
+    default int getStaticScriptMaxCount() {
+        return 0x6C;
+    }
+
+    /**
+     *
+     * @return 获取所有动态脚本
+     */
+    Map<Integer, byte[]> getDynamicScripts();
+
+    /**
+     *
+     * @return 获取所有静态脚本
+     */
+    Map<Integer, byte[]> getStaticScripts();
 
 
     Map<Integer, SpriteScriptAction> getSpriteScriptActions();
 
-    /**
-     * 获取所有精灵脚本
-     *
-     * @return 所有精灵脚本
-     */
-    Map<Integer, SpriteScript> getSpriteScripts();
-
-    /**
-     * 通过精灵的action获取脚本
-     */
-    default SpriteScript getSpriteScript(int action) {
-        return getSpriteScripts().get(action);
-    }
-
-    /**
-     * 通过精灵的action获取脚本
-     */
-    default SpriteScript getSpriteScript(@NotNull Sprite sprite) {
-        return getSpriteScript(sprite.intAction());
-    }
 }

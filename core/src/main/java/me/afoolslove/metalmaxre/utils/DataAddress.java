@@ -189,12 +189,24 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> implements Ser
 
 
     /**
-     * 获取地址在bank中的偏移量
+     * 获取起始地址在bank中的偏移量
      *
-     * @return 地址在bank中的偏移量
+     * @return 起始地址在bank中的偏移量
      */
     public int getBankOffset() {
         return getStartAddress() % switch (getType()) {
+            case PRG -> 0x2000;
+            case CHR -> 0x400;
+        };
+    }
+
+    /**
+     * 获取结束地址在bank中的偏移量
+     *
+     * @return 结束地址在bank中的偏移量
+     */
+    public int getBankEndOffset() {
+        return getEndAddress() % switch (getType()) {
             case PRG -> 0x2000;
             case CHR -> 0x400;
         };

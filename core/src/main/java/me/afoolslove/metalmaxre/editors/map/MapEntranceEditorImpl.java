@@ -69,11 +69,14 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
             MapEntrance mapEntrance = readBorderAndEntrance(mapId);
             // 设置所有使用此属性的地图
-            mapPropertiesEditor.getMapProperties().entrySet().parallelStream()
+            // 注：使用parallelStream会导致部分地图未能加载出入口数据，这里使用stream
+            mapPropertiesEditor.getMapProperties().entrySet().stream()
                     .filter(entry -> entry.getValue().getEntrance() == mapProperties.getEntrance())
                     .forEach(entry -> {
                         // 添加该地图的边界和出入口数据
-                        getMapEntrances().put(entry.getKey(), mapEntrance.copy());
+                        MapEntrance copy = mapEntrance.copy();
+                        getMapEntrances().put(entry.getKey(), copy);
+//                        System.out.println("put " + entry.getKey());
                     });
         }
     }
@@ -132,7 +135,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             }
 
             if (mapEntranceIndex == endMapEntranceIndex
-                || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
+                    || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
                 // 必须保证地图边界和出入口数据的完整性，不能写入部分
                 mapEntranceIndex = endMapEntranceIndex;
 
@@ -241,6 +244,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
         return mapEntrance;
     }
+
     @Override
     public Map<Integer, MapEntrance> getMapEntrances() {
         return mapEntrances;
@@ -333,7 +337,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 }
 
                 if (mapEntranceIndex == endMapEntranceIndex
-                    || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
+                        || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
                     // 必须保证地图边界和出入口数据的完整性，不能写入部分
                     mapEntranceIndex = endMapEntranceIndex;
                     LOGGER.error("地图边界和出入口编辑器：没有剩余的空间写入地图{}的边界和出入口数据：{}",
@@ -492,7 +496,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 }
 
                 if (mapEntranceIndex == endMapEntranceIndex
-                    || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
+                        || (endMapEntranceIndex - mapEntranceIndex) < (mapEntrance.length - 1)) {
                     // 必须保证地图边界和出入口数据的完整性，不能写入部分
                     mapEntranceIndex = endMapEntranceIndex;
                     LOGGER.error("地图边界和出入口编辑器：没有剩余的空间写入地图{}的边界和出入口数据：{}",

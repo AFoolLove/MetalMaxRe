@@ -86,15 +86,32 @@ public class BitInputStream extends ByteArrayInputStream {
      * 读取指定数量的bit并组合成整数
      */
     public synchronized int readBits(int length) {
+        return readBits(length, false);
+    }
+
+    /**
+     * 读取指定数量的bit并组合成整数
+     *
+     * @param reverse 是否倒序读取该长度的bit
+     */
+    public synchronized int readBits(int length, boolean reverse) {
         if (length <= 0) {
             return 0;
         }
 
         int result = 0;
-        for (int i = 0; i < length; i++) {
-            result <<= 1;
-            if (readBit()) {
-                result |= 1;
+        if (!reverse) {
+            for (int i = 0; i < length; i++) {
+                result <<= 1;
+                if (readBit()) {
+                    result |= 1;
+                }
+            }
+        } else {
+            for (int i = 0; i < length; i++) {
+                if (readBit()) {
+                    result |= (1 << i);
+                }
             }
         }
         return result;
@@ -169,11 +186,11 @@ public class BitInputStream extends ByteArrayInputStream {
     public static void main(String[] args) {
         BitOutputStream outputStream = new BitOutputStream();
         outputStream.writeBit(false);
-        outputStream.writeBit(false);
-        outputStream.writeBit(false);
-        outputStream.writeBit(false);
         outputStream.writeBit(true);
         outputStream.writeBit(true);
+        outputStream.writeBit(true);
+        outputStream.writeBit(true);
+        outputStream.writeBit(false);
         outputStream.writeBit(false);
         outputStream.writeBit(false);
 
@@ -181,8 +198,9 @@ public class BitInputStream extends ByteArrayInputStream {
         BitInputStream inputStream = new BitInputStream(outputStream.toByteArray());
 
         while (inputStream.hasBits()) {
-            boolean bit = inputStream.readBit();
-            System.out.print(bit ? "1" : "0");
+//            boolean bit = inputStream.readBit();
+//            System.out.print(bit ? "1" : "0");
+            System.out.println(inputStream.readBits(4, true));
         }
     }
 }
