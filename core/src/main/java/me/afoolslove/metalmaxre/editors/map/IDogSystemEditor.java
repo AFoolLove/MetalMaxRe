@@ -6,6 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * 犬系统编辑器
+ *
+ * @author AFoolLove
+ */
 public interface IDogSystemEditor extends IRomEditor {
     @Override
     default String getId() {

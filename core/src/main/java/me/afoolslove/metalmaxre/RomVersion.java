@@ -35,6 +35,13 @@ public class RomVersion {
     }
 
     /**
+     * 编辑器定制版
+     */
+    public static RomVersion getRe() {
+        return getVersion("re");
+    }
+
+    /**
      * SuperHack版
      */
     public static RomVersion getSuperHack() {

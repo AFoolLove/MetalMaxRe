@@ -50,19 +50,35 @@ public class Color {
     }
 
     public byte getAlpha() {
-        return (byte) ((argb & 0xFF_000000) >>> 24);
+        return (byte) intAlpha();
+    }
+
+    public int intAlpha() {
+        return (argb & 0xFF_000000) >>> 24;
     }
 
     public byte getRed() {
-        return (byte) ((argb & 0x00FF_0000) >>> 16);
+        return (byte) intRed();
+    }
+
+    public int intRed() {
+        return (argb & 0x00FF_0000) >>> 16;
     }
 
     public byte getGreen() {
-        return (byte) ((argb & 0x0000FF_00) >>> 8);
+        return (byte) intGreen();
+    }
+
+    public int intGreen() {
+        return (argb & 0x0000FF_00) >>> 8;
     }
 
     public byte getBlue() {
-        return (byte) ((argb & 0x000000FF));
+        return (byte) intBlue();
+    }
+
+    public int intBlue() {
+        return (argb & 0x000000FF);
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 事件处理器
@@ -18,7 +19,7 @@ import java.util.*;
  */
 public class EventHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventHandler.class);
-    private final Map<Class<Event>, Set<EventListener>> eventListeners = new HashMap<>();
+    private final Map<Class<Event>, Set<EventListener>> eventListeners = new ConcurrentHashMap<>();
 
     /**
      * 注册这个监听器里的所有有效的事件监听器

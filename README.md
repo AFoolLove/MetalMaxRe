@@ -1,3 +1,5 @@
+<img src="core/src/main/resources/icon.png" style="display: block; margin: 0 auto;" alt="MetalMaxRe Icon"/>
+
 # MetalMaxRe
 
     这是一个基于java开发的FC游戏 MetalMax ROM编辑器
@@ -28,41 +30,49 @@
 
 ### 编辑器
 
-| 编辑器类名                                                                                                     | 名称       | 状态          |
-|-----------------------------------------------------------------------------------------------------------|----------|-------------|
-| [IShopEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/IShopEditor.java)         | 商店编辑器    | 未完成         |
-| [IComputerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/IComputerEditor.java)      | 计算机编辑器   | 完成          |
-| [IDataValueEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/data/IDataValueEditor.java)        | 数据值编辑器   | 完成          |
-| [IItemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)                 | 物品编辑器    | 完成          |
-| [IEventEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/events/IEventTilesEditor.java)     | 事件编辑器    | 完成          |
-| [ITileSetEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/tileset/ITileSetEditor.java)     | 图块编辑器    | 完成          |
-| [IWorldMapEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/IWorldMapEditor.java)     | 世界地图编辑器  | 完成          |
-| [IDogSystemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IDogSystemEditor.java)         | 犬系统编辑器   | 完成          |
-| [IMapEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapEditor.java)                     | 地图编辑器    | 完成，但储存方式有问题 |
-| [IMapEntranceEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapEntranceEditor.java)     | 地图出入口编辑器 | 完成          |
-| [IMapPropertiesEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapPropertiesEditor.java) | 地图属性编辑器  | 完成          |
-| [IMonsterEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/IMonsterEditor.java)         | 怪物编辑器    | 进行中         |
-| [MonsterModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)   | 怪物模型编辑器  | 测试          |
-| [IPaletteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/palette/IPaletteEditor.java)         | 调色板编辑器   | 完成          |
-| [IPlayerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerEditor.java)            | 玩家编辑器    | 完成          |
-| [IPlayerExpEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerExpEditor.java)      | 玩家经验值编辑器 | 完成          |
-| [ISpriteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteEditor.java)            | 精灵编辑器    | 完成          |
-| [ITankEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/ITankEditor.java)                  | 坦克编辑器    | 完成          |
-| [ITextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/ITextEditor.java)                  | 文本编辑器    | 完成          |
-| [ITreasureEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/ITreasureEditor.java)      | 宝藏编辑器    | 完成          |
-| [IElevatorEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/elevator/IElevatorEditor.java)      | 电梯编辑器    | 完成          |
-| [ISpriteModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteModelEditor.java)  | 精灵模型编辑器  | 完成          |
-| [ITitleEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/title/ITitleEditor.java)               | 标题编辑器    | 完成          |
+| 编辑器类名                                                                                                             | 名称       | 状态          |
+|-------------------------------------------------------------------------------------------------------------------|----------|-------------|
+| [IListEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/list/IListEditor.java)                          | 清单编辑器    | 完成          |
+| [IComputerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/IComputerEditor.java)              | 计算机编辑器   | 完成          |
+| [IDataValueEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/data/IDataValueEditor.java)                | 数据值编辑器   | 完成          |
+| [IItemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)                         | 物品编辑器    | 完成          |
+| [IEventEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/events/IEventTilesEditor.java)             | 事件编辑器    | 完成          |
+| [ITileSetEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/tileset/ITileSetEditor.java)             | 图块编辑器    | 完成          |
+| [IWorldMapEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/world/IWorldMapEditor.java)             | 世界地图编辑器  | 完成          |
+| [IDogSystemEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IDogSystemEditor.java)                 | 犬系统编辑器   | 完成          |
+| [IMapEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapEditor.java)                             | 地图编辑器    | 完成，但储存方式有问题 |
+| [IMapEntranceEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapEntranceEditor.java)             | 地图出入口编辑器 | 完成          |
+| [IMapPropertiesEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/map/IMapPropertiesEditor.java)         | 地图属性编辑器  | 完成          |
+| [IMonsterEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/IMonsterEditor.java)                 | 怪物编辑器    | 完成          |
+| [IMonsterModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/IMonsterModelEditor.java)       | 怪物模型编辑器  | 测试          |
+| [IPaletteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/palette/IPaletteEditor.java)                 | 调色板编辑器   | 完成          |
+| [IPlayerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerEditor.java)                    | 玩家编辑器    | 完成          |
+| [IPlayerExpEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/player/IPlayerExpEditor.java)              | 玩家经验值编辑器 | 完成          |
+| [ISpriteEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteEditor.java)                    | 精灵编辑器    | 完成          |
+| [ISpriteModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteModelEditor.java)          | 精灵模型编辑器  | 测试          |
+| [ISpriteScriptEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/script/ISpriteScriptEditor.java) | 精灵脚本编辑器  | 完成          |
+| [ITankEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/ITankEditor.java)                          | 坦克编辑器    | 完成          |
+| [ITextEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/text/ITextEditor.java)                          | 文本编辑器    | 完成          |
+| [ITreasureEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/treasure/ITreasureEditor.java)              | 宝藏编辑器    | 完成          |
+| [IElevatorEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/elevator/IElevatorEditor.java)              | 电梯编辑器    | 完成          |
+| [ISpriteModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteModelEditor.java)          | 精灵模型编辑器  | 完成          |
+| [ITitleEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/title/ITitleEditor.java)                       | 标题编辑器    | 完成          |
 
 ## 编辑器可编辑内容
 
-### [IShopEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/IShopEditor.java)（售货机商品编辑器）
+### [IListEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/list/IListEditor.java)（清单编辑器）
 
-实现类：[ShopEditorImplImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/shop/ShopEditorImpl.java)
+实现类：[ListEditorImplImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/list/ListEditorImpl.java)
 
-不支持世界地图，世界地图也不支持使用售货机
+由商店编辑器重置制作
 
-* 售货机的商品、商品数量和所在地图，修改商品价格请使用 [`IItemEditor`](core/src/main/java/me/afoolslove/metalmaxre/editors/items/IItemEditor.java)
+* 战车装备、战车道具、玩家武器、玩家道具、特殊炮弹
+* 出租坦克、旅馆、酒吧、装饰、点唱机
+* 道具售货机、炮弹售货机、装甲片售货机
+* 药店
+* 电梯
+
+以上均为清单表，可以修改清单内容
 
 ### [IComputerEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/computer/IComputerEditor.java)（计算机编辑器）
 
@@ -174,16 +184,30 @@
 
 未完成
 
-* 怪物的掉落物
-* 怪物的部分属性
+* 怪物的一般属性
+  * 模型
+  * 类型：坦克、仿生、电子
+  * 生命值
+  * 攻击力、防御力、护甲
+  * 速度
+  * 命中率、回避值
+  * 击杀经验值、金钱
+* 怪物的特殊属性
+  * 攻击次数
+  * 攻击模式、攻击目标
+  * 闪避等级
+  * 被攻击后分裂
+  * 死亡后爆炸波及附近怪物
+  * 冰属性抗性、火属性抗性、其它抗性
+  * 每回合自动恢复
 * 怪物的组合方式
 * 怪物组合在地图和世界地图上的分布
 
 **和其它未提及的小功能数据修改**
 
-### [MonsterModelImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)（怪物模型辑器（测试））
+### [MonsterModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)（怪物模型辑器（测试））
 
-实现类：[MonsterEditorImplImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)
+实现类：[MonsterEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/monster/MonsterModelImpl.java)
 
 测试中，请勿启用写入数据
 
@@ -230,16 +254,26 @@
 实现类：[SpriteEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/SpriteEditorImpl.java)
 
 * 精灵
-  * 图像
+  * 图像，模型类型
   * 行动方式
   * 坐标
   * 朝向
-  * 对话功能
 * 特殊属性
   * 是否可以被玩家推动
   * 移动时是否无视地形行走或被推动
   * 锁定朝向，与玩家对话时不会朝向玩家
   * 移动时不播放移动动画（平移），雕像等
+* 动态脚本
+* 静态脚本
+
+### [ISpriteScriptEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/script/ISpriteScriptEditor.java)（精灵脚本编辑器）
+
+实现类：[SpriteScriptEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/script/SpriteScriptEditorImpl.java)
+
+大部分脚本与精灵相关
+
+* 动态脚本，玩家进入地图后会自动运行
+* 静态脚本，玩家与精灵对话后运行
 
 ### [ITankEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/tank/ITankEditor.java)（坦克编辑器）
 
@@ -288,8 +322,10 @@
 
 实现类：[ElevatorEditorImpl](core/src/main/java/me/afoolslove/metalmaxre/editors/elevator/ElevatorEditorImpl.java)
 
-* 设置每个电梯的楼层和数量
+* 设置每个电梯的楼层
 * 设置触发每个电梯的地图id范围
+
+楼层数量使用 清单编辑器 修改
 
 ### [ISpriteModelEditor](core/src/main/java/me/afoolslove/metalmaxre/editors/sprite/ISpriteModelEditor.java)（精灵模型编辑器）
 

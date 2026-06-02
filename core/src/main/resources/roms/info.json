@@ -22,6 +22,18 @@
       "修复start战车状态界面按上键指针会移动到错误的位置"
     ]
   },
+  "re": {
+    "builtIn": true,
+    "path": "/roms/MetalMaxRe.nes",
+    "name": "MetalMax Re",
+    "size": 786448,
+    "description": "基于先锋卡通汉化版本，编辑器定制版",
+    "modifyRecords": [
+      "地图少量扩容",
+      "怪物模型数据扩容",
+      "字库扩容"
+    ]
+  },
   "super_hack": {
     "builtIn": true,
     "path": "/roms/MetalMax_SuperHack.nes",

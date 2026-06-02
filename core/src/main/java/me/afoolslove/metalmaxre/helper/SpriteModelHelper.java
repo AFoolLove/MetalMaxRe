@@ -206,10 +206,10 @@ public class SpriteModelHelper {
         IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
 
         Color[][] spritePalette = {
-                paletteEditor.getSpritePalette().get(0x00).toColors(systemPalette, true),
-                paletteEditor.getSpritePalette().get(0x01).toColors(systemPalette, true),
-                paletteEditor.getSpritePalette().get(0x02).toColors(systemPalette, true),
-                paletteEditor.getSpritePalette().get(0x03).toColors(systemPalette, true),
+                paletteEditor.getBattleSpritePalette().get(0x00).toColors(systemPalette, true),
+                paletteEditor.getBattleSpritePalette().get(0x01).toColors(systemPalette, true),
+                paletteEditor.getBattleSpritePalette().get(0x02).toColors(systemPalette, true),
+                paletteEditor.getBattleSpritePalette().get(0x03).toColors(systemPalette, true),
         };
 
 
@@ -232,7 +232,7 @@ public class SpriteModelHelper {
                     // ID为0的不会显示
                     continue;
                 }
-                byte[][] tile = diced.get(tileId);
+                byte[][] tile = diced.get(tileId & 0xFF);
                 System.arraycopy(tile, 0x00, piece, 0x00, tile.length);
 
                 Color[][] palette = TileSetHelper.palette(piece, spritePalette[model.getPaletteIndex()]);

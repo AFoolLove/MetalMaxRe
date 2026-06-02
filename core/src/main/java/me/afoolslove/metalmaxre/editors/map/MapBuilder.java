@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -278,7 +278,7 @@ public class MapBuilder extends LinkedList<MapTile> {
         int sum = 0;
         for (MapTile mapTile : this) {
             if (mapTile.getCount() == 0) {
-                return 0x100;
+                sum += 0x100;
             } else {
                 sum += mapTile.getCount();
             }

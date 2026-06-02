@@ -5,6 +5,11 @@ import me.afoolslove.metalmaxre.editors.IRomEditor;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 事件图块编辑器
+ *
+ * @author AFoolLove
+ */
 public interface IEventTilesEditor extends IRomEditor {
     @Override
     default String getId() {

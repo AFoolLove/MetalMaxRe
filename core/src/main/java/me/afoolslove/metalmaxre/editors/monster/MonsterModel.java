@@ -1,6 +1,7 @@
 package me.afoolslove.metalmaxre.editors.monster;
 
 import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
+import me.afoolslove.metalmaxre.utils.Point2B;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +29,10 @@ public class MonsterModel {
     private Byte tileIndex; // 模型格式一有效，模型格式二为null
 
     private byte[] customPaletteYs; // 可能为null
+
+    private Point2B firePoint;
+
+    private Point2B[] customFirePoints;
 
     public MonsterModel(byte size) {
         this.width = (byte) ((size >>> 4) * 0x02); // F0
@@ -214,6 +219,34 @@ public class MonsterModel {
         this.customPaletteYs = customPaletteYs;
     }
 
+    /**
+     * 设置怪物的开火坐标点
+     *
+     * @param firePoint 怪物的开火坐标点
+     */
+    public void setFirePoint(@NotNull Point2B firePoint) {
+        this.firePoint = firePoint;
+    }
+
+    /**
+     * 设置怪物的开火坐标点
+     *
+     * @param x 怪物开火坐标点 X
+     * @param y 怪物开火坐标点 Y
+     */
+    public void setFirePoint(int x, int y) {
+        setFirePoint(new Point2B(x, y));
+    }
+
+    /**
+     * 设置怪物攻击方式的独立坐标点
+     *
+     * @param customFirePoints 怪物攻击方式的独立坐标点
+     */
+    public void setCustomFirePoints(Point2B[] customFirePoints) {
+        this.customFirePoints = customFirePoints;
+    }
+
 
     /**
      * 获取怪物的宽度
@@ -343,6 +376,9 @@ public class MonsterModel {
      * @return 怪物模型数据
      */
     public byte[] getModelData() {
+        if (modelData == null) {
+            modelData = new byte[0x00];
+        }
         return modelData;
     }
 
@@ -400,21 +436,48 @@ public class MonsterModel {
         return customPaletteYs;
     }
 
+    /**
+     * 获取怪物的开火坐标点
+     *
+     * @return 怪物的开火坐标点
+     */
+    public Point2B getFirePoint() {
+        return firePoint;
+    }
+
+    /**
+     * 获取怪物攻击方式的独立坐标点
+     *
+     * @return 怪物攻击方式的独立坐标点
+     */
+    public Point2B[] getCustomFirePoints() {
+        return customFirePoints;
+    }
+
+    /**
+     * 判断模型是否为空
+     *
+     * @return 模型是否为空
+     */
+    public boolean isEmptyModel() {
+        return getModelSize() == 0x00;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MonsterModel that)) return false;
         return getWidth() == that.getWidth()
-               && getHeight() == that.getHeight()
-               && isDoublePalette() == that.isDoublePalette()
-               && getModelIndex() == that.getModelIndex()
-               && getChrIndex() == that.getChrIndex()
-               && isChrIndexIncremental() == that.isChrIndexIncremental()
-               && Objects.deepEquals(palettes, that.palettes)
-               && Objects.deepEquals(getModelData(), that.getModelData())
-               && getModelType() == that.getModelType()
-               && Objects.equals(getTileIndex(), that.getTileIndex())
-               && Objects.deepEquals(getCustomPaletteYs(), that.getCustomPaletteYs());
+                && getHeight() == that.getHeight()
+                && isDoublePalette() == that.isDoublePalette()
+                && getModelIndex() == that.getModelIndex()
+                && getChrIndex() == that.getChrIndex()
+                && isChrIndexIncremental() == that.isChrIndexIncremental()
+                && Objects.deepEquals(palettes, that.palettes)
+                && Objects.deepEquals(getModelData(), that.getModelData())
+                && getModelType() == that.getModelType()
+                && Objects.equals(getTileIndex(), that.getTileIndex())
+                && Objects.deepEquals(getCustomPaletteYs(), that.getCustomPaletteYs());
     }
 
     @Override

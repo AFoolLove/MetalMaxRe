@@ -5,6 +5,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
 
+/**
+ * 坦克编辑器
+ *
+ * @author AFoolLove
+ */
 public interface ITankEditor extends IRomEditor {
     @Override
     default String getId() {

@@ -4,6 +4,11 @@ import me.afoolslove.metalmaxre.editors.IRomEditor;
 
 import java.util.Map;
 
+/**
+ * 地图属性编辑器
+ *
+ * @author AFoolLove
+ */
 public interface IMapPropertiesEditor extends IRomEditor {
     @Override
     default String getId() {

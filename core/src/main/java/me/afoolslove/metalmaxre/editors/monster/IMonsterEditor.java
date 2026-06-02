@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 怪物编辑器
+ *
+ * @author AFoolLove
+ */
 public interface IMonsterEditor extends IRomEditor {
     @Override
     default String getId() {

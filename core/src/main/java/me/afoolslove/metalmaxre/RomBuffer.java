@@ -506,6 +506,24 @@ public class RomBuffer implements AutoCloseable, Closeable {
         }
     }
 
+    public void fill(int index, byte val, int length) {
+        if (length == 0) {
+            return;
+        }
+        ByteBuffer buffer;
+        if (index > getPrgRom().capacity()) {
+            index -= getHeader().getChrRomStart();
+            buffer = getChrRom();
+        } else {
+            index -= getHeader().getPrgRomStart();
+            buffer = getPrgRom();
+        }
+
+        for (int i = 0; i < length; i++) {
+            buffer.put(index + i, val);
+        }
+    }
+
     public void putInt(int index, int n) {
         if (index > getPrgRom().capacity()) {
             index -= getHeader().getChrRomStart();
@@ -639,9 +657,9 @@ public class RomBuffer implements AutoCloseable, Closeable {
     public byte[] toByteArray() {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(
                 GameHeader.HEADER_LENGTH
-                + (trainer == null ? 0 : Trainer.TRAINER_LENGTH)
-                + header.getPrgRomLength()
-                + header.getChrRomLength());
+                        + (trainer == null ? 0 : Trainer.TRAINER_LENGTH)
+                        + header.getPrgRomLength()
+                        + header.getChrRomLength());
         try {
             save(byteArrayOutputStream);
         } catch (IOException ignored) {

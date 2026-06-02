@@ -94,6 +94,10 @@ public class Point2B {
         return this;
     }
 
+    public byte[] toBytes() {
+        return new byte[]{x, y};
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

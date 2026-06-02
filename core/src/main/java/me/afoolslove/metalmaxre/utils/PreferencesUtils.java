@@ -59,4 +59,13 @@ public class PreferencesUtils {
     public static Preferences getSpriteScriptPreferences() {
         return getPreferences().node("sprite_script");
     }
+
+    /**
+     * 获取重定向编辑器数据地址配置
+     *
+     * @return 重定向编辑器数据地址配置
+     */
+    public static Preferences getRedirectDataAddressPreferences() {
+        return getPreferences().node("editor_data_addresses");
+    }
 }

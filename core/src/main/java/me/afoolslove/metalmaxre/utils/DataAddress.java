@@ -1,5 +1,8 @@
 package me.afoolslove.metalmaxre.utils;
 
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 import me.afoolslove.metalmaxre.RomBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +15,25 @@ import java.io.Serializable;
  * @author AFoolLove
  */
 public class DataAddress extends SingleMapEntry<Integer, Integer> implements Serializable {
+    public static final JsonSerializer<DataAddress> SERIALIZER = (src, typeOfSrc, context) -> {
+        // 序列化 DataAddress
+        /*
+         * PRG-00000-00000
+         */
+        return new JsonPrimitive("%s-%05X-%05X".formatted(src.getType(), src.getStartAddress(), src.getEndAddress()));
+    };
+    public static final JsonDeserializer<DataAddress> DESERIALIZER = (json, typeOfT, context) -> {
+        // 反序列化 DataAddress
+        String[] split = json.getAsString().split("-");
+        DataAddress.Type type = DataAddress.Type.valueOf(split[0]);
+        Integer start = Integer.parseInt(split[1], 16);
+        Integer end = null;
+        if (split.length >= 3) {
+            end = Integer.parseInt(split[2], 16);
+        }
+        return DataAddress.from(type, start, end);
+    };
+
     public enum Type {
         PRG,
         CHR

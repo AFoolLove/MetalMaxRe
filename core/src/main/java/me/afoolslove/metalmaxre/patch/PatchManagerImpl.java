@@ -15,24 +15,8 @@ import java.util.Map;
 
 public class PatchManagerImpl implements IPatchManager {
     public static Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(DataAddress.class, (JsonSerializer<DataAddress>) (src, typeOfSrc, context) -> {
-                // 序列化 DataAddress
-                /*
-                 * PRG-00000-00000
-                 */
-                return new JsonPrimitive("%s-%05X-%05X".formatted(src.getType(), src.getStartAddress(), src.getEndAddress()));
-            })
-            .registerTypeAdapter(DataAddress.class, (JsonDeserializer<DataAddress>) (json, typeOfT, context) -> {
-                // 反序列化 DataAddress
-                String[] split = json.getAsString().split("-");
-                DataAddress.Type type = DataAddress.Type.valueOf(split[0]);
-                Integer start = Integer.parseInt(split[1], 16);
-                Integer end = null;
-                if (split.length >= 3) {
-                    end = Integer.parseInt(split[2], 16);
-                }
-                return DataAddress.from(type, start, end);
-            })
+            .registerTypeAdapter(DataAddress.class, DataAddress.SERIALIZER)
+            .registerTypeAdapter(DataAddress.class, DataAddress.DESERIALIZER)
 
             .registerTypeAdapter(PatchSegmentImpl.class, (JsonSerializer<PatchSegmentImpl>) (src, typeOfSrc, context) -> {
                 /*

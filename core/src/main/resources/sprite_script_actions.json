@@ -797,10 +797,10 @@
   {
     "code": "5F",
     "length": 0,
-    "name": "隐藏玩家与战车",
+    "name": "隐藏队伍",
     "format": "5F",
-    "formatText": "隐藏玩家与战车",
-    "shortDescription": "隐藏玩家与战车"
+    "formatText": "隐藏队伍中的玩家和牵引物",
+    "shortDescription": "隐藏队伍中的玩家和牵引物"
   },
   {
     "code": "60",
@@ -906,10 +906,10 @@
   {
     "code": "6C",
     "length": 0,
-    "name": "玩家隐藏",
+    "name": "隐藏三位玩家",
     "format": "6C",
-    "formatText": "玩家隐藏，无法恢复",
-    "shortDescription": "玩家隐藏，无法恢复"
+    "formatText": "隐藏三位玩家",
+    "shortDescription": "隐藏三位玩家"
   },
   {
     "code": "6D",
@@ -966,6 +966,14 @@
     "format": "73 XX YY ZZ",
     "formatText": "传送到地图%02X，坐标[%02X,%02X]",
     "shortDescription": "传送到指定地图的指定位置"
+  },
+  {
+    "code": "FF",
+    "length": 0,
+    "name": "占位",
+    "format": "FF",
+    "formatText": "占位",
+    "shortDescription": "占位"
   }
 ]
 

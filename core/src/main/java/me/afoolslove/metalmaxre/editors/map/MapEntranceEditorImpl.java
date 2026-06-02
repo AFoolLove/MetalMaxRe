@@ -5,6 +5,7 @@ import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
+import me.afoolslove.metalmaxre.utils.Point2B;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
             prgPosition((mapEntranceAddress.getStartAddress() & 0xFF000) + mapProperties.getEntrance() - 0x8000);
 //            System.out.printf("%02X. %05X ",map, position());
 
-            MapEntrance mapEntrance = readBorderAndEntrance(mapId);
+            MapEntrance mapEntrance = readBorderAndEntrance();
             // 设置所有使用此属性的地图
             // 注：使用parallelStream会导致部分地图未能加载出入口数据，这里使用stream
             mapPropertiesEditor.getMapProperties().entrySet().stream()
@@ -103,15 +104,15 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                 // 写入地图出入口数据
 
                 // 重新排序，需要顺序写入 出入口的坐标
-                List<SingleMapEntry<MapPoint, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
+                List<SingleMapEntry<Point2B, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
 
                 // 写入入口 X、Y
-                for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                for (SingleMapEntry<Point2B, MapPoint> mapEntry : list) {
                     outputStream.write(mapEntry.getKey().getX());
                     outputStream.write(mapEntry.getKey().getY());
                 }
                 // 写入出口 Map、X、Y
-                for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                for (SingleMapEntry<Point2B, MapPoint> mapEntry : list) {
                     outputStream.write(mapEntry.getValue().getMap());
                     outputStream.write(mapEntry.getValue().getX());
                     outputStream.write(mapEntry.getValue().getY());
@@ -197,7 +198,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         }
     }
 
-    protected synchronized MapEntrance readBorderAndEntrance(int mapId) {
+    protected synchronized MapEntrance readBorderAndEntrance() {
         int temp = getBuffer().getToInt();
 
         MapBorder mapBorder;
@@ -229,11 +230,11 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
         int count = getBuffer().getToInt();
 
         if (count != 0x00) {
-            MapPoint[] entrances = new MapPoint[count];
+            Point2B[] entrances = new Point2B[count];
             // 读取入口数据
             for (int i = 0; i < count; i++) {
                 // 读取当前地图入口的 X、Y
-                entrances[i] = new MapPoint(mapId, getBuffer().get(), getBuffer().get());
+                entrances[i] = new Point2B(getBuffer().get(), getBuffer().get());
             }
             // 读取入口对应的出口
             for (int i = 0; i < count; i++) {
@@ -271,7 +272,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
             // SH的世界地图边界和出入口数据是分开存放的
             prgPosition(0x7FE83 - 0x10);
-            MapEntrance mapEntrance = readBorderAndEntrance(0x00);
+            MapEntrance mapEntrance = readBorderAndEntrance();
             getMapEntrances().put(0x00, mapEntrance);
         }
 
@@ -298,15 +299,15 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     // 写入地图出入口数据
 
                     // 重新排序，需要顺序写入 出入口的坐标
-                    List<SingleMapEntry<MapPoint, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
+                    List<SingleMapEntry<Point2B, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
 
                     // 写入入口 X、Y
-                    for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                    for (SingleMapEntry<Point2B, MapPoint> mapEntry : list) {
                         outputStream.write(mapEntry.getKey().getX());
                         outputStream.write(mapEntry.getKey().getY());
                     }
                     // 写入出口 Map、X、Y
-                    for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                    for (SingleMapEntry<Point2B, MapPoint> mapEntry : list) {
                         outputStream.write(mapEntry.getValue().getMap());
                         outputStream.write(mapEntry.getValue().getX());
                         outputStream.write(mapEntry.getValue().getY());
@@ -430,7 +431,7 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
 
             // SHG的世界地图边界和出入口数据是分开存放的
             prgPosition(0x53E83 - 0x10);
-            MapEntrance mapEntrance = readBorderAndEntrance(0x00);
+            MapEntrance mapEntrance = readBorderAndEntrance();
             getMapEntrances().put(0x00, mapEntrance);
         }
 
@@ -457,15 +458,15 @@ public class MapEntranceEditorImpl extends RomBufferWrapperAbstractEditor implem
                     // 写入地图出入口数据
 
                     // 重新排序，需要顺序写入 出入口的坐标
-                    List<SingleMapEntry<MapPoint, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
+                    List<SingleMapEntry<Point2B, MapPoint>> list = new ArrayList<>(entry.getValue().getEntrances());
 
                     // 写入入口 X、Y
-                    for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                    for (SingleMapEntry<Point2B, MapPoint> mapEntry : list) {
                         outputStream.write(mapEntry.getKey().getX());
                         outputStream.write(mapEntry.getKey().getY());
                     }
                     // 写入出口 Map、X、Y
-                    for (SingleMapEntry<MapPoint, MapPoint> mapEntry : list) {
+                    for (SingleMapEntry<Point2B, MapPoint> mapEntry : list) {
                         outputStream.write(mapEntry.getValue().getMap());
                         outputStream.write(mapEntry.getValue().getX());
                         outputStream.write(mapEntry.getValue().getY());

@@ -7,6 +7,7 @@ import me.afoolslove.metalmaxre.editors.palette.SystemPalette;
 import me.afoolslove.metalmaxre.editors.text.mapping.CharMapCN;
 import me.afoolslove.metalmaxre.editors.text.mapping.ICharMap;
 import me.afoolslove.metalmaxre.event.EventHandler;
+import me.afoolslove.metalmaxre.event.editors.editor.EditorApplyEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorLoadEvent;
 import me.afoolslove.metalmaxre.event.editors.editor.EditorManagerEvent;
 import me.afoolslove.metalmaxre.patch.IPatchManager;
@@ -111,7 +112,7 @@ public class MetalMaxRe {
      * @param editor 编辑器类型
      * @return 编辑器
      */
-    <E extends IRomEditor> E getEditor(Class<? extends IRomEditor> editor) {
+    public <E extends IRomEditor> E getEditor(Class<? extends IRomEditor> editor) {
         return getEditorManager().getEditor(editor);
     }
 
@@ -127,20 +128,35 @@ public class MetalMaxRe {
     @TestOnly
     public void debugLoadTime() {
         getEventHandler().register(new EventListener() {
-            private final Map<IRomEditor, Long> times = new HashMap<>();
+            private final Map<IRomEditor, Long> loadTimes = new HashMap<>();
+            private final Map<IRomEditor, Long> applyTimes = new HashMap<>();
 
-            public void onPre(EditorLoadEvent.Pre pre) {
-                times.put(pre.getEditor(), System.currentTimeMillis());
+            public void onLoadPre(EditorLoadEvent.Pre pre) {
+                loadTimes.put(pre.getEditor(), System.currentTimeMillis());
             }
 
-            public void onPost(EditorLoadEvent.Post post) {
-                times.put(post.getEditor(), System.currentTimeMillis() - times.get(post.getEditor()));
-                LOGGER.debug(post.getEditor().getClass().getSimpleName() + times.get(post.getEditor()));
+            public void onLoadPost(EditorLoadEvent.Post post) {
+                loadTimes.put(post.getEditor(), System.currentTimeMillis() - loadTimes.get(post.getEditor()));
+                LOGGER.debug("{} time: {}ms", post.getEditor().getClass().getSimpleName(), loadTimes.get(post.getEditor()));
             }
 
-            public void onEnd(EditorManagerEvent.LoadPost post) {
-                LOGGER.debug("time:" + times.values().stream().mapToInt(Long::intValue).sum());
-                times.clear();
+            public void onLoadEnd(EditorManagerEvent.LoadPost post) {
+                LOGGER.debug("load tolal time: {}ms", loadTimes.values().stream().mapToInt(Long::intValue).sum());
+                loadTimes.clear();
+            }
+
+            public void onApplyPre(EditorApplyEvent.Pre pre) {
+                applyTimes.put(pre.getEditor(), System.currentTimeMillis());
+            }
+
+            public void onApplyPost(EditorApplyEvent.Post post) {
+                applyTimes.put(post.getEditor(), System.currentTimeMillis() - applyTimes.get(post.getEditor()));
+                LOGGER.debug("{} time: {}ms", post.getEditor().getClass().getSimpleName(), applyTimes.get(post.getEditor()));
+            }
+
+            public void onApplyEnd(EditorManagerEvent.ApplyPost post) {
+                LOGGER.debug("apply tolal time: {}ms", applyTimes.values().stream().mapToInt(Long::intValue).sum());
+                applyTimes.clear();
             }
         });
     }

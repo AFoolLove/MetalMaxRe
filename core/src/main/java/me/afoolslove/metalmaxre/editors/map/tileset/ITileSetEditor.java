@@ -5,6 +5,11 @@ import me.afoolslove.metalmaxre.editors.map.MapProperties;
 import me.afoolslove.metalmaxre.editors.map.WorldMapProperties;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * 地图和精灵的图块集
+ *
+ * @author AFoolLove
+ */
 public interface ITileSetEditor extends IRomEditor {
     @Override
     default String getId() {

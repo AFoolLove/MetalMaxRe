@@ -4,15 +4,19 @@ import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
-import me.afoolslove.metalmaxre.utils.NumberR;
 import me.afoolslove.metalmaxre.utils.SystemSprite;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * 精灵模型编辑器
+ *
+ * @author AFoolLove
+ */
 public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteModelEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpriteModelEditorImpl.class);
 
@@ -48,9 +52,9 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
     public static final String BATTLE_SPRITE_MODEL_ADDRESS = "battleSpriteModel";
 
 
-    private final List<SpriteModel> spriteModels = new ArrayList<>();
-    private final List<SystemSpriteModel> systemSpriteModels = new ArrayList<>();
-    private final List<BattleSpriteModel> battleSpriteModels = new ArrayList<>();
+    private final Map<Integer, SpriteModel> spriteModels = new HashMap<>();
+    private final Map<Integer, SystemSpriteModel> systemSpriteModels = new HashMap<>();
+    private final Map<Integer, BattleSpriteModel> battleSpriteModels = new HashMap<>();
 
     public SpriteModelEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
@@ -72,7 +76,7 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
                                  @NotNull DataAddress battleSpriteModelIndexAddress,
                                  @NotNull DataAddress battleSpriteModelAttributeAddress,
                                  @NotNull DataAddress battleSpriteModelAddress) {
-        super(metalMaxRe, false);
+        super(metalMaxRe, true);
         putDataAddress(SPRITE_MODEL_INDEX_ADDRESS, spriteModelIndexAddress);
         putDataAddress(SPRITE_MODEL_ADDRESS, spriteModelAddress);
         putDataAddress(SYSTEM_SPRITE_MODEL_INDEX_ADDRESS, systemSpriteModelIndexAddress);
@@ -89,207 +93,128 @@ public class SpriteModelEditorImpl extends RomBufferWrapperAbstractEditor implem
         getSystemSpriteModels().clear();
         getBattleSpriteModels().clear();
 
-        DataAddress spriteModelIndexAddress = getDataAddress(SPRITE_MODEL_INDEX_ADDRESS);
-        char[] indexes = new char[spriteModelIndexAddress.length() / 0x02];
-        position(spriteModelIndexAddress);
-        for (int i = 0; i < indexes.length; i++) {
-            indexes[i] = getBuffer().getChar();
-        }
-
-        DataAddress spriteModelAddress = getDataAddress(SPRITE_MODEL_ADDRESS);
-        int bankOffset = spriteModelAddress.getBankOffset();
-        for (int i = 0; i < indexes.length; i++) {
-            int position = indexes[i] - 0x8000 - bankOffset;
-            position += spriteModelAddress.getAbsStartAddress(getBuffer());
-
-            int head = getBuffer().get(position++);
-            int attribute = getBuffer().get(position++);
+        // 获取特殊精灵模型数据
+        Map<Integer, byte[]> spriteModelData = new HashMap<>();
+        loadIndexedData(SPRITE_MODEL_INDEX_ADDRESS, SPRITE_MODEL_ADDRESS, spriteModelData, 0x45);
+        for (Map.Entry<Integer, byte[]> entry : spriteModelData.entrySet()) {
+            byte[] value = entry.getValue();
+            int head = value[0x00];
+            int attribute = value[0x01];
             SpriteModel spriteModel = new SpriteModel(head, attribute, null);
 
             byte[] model = new byte[spriteModel.modelLength()];
-            getBuffer().get(position, model);
+            System.arraycopy(value, 1 + 1, model, 0, model.length);
             spriteModel.setModel(model);
 
-            getSpriteModels().add(spriteModel);
+            getSpriteModels().put(entry.getKey(), spriteModel);
         }
 
-        DataAddress systemSpriteModelIndexAddress = getDataAddress(SYSTEM_SPRITE_MODEL_INDEX_ADDRESS);
-        indexes = new char[systemSpriteModelIndexAddress.length() / 0x02];
-        position(systemSpriteModelIndexAddress);
-        for (int i = 0; i < indexes.length; i++) {
-            indexes[i] = getBuffer().getChar();
-        }
-
-        DataAddress systemSpriteModelAddress = getDataAddress(SYSTEM_SPRITE_MODEL_ADDRESS);
-        bankOffset = systemSpriteModelAddress.getBankOffset();
-        for (int i = 0; i < indexes.length; i++) {
-            int position = indexes[i] - 0x8000 - bankOffset;
-            position += systemSpriteModelAddress.getAbsStartAddress(getBuffer());
-
-            int count = getBuffer().get(position++);
+        // 获取系统精灵模型数据
+        Map<Integer, byte[]> systemSpriteModelData = new HashMap<>();
+        loadIndexedData(SYSTEM_SPRITE_MODEL_INDEX_ADDRESS, SYSTEM_SPRITE_MODEL_ADDRESS, systemSpriteModelData, 0x36);
+        for (Map.Entry<Integer, byte[]> entry : systemSpriteModelData.entrySet()) {
+            byte[] value = entry.getValue();
+            int count = value[0x00];
             SystemSpriteModel systemSpriteModel = new SystemSpriteModel();
-            for (int c = 0; c < count; c++) {
-                int y = getBuffer().getToInt(position++);
-                int tile = getBuffer().getToInt(position++);
-                int attribute = getBuffer().getToInt(position++);
-                int x = getBuffer().getToInt(position++);
+            for (int i = 0; i < count; i++) {
+                int y = value[i * 0x04 + 1 + 0];
+                int tile = value[i * 0x04 + 1 + 1];
+                int attribute = value[i * 0x04 + 1 + 2];
+                int x = value[i * 0x04 + 1 + 3];
                 SystemSprite systemSprite = new SystemSprite(x, y, tile, attribute);
                 systemSpriteModel.add(systemSprite);
             }
-            getSystemSpriteModels().add(systemSpriteModel);
+            getSystemSpriteModels().put(entry.getKey(), systemSpriteModel);
         }
 
         // 获取战斗精灵模型数据
-        DataAddress battleSpriteModelAddress = getDataAddress(BATTLE_SPRITE_MODEL_ADDRESS);
-        byte[] modelAttributes = new byte[battleSpriteModelAddress.length()];
-        getBuffer().get(battleSpriteModelAddress, modelAttributes);
+        Map<Integer, byte[]> battleSpriteModelData = new HashMap<>();
+        loadIndexedData(BATTLE_SPRITE_MODEL_INDEX_ADDRESS, BATTLE_SPRITE_MODEL_ADDRESS, battleSpriteModelData, 0xFE);
 
-        DataAddress battleSpriteModelIndexAddress = getDataAddress(BATTLE_SPRITE_MODEL_INDEX_ADDRESS);
-        indexes = new char[battleSpriteModelIndexAddress.length() / 0x02];
-        position(battleSpriteModelIndexAddress);
-        for (int i = 0; i < indexes.length; i++) {
-            indexes[i] = getBuffer().getChar();
-        }
-        bankOffset = battleSpriteModelAddress.getBankOffset();
-        for (int i = 0; i < indexes.length; i++) {
-            char modelIndex = indexes[i];
-            if (modelIndex == 0xFFFF) {
-                getBattleSpriteModels().add(BattleSpriteModel.createEmptyModel());
+        DataAddress battleSpriteModelAttributeAddress = getDataAddress(BATTLE_SPRITE_MODEL_ATTRIBUTE_ADDRESS);
+        byte[] modelAttributes = new byte[battleSpriteModelAttributeAddress.length()];
+        getBuffer().get(battleSpriteModelAttributeAddress, modelAttributes);
+        for (Map.Entry<Integer, byte[]> entry : battleSpriteModelData.entrySet()) {
+            byte[] value = entry.getValue();
+            if (value.length == 0) {
+                getBattleSpriteModels().put(entry.getKey(), BattleSpriteModel.createEmptyModel());
                 continue;
             }
-            int position = modelIndex - 0x8000 - bankOffset;
-            position += battleSpriteModelAddress.getAbsStartAddress(getBuffer());
-            BattleSpriteModel battleSpriteModel = new BattleSpriteModel(modelAttributes[i], (byte) 0, null);
 
-            byte offset = getBuffer().get(position++);
+            BattleSpriteModel battleSpriteModel = new BattleSpriteModel(modelAttributes[entry.getKey()], (byte) 0, null);
+
+            byte offset = value[0x00];
             byte[] model = new byte[battleSpriteModel.getHeight() * battleSpriteModel.getWidth()];
-            getBuffer().get(position, model);
+            System.arraycopy(value, 1, model, 0x00, model.length);
             battleSpriteModel.setOffset(offset);
             battleSpriteModel.setModel(model);
-            getBattleSpriteModels().add(battleSpriteModel);
+            getBattleSpriteModels().put(entry.getKey(), battleSpriteModel);
         }
-
     }
 
     @Editor.Apply
     public void onApply() {
-        // 溢出标志
-        boolean overflow = false;
-
-        DataAddress spriteModelIndexAddress = getDataAddress(SPRITE_MODEL_INDEX_ADDRESS);
-        char[] indexes = new char[spriteModelIndexAddress.length() / 0x02];
-
-        // 写入模型数据
-        DataAddress spriteModelAddress = getDataAddress(SPRITE_MODEL_ADDRESS);
-        int baseSpriteModelIndex = 0x8000 + spriteModelAddress.getBankOffset();
-        position(spriteModelAddress);
-        for (int i = 0; i < indexes.length; i++) {
-            indexes[i] = (char) baseSpriteModelIndex;
-
-            SpriteModel spriteModel = getSpriteModel(i);
-            overflow = overflow || !spriteModelAddress.range(position() - 0x10 + spriteModel.length());
-            if (overflow) {
-                // 写不下了
-                LOGGER.error("精灵模型编辑器：精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), spriteModel.length());
-                continue;
-            }
-            getBuffer().put(spriteModel.getHead());
-            getBuffer().put(spriteModel.getAttribute());
-            getBuffer().put(spriteModel.getModel());
-
-            baseSpriteModelIndex += spriteModel.length();
+        // 写入特殊精灵模型数据
+        Map<Integer, byte[]> spriteModelData = new HashMap<>();
+        for (Map.Entry<Integer, SpriteModel> entry : getSpriteModels().entrySet()) {
+            spriteModelData.put(entry.getKey(), entry.getValue().toByteArray());
+        }
+        int end = applyIndexedData(SPRITE_MODEL_INDEX_ADDRESS, SPRITE_MODEL_ADDRESS, false, spriteModelData, false, spriteModelData.size());
+        if (end >= 0) {
+            LOGGER.info("精灵模型编辑器：特殊精灵模型 剩余{}个空闲字节", end);
+        } else {
+            LOGGER.error("精灵模型编辑器：特殊精灵模型数据溢出！超出了数据上限{}字节", -end);
         }
 
-        // 写入模型索引
-        position(spriteModelIndexAddress);
-        for (char index : indexes) {
-            getBuffer().putChar(NumberR.toChar(index));
-        }
-
-        DataAddress systemSpriteModelIndexAddress = getDataAddress(SYSTEM_SPRITE_MODEL_INDEX_ADDRESS);
-        indexes = new char[systemSpriteModelIndexAddress.length() / 0x02];
         // 写入系统精灵模型数据
-        DataAddress systemSpriteModelAddress = getDataAddress(SYSTEM_SPRITE_MODEL_ADDRESS);
-        baseSpriteModelIndex = 0x8000 + systemSpriteModelAddress.getBankOffset();
-        position(systemSpriteModelAddress);
-        overflow = false;
-        for (int i = 0; i < indexes.length; i++) {
-            indexes[i] = (char) baseSpriteModelIndex;
-
-            List<SystemSprite> systemSpriteModel = getSystemSpriteModel(i);
-
-            overflow = overflow || !systemSpriteModelAddress.range(position() - 0x10 + (systemSpriteModel.size() * 0x04));
-            if (overflow) {
-                // 写不下了
-                LOGGER.error("精灵模型编辑器：系统精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), systemSpriteModel.size() * 0x04);
-                continue;
-            }
-            // 数量
-            getBuffer().put(systemSpriteModel.size());
-            for (SystemSprite systemSprite : systemSpriteModel) {
-                getBuffer().put(systemSprite.toArrayByte());
-            }
-            baseSpriteModelIndex += 1 + (systemSpriteModel.size() * 0x04);
+        Map<Integer, byte[]> systemSpriteModelData = new HashMap<>();
+        for (Map.Entry<Integer, SystemSpriteModel> entry : getSystemSpriteModels().entrySet()) {
+            systemSpriteModelData.put(entry.getKey(), entry.getValue().toByteArray());
+        }
+        end = applyIndexedData(SYSTEM_SPRITE_MODEL_INDEX_ADDRESS, SYSTEM_SPRITE_MODEL_ADDRESS, false, systemSpriteModelData, false, systemSpriteModelData.size());
+        if (end >= 0) {
+            LOGGER.info("精灵模型编辑器：系统精灵模型 剩余{}个空闲字节", end);
+        } else {
+            LOGGER.error("精灵模型编辑器：系统精灵模型数据溢出！超出了数据上限{}字节", -end);
         }
 
-        // 写入模型索引
-        position(systemSpriteModelIndexAddress);
-        for (char index : indexes) {
-            getBuffer().putChar(NumberR.toChar(index));
-        }
-
-        // 写入战斗精灵模型数据
-        DataAddress battleSpriteModelIndexAddress = getDataAddress(BATTLE_SPRITE_MODEL_INDEX_ADDRESS);
+        // 获取战斗精灵模型数据
         DataAddress battleSpriteModelAttributeAddress = getDataAddress(BATTLE_SPRITE_MODEL_ATTRIBUTE_ADDRESS);
-        DataAddress battleSpriteModelAddress = getDataAddress(BATTLE_SPRITE_MODEL_ADDRESS);
+        byte[] modelAttributes = new byte[battleSpriteModelAttributeAddress.length()];
 
-        indexes = new char[battleSpriteModelIndexAddress.length() / 0x02];
-        byte[] attributes = new byte[battleSpriteModelAttributeAddress.length()];
-        baseSpriteModelIndex = 0x8000 + battleSpriteModelAddress.getBankOffset();
-        position(battleSpriteModelAddress);
-        overflow = false;
-        for (int i = 0; i < indexes.length; i++) {
-            BattleSpriteModel battleSpriteModel = getBattleSpriteModels().get(i);
+        Map<Integer, byte[]> battleSpriteModelData = new HashMap<>();
+        for (Map.Entry<Integer, BattleSpriteModel> entry : getBattleSpriteModels().entrySet()) {
+            BattleSpriteModel battleSpriteModel = entry.getValue();
+            Integer index = entry.getKey();
+            modelAttributes[index] = battleSpriteModel.getAttribute();
             if (battleSpriteModel.isEmptyModel()) {
-                indexes[i] = 0xFFFF;
+                battleSpriteModelData.put(index, new byte[0]);
                 continue;
             }
-            indexes[i] = (char) baseSpriteModelIndex;
-
-            overflow = overflow || !battleSpriteModelAddress.range(position() - 0x10 + battleSpriteModel.length());
-            if (overflow) {
-                // 写不下了
-                LOGGER.error("精灵模型编辑器：战斗精灵模型数据溢出 模型ID：{} 长度为：{}", "%02X".formatted(i), battleSpriteModel.length());
-                continue;
-            }
-            attributes[i] = battleSpriteModel.getAttribute();
-            getBuffer().put(battleSpriteModel.getOffset());
-            getBuffer().put(battleSpriteModel.getModel());
-            baseSpriteModelIndex += 1 + (battleSpriteModel.getWidth() * battleSpriteModel.getHeight());
+            battleSpriteModelData.put(index, battleSpriteModel.toByteArray());
         }
-
+        end = applyIndexedData(BATTLE_SPRITE_MODEL_INDEX_ADDRESS, BATTLE_SPRITE_MODEL_ADDRESS, false, battleSpriteModelData, true, battleSpriteModelData.size());
+        if (end >= 0) {
+            LOGGER.info("精灵模型编辑器：战斗精灵模型 剩余{}个空闲字节", end);
+        } else {
+            LOGGER.error("精灵模型编辑器：战斗精灵模型数据溢出！超出了数据上限{}字节", -end);
+        }
         // 写入战斗精灵模型属性
-        position(battleSpriteModelAttributeAddress);
-        getBuffer().put(attributes);
-        // 写入战斗精灵模型索引
-        position(battleSpriteModelIndexAddress);
-        for (char index : indexes) {
-            getBuffer().putChar(NumberR.toChar(index));
-        }
+        getBuffer().put(battleSpriteModelAttributeAddress, modelAttributes);
     }
 
     @Override
-    public List<SpriteModel> getSpriteModels() {
+    public Map<Integer, SpriteModel> getSpriteModels() {
         return spriteModels;
     }
 
     @Override
-    public List<SystemSpriteModel> getSystemSpriteModels() {
+    public Map<Integer, SystemSpriteModel> getSystemSpriteModels() {
         return systemSpriteModels;
     }
 
     @Override
-    public List<BattleSpriteModel> getBattleSpriteModels() {
+    public Map<Integer, BattleSpriteModel> getBattleSpriteModels() {
         return battleSpriteModels;
     }
 }

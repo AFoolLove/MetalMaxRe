@@ -95,4 +95,22 @@ public abstract class AbstractEditor implements IRomEditor {
     public Map<String, Object> getDataAddresses() {
         return this.addresses;
     }
+
+    /**
+     * 在已排序的索引数组中查找目标值的排名（前一个位置）
+     *
+     * @param indexes 已排序（小到大）的索引池
+     * @param target  目标值
+     * @return 排名索引
+     */
+    protected int findSortedRank(char[] indexes, char target) {
+        int preIndex = 0;
+        for (int i = 1; i < indexes.length; i++) {
+            if (indexes[i] > target) {
+                return preIndex;
+            }
+            preIndex = i;
+        }
+        return preIndex;
+    }
 }

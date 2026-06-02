@@ -2,6 +2,8 @@ package me.afoolslove.metalmaxre.editors.sprite;
 
 import me.afoolslove.metalmaxre.utils.NumberR;
 
+import java.io.ByteArrayOutputStream;
+
 /**
  * 战斗时的精灵模型
  * <p>
@@ -46,7 +48,7 @@ public class BattleSpriteModel {
     }
 
     public int getPaletteIndex() {
-        return NumberR.at(attribute, 7, 3, true);
+        return NumberR.at(attribute, 1, 2, true);
     }
 
     public byte getAttribute() {
@@ -59,11 +61,13 @@ public class BattleSpriteModel {
 
     /**
      * 获取全部数据长度
+     * <p>
+     * {@link BattleSpriteModel#attribute} 不属于ROM格式中的数据
      *
      * @return 全部数据长度
      */
     public int length() {
-        return 2 + modelLength();
+        return 1 + modelLength();
     }
 
     /**
@@ -105,6 +109,18 @@ public class BattleSpriteModel {
 
     public boolean isEmptyModel() {
         return this instanceof EmptyBattleSpriteModel;
+    }
+
+    /**
+     * 转换为ROM格式的字节数组
+     *
+     * @return 字节数组
+     */
+    public byte[] toByteArray() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(length());
+        outputStream.write(getOffset());
+        outputStream.writeBytes(getModel());
+        return outputStream.toByteArray();
     }
 
     public static EmptyBattleSpriteModel createEmptyModel() {

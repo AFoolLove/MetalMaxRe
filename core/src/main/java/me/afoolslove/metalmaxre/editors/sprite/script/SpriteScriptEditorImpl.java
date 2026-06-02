@@ -12,13 +12,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * 精灵脚本编辑器
+ *
+ * @author AFoolLove
+ */
 public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteScriptEditor {
     public static final Logger LOGGER = LoggerFactory.getLogger(SpriteScriptEditorImpl.class);
 
@@ -135,108 +138,27 @@ public class SpriteScriptEditorImpl extends RomBufferWrapperAbstractEditor imple
         getDynamicScripts().clear();
         getStaticScripts().clear();
 
-        loadScripts(DYNAMIC_SCRIPT_INDEX_ADDRESS, DYNAMIC_SCRIPT_ADDRESS, getDynamicScripts(), getDynamicScriptMaxCount());
-        loadScripts(STATIC_SCRIPT_INDEX_ADDRESS, STATIC_SCRIPT_ADDRESS, getStaticScripts(), getStaticScriptMaxCount());
-    }
-
-    /**
-     * 加载脚本数据（动态/静态共用）
-     *
-     * @param indexAddressKey 索引地址key
-     * @param dataAddressKey  数据地址key
-     * @param dataMap         存储结果的Map
-     * @param maxCount        最大数量
-     */
-    private void loadScripts(@NotNull String indexAddressKey,
-                             @NotNull String dataAddressKey,
-                             @NotNull Map<Integer, byte[]> dataMap,
-                             int maxCount) {
-        // 读取原始索引
-        char[] indexes = new char[maxCount];
-        position(getDataAddress(indexAddressKey));
-        getBuffer().getCharArray(indexes);
-
-        // 排序后的索引副本
-        char[] sorted = Arrays.copyOf(indexes, indexes.length);
-        Arrays.sort(sorted);
-
-        // 计算每个原始索引在排序数组中的排名
-        int[] rank = new int[maxCount];
-        for (int i = 0; i < maxCount; i++) {
-            rank[i] = Arrays.binarySearch(sorted, indexes[i]);
-        }
-
-        // 根据相邻排序索引的差值计算每个脚本的长度并读取数据
-        int bankStartAddress = getDataAddress(dataAddressKey).getBankStartAddress() + getBuffer().getHeader().getPrgRomStart();
-        int endOffset = getDataAddress(dataAddressKey).getBankEndOffset() + 0x8000;
-
-        for (int i = 0; i < maxCount; i++) {
-            int nextOffset = (rank[i] + 1 < maxCount) ? sorted[rank[i] + 1] : endOffset;
-            int length = nextOffset - sorted[rank[i]];
-            if (length >= 0) {
-                byte[] bytes = new byte[length];
-                getBuffer().get(bankStartAddress + indexes[i] - 0x8000, bytes);
-                dataMap.put(i, bytes);
-            }
-        }
+        // 加载动态脚本
+        loadIndexedData(DYNAMIC_SCRIPT_INDEX_ADDRESS, DYNAMIC_SCRIPT_ADDRESS, getDynamicScripts(), getDynamicScriptMaxCount());
+        // 加载静态脚本
+        loadIndexedData(STATIC_SCRIPT_INDEX_ADDRESS, STATIC_SCRIPT_ADDRESS, getStaticScripts(), getStaticScriptMaxCount());
     }
 
     @Editor.Apply
     public void onApply() {
-        applyScripts(DYNAMIC_SCRIPT_INDEX_ADDRESS, DYNAMIC_SCRIPT_ADDRESS, getDynamicScripts(), getDynamicScriptMaxCount());
-        applyScripts(STATIC_SCRIPT_INDEX_ADDRESS, STATIC_SCRIPT_ADDRESS, getStaticScripts(), getStaticScriptMaxCount());
-    }
-
-    /**
-     *
-     */
-    private void applyScripts(@NotNull String indexAddressKey,
-                              @NotNull String dataAddressKey,
-                              @NotNull Map<Integer, byte[]> dataMap,
-                              int maxCount) {
-        final int maxLength = dataMap.values().stream().mapToInt(bytes -> bytes.length).sum();
-
-        // 储存新的索引
-        char[] indexes = new char[maxCount];
-
-        // 用于储存新的数据
-        ByteBuffer dataBuffer = ByteBuffer.allocate(maxLength);
-
-        byte[][] sortData = new byte[maxCount][];
-        for (Map.Entry<Integer, byte[]> entry : dataMap.entrySet()) {
-            sortData[entry.getKey()] = entry.getValue();
-        }
-        // 按数组长度大到小排序
-        Arrays.sort(sortData, (o1, o2) -> o2.length - o1.length);
-        DataAddress dataAddress = getDataAddress(dataAddressKey);
-        int bankOffset = dataAddress.getBankOffset();
-        // 通过遍历数据获取对应的索引，将索引目标值设置为数据起始地址
-        for (int i = 0; i < maxCount; i++) {
-            for (Map.Entry<Integer, byte[]> entry : dataMap.entrySet()) {
-                if (entry.getValue() == sortData[i]) {
-                    indexes[entry.getKey()] = (char) (dataBuffer.position() + 0x8000 + bankOffset);
-                    dataBuffer.put(entry.getValue());
-                    break;
-                }
-            }
-        }
-        position(getDataAddress(indexAddressKey));
-        getBuffer().putCharsR(indexes);
-
-        position(dataAddress);
-        getBuffer().put(dataBuffer.array(), 0, Math.min(dataBuffer.position(), dataAddress.length()));
-
-        int end = dataAddress.getEndAddress(-position() + 0x10 + 1);
+        // 写入动态脚本
+        int end = applyIndexedData(DYNAMIC_SCRIPT_INDEX_ADDRESS, DYNAMIC_SCRIPT_ADDRESS, getDynamicScripts(), getDynamicScriptMaxCount(), (byte) 0x00);
         if (end >= 0) {
-            if (end > 0) {
-                // 使用0x00填充未使用的数据
-                byte[] fillBytes = new byte[end];
-                Arrays.fill(fillBytes, (byte) 0x00);
-                getBuffer().put(fillBytes);
-            }
-            LOGGER.info("精灵脚本编辑器：{}剩余{}个空闲字节", dataAddressKey, end);
+            LOGGER.info("脚本编辑器：动态脚本数据剩余{}个空闲字节", end);
         } else {
-            LOGGER.error("精灵脚本编辑器：{}错误！超出了数据上限{}字节", dataAddressKey, -end);
+            LOGGER.error("脚本编辑器：动态脚本数据错误！超出了数据上限{}字节", -end);
+        }
+        // 写入静态脚本
+        end = applyIndexedData(STATIC_SCRIPT_INDEX_ADDRESS, STATIC_SCRIPT_ADDRESS, getStaticScripts(), getStaticScriptMaxCount(), (byte) 0x00);
+        if (end >= 0) {
+            LOGGER.info("脚本编辑器：静态脚本数据剩余{}个空闲字节", end);
+        } else {
+            LOGGER.error("脚本编辑器：静态脚本数据错误！超出了数据上限{}字节", -end);
         }
     }
 

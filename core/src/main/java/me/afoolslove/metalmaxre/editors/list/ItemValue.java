@@ -1,18 +1,18 @@
-package me.afoolslove.metalmaxre.editors.computer.shop;
+package me.afoolslove.metalmaxre.editors.list;
 
 /**
- * 商店基本物品
+ * 清单基本项目
  *
  * @author AFoolLove
  */
-public class ShopItem {
+public class ItemValue implements Cloneable {
     private byte item;
 
-    public ShopItem() {
+    public ItemValue() {
         this.item = 0x00;
     }
 
-    public ShopItem(byte item) {
+    public ItemValue(byte item) {
         this.item = item;
     }
 
@@ -32,4 +32,7 @@ public class ShopItem {
         setItem((byte) (item & 0xFF));
     }
 
+    public ItemValue copy() {
+        return new ItemValue(item);
+    }
 }

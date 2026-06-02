@@ -4,6 +4,11 @@ import me.afoolslove.metalmaxre.editors.IRomEditor;
 
 import java.util.Map;
 
+/**
+ * 精灵脚本编辑器
+ *
+ * @author AFoolLove
+ */
 public interface ISpriteScriptEditor extends IRomEditor {
     @Override
     default String getId() {

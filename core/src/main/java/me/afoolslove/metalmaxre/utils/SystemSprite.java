@@ -149,7 +149,7 @@ public class SystemSprite extends Point2B {
         return setAttribute((byte) (attribute & 0xFF));
     }
 
-    public byte[] toArrayByte() {
+    public byte[] toByteArray() {
         byte[] bytes = new byte[0x04];
         bytes[0x00] = getRawY();
         bytes[0x01] = getTile();

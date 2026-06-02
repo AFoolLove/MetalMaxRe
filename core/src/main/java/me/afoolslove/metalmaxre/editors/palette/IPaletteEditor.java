@@ -43,11 +43,5 @@ public interface IPaletteEditor extends IRomEditor {
      *
      * @return 调色板
      */
-    default List<PaletteRow> getPaletteByIndex(int position) {
-        // 0x8000+0x1AD0=基础数据起始
-        // 9byte 每组数据的长度
-        // 获取索引
-        int index = (position - (0x8000 + 0x1AD0)) / 9;
-        return getPalettes().get(index);
-    }
+    List<PaletteRow> getPaletteByIndex(int position);
 }

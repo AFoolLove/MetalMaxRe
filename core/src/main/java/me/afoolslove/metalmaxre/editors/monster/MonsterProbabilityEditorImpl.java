@@ -6,6 +6,11 @@ import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * 怪物概率编辑器
+ *
+ * @author AFoolLove
+ */
 public class MonsterProbabilityEditorImpl extends AbstractEditor implements IMonsterProbabilityEditor {
     /**
      * 怪物权重地址

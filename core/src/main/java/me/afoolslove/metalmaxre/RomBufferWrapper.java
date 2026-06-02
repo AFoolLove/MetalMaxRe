@@ -289,6 +289,11 @@ public class RomBufferWrapper extends RomBuffer {
     }
 
     @Override
+    public void fill(int index, byte val, int length) {
+        romBuffer.fill(index, val, length);
+    }
+
+    @Override
     public void putInt(int index, int n) {
         romBuffer.putInt(index, n);
     }

@@ -2,16 +2,18 @@ package me.afoolslove.metalmaxre.editors;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBuffer;
+import me.afoolslove.metalmaxre.editors.audio.AudioEditorImpl;
+import me.afoolslove.metalmaxre.editors.audio.IAudioEditor;
 import me.afoolslove.metalmaxre.editors.computer.ComputerEditorImpl;
 import me.afoolslove.metalmaxre.editors.computer.IComputerEditor;
-import me.afoolslove.metalmaxre.editors.computer.shop.IShopEditor;
-import me.afoolslove.metalmaxre.editors.computer.shop.ShopEditorImpl;
 import me.afoolslove.metalmaxre.editors.data.DataValueEditorImpl;
 import me.afoolslove.metalmaxre.editors.data.IDataValueEditor;
 import me.afoolslove.metalmaxre.editors.elevator.ElevatorEditorImpl;
 import me.afoolslove.metalmaxre.editors.elevator.IElevatorEditor;
 import me.afoolslove.metalmaxre.editors.items.IItemEditor;
 import me.afoolslove.metalmaxre.editors.items.ItemEditorImpl;
+import me.afoolslove.metalmaxre.editors.list.IListEditor;
+import me.afoolslove.metalmaxre.editors.list.ListEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.*;
 import me.afoolslove.metalmaxre.editors.map.events.EventTilesEditorImpl;
 import me.afoolslove.metalmaxre.editors.map.events.IEventTilesEditor;
@@ -94,7 +96,7 @@ public class EditorManagerImpl implements IEditorManager {
 
     public void registerDefaultEditors() {
         register(IComputerEditor.class, ComputerEditorImpl::new);
-        register(IShopEditor.class, ShopEditorImpl::new);
+        register(IListEditor.class, ListEditorImpl::new);
         register(IDataValueEditor.class, DataValueEditorImpl::new);
         register(IItemEditor.class, ItemEditorImpl::new);
         register(IDogSystemEditor.class, DogSystemEditorImpl::new);
@@ -104,7 +106,7 @@ public class EditorManagerImpl implements IEditorManager {
         register(ISpriteEditor.class, SpriteEditorImpl::new);
         register(ITankEditor.class, TankEditorImpl::new);
         register(ITreasureEditor.class, TreasureEditorImpl::new);
-        register(IMapEditor.class, MapEditorImpl::new);
+        register(IMapEditor.class, MapEditorImpl.class);
         register(IMapPropertiesEditor.class, MapPropertiesEditorImpl.class);
         register(IEventTilesEditor.class, EventTilesEditorImpl::new);
         register(IWorldMapEditor.class, WorldMapEditorImpl.class);
@@ -112,12 +114,13 @@ public class EditorManagerImpl implements IEditorManager {
         register(ITileSetEditor.class, TileSetEditorImpl::new);
         register(ITextEditor.class, TextEditorImpl.class);
         register(IMonsterEditor.class, MonsterEditorImpl::new);
-        register(MonsterModelImpl.class, MonsterModelImpl::new);
+        register(IMonsterModelEditor.class, MonsterModelImpl.class);
         register(IElevatorEditor.class, ElevatorEditorImpl::new);
         register(ISpriteScriptEditor.class, SpriteScriptEditorImpl::new);
         register(ISpriteModelEditor.class, SpriteModelEditorImpl::new);
         register(IMonsterProbabilityEditor.class, MonsterProbabilityEditorImpl.class);
         register(ITitleEditor.class, TitleEditorImpl.class);
+        register(IAudioEditor.class, AudioEditorImpl::new);
     }
 
     @Override
@@ -165,10 +168,10 @@ public class EditorManagerImpl implements IEditorManager {
         }
         if (loadMethod == null || applyMethod == null) {
             if (loadMethod == null) {
-                LOGGER.warn("{}未找到加载ROM数据方法", editor.getClass());
+                LOGGER.warn("{} 未找到加载ROM数据方法", editor.getClass());
             }
             if (applyMethod == null) {
-                LOGGER.warn("{}未找到应用ROM数据方法", editor.getClass());
+                LOGGER.warn("{} 未找到应用ROM数据方法", editor.getClass());
             }
             return;
         }

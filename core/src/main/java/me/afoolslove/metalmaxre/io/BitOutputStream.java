@@ -16,6 +16,14 @@ public class BitOutputStream extends ByteArrayOutputStream {
 
     private int nextBitIndex = 0; // 下一个被写入的bit位
 
+    public BitOutputStream() {
+        super();
+    }
+
+    public BitOutputStream(int size) {
+        super(size);
+    }
+
     /**
      * 写入一个bit
      */

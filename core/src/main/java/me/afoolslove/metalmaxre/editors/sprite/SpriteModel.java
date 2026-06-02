@@ -2,8 +2,12 @@ package me.afoolslove.metalmaxre.editors.sprite;
 
 import me.afoolslove.metalmaxre.utils.NumberR;
 
+import java.io.ByteArrayOutputStream;
+
 /**
  * 精灵模型
+ * <p>
+ * 类型为0x44的精灵模型
  *
  * @author AFoolLove
  */
@@ -366,5 +370,18 @@ public class SpriteModel {
         setWidth(width);
         setHeight(height);
         setModel(model);
+    }
+
+    /**
+     * 转为ROM格式的字节数组
+     *
+     * @return 字节数组
+     */
+    public byte[] toByteArray() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(length());
+        outputStream.write(getHead());
+        outputStream.write(getAttribute());
+        outputStream.writeBytes(getModel());
+        return outputStream.toByteArray();
     }
 }

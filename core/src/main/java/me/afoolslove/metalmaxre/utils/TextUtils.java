@@ -71,5 +71,23 @@ public class TextUtils {
         return textEditor.getPage(0x01).stream().map(v -> v.toText(charMap)).toList();
     }
 
+    /**
+     * 获取指定页的所有文本
+     *
+     * @param textEditor 文本编辑器
+     * @param hasId      名称前缀是否包含id
+     * @return 所有物品名称
+     */
+    public static List<String> getPageValues(@NotNull ITextEditor textEditor, boolean hasId, int page, @NotNull ICharMap charMap) {
+        if (hasId) {
+            List<String> names = new ArrayList<>();
+            List<TextBuilder> list = textEditor.getPage(page);
+            for (int i = 0; i < list.size(); i++) {
+                names.add(String.format("%02X %s", i, list.get(i).toText(charMap)));
+            }
+            return names;
+        }
+        return textEditor.getPage(page).stream().map(v -> v.toText(charMap)).toList();
+    }
 
 }

@@ -1,4 +1,4 @@
-package me.afoolslove.metalmaxre.editors.computer.shop;
+package me.afoolslove.metalmaxre.editors.list;
 
 import org.jetbrains.annotations.Range;
 
@@ -9,7 +9,7 @@ import java.util.Objects;
  *
  * @author AFoolLove
  */
-public class VendorItem extends ShopItem {
+public class VendorItem extends ItemValue {
     private byte count;
 
     public VendorItem(byte item, byte count) {
@@ -22,7 +22,7 @@ public class VendorItem extends ShopItem {
      *
      * @param item 商品
      * @see #setItem(byte)
-     * @see #getItem()
+     * @see #getRawItem()
      */
     public void setItem(@Range(from = 0x00, to = 0xFF) int item) {
         super.setItem(item);
@@ -33,7 +33,7 @@ public class VendorItem extends ShopItem {
      *
      * @param item 商品
      * @see #setItem(int)
-     * @see #getItem()
+     * @see #getRawItem()
      */
     public void setItem(byte item) {
         super.setItem(item);
@@ -43,11 +43,11 @@ public class VendorItem extends ShopItem {
      * 设置商品数量，包含是否有货
      *
      * @param count 商品数量
-     * @see #setCount(byte)
+     * @see #setRawCount(byte)
      * @see #getCount()
      * @see #intCount()
      */
-    public void setCount(@Range(from = 0x00, to = 0xFF) int count) {
+    public void setRawCount(@Range(from = 0x00, to = 0xFF) int count) {
         this.count = (byte) (count & 0xFF);
     }
 
@@ -55,53 +55,61 @@ public class VendorItem extends ShopItem {
      * 设置商品数量，包含是否有货
      *
      * @param count 商品数量
-     * @see #setCount(int)
+     * @see #setRawCount(int)
      * @see #getCount()
      * @see #intCount()
      */
-    public void setCount(byte count) {
+    public void setRawCount(byte count) {
         this.count = count;
     }
 
     /**
      * @return 商品
-     * @see #intItem()
+     * @see #intRawItem()
      * @see #setItem(byte)
      * @see #setItem(int)
      */
-    public byte getItem() {
+    public byte getRawItem() {
         return super.getItem();
     }
 
     /**
      * @return 商品
-     * @see #getItem()
+     * @see #getRawItem()
      * @see #setItem(byte)
      * @see #setItem(int)
      */
-    public int intItem() {
+    public int intRawItem() {
         return super.intItem();
     }
 
     /**
      * @return 商品数量，最大0x7F(127)
      * @see #intCount()
-     * @see #setCount(byte)
-     * @see #setCount(int)
+     * @see #setRawCount(byte)
+     * @see #setRawCount(int)
      */
     public byte getCount() {
-        return (byte) (count & 0x7F);
+        return (byte) (getRawCount() & 0x7F);
     }
 
     /**
      * @return 商品数量，最大0x7F(127)
      * @see #getCount()
-     * @see #setCount(byte)
-     * @see #setCount(int)
+     * @see #setRawCount(byte)
+     * @see #setRawCount(int)
      */
     @Range(from = 0x00, to = 0x7F)
     public int intCount() {
-        return (byte) (count & 0x7F);
+        return getRawCount() & 0x7F;
+    }
+
+    public byte getRawCount() {
+        return this.count;
+    }
+
+    public int intRawCount() {
+        return getRawCount() & 0xFF;
     }
 
     /**
@@ -128,7 +136,7 @@ public class VendorItem extends ShopItem {
 
     @Override
     public String toString() {
-        return String.format("VendorItem{item=%02X, count=%02X}", getItem(), getCount());
+        return String.format("VendorItem{item=%02X, count=%02X}", getRawItem(), getCount());
     }
 
     @Override
@@ -139,11 +147,11 @@ public class VendorItem extends ShopItem {
         if (!(o instanceof VendorItem that)) {
             return false;
         }
-        return getItem() == that.getItem() && getCount() == that.getCount();
+        return getRawItem() == that.getRawItem() && getRawCount() == that.getRawCount();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getItem(), getCount());
+        return Objects.hash(getRawItem(), getRawCount());
     }
 }

@@ -12,6 +12,13 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.util.*;
 
+/**
+ * 精灵编辑器
+ * <p>
+ * 可修改地图中精灵的位置，精灵的XY坐标不能超过0x3F
+ *
+ * @author AFoolLove
+ */
 public class SpriteEditorImpl extends RomBufferWrapperAbstractEditor implements ISpriteEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpriteEditorImpl.class);
     /**

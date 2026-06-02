@@ -43,7 +43,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
 
     private XXTileSet[] tiles = new XXTileSet[0xD4]; // 0x04 = CHR表的四分之一
     private TileCombinationSet[] combinations = new TileCombinationSet[0x37]; // 每4byte一组，0x37个组合，0x40个4byte组
-    private TileAttributeSet[] attributes = new TileAttributeSet[0x37]; // 每0x40byte一组，0x37个组合，每byte对应一个图块的特性和调色板索引
+    private TileAttributeSet[] attributes = new TileAttributeSet[0x44]; // 每0x40byte一组，0x37个组合，每byte对应一个图块的特性和调色板索引
 
     /**
      * 世界地图图块的组合数据，全局固定
@@ -70,7 +70,7 @@ public class TileSetEditorImpl extends RomBufferWrapperAbstractEditor implements
         this(metalMaxRe,
                 DataAddress.fromCHR(0x00000, 0x34FFF),
                 DataAddress.fromCHR(0x35000, 0x386FF),
-                DataAddress.fromCHR(0x38700, 0x394C0),
+                DataAddress.fromCHR(0x38700, 0x397FF),
                 DataAddress.fromPRG(0x0FBBE - 0x10, 0x1000F - 0x10),
                 DataAddress.fromPRG(0x0FEAA - 0x10, 0x0FFA9 - 0x10));
     }

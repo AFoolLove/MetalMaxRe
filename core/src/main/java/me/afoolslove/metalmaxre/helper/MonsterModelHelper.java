@@ -1,8 +1,8 @@
 package me.afoolslove.metalmaxre.helper;
 
 import me.afoolslove.metalmaxre.MetalMaxRe;
+import me.afoolslove.metalmaxre.editors.monster.IMonsterModelEditor;
 import me.afoolslove.metalmaxre.editors.monster.MonsterModel;
-import me.afoolslove.metalmaxre.editors.monster.MonsterModelImpl;
 import me.afoolslove.metalmaxre.editors.monster.MonsterModelType;
 import me.afoolslove.metalmaxre.editors.palette.Color;
 import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class MonsterModelHelper {
     public static Color[][] generateMonsterModelPaletteFromId(@NotNull MetalMaxRe metalMaxRe, int monsterId) {
-        MonsterModelImpl monsterModel = metalMaxRe.getEditorManager().getEditor(MonsterModelImpl.class);
+        IMonsterModelEditor monsterModel = metalMaxRe.getEditorManager().getEditor(IMonsterModelEditor.class);
         MonsterModel model = monsterModel.getMonsterModel(monsterId);
         return generateMonsterModelPaletteFromModel(metalMaxRe, model);
     }
@@ -25,7 +25,7 @@ public class MonsterModelHelper {
     }
 
     public static Color[][] generateMonsterModelPalette(@NotNull MetalMaxRe metalMaxRe, boolean isDoublePalette, PaletteRow[] palettes) {
-        MonsterModelImpl monsterModel = metalMaxRe.getEditorManager().getEditor(MonsterModelImpl.class);
+        IMonsterModelEditor monsterModel = metalMaxRe.getEditorManager().getEditor(IMonsterModelEditor.class);
 
         SystemPalette systemPalette = metalMaxRe.getSystemPalette();
         Color[][] colors = new Color[][]{
@@ -49,7 +49,7 @@ public class MonsterModelHelper {
     }
 
     public static byte[][] generateMonsterModel(@NotNull MetalMaxRe metalMaxRe, int monsterId) {
-        MonsterModelImpl monsterModel = metalMaxRe.getEditorManager().getEditor(MonsterModelImpl.class);
+        IMonsterModelEditor monsterModel = metalMaxRe.getEditorManager().getEditor(IMonsterModelEditor.class);
         return generateMonsterModel(metalMaxRe, monsterModel.getMonsterModel(monsterId));
     }
 

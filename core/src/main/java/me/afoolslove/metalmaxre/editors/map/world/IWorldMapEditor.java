@@ -5,6 +5,11 @@ import me.afoolslove.metalmaxre.editors.map.MapPoint;
 
 import java.util.List;
 
+/**
+ * 世界地图编辑器
+ *
+ * @author AFoolLove
+ */
 public interface IWorldMapEditor extends IRomEditor {
     @Override
     default String getId() {

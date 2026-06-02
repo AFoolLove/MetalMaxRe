@@ -24,9 +24,9 @@ public interface IElevatorEditor extends IRomEditor {
     }
 
     /**
-     * @return 所有电梯和对应的楼层
+     * @return 所有电梯的顶层
      */
-    List<SingleMapEntry<Byte, List<Byte>>> getElevatorFloors();
+    List<Byte> getElevatorTopFloors();
 
     /**
      * @return 所有电梯对应的有效范围地图

@@ -3,6 +3,7 @@ package me.afoolslove.metalmaxre.editors.elevator;
 import me.afoolslove.metalmaxre.MetalMaxRe;
 import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
+import me.afoolslove.metalmaxre.editors.list.IListEditor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implements IElevatorEditor {
@@ -20,44 +20,36 @@ public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implement
      */
     public static final String ELEVATOR_TOP_FLOORS_ADDRESS = "elevatorTopFloors";
     /**
-     * 电梯显示的楼层地址
-     */
-    public static final String ELEVATOR_FLOORS_ADDRESS = "elevatorFloors";
-    /**
      * 拥有电梯属性的地图地址
      */
     public static final String ELEVATOR_MAPS_ADDRESS = "elevatorMaps";
 
     /**
-     * K: top floors
-     * V: floors
+     * top floors
      */
-    private final List<SingleMapEntry<Byte, List<Byte>>> floors = new ArrayList<>(getElevatorMaxCount());
+    private final List<Byte> topFloors = new ArrayList<>(getElevatorMaxCount());
     private final List<SingleMapEntry<Integer, Integer>> floorRanges = new ArrayList<>(getElevatorMaxCount());
 
     public ElevatorEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
                 DataAddress.fromPRG(0x20150 - 0x10, 0x25154 - 0x10),
-                DataAddress.fromPRG(0x23FF0 - 0x10, 0x2400F - 0x10),
                 DataAddress.fromPRG(0x29226 - 0x10, 0x2922F - 0x10)
         );
     }
 
     public ElevatorEditorImpl(@NotNull MetalMaxRe metalMaxRe,
                               DataAddress elevatorTopFloorsAddress,
-                              DataAddress elevatorFloorsAddress,
                               DataAddress elevatorMapsAddress
     ) {
         super(metalMaxRe);
         putDataAddress(ELEVATOR_TOP_FLOORS_ADDRESS, elevatorTopFloorsAddress);
-        putDataAddress(ELEVATOR_FLOORS_ADDRESS, elevatorFloorsAddress);
         putDataAddress(ELEVATOR_MAPS_ADDRESS, elevatorMapsAddress);
     }
 
     @Editor.Load
-    public void onLoad() {
+    public void onLoad(IListEditor listEditor) {
         // 读取前清空数据
-        getElevatorFloors().clear();
+        getElevatorTopFloors().clear();
         getElevatorFloorRanges().clear();
 
         // 读取电梯顶层地图ID
@@ -65,19 +57,10 @@ public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implement
         byte[][] floorRanges = new byte[2][getElevatorMaxCount()];
         position(getDataAddress(ELEVATOR_TOP_FLOORS_ADDRESS));
         getBuffer().get(topFloors);
-        // 读取电梯显示的楼层
-        position(getDataAddress(ELEVATOR_FLOORS_ADDRESS));
         for (byte topFloor : topFloors) {
-            List<Byte> fs = new ArrayList<>();
-            int count = getBuffer().getToInt();
-            byte[] floorBytes = new byte[count];
-            getBuffer().get(floorBytes);
-            for (int floorByte = 0; floorByte < count; floorByte++) {
-                fs.add(floorBytes[floorByte]);
-            }
-
-            getElevatorFloors().add(SingleMapEntry.create(topFloor, fs));
+            getElevatorTopFloors().add(topFloor);
         }
+
         // 读取电梯有效范围
         position(getDataAddress(ELEVATOR_MAPS_ADDRESS));
         getBuffer().getAABytes(0, getElevatorMaxCount(), floorRanges);
@@ -89,18 +72,12 @@ public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implement
     }
 
     @Editor.Apply
-    public void onApply() {
+    public void onApply(IListEditor listEditor) {
         byte[] topFloors = new byte[getElevatorMaxCount()];
-        byte[][] floors = new byte[getElevatorMaxCount()][];
         byte[][] floorRanges = new byte[2][getElevatorMaxCount()];
 
         for (int floor = 0; floor < getElevatorMaxCount(); floor++) {
-            SingleMapEntry<Byte, List<Byte>> entry = getElevatorFloors().get(floor);
-            topFloors[floor] = entry.getKey();
-            floors[floor] = new byte[entry.getValue().size()];
-            for (int f = 0; f < entry.getValue().size(); f++) {
-                floors[floor][f] = entry.getValue().get(f);
-            }
+            topFloors[floor] = getElevatorTopFloors().get(floor);
 
             SingleMapEntry<Integer, Integer> entryRange = getElevatorFloorRanges().get(floor);
             floorRanges[0x00][floor] = ((byte) (entryRange.getKey() & 0xFF));
@@ -110,55 +87,18 @@ public class ElevatorEditorImpl extends RomBufferWrapperAbstractEditor implement
         // 写入电梯顶层地图ID
         position(getDataAddress(ELEVATOR_TOP_FLOORS_ADDRESS));
         getBuffer().put(topFloors);
-        // 写入电梯显示的楼层
-        int floorCount = 5; // 最少5个
-        DataAddress elevatorFloorsAddress = getDataAddress(ELEVATOR_FLOORS_ADDRESS);
-        int floorMaxLength = elevatorFloorsAddress.length();
-        position(elevatorFloorsAddress);
-        for (int i = 0; i < floors.length; i++) {
-            byte[] floor = floors[i];
-            int count = floor.length;
-
-            if (floorCount >= floorMaxLength) {
-                LOGGER.error("电梯编辑器：空间不足，无法写入第{}电梯的楼层", i);
-                continue;
-            } else if (floorMaxLength < (floorCount + count)) {
-                // 空间不足，剪切楼层数量
-                count = (floorCount + count) - elevatorFloorsAddress.length();
-                LOGGER.error("电梯编辑器：空间不足，剪切第{}电梯楼层数量为{}", i, count);
-            }
-
-            floorCount += count;
-
-            getBuffer().put(count);
-            getBuffer().put(floor);
-        }
-
-        int end = elevatorFloorsAddress.getEndAddress(-position() + 0x10 + 1);
-        if (end != 0) {
-            if (end >= 0) {
-                // 使用0xFF填充未使用的数据
-                byte[] fillBytes = new byte[end];
-                Arrays.fill(fillBytes, (byte) 0xFF);
-                getBuffer().put(fillBytes);
-                LOGGER.info("电梯编辑器：剩余{}个空闲字节", end);
-            } else {
-                LOGGER.error("电梯编辑器：错误！超出了数据上限{}字节", -end);
-            }
-        }
-
         // 写入电梯有效范围
         position(getDataAddress(ELEVATOR_MAPS_ADDRESS));
         getBuffer().putAABytes(0, getElevatorMaxCount(), floorRanges);
     }
 
     @Override
-    public List<SingleMapEntry<Byte, List<Byte>>> getElevatorFloors() {
-        return floors;
+    public List<Byte> getElevatorTopFloors() {
+        return this.topFloors;
     }
 
     @Override
     public List<SingleMapEntry<Integer, Integer>> getElevatorFloorRanges() {
-        return floorRanges;
+        return this.floorRanges;
     }
 }

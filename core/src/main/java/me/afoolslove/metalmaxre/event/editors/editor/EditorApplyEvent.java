@@ -40,5 +40,9 @@ public class EditorApplyEvent extends EditorEvent {
         public Exception getException() {
             return exception;
         }
+
+        public boolean hasException() {
+            return exception != null;
+        }
     }
 }

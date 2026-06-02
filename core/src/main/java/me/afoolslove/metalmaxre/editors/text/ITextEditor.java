@@ -5,6 +5,11 @@ import me.afoolslove.metalmaxre.editors.IRomEditor;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 文本编辑器
+ *
+ * @author AFoolLove
+ */
 public interface ITextEditor extends IRomEditor {
     /**
      * 物品名称页
@@ -18,7 +23,6 @@ public interface ITextEditor extends IRomEditor {
      * 城镇名称页
      */
     int TOWN_NAME_PAGE = 0x0D;
-
 
 
     @Override

@@ -5,6 +5,19 @@ plugins {
 group 'me.afoolslove'
 version '1.0-SNAPSHOT'
 
+sourceSets {
+    main {
+        java {
+            // 将 gen 目录添加为源码目录
+            srcDirs += ['src/main/gen', 'gen']
+        }
+        resources {
+            // 如果 gen 目录下也有资源文件，也可以在此添加
+            // srcDirs += ['src/main/gen/resources', 'gen/resources']
+        }
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -12,12 +25,14 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    implementation 'org.slf4j:slf4j-api:2.0.5'
-    implementation 'ch.qos.logback:logback-classic:1.4.6'
+    api 'org.slf4j:slf4j-api:2.0.5'
+    api 'ch.qos.logback:logback-classic:1.4.14'
 
-    implementation 'org.jetbrains:annotations:23.0.0'
+    api 'org.jetbrains:annotations:23.0.0'
 
-    implementation 'com.google.code.gson:gson:2.10'
+    api 'com.google.code.gson:gson:2.10'
+    // 精灵脚本解析器
+    api 'org.antlr:antlr4-runtime:4.13.2'
 }
 
 test {

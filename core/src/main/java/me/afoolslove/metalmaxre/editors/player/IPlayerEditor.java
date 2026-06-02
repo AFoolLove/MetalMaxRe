@@ -5,6 +5,11 @@ import org.jetbrains.annotations.Range;
 
 import java.util.Map;
 
+/**
+ * 玩家编辑器
+ *
+ * @author AFoolLove
+ */
 public interface IPlayerEditor extends IRomEditor {
     @Override
     default String getId() {

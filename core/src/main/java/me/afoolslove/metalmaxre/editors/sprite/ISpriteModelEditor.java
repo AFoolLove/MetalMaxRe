@@ -3,7 +3,7 @@ package me.afoolslove.metalmaxre.editors.sprite;
 import me.afoolslove.metalmaxre.editors.IRomEditor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * 精灵模型编辑器
@@ -25,7 +25,7 @@ public interface ISpriteModelEditor extends IRomEditor {
      *
      * @return 所有精灵模型
      */
-    List<SpriteModel> getSpriteModels();
+    Map<Integer, SpriteModel> getSpriteModels();
 
     /**
      * 获取精灵模型
@@ -56,7 +56,7 @@ public interface ISpriteModelEditor extends IRomEditor {
      *
      * @return 系统精灵模型
      */
-    List<SystemSpriteModel> getSystemSpriteModels();
+    Map<Integer, SystemSpriteModel> getSystemSpriteModels();
 
     /**
      * 获取系统精灵模型
@@ -87,7 +87,7 @@ public interface ISpriteModelEditor extends IRomEditor {
      *
      * @return 战斗精灵模型
      */
-    List<BattleSpriteModel> getBattleSpriteModels();
+    Map<Integer, BattleSpriteModel> getBattleSpriteModels();
 
     /**
      * 获取战斗精灵模型

@@ -42,7 +42,7 @@ public class TitleEditorImpl extends RomBufferWrapperAbstractEditor implements I
                 DataAddress.fromCHR(0x3F3C0, 0x3F3FF),
                 DataAddress.fromCHR(0x3F400, 0x3F7BF),
                 DataAddress.fromCHR(0x3F7C0, 0x3F7FF),
-                DataAddress.fromPRG(0x47810 - 0x10, 0x48010 - 0x10));
+                DataAddress.fromPRG(0x47810 - 0x10, 0x4800F - 0x10));
     }
 
     public TitleEditorImpl(@NotNull MetalMaxRe metalMaxRe,

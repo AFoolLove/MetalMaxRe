@@ -5,7 +5,6 @@ import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Range;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -159,11 +158,13 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
      *
      * @return 调色板
      */
-    public List<PaletteRow> getPalettes(@Range(from = 0x9AD0, to = 0xFFFF) int position) {
+    @Override
+    public List<PaletteRow> getPaletteByIndex(int position) {
         // 0x8000+0x1AD0=基础数据起始
         // 9byte 每组数据的长度
-        // 获取索引
-        int index = (position - (0x8000 + 0x1AD0)) / 9;
+        DataAddress paletteAddress = getDataAddress(PALETTE_ADDRESS);
+        // 计算索引
+        int index = (position - (0x8000 + paletteAddress.getBankOffset())) / 9;
         return getPalettes().get(index);
     }
 
