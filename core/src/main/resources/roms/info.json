@@ -33,31 +33,5 @@
       "怪物模型数据扩容",
       "字库扩容"
     ]
-  },
-  "super_hack": {
-    "builtIn": true,
-    "path": "/roms/MetalMax_SuperHack.nes",
-    "name": "MetalMax SuperHack",
-    "size": 802832,
-    "description": "由doubledr发起的大型HACK，部分模拟器不支持",
-    "modifyRecords": [
-      "修复有些文字上有个小点",
-      "修复起名界面右下角的BACK选项上方有多余的字符",
-      "修复起名界面因日版的浊音和半浊音导致部分文本不能选择",
-      "修复start战车状态界面按上键指针会移动到错误的位置"
-    ]
-  },
-  "super_hack_general": {
-    "builtIn": true,
-    "path": "/roms/MetalMax_SuperHackGeneral.nes",
-    "name": "MetalMax SuperHackGeneral",
-    "size": 786448,
-    "description": "由doubledr发起的大型HACK，通用版本，适用于大部分模拟器",
-    "modifyRecords": [
-      "修复有些文字上有个小点",
-      "修复起名界面右下角的BACK选项上方有多余的字符",
-      "修复起名界面因日版的浊音和半浊音导致部分文本不能选择",
-      "修复start战车状态界面按上键指针会移动到错误的位置"
-    ]
   }
 }

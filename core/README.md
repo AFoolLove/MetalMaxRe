@@ -7,8 +7,9 @@
    ~~~java
    RomBuffer romBuffer = new RomBuffer(RomVersion.getChinese(), null);
    ~~~
-    2. 使用内置ROM，指定版本，其中的 <version> 请填写有效的版本，内置四种版本：  
-       `japanese`、`chinese`、`super_hack`、`super_hack_general`
+    2. 使用内置ROM，指定版本，其中的 <version> 请填写有效的版本，内置三种版本：  
+       `japanese`、`chinese`、`re`  
+       `re` 版本为定制版本，解决原版设计上限等问题，适合作为改版的底板
    ~~~java
    RomBuffer romBuffer = new RomBuffer("<version>", null);
    ~~~

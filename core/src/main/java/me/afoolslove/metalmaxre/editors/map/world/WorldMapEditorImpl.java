@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 /**
  * 世界地图编辑器
@@ -548,47 +548,4 @@ public class WorldMapEditorImpl extends RomBufferWrapperAbstractEditor implement
         return mines;
     }
 
-    /**
-     * 兼容SH和SHG版本
-     */
-    @Editor.TargetVersion({"super_hack", "super_hack_general"})
-    public static class SHWorldMapEditorImpl extends WorldMapEditorImpl {
-
-        public SHWorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
-            this(metalMaxRe,
-                    DataAddress.fromPRG(0x00010 - 0x10, 0x0040F - 0x10),
-                    DataAddress.fromPRG(0x00410 - 0x10, 0x0060F - 0x10),
-                    DataAddress.fromCHR(0x3A010 - 0x10, 0x3B00F - 0x10),
-                    DataAddress.fromPRG(0x35EC1 - 0x10, 0x35EC8 - 0x10));
-        }
-
-        public SHWorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
-                                    DataAddress worldMapTilesIndexAddress,
-                                    DataAddress worldMapX00410Address,
-                                    DataAddress worldMapIndexAddress,
-                                    DataAddress worldMapMinesAddress,
-                                    List<DataAddress> worldMapIndexesAddress) {
-            super(metalMaxRe, worldMapTilesIndexAddress, worldMapX00410Address, worldMapIndexAddress, worldMapMinesAddress, worldMapIndexesAddress);
-        }
-
-        public SHWorldMapEditorImpl(@NotNull MetalMaxRe metalMaxRe,
-                                    DataAddress worldMapTilesIndexAddress,
-                                    DataAddress worldMapX00410Address,
-                                    DataAddress worldMapIndexAddress,
-                                    DataAddress worldMapMinesAddress) {
-            super(metalMaxRe, worldMapTilesIndexAddress, worldMapX00410Address, worldMapIndexAddress, worldMapMinesAddress);
-        }
-
-        @Override
-        @Editor.Load
-        public void onLoad() {
-            super.onLoad();
-        }
-
-        @Override
-        @Editor.Apply
-        public void onApply(IEventTilesEditor eventTilesEditor) {
-            super.onApply(eventTilesEditor);
-        }
-    }
 }

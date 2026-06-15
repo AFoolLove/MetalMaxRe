@@ -41,19 +41,6 @@ public class RomVersion {
         return getVersion("re");
     }
 
-    /**
-     * SuperHack版
-     */
-    public static RomVersion getSuperHack() {
-        return getVersion("super_hack");
-    }
-
-    /**
-     * SuperHack通用版
-     */
-    public static RomVersion getSuperHackGeneral() {
-        return getVersion("super_hack_general");
-    }
 
     public static RomVersion getVersion(@NotNull String version) {
         return getVersion(version, "chinese");

@@ -11,12 +11,11 @@
 ### 关于游戏版本
 
 不同版本数据地址有所不同，错误的加载ROM版本会导致数据加载错误  
-编辑器内置4种ROM版本：
+编辑器内置3种ROM版本：
 
 * `Chinese（中文版）`
 * `Janpanse（日文原版）`
-* `SuperHackGeneral（SH通用版）`
-* `SuperHack（SH）`
+* `Re（该项目定制版）`
 
 如果内置的4种版本都不能加载你的ROM，可以尝试自定义[RomVersion](core/src/main/java/me/afoolslove/metalmaxre/RomVersion.java)
 并修改相关编辑器
