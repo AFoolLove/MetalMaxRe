@@ -278,9 +278,15 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> implements Ser
     @Override
     public String toString() {
         if (isLimited()) {
-            return String.format("%05X-%05X", getStartAddress(), getEndAddress());
+            return switch (getType()) {
+                case PRG -> "PRG-%05X-%05X".formatted(getStartAddress(), getEndAddress());
+                case CHR -> "CHR-%03X-%03X".formatted(getStartAddress(), getEndAddress());
+            };
         }
-        return String.format("%05X-.....", getStartAddress());
+        return switch (getType()) {
+            case PRG -> "PRG-%05X-.....".formatted(getStartAddress());
+            case CHR -> "CHR-%05X-.....".formatted(getStartAddress());
+        };
     }
 
     public static DataAddress fromEnd(@NotNull DataAddress start, int end) {
@@ -316,7 +322,7 @@ public class DataAddress extends SingleMapEntry<Integer, Integer> implements Ser
     }
 
     public static DataAddress fromPRGLength(int start, int length) {
-        return new DataAddress(Type.PRG, start, start + length);
+        return new DataAddress(Type.PRG, start, start + length - 1);
     }
 
     public static DataAddress fromPRG(int start, int end) {

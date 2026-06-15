@@ -7,9 +7,8 @@ import me.afoolslove.metalmaxre.RomBufferWrapperAbstractEditor;
 import me.afoolslove.metalmaxre.editors.Editor;
 import me.afoolslove.metalmaxre.utils.DataAddress;
 import me.afoolslove.metalmaxre.utils.NumberR;
-import me.afoolslove.metalmaxre.utils.ResourceManager;
+import me.afoolslove.metalmaxre.utils.SingleMapEntry;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +23,8 @@ import java.util.*;
 @Editor.TargetVersions
 public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements ITextEditor {
     private static final Logger LOGGER = LoggerFactory.getLogger(TextEditorImpl.class);
+    public static final String TEXT_PAGE_INDEX_ADDRESS = "textIndexAddress";
+    public static final String TEXT_PAGE_BANK_ADDRESS = "textBankAddress";
     /**
      * 已知的文本段的地址
      * <p>
@@ -50,13 +51,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
 
     public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe) {
         this(metalMaxRe,
-                ResourceManager.getAsString("/text_addresses/chinese.json")
-        );
-    }
-
-    public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe, String jsonTextAddresses) {
-        this(metalMaxRe,
-                jsonTextAddresses,
+                DataAddress.fromPRG(0x33ABA - 0x10, 0x33AE5 - 0x10),
+                DataAddress.fromPRG(0x33AE6 - 0x10, 0x33AFB - 0x10),
                 DataAddress.from(0x29C17 - 0x10, 0x29C66 - 0x10),
                 DataAddress.from(0x29C67 - 0x10, 0x29C92 - 0x10),
                 DataAddress.from(0x29C93 - 0x10, 0x29CBE - 0x10)
@@ -64,34 +60,15 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
     }
 
     public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe,
-                          @Nullable String jsonTextAddresses,
-                          @NotNull DataAddress easterEggNameAddress,
-                          @NotNull DataAddress player1NamePoolAddress,
-                          @NotNull DataAddress player2NamePoolAddress) {
-        this(metalMaxRe, new HashMap<>(), easterEggNameAddress, player1NamePoolAddress, player2NamePoolAddress);
-        if (jsonTextAddresses == null) {
-            return;
-        }
-        Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(jsonTextAddresses, JsonObject.class);
-
-        Map<Integer, DataAddress> dataAddressList = getDataAddressMap(TEXT_MAP_ADDRESS);
-        for (String s : jsonObject.keySet()) {
-            int page = Integer.parseInt(s, 16) & 0xFF;
-            String[] split = jsonObject.get(s).getAsString().split("-", 2);
-            int startAddr = Integer.parseInt(split[0], 16) & 0xFFFFF;
-            int endAddr = Integer.parseInt(split[1], 16) & 0xFFFFF;
-            dataAddressList.put(page, DataAddress.from(startAddr - 0x10, endAddr - 0x10));
-        }
-    }
-
-    public TextEditorImpl(@NotNull MetalMaxRe metalMaxRe,
-                          @NotNull Map<Integer, DataAddress> textAddresses,
+                          @NotNull DataAddress textIndexAddress,
+                          @NotNull DataAddress textBankAddress,
                           @NotNull DataAddress easterEggNameAddress,
                           @NotNull DataAddress player1NamePoolAddress,
                           @NotNull DataAddress player2NamePoolAddress) {
         super(metalMaxRe);
-        putDataAddress(TEXT_MAP_ADDRESS, textAddresses);
+        putDataAddress(TEXT_PAGE_INDEX_ADDRESS, textIndexAddress);
+        putDataAddress(TEXT_PAGE_BANK_ADDRESS, textBankAddress);
+        putDataAddress(TEXT_MAP_ADDRESS, new HashMap<>());
         putDataAddress(EASTER_EGG_NAME_ADDRESS, easterEggNameAddress);
         putDataAddress(PLAYER_1_NAME_POOL_ADDRESS, player1NamePoolAddress);
         putDataAddress(PLAYER_2_NAME_POOL_ADDRESS, player2NamePoolAddress);
@@ -103,6 +80,8 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
         easterEggNames.clear();
         player1NamePool.clear();
         player2NamePool.clear();
+
+        loadTextAddresses(true);
 
         Map<Integer, DataAddress> dataAddressMap = getDataAddressMap(TEXT_MAP_ADDRESS);
         dataAddressMap.values().parallelStream().forEach(textAddress -> {
@@ -196,6 +175,75 @@ public class TextEditorImpl extends RomBufferWrapperAbstractEditor implements IT
             getBuffer().put(bytes);
         }
     }
+
+    protected void dataAddressFromJson(String jsonTextAddresses) {
+        if (jsonTextAddresses == null) {
+            return;
+        }
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(jsonTextAddresses, JsonObject.class);
+
+        Map<Integer, DataAddress> dataAddressList = getDataAddressMap(TEXT_MAP_ADDRESS);
+        for (String s : jsonObject.keySet()) {
+            int page = Integer.parseInt(s, 16) & 0xFF;
+            String[] split = jsonObject.get(s).getAsString().split("-", 2);
+            int startAddr = Integer.parseInt(split[0], 16) & 0xFFFFF;
+            int endAddr = Integer.parseInt(split[1], 16) & 0xFFFFF;
+            dataAddressList.put(page, DataAddress.from(startAddr - 0x10, endAddr - 0x10));
+        }
+    }
+
+    protected void loadTextAddresses(boolean limit15Page) {
+        DataAddress textPageIndexAddress = getDataAddress(TEXT_PAGE_INDEX_ADDRESS);
+        DataAddress textPageBankAddress = getDataAddress(TEXT_PAGE_BANK_ADDRESS);
+        int pageCount = textPageIndexAddress.length() / 2;
+
+        char[] indexes = new char[pageCount];
+        byte[] banks = new byte[pageCount];
+        position(textPageIndexAddress);
+        getBuffer().getCharArray(indexes);
+        // 偏移修正，实际地址需要+1
+        for (int i = 0; i < indexes.length; i++) {
+            indexes[i] -= (0x8000 - 1);
+        }
+        getBuffer().get(textPageBankAddress, banks);
+
+        // 通过bank分组
+        Map<Byte, List<SingleMapEntry<Integer, Character>>> bankMap = new HashMap<>();
+        for (int i = 0; i < banks.length; i++) {
+            List<SingleMapEntry<Integer, Character>> singleMapEntries = bankMap.computeIfAbsent(banks[i], k -> new ArrayList<>());
+            singleMapEntries.add(SingleMapEntry.create(i, indexes[i]));
+        }
+
+        // 分解为方便读取的格式
+        Map<Integer, DataAddress> dataAddressList = getDataAddressMap(TEXT_MAP_ADDRESS);
+        for (Map.Entry<Byte, List<SingleMapEntry<Integer, Character>>> entry : bankMap.entrySet()) {
+            Byte bank = entry.getKey();
+            List<SingleMapEntry<Integer, Character>> singleMapEntries = entry.getValue();
+            // 按照value的从小到大排序
+            singleMapEntries.sort((o1, o2) -> o1.getValue() - o2.getValue());
+
+            char[] chars = new char[singleMapEntries.size() + 1];
+            for (int i = 0; i < chars.length - 1; i++) {
+                chars[i] = singleMapEntries.get(i).getValue();
+            }
+            // 该bank的总长度
+            chars[chars.length - 1] = 0x2000;
+
+            for (int i = chars.length - 1; i > 0; i--) {
+                DataAddress dataAddress = DataAddress.fromPRGLength((bank & 0xFF) * 0x2000 + chars[i - 1], chars[i] - chars[i - 1]);
+                dataAddressList.put(singleMapEntries.get(i - 1).getKey(), dataAddress);
+            }
+        }
+        if (limit15Page) {
+            dataAddressList.get(0x15).setValue(0x3886D - 0x10);
+        }
+    }
+
+    protected void textAddressToJson(String jsonTextAddresses) {
+
+    }
+
 
     private void copyArrayTo(byte[] src, byte[] dst, int length, byte fillValue) {
         Arrays.fill(dst, fillValue);

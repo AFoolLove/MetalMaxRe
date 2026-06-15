@@ -11,10 +11,8 @@ import me.afoolslove.metalmaxre.editors.map.tileset.TileCombinationSet;
 import me.afoolslove.metalmaxre.editors.map.tileset.XXTileSet;
 import me.afoolslove.metalmaxre.editors.map.world.IWorldMapEditor;
 import me.afoolslove.metalmaxre.editors.map.world.WorldMapEditorImpl;
+import me.afoolslove.metalmaxre.editors.palette.*;
 import me.afoolslove.metalmaxre.editors.palette.Color;
-import me.afoolslove.metalmaxre.editors.palette.IPaletteEditor;
-import me.afoolslove.metalmaxre.editors.palette.PaletteRow;
-import me.afoolslove.metalmaxre.editors.palette.SystemPalette;
 import me.afoolslove.metalmaxre.utils.BufferedImageUtils;
 import me.afoolslove.metalmaxre.utils.NumberR;
 import org.jetbrains.annotations.NotNull;
@@ -22,8 +20,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class TileSetHelper {
@@ -96,18 +94,14 @@ public class TileSetHelper {
      * @return 通过地图属性生成一张 TileSet 图片
      * @see #generateTileSet(MetalMaxRe, int, int, int, int, int, int, Color[][])
      */
-    public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, @NotNull MapProperties mapProperties, @Nullable Color[][] palette) {
+    public static Color[][] generateTileSet(@NotNull MetalMaxRe metalMaxRe, @NotNull MapProperties mapProperties, @Nullable Color[][] paletteColor) {
         SystemPalette systemPalette = metalMaxRe.getSystemPalette();
 
-        if (palette == null) {
+        if (paletteColor == null) {
             IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
-            List<PaletteRow> palettes = paletteEditor.getPaletteByIndex(mapProperties.getPalette());
+            Palette palette = paletteEditor.getPaletteByIndex(mapProperties.getPalette());
 
-            palette = new Color[0x04][];
-            palette[0x00] = palettes.get(0x00).toColors(systemPalette);
-            palette[0x01] = palettes.get(0x01).toColors(systemPalette);
-            palette[0x02] = palettes.get(0x02).toColors(systemPalette);
-            palette[0x03] = palettes.get(0x03).toColors(systemPalette);
+            paletteColor = palette.toColors(systemPalette);
         }
         return generateTileSet(metalMaxRe,
                 mapProperties.tilesIndexA & 0xFF,
@@ -116,7 +110,7 @@ public class TileSetHelper {
                 mapProperties.tilesIndexD & 0xFF,
                 mapProperties.combinationA & 0xFF,
                 mapProperties.combinationB & 0xFF,
-                palette
+                paletteColor
         );
     }
 
@@ -275,13 +269,9 @@ public class TileSetHelper {
         SystemPalette systemPalette = metalMaxRe.getSystemPalette();
         ITileSetEditor tileSetEditor = metalMaxRe.getEditorManager().getEditor(ITileSetEditor.class);
         IPaletteEditor paletteEditor = metalMaxRe.getEditorManager().getEditor(IPaletteEditor.class);
-        List<PaletteRow> palette = paletteEditor.getPaletteByIndex(0x9AD0);
+        Palette palette = paletteEditor.getPaletteByIndex(0x9AD0);
 
-        Color[][] colors = new Color[0x04][];
-        colors[0x00] = palette.get(0x00).toColors(systemPalette);
-        colors[0x01] = palette.get(0x01).toColors(systemPalette);
-        colors[0x02] = palette.get(0x02).toColors(systemPalette);
-        colors[0x03] = palette.get(0x03).toColors(systemPalette);
+        Color[][] colors = palette.toColors(systemPalette);
         return generate(metalMaxRe, 0x100, 0x100, x00, x40, x80, xC0, tileSetEditor.getWorldCombinations(), tileSetEditor.getWorldAttributes(), colors);
     }
 

@@ -39,7 +39,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
     /**
      * 所有调色板
      */
-    private final List<List<PaletteRow>> palettes = new ArrayList<>();
+    private final List<Palette> palettes = new ArrayList<>();
     /**
      * 精灵调色板（非战斗时）
      */
@@ -77,16 +77,15 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
         position(getDataAddress(PALETTE_ADDRESS));
         // 读取所有调色板集（(3+3+3)byte ）
         for (int i = 0, maxCount = getPaletteMaxCount() / 0x03; i < maxCount; i++) {
-            List<PaletteRow> palettes = new ArrayList<>();
-            palettes.add(0x00, new PaletteRow(getBuffer(), position()));
+            PaletteRow row0 = new PaletteRow(getBuffer(), position());
             offsetPosition(3);
-            palettes.add(0x01, new PaletteRow(getBuffer(), position()));
+            PaletteRow row1 = new PaletteRow(getBuffer(), position());
             offsetPosition(3);
-            palettes.add(0x02, new PaletteRow(getBuffer(), position()));
+            PaletteRow row2 = new PaletteRow(getBuffer(), position());
             offsetPosition(3);
             // 固定颜色，改了也不会写入到游戏中
-            palettes.add(0x03, new PaletteRow(0x30, 0x10, 0x00));
-            getPalettes().add(palettes);
+            Palette palette = new Palette(row0, row1, row2, new PaletteRow(0x30, 0x10, 0x00));
+            getPalettes().add(palette);
         }
 
         // 读取精灵调色板，固定数值
@@ -110,11 +109,9 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
         // 写入调色板
         position(getDataAddress(PALETTE_ADDRESS));
         for (int i = 0, maxCount = getPaletteMaxCount() / 0x03; i < maxCount; i++) {
-            List<PaletteRow> paletteRows = getPalettes().get(i);
+            Palette palette = getPalettes().get(i);
             // 3个调色板，1个调色板3byte
-            for (int j = 0; j < 0x03; j++) {
-                getBuffer().put(paletteRows.get(j).getPaletteRow(), 1, 3);
-            }
+            getBuffer().put(palette.toByteArray());
         }
 
 //        int end = position() - 1;
@@ -138,7 +135,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
         }
     }
 
-    public List<List<PaletteRow>> getPalettes() {
+    public List<Palette> getPalettes() {
         return palettes;
     }
 
@@ -159,7 +156,7 @@ public class PaletteEditorImpl extends RomBufferWrapperAbstractEditor implements
      * @return 调色板
      */
     @Override
-    public List<PaletteRow> getPaletteByIndex(int position) {
+    public Palette getPaletteByIndex(int position) {
         // 0x8000+0x1AD0=基础数据起始
         // 9byte 每组数据的长度
         DataAddress paletteAddress = getDataAddress(PALETTE_ADDRESS);

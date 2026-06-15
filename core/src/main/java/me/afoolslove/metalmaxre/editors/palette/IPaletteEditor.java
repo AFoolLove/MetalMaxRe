@@ -25,7 +25,7 @@ public interface IPaletteEditor extends IRomEditor {
     /**
      * @return 所有调色板集
      */
-    List<List<PaletteRow>> getPalettes();
+    List<Palette> getPalettes();
 
     /**
      * @return 精灵的调色板
@@ -43,5 +43,5 @@ public interface IPaletteEditor extends IRomEditor {
      *
      * @return 调色板
      */
-    List<PaletteRow> getPaletteByIndex(int position);
+    Palette getPaletteByIndex(int position);
 }
