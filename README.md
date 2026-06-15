@@ -17,7 +17,7 @@
 * `Janpanse（日文原版）`
 * `Re（该项目定制版）`
 
-如果内置的4种版本都不能加载你的ROM，可以尝试自定义[RomVersion](core/src/main/java/me/afoolslove/metalmaxre/RomVersion.java)
+如果内置的3种版本都不能加载你的ROM，可以尝试自定义[RomVersion](core/src/main/java/me/afoolslove/metalmaxre/RomVersion.java)
 并修改相关编辑器
 
 ### 使用
